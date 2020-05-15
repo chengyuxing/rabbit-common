@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <description>一个公共类库工具类</description>
-    <groupId>org.rabbit</groupId>
+    <groupId>com.github.chengyuxing</groupId>
     <artifactId>rabbit-common</artifactId>
     <version>1.0.5</version>
     <packaging>jar</packaging>
