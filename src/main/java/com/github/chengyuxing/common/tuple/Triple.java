@@ -1,4 +1,4 @@
-package org.rabbit.common.tuple;
+package com.github.chengyuxing.common.tuple;
 
 /**
  * 三元组

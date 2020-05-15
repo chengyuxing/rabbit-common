@@ -1,12 +1,11 @@
 package tests;
 
 import org.junit.Test;
-import org.rabbit.common.tuple.Quintuple;
-import org.rabbit.common.tuple.Tuples;
-import org.rabbit.common.types.ImmutableList;
-import org.rabbit.common.utils.Exps;
+import com.github.chengyuxing.common.tuple.Quintuple;
+import com.github.chengyuxing.common.tuple.Tuples;
+import com.github.chengyuxing.common.types.ImmutableList;
+import com.github.chengyuxing.common.utils.Exps;
 
-import java.util.Arrays;
 import java.util.stream.Stream;
 
 public class MyTest {

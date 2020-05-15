@@ -1,4 +1,4 @@
-package org.rabbit.common.types;
+package com.github.chengyuxing.common.types;
 
 /**
  * 命名的线程变量
