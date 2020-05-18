@@ -1,4 +1,4 @@
-package com.github.chengyuxing.common.utils;
+package rabbit.common.utils;
 
 import java.util.Optional;
 

@@ -1,4 +1,4 @@
-package com.github.chengyuxing.common.types;
+package rabbit.common.types;
 
 import java.util.*;
 import java.util.function.Function;

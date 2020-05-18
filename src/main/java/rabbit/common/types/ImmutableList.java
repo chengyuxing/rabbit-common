@@ -1,4 +1,4 @@
-package com.github.chengyuxing.common.types;
+package rabbit.common.types;
 
 import java.util.List;
 import java.util.function.BiFunction;

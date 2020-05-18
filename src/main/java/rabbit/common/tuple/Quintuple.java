@@ -1,4 +1,4 @@
-package com.github.chengyuxing.common.tuple;
+package rabbit.common.tuple;
 
 /**
  * 五元组

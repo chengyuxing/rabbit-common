@@ -1,4 +1,4 @@
-package com.github.chengyuxing.common.utils;
+package rabbit.common.utils;
 
 public final class ReflectUtil {
     public static String initGetMethod(String field, Class<?> type) {

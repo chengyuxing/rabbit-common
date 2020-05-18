@@ -1,10 +1,10 @@
 package tests;
 
 import org.junit.Test;
-import com.github.chengyuxing.common.tuple.Quintuple;
-import com.github.chengyuxing.common.tuple.Tuples;
-import com.github.chengyuxing.common.types.ImmutableList;
-import com.github.chengyuxing.common.utils.Exps;
+import rabbit.common.tuple.Quintuple;
+import rabbit.common.tuple.Tuples;
+import rabbit.common.types.ImmutableList;
+import rabbit.common.utils.Exps;
 
 import java.util.stream.Stream;
 
