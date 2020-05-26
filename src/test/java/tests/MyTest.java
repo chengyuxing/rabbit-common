@@ -6,9 +6,25 @@ import rabbit.common.tuple.Tuples;
 import rabbit.common.types.ImmutableList;
 import rabbit.common.utils.Exps;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Stream;
 
 public class MyTest {
+    @Test
+    public void ImmutableTest() throws Exception {
+        List<String> list = new ArrayList<>();
+        list.add("a");
+        list.add("b");
+        list.add("c");
+
+        ImmutableList<String> immutableList = ImmutableList.of(list);
+
+        list.add("d");
+
+        immutableList.tail().foreach(System.out::println);
+    }
+
     @Test
     public void pairTest() throws Exception {
         Quintuple<Integer, Integer, Integer, Integer, String> quintuple = Tuples.quintuple(1, 2, 3, 4, "jackson");
@@ -31,7 +47,7 @@ public class MyTest {
 
     @Test
     public void listIm() throws Exception {
-        int i = ImmutableList.of(1, 2, 3, 4, 5, 6)
+        long i = ImmutableList.of(1, 2, 3, 4, 5, 6)
                 .sum(item -> item);
         System.out.println(i);
 

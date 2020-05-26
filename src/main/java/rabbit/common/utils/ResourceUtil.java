@@ -14,18 +14,32 @@ import java.util.stream.Stream;
 
 public class ResourceUtil {
     /**
-     * 获取classPath下的文件
+     * 递归获取classPath下的文件
      *
-     * @param path   路径
-     * @param suffix 文件后缀
+     * @param basePath 基本路径
+     * @param depth    深度
+     * @param suffix   文件后缀
      * @return Stream
      * @throws IOException        没有此路径
      * @throws URISyntaxException 路径格式异常
      */
-    public static Stream<Path> getClassPathResources(String path, String suffix) throws IOException, URISyntaxException {
-        URL url = classLoader().getResource(path);
+    public static Stream<Path> getClassPathResources(String basePath, int depth, String suffix) throws IOException, URISyntaxException {
+        URL url = classLoader().getResource(basePath);
         Objects.requireNonNull(url);
-        return Files.find(Paths.get(url.toURI()), 5, (p, attr) -> p.toString().endsWith(suffix) && !attr.isDirectory());
+        return Files.find(Paths.get(url.toURI()), depth, (p, attr) -> p.toString().endsWith(suffix) && !attr.isDirectory());
+    }
+
+    /**
+     * 递归获取classPath下的文件深度为5
+     *
+     * @param basePath 基本路径
+     * @param suffix   文件后缀
+     * @return Stream
+     * @throws IOException        没有此路径
+     * @throws URISyntaxException 路径格式异常
+     */
+    public static Stream<Path> getClassPathResources(String basePath, String suffix) throws IOException, URISyntaxException {
+        return getClassPathResources(basePath, 5, suffix);
     }
 
     /**
