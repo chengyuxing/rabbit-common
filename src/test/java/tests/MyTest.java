@@ -47,8 +47,7 @@ public class MyTest {
 
     @Test
     public void listIm() throws Exception {
-        long i = ImmutableList.of(1, 2, 3, 4, 5, 6)
-                .sum(item -> item);
+        long i = ImmutableList.of(1, 2, 3, 4, 5, 6).product(item -> item);
         System.out.println(i);
 
     }
