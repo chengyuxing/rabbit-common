@@ -12,6 +12,9 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+/**
+ * 资源工具类
+ */
 public class ResourceUtil {
     /**
      * 递归获取classPath下的文件
@@ -79,6 +82,11 @@ public class ResourceUtil {
         return path.replace('/', '.');
     }
 
+    /**
+     * 获取类加载器
+     *
+     * @return 类加载器
+     */
     public static ClassLoader classLoader() {
         return Thread.currentThread().getContextClassLoader();
     }

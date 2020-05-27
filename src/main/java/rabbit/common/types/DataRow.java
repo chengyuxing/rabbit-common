@@ -105,15 +105,35 @@ public final class DataRow {
         return getType(index);
     }
 
+    /**
+     * 获取值类型
+     *
+     * @param index 索引
+     * @return 值类型
+     */
     public String getType(int index) {
         return types[index];
     }
 
+    /**
+     * 获取值
+     *
+     * @param index 索引
+     * @param <T>   类型参数
+     * @return 值
+     */
     @SuppressWarnings("unchecked")
     public <T> T get(int index) {
         return (T) values[index];
     }
 
+    /**
+     * 获取值
+     *
+     * @param name 名称
+     * @param <T>  类型参数
+     * @return 值
+     */
     public <T> T get(String name) {
         int index = getNames().indexOf(name);
         return get(index);
@@ -186,6 +206,11 @@ public final class DataRow {
         );
     }
 
+    /**
+     * 转为mao
+     *
+     * @return map
+     */
     public Map<String, Object> toMap() {
         return toMap(v -> v);
     }

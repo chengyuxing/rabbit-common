@@ -1,5 +1,8 @@
 package rabbit.common.utils;
 
+/**
+ * 字符串工具类
+ */
 public class StringUtil {
     /**
      * 去除字符串中多余的换行符和空格
