@@ -207,7 +207,7 @@ public final class DataRow {
     }
 
     /**
-     * 转为mao
+     * 转为Map
      *
      * @return map
      */
