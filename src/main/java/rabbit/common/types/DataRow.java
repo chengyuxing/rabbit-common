@@ -1,8 +1,10 @@
 package rabbit.common.types;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
-import java.util.stream.Stream;
 
 /**
  * 行数据类型
@@ -68,8 +70,8 @@ public final class DataRow {
      *
      * @return 值
      */
-    public Stream<Object> getValues() {
-        return Stream.of(values);
+    public List<Object> getValues() {
+        return Arrays.asList(values);
     }
 
     /**
@@ -196,6 +198,8 @@ public final class DataRow {
     /**
      * 转换为Map
      *
+     * @param valueConvert 值转换器
+     * @param <T>          值类型参数
      * @return 一个Map
      */
     public <T> Map<String, T> toMap(Function<Object, T> valueConvert) {
