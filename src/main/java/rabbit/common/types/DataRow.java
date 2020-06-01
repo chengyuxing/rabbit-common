@@ -31,7 +31,10 @@ public final class DataRow {
      * @return 新实例
      */
     public static DataRow of(String[] names, String[] types, Object[] values) {
-        return new DataRow(names, types, values);
+        if (names.length == types.length && types.length == values.length) {
+            return new DataRow(names, types, values);
+        }
+        throw new IllegalArgumentException("all of 3 args's length not equal!");
     }
 
     /**
@@ -53,7 +56,7 @@ public final class DataRow {
      * @return 一个空的DataRow
      */
     public static DataRow empty() {
-        return new DataRow(new String[0], new String[0], new Object[0]);
+        return of(new String[0], new String[0], new Object[0]);
     }
 
     /**
@@ -62,7 +65,7 @@ public final class DataRow {
      * @return 是否为空
      */
     public boolean isEmpty() {
-        return names == null || names.length == 0;
+        return names.length == 0 && types.length == 0 && values.length == 0;
     }
 
     /**
@@ -217,6 +220,26 @@ public final class DataRow {
      */
     public Map<String, Object> toMap() {
         return toMap(v -> v);
+    }
+
+    /**
+     * 从map转换到DataRow
+     *
+     * @param map map
+     * @return DataRow
+     */
+    public static DataRow fromMap(Map<?, ?> map) {
+        String[] names = new String[map.keySet().size()];
+        String[] types = new String[names.length];
+        Object[] values = new Object[names.length];
+        int i = 0;
+        for (Object key : map.keySet()) {
+            names[i] = key.toString();
+            values[i] = map.get(key);
+            types[i] = values[i].getClass().getName();
+            i++;
+        }
+        return of(names, types, values);
     }
 
     @Override
