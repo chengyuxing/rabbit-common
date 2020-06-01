@@ -4,6 +4,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
@@ -196,6 +198,15 @@ public final class DataRow {
     public Integer getInt(String name) {
         int index = getNames().indexOf(name);
         return getInt(index);
+    }
+
+    /**
+     * 遍历键和值
+     *
+     * @param action 动作
+     */
+    public void foreach(BiConsumer<String, Object> action) {
+        getNames().forEach(name -> action.accept(name, get(name)));
     }
 
     /**
