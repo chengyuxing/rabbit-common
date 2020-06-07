@@ -5,12 +5,32 @@ import rabbit.common.tuple.Quintuple;
 import rabbit.common.tuple.Tuples;
 import rabbit.common.types.ImmutableList;
 import rabbit.common.utils.Exps;
+import rabbit.common.io.TSVWriter;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
 public class MyTest {
+
+    @Test
+    public void tsv() throws Exception {
+        TSVWriter writer = TSVWriter.of("/Users/chengyuxing/Downloads/bytes.tsv");
+        for (int i = 0; i < 10000; i++) {
+            List<Object> row = new ArrayList<>();
+            row.add("chengyuxing");
+            row.add(i);
+            row.add(Math.random() * 1000);
+            row.add(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+            row.add("昆明市");
+            row.add(i % 3 == 0 ? "" : "ok");
+            writer.writeLine(row);
+        }
+        writer.close();
+    }
+
     @Test
     public void ImmutableTest() throws Exception {
         List<String> list = new ArrayList<>();
