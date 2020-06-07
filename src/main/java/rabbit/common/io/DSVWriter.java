@@ -36,7 +36,7 @@ public abstract class DSVWriter implements AutoCloseable {
      * @param columns 单元格
      * @throws IOException ioExp
      */
-    public void writeLine(Collection<Object> columns) throws IOException {
+    public <T> void writeLine(Collection<T> columns) throws IOException {
         String line = columns.stream().map(Object::toString).collect(Collectors.joining(delimiter()));
         out.write(line.getBytes());
         out.write("\n".getBytes());
@@ -51,7 +51,7 @@ public abstract class DSVWriter implements AutoCloseable {
     public void writeLine(DataRow row) throws IOException {
         if (header == null) {
             header = String.join(delimiter(), row.getNames());
-            out.write(header.getBytes());
+            writeLine(row.getNames());
         }
         writeLine(row.getValues());
     }
