@@ -1,9 +1,6 @@
 package rabbit.common.types;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 
 /**
@@ -65,7 +62,7 @@ public final class DataRow {
      * @return 是否为空
      */
     public boolean isEmpty() {
-        return names.length == 0 && types.length == 0 && values.length == 0;
+        return names.length == 0;
     }
 
     /**
@@ -183,9 +180,9 @@ public final class DataRow {
         if (value instanceof Integer) {
             return (Integer) value;
         }
-        String v = value.toString();
-        return Integer.valueOf(v);
+        return Integer.parseInt(value.toString());
     }
+
 
     /**
      * 根据名字获取一个整型
@@ -196,6 +193,34 @@ public final class DataRow {
     public Integer getInt(String name) {
         int index = getNames().indexOf(name);
         return getInt(index);
+    }
+
+    /**
+     * 获取一个双精度类型数组
+     *
+     * @param index 索引
+     * @return 双精度数字
+     */
+    public Double getDouble(int index) {
+        Object value = get(index);
+        if (value == null) {
+            return null;
+        }
+        if (value instanceof Double) {
+            return (Double) value;
+        }
+        return Double.parseDouble(value.toString());
+    }
+
+    /**
+     * 获取一个双精度类型数组
+     *
+     * @param name 名字
+     * @return 双精度数字
+     */
+    public Double getDouble(String name) {
+        int index = getNames().indexOf(name);
+        return getDouble(index);
     }
 
     /**
