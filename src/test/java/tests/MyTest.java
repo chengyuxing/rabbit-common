@@ -6,7 +6,11 @@ import rabbit.common.tuple.Tuples;
 import rabbit.common.types.ImmutableList;
 import rabbit.common.utils.Exps;
 import rabbit.common.io.TSVWriter;
+import rabbit.common.utils.ResourceUtil;
 
+import java.io.InputStream;
+import java.net.URL;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -78,5 +82,11 @@ public class MyTest {
                 .reduce(Integer::sum).get();
         System.out.println(sum);
 
+    }
+
+    @Test
+    public void readFile() throws Exception{
+        URL url = ResourceUtil.classLoader().getResource("rabbit/common/tuple");
+        System.out.println(Paths.get(url.toURI()));
     }
 }
