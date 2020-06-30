@@ -111,6 +111,5 @@ public class MyTest {
         user.setName("chengyuxing");
         user.setAge(23);
 
-        DataRow row = ReflectUtil.fromBean(user);
     }
 }
