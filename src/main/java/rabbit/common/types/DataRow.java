@@ -267,6 +267,24 @@ public final class DataRow {
         return of(names, types, values);
     }
 
+    /**
+     * 从List转换到DataRow
+     *
+     * @param list  数据
+     * @param names 列字段名
+     * @return DataRow
+     */
+    public static DataRow fromList(List<?> list, String... names) {
+        String[] types = new String[names.length];
+        Object[] values = new Object[names.length];
+        for (int i = 0; i < names.length; i++) {
+            Object value = list.get(i);
+            values[i] = value;
+            types[i] = value.getClass().getName();
+        }
+        return of(names, types, values);
+    }
+
     @Override
     public String toString() {
         return "DataRow{" +

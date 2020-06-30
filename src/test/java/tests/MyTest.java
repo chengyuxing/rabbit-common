@@ -3,17 +3,24 @@ package tests;
 import org.junit.Test;
 import rabbit.common.tuple.Quintuple;
 import rabbit.common.tuple.Tuples;
+import rabbit.common.types.DataRow;
 import rabbit.common.types.ImmutableList;
 import rabbit.common.utils.Exps;
 import rabbit.common.io.TSVWriter;
+import rabbit.common.utils.ReflectUtil;
 import rabbit.common.utils.ResourceUtil;
 
+import java.beans.*;
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -85,8 +92,25 @@ public class MyTest {
     }
 
     @Test
-    public void readFile() throws Exception{
+    public void readFile() throws Exception {
         URL url = ResourceUtil.classLoader().getResource("rabbit/common/tuple");
         System.out.println(Paths.get(url.toURI()));
+    }
+
+    @Test
+    public void rowTest() throws Exception {
+        DataRow row = DataRow.fromList(
+                Arrays.asList(1, "cyx", true, 0.01),
+                "id", "name", "success", "score");
+        System.out.println(row);
+    }
+
+    @Test
+    public void javaBeanTest() throws IntrospectionException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        User user = new User();
+        user.setName("chengyuxing");
+        user.setAge(23);
+
+        DataRow row = ReflectUtil.fromBean(user);
     }
 }
