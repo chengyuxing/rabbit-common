@@ -34,6 +34,7 @@ public abstract class DSVWriter implements AutoCloseable {
      * 写入行
      *
      * @param columns 单元格
+     * @param <T> 类型参数
      * @throws IOException ioExp
      */
     public <T> void writeLine(Collection<T> columns) throws IOException {
