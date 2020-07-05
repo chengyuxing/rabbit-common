@@ -34,11 +34,16 @@ public abstract class DSVWriter implements AutoCloseable {
      * 写入行
      *
      * @param columns 单元格
-     * @param <T> 类型参数
+     * @param <T>     类型参数
      * @throws IOException ioExp
      */
     public <T> void writeLine(Collection<T> columns) throws IOException {
-        String line = columns.stream().map(Object::toString).collect(Collectors.joining(delimiter()));
+        String line = columns.stream().map(v -> {
+            if (null == v) {
+                return "";
+            }
+            return v.toString();
+        }).collect(Collectors.joining(delimiter()));
         out.write(line.getBytes());
         out.write("\n".getBytes());
     }
