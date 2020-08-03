@@ -27,7 +27,7 @@ public class Test2 {
 
     @Test
     public void speedTest2() throws Exception {
-        List<Map<String, Object>> maps = rows.stream().map(r -> r.toMap2(v -> v)).collect(Collectors.toList());
+        List<Map<String, Object>> maps = rows.stream().map(r -> r.toMap(v -> v)).collect(Collectors.toList());
         System.out.println(maps.size());
     }
 
