@@ -10,8 +10,6 @@ public final class DataRow {
     private final String[] names;
     private final String[] types;
     private final Object[] values;
-    private List<String> _names;
-    private List<String> _types;
 
     private DataRow(String[] names, String[] types, Object[] values) {
         this.names = names;
@@ -80,9 +78,7 @@ public final class DataRow {
      * @return 字段
      */
     public List<String> getNames() {
-        if (_names == null)
-            _names = Arrays.asList(names);
-        return _names;
+        return Arrays.asList(names);
     }
 
     /**
@@ -91,9 +87,7 @@ public final class DataRow {
      * @return 类型
      */
     public List<String> getTypes() {
-        if (_types == null)
-            _types = Arrays.asList(types);
-        return _types;
+        return Arrays.asList(types);
     }
 
     /**
@@ -103,7 +97,7 @@ public final class DataRow {
      * @return 类型
      */
     public String getType(String name) {
-        int index = getNames().indexOf(name);
+        int index = indexOf(name);
         return getType(index);
     }
 
@@ -137,7 +131,7 @@ public final class DataRow {
      * @return 值
      */
     public <T> T get(String name) {
-        int index = getNames().indexOf(name);
+        int index = indexOf(name);
         return get(index);
     }
 
@@ -162,7 +156,7 @@ public final class DataRow {
      * @return 字符串或null
      */
     public String getString(String name) {
-        int index = getNames().indexOf(name);
+        int index = indexOf(name);
         return getString(index);
     }
 
@@ -191,7 +185,7 @@ public final class DataRow {
      * @return 整型或null
      */
     public Integer getInt(String name) {
-        int index = getNames().indexOf(name);
+        int index = indexOf(name);
         return getInt(index);
     }
 
@@ -219,8 +213,28 @@ public final class DataRow {
      * @return 双精度数字
      */
     public Double getDouble(String name) {
-        int index = getNames().indexOf(name);
+        int index = indexOf(name);
         return getDouble(index);
+    }
+
+    /**
+     * 获取指定字段名的索引
+     *
+     * @param name 字段名
+     * @return 字段名位置索引
+     */
+    public int indexOf(String name) {
+        int index = -1;
+        if (name == null) {
+            return index;
+        }
+        for (int i = 0; i < names.length; i++) {
+            if (names[i].equals(name)) {
+                index = i;
+                break;
+            }
+        }
+        return index;
     }
 
     /**
