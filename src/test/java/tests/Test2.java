@@ -26,6 +26,11 @@ public class Test2 {
     }
 
     @Test
+    public void rTest() throws Exception{
+        System.out.println(rows.get(111).getString("c"));
+    }
+
+    @Test
     public void speedTest2() throws Exception {
         List<Map<String, Object>> maps = rows.stream().map(r -> r.toMap(v -> v)).collect(Collectors.toList());
         System.out.println(maps.size());
