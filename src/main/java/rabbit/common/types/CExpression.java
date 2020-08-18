@@ -18,9 +18,9 @@ import java.util.regex.Pattern;
  * {@code :id >= 0 && :name <> blank && :age<=21}
  * </blockquote>
  */
-public class FExpression {
-    public static final String NUMBER_REGEX = "[0-9]|(0\\.\\d+)|([1-9]+\\.?\\d+)";
-    private static final Pattern filterPattern = Pattern.compile(":?(?<name>\\w+) *(?<op>[><=!]{1,2}) *(?<value>[\\S\\s ]+)");
+public class CExpression {
+    public static final String NUMBER_REGEX = "-?([0-9]|(0\\.\\d+)|([1-9]+\\.?\\d+))";
+    private static final Pattern filterPattern = Pattern.compile(":(?<name>\\w+) *(?<op>[><=!]{1,2}) *(?<value>[\\S\\s]+)");
 
     private final String expression;
 
@@ -29,7 +29,7 @@ public class FExpression {
      *
      * @param expression 表达式
      */
-    FExpression(String expression) {
+    CExpression(String expression) {
         this.expression = expression;
     }
 
@@ -43,8 +43,8 @@ public class FExpression {
      * @param expression 表达式
      * @return 表达式实例
      */
-    public static FExpression of(String expression) {
-        return new FExpression(expression);
+    public static CExpression of(String expression) {
+        return new CExpression(expression);
     }
 
     /**
@@ -122,10 +122,27 @@ public class FExpression {
         if (source != null) {
             sourceType = source.getClass();
         }
-        // 判断源值必须是数字类型,其余情况全部视为对象的比较
-        if (sourceType != null && sourceType != String.class && source.toString().matches(NUMBER_REGEX)) {
-            if (value.matches(NUMBER_REGEX)) {
+        if (sourceType != null) {
+            // 判断源值必须是数字类型,其余情况全部视为对象的比较
+            if (sourceType == Integer.class ||
+                    sourceType == Long.class ||
+                    sourceType == Double.class ||
+                    sourceType == Float.class ||
+                    sourceType == Byte.class) {
                 return compareNumber(name, op, value, params);
+            }
+            if (source.toString().matches(NUMBER_REGEX)) {
+                // 此功能暂保留，非严格数据类型的数字比较大小，在以后版本中可能移除
+                // ************************
+                // 建议明确数据类型为数字比较大小
+                // ************************
+                if (op.equals(">") || op.equals("<") || op.equals(">=") || op.equals("<=")) {
+                    if (value.matches(NUMBER_REGEX)) {
+                        return compareNumber(name, op, value, params);
+                    } else {
+                        throw new IllegalAccessException(String.format("can not compare NonNumber: %s %s %s", name, op, value));
+                    }
+                }
             }
         }
         return compareNonNumber(name, op, value, params);
@@ -183,7 +200,7 @@ public class FExpression {
             case "<>":
                 return !equal(source, op, value);
             default:
-                throw new UnsupportedOperationException(String.format("can not compare NonNumber: %s %s %s", source, op, value));
+                throw new UnsupportedOperationException(String.format("can not compare NonNumber: \"%s\" %s %s", source, op, value));
         }
     }
 
@@ -202,6 +219,12 @@ public class FExpression {
         }
         if (value.equals("blank")) {
             return source == null || "".equals(source.toString().trim());
+        }
+        if (value.equals("true")) {
+            return source.equals(true);
+        }
+        if (value.equals("false")) {
+            return source.equals(false);
         }
         if ((value.startsWith("\"") && value.endsWith("\"")) || (value.startsWith("'") && value.endsWith("'"))) {
             return value.substring(1, value.length() - 1).equals(source);
