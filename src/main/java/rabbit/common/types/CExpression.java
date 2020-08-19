@@ -52,9 +52,8 @@ public class CExpression {
      *
      * @param params 参数字典
      * @return 逻辑运算的结果
-     * @throws IllegalAccessException child expression format
      */
-    public boolean getResult(Map<String, Object> params) throws IllegalAccessException {
+    public boolean getResult(Map<String, Object> params) {
         Pair<List<String>, List<String>> ps = StringUtil.split(expression, "(?<op>\\|\\||&&) *[^ '\"]", "op");
 
         List<String> filters = ps.getItem1();
@@ -114,35 +113,14 @@ public class CExpression {
      * @param value  被比对的值
      * @param params 参数字典
      * @return 比较结果
-     * @throws IllegalAccessException unKnow value type exp
      */
-    private static boolean compare(String name, String op, String value, Map<String, Object> params) throws IllegalAccessException {
+    private static boolean compare(String name, String op, String value, Map<String, Object> params) {
         Object source = params.get(name);
-        Class<?> sourceType = null;
-        if (source != null) {
-            sourceType = source.getClass();
-        }
-        if (sourceType != null) {
-            // 判断源值必须是数字类型,其余情况全部视为对象的比较
-            if (sourceType == Integer.class ||
-                    sourceType == Long.class ||
-                    sourceType == Double.class ||
-                    sourceType == Float.class ||
-                    sourceType == Byte.class) {
+        if (op.equals(">") || op.equals("<") || op.equals(">=") || op.equals("<=")) {
+            if (source != null && source.toString().matches(NUMBER_REGEX) && value.matches(NUMBER_REGEX)) {
                 return compareNumber(name, op, value, params);
-            }
-            if (source.toString().matches(NUMBER_REGEX)) {
-                // 此功能暂保留，非严格数据类型的数字比较大小，在以后版本中可能移除
-                // ************************
-                // 建议明确数据类型为数字比较大小
-                // ************************
-                if (op.equals(">") || op.equals("<") || op.equals(">=") || op.equals("<=")) {
-                    if (value.matches(NUMBER_REGEX)) {
-                        return compareNumber(name, op, value, params);
-                    } else {
-                        throw new IllegalAccessException(String.format("can not compare NonNumber: %s %s %s", name, op, value));
-                    }
-                }
+            } else {
+                throw new UnsupportedOperationException(String.format("can not compare NonNumber: %s %s %s", name, op, value));
             }
         }
         return compareNonNumber(name, op, value, params);
@@ -188,17 +166,16 @@ public class CExpression {
      * @param value  被比对的值
      * @param params 参数字典
      * @return 比较结果
-     * @throws IllegalAccessException unKnow value type exp
      */
-    private static boolean compareNonNumber(String name, String op, String value, Map<String, Object> params) throws IllegalAccessException {
+    private static boolean compareNonNumber(String name, String op, String value, Map<String, Object> params) {
         Object source = params.get(name);
         switch (op) {
             case "=":
             case "==":
-                return equal(source, op, value);
+                return equal(source, value);
             case "!=":
             case "<>":
-                return !equal(source, op, value);
+                return !equal(source, value);
             default:
                 throw new UnsupportedOperationException(String.format("can not compare NonNumber: \"%s\" %s %s", source, op, value));
         }
@@ -208,12 +185,10 @@ public class CExpression {
      * 比对相等
      *
      * @param source 源值
-     * @param op     操作符
      * @param value  被比对的值
      * @return 是否相等
-     * @throws IllegalAccessException unKnow value type exp
      */
-    private static boolean equal(Object source, String op, String value) throws IllegalAccessException {
+    private static boolean equal(Object source, String value) {
         if (value.equals("null")) {
             return source == null;
         }
@@ -229,9 +204,9 @@ public class CExpression {
         if ((value.startsWith("\"") && value.endsWith("\"")) || (value.startsWith("'") && value.endsWith("'"))) {
             return value.substring(1, value.length() - 1).equals(source);
         }
-        if (value.matches(NUMBER_REGEX)) {
+        if (source == null) {
             return false;
         }
-        throw new IllegalAccessException(String.format("unKnow value type of child expression: %s %s %s", source, op, value));
+        return value.equals(source.toString());
     }
 }
