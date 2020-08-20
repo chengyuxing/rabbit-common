@@ -116,6 +116,9 @@ public class CExpression {
      * @return 比较结果
      */
     private static boolean compare(String name, String op, String value, Map<String, Object> params) {
+        if (!params.containsKey(name)) {
+            throw new NullPointerException("value of parameter name:\"" + name + "\" not found!");
+        }
         Object source = params.get(name);
         if (op.equals(">") || op.equals("<") || op.equals(">=") || op.equals("<=")) {
             if (source != null && source.toString().matches(NUMBER_REGEX) && value.matches(NUMBER_REGEX)) {
