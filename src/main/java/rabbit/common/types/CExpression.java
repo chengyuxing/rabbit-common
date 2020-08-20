@@ -11,6 +11,7 @@ import java.util.regex.Pattern;
 
 /**
  * 条件表达式解析器<br>
+ * 支持比较的数据类型: {@code null, blank(空白字符串和null),true, false, 字符串(''或""), 数字}<br>
  * 支持的比较操作符: {@code >, <, >=, <=, == (=), != (<>)}<br>
  * 支持的逻辑运算符: {@code &&, ||}<br>
  * e.g.
