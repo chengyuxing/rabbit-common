@@ -98,6 +98,9 @@ public final class DataRow {
      */
     public String getType(String name) {
         int index = indexOf(name);
+        if (index == -1) {
+            return null;
+        }
         return getType(index);
     }
 
