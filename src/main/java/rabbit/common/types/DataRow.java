@@ -132,6 +132,9 @@ public final class DataRow {
      */
     public <T> T get(String name) {
         int index = indexOf(name);
+        if (index == -1) {
+            return null;
+        }
         return get(index);
     }
 
@@ -157,6 +160,9 @@ public final class DataRow {
      */
     public String getString(String name) {
         int index = indexOf(name);
+        if (index == -1) {
+            return null;
+        }
         return getString(index);
     }
 
@@ -186,6 +192,9 @@ public final class DataRow {
      */
     public Integer getInt(String name) {
         int index = indexOf(name);
+        if (index == -1) {
+            return null;
+        }
         return getInt(index);
     }
 
@@ -214,6 +223,9 @@ public final class DataRow {
      */
     public Double getDouble(String name) {
         int index = indexOf(name);
+        if (index == -1) {
+            return null;
+        }
         return getDouble(index);
     }
 
