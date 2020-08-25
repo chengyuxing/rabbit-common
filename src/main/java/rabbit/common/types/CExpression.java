@@ -13,6 +13,8 @@ import java.util.regex.Pattern;
  * 条件表达式解析器<br>
  * 支持比较的数据类型: {@code null, blank(空白字符串和null),true, false, 字符串(''或""), 数字}<br>
  * 支持的比较操作符: {@code >, <, >=, <=, == (=), != (<>)}<br>
+ * {@code ~ (正则查找包含), !~ (正则查找不包含)}<br>
+ * {@code @ (正则匹配), !@ (正则不匹配)}<br>
  * 支持的逻辑运算符: {@code &&, ||}<br>
  * e.g.
  * <blockquote>
@@ -21,7 +23,7 @@ import java.util.regex.Pattern;
  */
 public class CExpression {
     public static final String NUMBER_REGEX = "-?([0-9]|(0\\.\\d+)|([1-9]+\\.?\\d+))";
-    private static final Pattern filterPattern = Pattern.compile(":(?<name>\\w+) *(?<op>[><=!]{1,2}) *(?<value>[\\S\\s]+)");
+    private static final Pattern filterPattern = Pattern.compile(":(?<name>\\w+) *(?<op>[><=!@~]{1,2}) *(?<value>[\\S\\s]+)");
 
     private final String expression;
 
@@ -180,9 +182,35 @@ public class CExpression {
             case "!=":
             case "<>":
                 return !equal(source, value);
+            case "~":
+                return regex(source, value, false);
+            case "!~":
+                return !regex(source, value, false);
+            case "@":
+                return regex(source, value, true);
+            case "!@":
+                return !regex(source, value, true);
             default:
-                throw new UnsupportedOperationException(String.format("can not compare NonNumber: \"%s\" %s %s", source, op, value));
+                throw new UnsupportedOperationException(String.format("unKnow operation for compare NonNumber: \"%s\" %s %s", source, op, value));
         }
+    }
+
+    /**
+     * 正则表达式比较
+     *
+     * @param source  源值
+     * @param value   正则表达式
+     * @param matches 是否全匹配，否则就是包含关系
+     * @return 是否满足正则
+     */
+    private static boolean regex(Object source, String value, boolean matches) {
+        String regex = getString(value);
+        Pattern p = Pattern.compile(regex);
+        Matcher m = p.matcher(source.toString());
+        if (matches) {
+            return m.matches();
+        }
+        return m.find();
     }
 
     /**
@@ -205,12 +233,22 @@ public class CExpression {
         if (value.equals("false")) {
             return source.equals(false);
         }
-        if ((value.startsWith("\"") && value.endsWith("\"")) || (value.startsWith("'") && value.endsWith("'"))) {
-            return value.substring(1, value.length() - 1).equals(source);
-        }
         if (source == null) {
             return false;
         }
-        return value.equals(source.toString());
+        return getString(value).equals(source.toString());
+    }
+
+    /**
+     * 排除引号获取字符串
+     *
+     * @param value 字符串
+     * @return 排除引号后的字符串
+     */
+    private static String getString(String value) {
+        if ((value.startsWith("\"") && value.endsWith("\"")) || (value.startsWith("'") && value.endsWith("'"))) {
+            return value.substring(1, value.length() - 1);
+        }
+        return value;
     }
 }
