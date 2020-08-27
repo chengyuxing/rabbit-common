@@ -1,4 +1,6 @@
-package rabbit.common.utils;
+package rabbit.common.io;
+
+import rabbit.common.utils.ResourceUtil;
 
 import java.io.File;
 import java.io.InputStream;
