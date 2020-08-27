@@ -91,8 +91,7 @@ public class MyTest {
 
     @Test
     public void readFile() throws Exception {
-        URL url = ResourceUtil.classLoader().getResource("rabbit/common/tuple");
-        System.out.println(Paths.get(url.toURI()));
+        System.out.println((char) 58);
     }
 
     @Test

@@ -1,15 +1,11 @@
 package rabbit.common.utils;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 /**
@@ -17,23 +13,20 @@ import java.util.stream.Stream;
  */
 public class ResourceUtil {
     /**
-     * 递归获取classPath下的文件
+     * 递归获取指定目录下的文件
      *
      * @param basePath 基本路径
      * @param depth    深度
      * @param suffix   文件后缀
      * @return Stream
-     * @throws IOException        没有此路径
-     * @throws URISyntaxException 路径格式异常
+     * @throws IOException 没有此路径
      */
-    public static Stream<Path> getClassPathResources(String basePath, int depth, String suffix) throws IOException, URISyntaxException {
-        URL url = classLoader().getResource(basePath);
-        Objects.requireNonNull(url);
-        return Files.find(Paths.get(url.toURI()), depth, (p, attr) -> p.toString().endsWith(suffix) && !attr.isDirectory());
+    public static Stream<Path> getResources(String basePath, int depth, String suffix) throws IOException {
+        return Files.find(Paths.get(basePath), depth, (p, attr) -> p.toString().endsWith(suffix) && !attr.isDirectory());
     }
 
     /**
-     * 递归获取classPath下的文件深度为5
+     * 递归获取指定目录下的文件深度为5
      *
      * @param basePath 基本路径
      * @param suffix   文件后缀
@@ -41,25 +34,8 @@ public class ResourceUtil {
      * @throws IOException        没有此路径
      * @throws URISyntaxException 路径格式异常
      */
-    public static Stream<Path> getClassPathResources(String basePath, String suffix) throws IOException, URISyntaxException {
-        return getClassPathResources(basePath, 5, suffix);
-    }
-
-    /**
-     * 读取ClassPath下的文件到输入流
-     *
-     * @param file 文件
-     * @return 输入流
-     * @throws FileNotFoundException 没有找到文件异常
-     */
-    public static InputStream getClassPathResourceAsStream(final String file) throws FileNotFoundException {
-        String _file = file;
-        if (file.startsWith("/")) {
-            _file = file.substring(1);
-        }
-        InputStream in = classLoader().getResourceAsStream(_file);
-        return Optional.ofNullable(in)
-                .orElseThrow(() -> new FileNotFoundException(file));
+    public static Stream<Path> getResources(String basePath, String suffix) throws IOException, URISyntaxException {
+        return getResources(basePath, 5, suffix);
     }
 
     /**
@@ -83,11 +59,24 @@ public class ResourceUtil {
     }
 
     /**
-     * 获取类加载器
+     * 判断是否是一个文件系统协议
      *
-     * @return 类加载器
+     * @param url url
+     * @return 是否是文件协议
      */
-    public static ClassLoader classLoader() {
-        return Thread.currentThread().getContextClassLoader();
+    public static boolean isFileURL(URL url) {
+        String protocol = url.getProtocol();
+        return "file".equals(protocol) || "vfsfile".equals(protocol) || "vfs".equals(protocol);
+    }
+
+    /**
+     * 判断路径是否是jar压缩包协议
+     *
+     * @param url url
+     * @return 是否是jar压缩包协议
+     */
+    public static boolean isJarURL(URL url) {
+        String protocol = url.getProtocol();
+        return "jar".equals(protocol) || "war".equals(protocol) || "zip".equals(protocol) || "vfszip".equals(protocol) || "wsjar".equals(protocol);
     }
 }

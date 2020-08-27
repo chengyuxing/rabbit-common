@@ -71,4 +71,14 @@ public class StringUtil {
         items.add(s.substring(splitIndex));
         return Pair.of(items, splitSymbols);
     }
+
+    /**
+     * 判断字符串是否有长度
+     *
+     * @param str 字符串
+     * @return 是否有长度
+     */
+    public static boolean hasLength(String str) {
+        return str != null && !str.isEmpty();
+    }
 }
