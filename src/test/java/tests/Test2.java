@@ -13,7 +13,7 @@ public class Test2 {
 
     static List<DataRow> rows = new ArrayList<>();
 
-    @BeforeClass
+//    @BeforeClass
     public static void init() {
         for (int i = 0; i < 10000; i++) {
             DataRow row = DataRow.of(
