@@ -123,11 +123,13 @@ public class CExpression {
         }
         Object source = params.get(name);
         if (op.equals(">") || op.equals("<") || op.equals(">=") || op.equals("<=")) {
-            if (source != null && source.toString().matches(NUMBER_REGEX) && value.matches(NUMBER_REGEX)) {
-                return compareNumber(name, op, value, params);
-            } else {
-                throw new UnsupportedOperationException(String.format("can not compare NonNumber: %s %s %s", name, op, value));
+            if (source == null) {
+                return false;
             }
+            if (source.toString().matches(NUMBER_REGEX) && value.matches(NUMBER_REGEX)) {
+                return compareNumber(name, op, value, params);
+            }
+            throw new UnsupportedOperationException(String.format("can not compare NonNumber: %s %s %s", name, op, value));
         }
         return compareNonNumber(name, op, value, params);
     }
