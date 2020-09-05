@@ -53,10 +53,10 @@ public class CExpression {
     /**
      * 通过传入一个参数字典来获取解析表达式后进行逻辑运算的结果
      *
-     * @param params 参数字典
+     * @param args 参数字典
      * @return 逻辑运算的结果
      */
-    public boolean getResult(Map<String, Object> params) {
+    public boolean getResult(Map<String, Object> args) {
         Pair<List<String>, List<String>> ps = StringUtil.split(expression, "(?<op>\\|\\||&&) *[^ '\"]", "op");
 
         List<String> filters = ps.getItem1();
@@ -69,7 +69,7 @@ public class CExpression {
                 String name = m.group("name");
                 String op = m.group("op");
                 String value = m.group("value");
-                boolean itemResult = compare(name, op, value, params);
+                boolean itemResult = compare(name, op, value, args);
                 results.add(itemResult);
             } else {
                 throw new IllegalArgumentException("child expression format error: " + filter);
@@ -114,24 +114,24 @@ public class CExpression {
      * @param name   对应参数字典的key名
      * @param op     操作符
      * @param value  被比对的值
-     * @param params 参数字典
+     * @param args 参数字典
      * @return 比较结果
      */
-    private static boolean compare(String name, String op, String value, Map<String, Object> params) {
-        if (!params.containsKey(name)) {
+    private static boolean compare(String name, String op, String value, Map<String, Object> args) {
+        if (!args.containsKey(name)) {
             throw new NullPointerException("value of parameter name:\"" + name + "\" not found!");
         }
-        Object source = params.get(name);
+        Object source = args.get(name);
         if (op.equals(">") || op.equals("<") || op.equals(">=") || op.equals("<=")) {
             if (source == null) {
                 return false;
             }
             if (source.toString().matches(NUMBER_REGEX) && value.matches(NUMBER_REGEX)) {
-                return compareNumber(name, op, value, params);
+                return compareNumber(name, op, value, args);
             }
             throw new UnsupportedOperationException(String.format("can not compare NonNumber: %s %s %s", name, op, value));
         }
-        return compareNonNumber(name, op, value, params);
+        return compareNonNumber(name, op, value, args);
     }
 
     /**
@@ -140,12 +140,12 @@ public class CExpression {
      * @param name   对应参数字典的key名
      * @param op     操作符
      * @param value  被比对的值
-     * @param params 参数字典
+     * @param args 参数字典
      * @return 比较结果
      */
-    private static boolean compareNumber(String name, String op, String value, Map<String, Object> params) {
+    private static boolean compareNumber(String name, String op, String value, Map<String, Object> args) {
         double targetNum = Double.parseDouble(value);
-        double sourceNum = Double.parseDouble(params.get(name).toString());
+        double sourceNum = Double.parseDouble(args.get(name).toString());
         switch (op) {
             case "=":
             case "==":
@@ -172,11 +172,11 @@ public class CExpression {
      * @param name   对应参数字典的key名
      * @param op     操作符
      * @param value  被比对的值
-     * @param params 参数字典
+     * @param args 参数字典
      * @return 比较结果
      */
-    private static boolean compareNonNumber(String name, String op, String value, Map<String, Object> params) {
-        Object source = params.get(name);
+    private static boolean compareNonNumber(String name, String op, String value, Map<String, Object> args) {
+        Object source = args.get(name);
         switch (op) {
             case "=":
             case "==":
