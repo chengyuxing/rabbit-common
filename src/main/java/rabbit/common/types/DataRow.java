@@ -142,6 +142,28 @@ public final class DataRow {
     }
 
     /**
+     * 获取可为空的值
+     *
+     * @param index 索引
+     * @param <T>   类型参数
+     * @return 值
+     */
+    public <T> Optional<T> getNullable(int index) {
+        return Optional.ofNullable(get(index));
+    }
+
+    /**
+     * 获取可为空的值
+     *
+     * @param name 名称
+     * @param <T>  类型参数
+     * @return 值
+     */
+    public <T> Optional<T> getNullable(String name) {
+        return Optional.ofNullable(get(name));
+    }
+
+    /**
      * 根据索引获取一个字符串
      *
      * @param index 索引
