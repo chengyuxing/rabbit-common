@@ -5,7 +5,6 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.stream.Stream;
 
 /**
@@ -15,14 +14,14 @@ public class ResourceUtil {
     /**
      * 递归获取指定目录下的文件
      *
-     * @param basePath 基本路径
-     * @param depth    深度
-     * @param suffix   文件后缀
+     * @param path   基本路径
+     * @param depth  深度
+     * @param suffix 文件后缀
      * @return Stream
      * @throws IOException 没有此路径
      */
-    public static Stream<Path> getResources(String basePath, int depth, String suffix) throws IOException {
-        return Files.find(Paths.get(basePath), depth, (p, attr) -> p.toString().endsWith(suffix) && !attr.isDirectory());
+    public static Stream<Path> getResources(Path path, int depth, String suffix) throws IOException {
+        return Files.find(path, depth, (p, attr) -> p.toString().endsWith(suffix) && !attr.isDirectory());
     }
 
     /**
@@ -34,7 +33,7 @@ public class ResourceUtil {
      * @throws IOException        没有此路径
      * @throws URISyntaxException 路径格式异常
      */
-    public static Stream<Path> getResources(String basePath, String suffix) throws IOException, URISyntaxException {
+    public static Stream<Path> getResources(Path basePath, String suffix) throws IOException, URISyntaxException {
         return getResources(basePath, 5, suffix);
     }
 
