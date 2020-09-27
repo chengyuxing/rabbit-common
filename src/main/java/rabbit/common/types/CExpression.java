@@ -76,7 +76,7 @@ public class CExpression {
             String name = m.group("name");
             String op = m.group("op");
             String value = m.group("value");
-            boolean bool = CExpression.compare(name, op, value, args);
+            boolean bool = compare(name, op, value, args);
             return calc(expression.replace(filter, bool + ""), args);
         }
         return Boolean.parseBoolean(SCRIPT_ENGINE.eval(expression).toString());
