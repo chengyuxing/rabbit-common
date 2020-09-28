@@ -255,6 +255,15 @@ public final class DataRow {
     }
 
     /**
+     * 行数据列数
+     *
+     * @return 列数
+     */
+    public int size() {
+        return values.length;
+    }
+
+    /**
      * 获取指定字段名的索引
      *
      * @param name 字段名
