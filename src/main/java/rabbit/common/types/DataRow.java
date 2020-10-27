@@ -321,7 +321,11 @@ public final class DataRow {
         for (Object key : map.keySet()) {
             names[i] = key.toString();
             values[i] = map.get(key);
-            types[i] = values[i].getClass().getName();
+            if (values[i] == null) {
+                types[i] = "null";
+            } else {
+                types[i] = values[i].getClass().getName();
+            }
             i++;
         }
         return of(names, types, values);
@@ -340,7 +344,11 @@ public final class DataRow {
         for (int i = 0; i < names.length; i++) {
             Object value = list.get(i);
             values[i] = value;
-            types[i] = value.getClass().getName();
+            if (value == null) {
+                types[i] = "null";
+            } else {
+                types[i] = value.getClass().getName();
+            }
         }
         return of(names, types, values);
     }
