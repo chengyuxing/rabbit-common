@@ -1,7 +1,13 @@
 package rabbit.common.types;
 
+import rabbit.common.utils.ReflectUtil;
+
+import java.beans.IntrospectionException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 /**
  * 行数据类型
@@ -305,6 +311,58 @@ public final class DataRow {
      */
     public Map<String, Object> toMap() {
         return toMap(v -> v);
+    }
+
+    /**
+     * 转为一个标准的javaBean实体
+     *
+     * @param clazz 实体类
+     * @param <T>   类型参数
+     * @return 实体
+     */
+    public <T> T toEntity(Class<T> clazz) throws IllegalAccessException, InstantiationException, IntrospectionException, InvocationTargetException {
+        T entity = clazz.newInstance();
+        Iterator<Method> methods = ReflectUtil.getSetMethods(clazz).iterator();
+        while (methods.hasNext()) {
+            Method method = methods.next();
+            String field = method.getName().substring(3);
+            field = field.substring(0, 1).toLowerCase().concat(field.substring(1));
+            if (getNames().contains(field)) {
+                Object value = get(field);
+                if (value != null) {
+                    method.invoke(entity, value);
+                }
+            }
+        }
+        return entity;
+    }
+
+    public static DataRow fromEntity(Object entity) throws IntrospectionException, InvocationTargetException, IllegalAccessException {
+        List<String> names = new ArrayList<>();
+        List<String> types = new ArrayList<>();
+        List<Object> values = new ArrayList<>();
+        Iterator<Method> methods = ReflectUtil.getGetMethods(entity.getClass()).iterator();
+        while (methods.hasNext()) {
+            Method method = methods.next();
+            Class<?> returnType = method.getReturnType();
+            if (returnType != Class.class) {
+                String field = method.getName();
+                if (field.startsWith("get")) {
+                    field = field.substring(3);
+                } else if (field.startsWith("is")) {
+                    field = field.substring(2);
+                }
+                Object value = method.invoke(entity);
+                if (value != null) {
+                    String type = returnType.getTypeName();
+                    field = field.substring(0, 1).toLowerCase().concat(field.substring(1));
+                    names.add(field);
+                    types.add(type);
+                    values.add(value);
+                }
+            }
+        }
+        return of(names.toArray(new String[0]), types.toArray(new String[0]), values.toArray());
     }
 
     /**
