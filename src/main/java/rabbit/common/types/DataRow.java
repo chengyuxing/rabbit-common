@@ -337,6 +337,15 @@ public final class DataRow {
         return entity;
     }
 
+    /**
+     * 从一个标准的javaBean实体转为DataRow类型
+     *
+     * @param entity 实体
+     * @return DataRow
+     * @throws IntrospectionException    Introspection ex
+     * @throws InvocationTargetException InvocationTarget ex
+     * @throws IllegalAccessException    IllegalAccess ex
+     */
     public static DataRow fromEntity(Object entity) throws IntrospectionException, InvocationTargetException, IllegalAccessException {
         List<String> names = new ArrayList<>();
         List<String> types = new ArrayList<>();

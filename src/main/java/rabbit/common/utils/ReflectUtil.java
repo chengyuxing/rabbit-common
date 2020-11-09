@@ -41,7 +41,7 @@ public final class ReflectUtil {
      *
      * @param clazz 类
      * @return 类的set方法组
-     * @throws IntrospectionException exp
+     * @throws IntrospectionException ex
      */
     public static Stream<Method> getSetMethods(Class<?> clazz) throws IntrospectionException {
         BeanInfo beanInfo = Introspector.getBeanInfo(clazz);
@@ -55,7 +55,7 @@ public final class ReflectUtil {
      *
      * @param clazz 类
      * @return 类的set方法组
-     * @throws IntrospectionException exp
+     * @throws IntrospectionException ex
      */
     public static Stream<Method> getGetMethods(Class<?> clazz) throws IntrospectionException {
         BeanInfo beanInfo = Introspector.getBeanInfo(clazz);
