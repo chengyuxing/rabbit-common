@@ -15,7 +15,7 @@ import java.util.stream.Stream;
 public class ReflectTests {
     @Test
     public void test1() throws Exception {
-        DataRow row = DataRow.fromList(Arrays.asList("chengyuxing", 27, 13), "name", "age", "id");
+        DataRow row = DataRow.fromList(Arrays.asList("chengyuxing", 27, 13, new String[]{"a", "b", "c"}), "name", "age", "id", "roles");
 
         User user = row.toEntity(User.class);
 
@@ -44,9 +44,9 @@ public class ReflectTests {
     }
 
     @Test
-    public void convert() throws Exception{
+    public void convert() throws Exception {
         ReflectUtil.getGetMethods(User.class)
-                .forEach(m->{
+                .forEach(m -> {
                     System.out.println(m.getReturnType() == Class.class);
                 });
     }

@@ -1,5 +1,6 @@
 package tests.entity;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -9,11 +10,27 @@ public class User {
     private Integer age;
     private boolean enable;
 
+    private String[] strs;
+
     private List<String> roles;
 
     private Map<String, Object> family;
 
     private List<Map<String,Object>> families;
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "name='" + name + '\'' +
+                ", id=" + id +
+                ", age=" + age +
+                ", enable=" + enable +
+                ", strs=" + Arrays.toString(strs) +
+                ", roles=" + roles +
+                ", family=" + family +
+                ", families=" + families +
+                '}';
+    }
 
     public String getName() {
         return name;
@@ -47,18 +64,6 @@ public class User {
         this.enable = enable;
     }
 
-    @Override
-    public String toString() {
-        return "User{" +
-                "name='" + name + '\'' +
-                ", id=" + id +
-                ", age=" + age +
-                ", enable=" + enable +
-                ", roles=" + roles +
-                ", family=" + family +
-                '}';
-    }
-
     public List<String> getRoles() {
         return roles;
     }
@@ -81,5 +86,13 @@ public class User {
 
     public void setFamilies(List<Map<String, Object>> families) {
         this.families = families;
+    }
+
+    public String[] getStrs() {
+        return strs;
+    }
+
+    public void setStrs(String[] strs) {
+        this.strs = strs;
     }
 }
