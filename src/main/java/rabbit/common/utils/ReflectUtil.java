@@ -63,4 +63,25 @@ public final class ReflectUtil {
                 .map(PropertyDescriptor::getReadMethod)
                 .filter(Objects::nonNull);
     }
+
+    /**
+     * 判断对象是否是java的基本数据类型(包括包装类型)
+     *
+     * @param value 对象
+     * @return 是否是java的基本数据类型
+     */
+    public static boolean isBasicType(Object value) {
+        if (value.getClass().isPrimitive()) {
+            return true;
+        }
+        return value instanceof String ||
+                value instanceof Boolean ||
+                value instanceof Integer ||
+                value instanceof Long ||
+                value instanceof Short ||
+                value instanceof Double ||
+                value instanceof Character ||
+                value instanceof Float ||
+                value instanceof Byte;
+    }
 }
