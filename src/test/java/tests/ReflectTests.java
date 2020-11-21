@@ -15,13 +15,20 @@ import java.util.stream.Stream;
 public class ReflectTests {
     @Test
     public void test1() throws Exception {
-        DataRow row = DataRow.fromList(Arrays.asList("chengyuxing", 27, 13, new String[]{"a", "b", "c"}), "name", "age", "id", "roles");
+        DataRow row = DataRow.fromList(Arrays.asList("chengyuxing", 27, 13, new String[]{"a", "b", "c"}),
+                "name", "id", "age", "roles");
+
+        System.out.println(row);
 
         User user = row.toEntity(User.class);
 
         System.out.println(user);
 
-        System.out.println(DataRow.fromEntity(user));
+    }
+
+    @Test
+    public void classTest() throws Exception{
+        System.out.println(Map.class.isAssignableFrom(HashMap.class));
     }
 
     @Test
