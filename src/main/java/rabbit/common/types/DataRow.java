@@ -410,6 +410,8 @@ public final class DataRow {
                             } else {
                                 method.invoke(entity, value);
                             }
+                        } else if (argType == String.class) {
+                            method.invoke(entity, value.toString());
                         } else {
                             method.invoke(entity, value);
                         }
