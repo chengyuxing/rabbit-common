@@ -40,13 +40,13 @@ public final class ReflectUtil {
     }
 
     /**
-     * 获取标准javaBean的所有Set方法
+     * 获取标准javaBean的所有写方法
      *
      * @param clazz 类
      * @return 类的set方法组
      * @throws IntrospectionException ex
      */
-    public static Stream<Method> getSetMethods(Class<?> clazz) throws IntrospectionException {
+    public static Stream<Method> getWriteMethods(Class<?> clazz) throws IntrospectionException {
         BeanInfo beanInfo = Introspector.getBeanInfo(clazz);
         return Stream.of(beanInfo.getPropertyDescriptors())
                 .map(PropertyDescriptor::getWriteMethod)
@@ -54,13 +54,13 @@ public final class ReflectUtil {
     }
 
     /**
-     * 获取标准javaBean的所有Set方法
+     * 获取标准javaBean的所有读方法
      *
      * @param clazz 类
      * @return 类的set方法组
      * @throws IntrospectionException ex
      */
-    public static Stream<Method> getGetMethods(Class<?> clazz) throws IntrospectionException {
+    public static Stream<Method> getReadMethods(Class<?> clazz) throws IntrospectionException {
         BeanInfo beanInfo = Introspector.getBeanInfo(clazz);
         return Stream.of(beanInfo.getPropertyDescriptors())
                 .map(PropertyDescriptor::getReadMethod)

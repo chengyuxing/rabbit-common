@@ -99,7 +99,7 @@ public class DateTimes {
             }
         }
         if (year == 0 && hour == -1) {
-            throw new IllegalArgumentException("un know date time formatter: " + s);
+            throw new IllegalArgumentException("un know date time format: " + s);
         }
         return LocalDateTime.of(year, month, day, hour, minus, second);
     }

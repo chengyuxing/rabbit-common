@@ -1,5 +1,6 @@
 package rabbit.common.types;
 
+import rabbit.common.utils.DateTimes;
 import rabbit.common.utils.ReflectUtil;
 
 import java.beans.IntrospectionException;
@@ -7,8 +8,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.Time;
 import java.sql.Timestamp;
-import java.time.LocalDate;
-import java.time.ZoneId;
+import java.time.*;
+import java.time.temporal.Temporal;
 import java.util.*;
 import java.util.function.Function;
 
@@ -325,56 +326,100 @@ public final class DataRow {
      * @param <T>   类型参数
      * @return 实体
      */
-    public <T> T toEntity(Class<T> clazz) throws IllegalAccessException, InstantiationException, IntrospectionException, InvocationTargetException, NoSuchMethodException {
-        T entity = clazz.newInstance();
-        Iterator<Method> methods = ReflectUtil.getSetMethods(clazz).iterator();
-        while (methods.hasNext()) {
-            Method method = methods.next();
-            String field = method.getName().substring(3);
-            field = field.substring(0, 1).toLowerCase().concat(field.substring(1));
-            if (getNames().contains(field)) {
-                Object value = get(field);
-                String valueType = getType(field);
-                if (value != null && valueType != null) {
-                    Class<?> argType = method.getParameterTypes()[0];
-                    if (argType == Date.class) {
-                        switch (valueType) {
-                            case "java.sql.Time":
-                                method.invoke(entity, new Date(((Time) value).toLocalTime().atDate(LocalDate.now()).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()));
-                                break;
-                            case "java.sql.Timestamp":
-                                method.invoke(entity, new Date(((Timestamp) value).toInstant().toEpochMilli()));
-                                break;
-                            case "java.sql.Date":
-                                method.invoke(entity, new Date(((java.sql.Date) value).toLocalDate().atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()));
-                                break;
-                        }
-                    } else if (Map.class.isAssignableFrom(argType) || Collection.class.isAssignableFrom(argType) || !argType.getTypeName().startsWith("java.")) {
-                        if (valueType.equals("org.postgresql.util.PGobject")) {
-                            Class<?> pgObjClass = value.getClass();
-                            String pgType = (String) pgObjClass.getDeclaredMethod("getType").invoke(value);
-                            String pgValue = (String) pgObjClass.getDeclaredMethod("getValue").invoke(value);
-                            if (pgType.equals("json") || pgType.equals("jsonb")) {
-                                method.invoke(entity, json2Obj(pgValue, argType));
+    public <T> T toEntity(Class<T> clazz) {
+        try {
+            T entity = clazz.newInstance();
+            Iterator<Method> methods = ReflectUtil.getWriteMethods(clazz).iterator();
+            while (methods.hasNext()) {
+                Method method = methods.next();
+                if (method.getName().startsWith("set")) {
+                    String field = method.getName().substring(3);
+                    field = field.substring(0, 1).toLowerCase().concat(field.substring(1));
+                    Object value = get(field);
+                    String valueType = getType(field);
+                    if (value != null && valueType != null) {
+                        Class<?> argType = method.getParameterTypes()[0];
+                        if (argType == Date.class) {
+                            switch (valueType) {
+                                case "java.sql.Time":
+                                    method.invoke(entity, new Date(((Time) value).toLocalTime().atDate(LocalDate.now()).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()));
+                                    break;
+                                case "java.sql.Timestamp":
+                                    method.invoke(entity, new Date(((Timestamp) value).toInstant().toEpochMilli()));
+                                    break;
+                                case "java.sql.Date":
+                                    method.invoke(entity, new Date(((java.sql.Date) value).toLocalDate().atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()));
+                                    break;
+                                case "java.lang.String":
+                                    method.invoke(entity, DateTimes.toDate(value.toString()));
+                                    break;
                             }
-                            // I think this is json string and you want convert to object.
-                        } else if (valueType.equals("java.lang.String")) {
-                            method.invoke(entity, json2Obj(value.toString(), argType));
-                            // PostgreSQL array and exclude blob
-                        } else if (valueType.startsWith("[L") || (valueType.endsWith("[]") && !valueType.equals("byte[]"))) {
-                            if (List.class.isAssignableFrom(argType)) {
-                                method.invoke(entity, Arrays.asList((Object[]) value));
+                        } else if (Temporal.class.isAssignableFrom(argType)) {
+                            switch (valueType) {
+                                case "java.sql.Date":
+                                    if (argType == LocalDate.class) {
+                                        method.invoke(entity, ((java.sql.Date) value).toLocalDate());
+                                    }
+                                    break;
+                                case "java.sql.Timestamp":
+                                    if (argType == LocalDateTime.class) {
+                                        method.invoke(entity, ((Timestamp) value).toLocalDateTime());
+                                    } else if (argType == Instant.class) {
+                                        method.invoke(entity, ((Timestamp) value).toInstant());
+                                    } else if (argType == LocalDate.class) {
+                                        method.invoke(entity, ((Timestamp) value).toLocalDateTime().toLocalDate());
+                                    } else if (argType == LocalTime.class) {
+                                        method.invoke(entity, ((Timestamp) value).toLocalDateTime().toLocalTime());
+                                    }
+                                    break;
+                                case "java.sql.Time":
+                                    if (argType == LocalTime.class) {
+                                        method.invoke(entity, ((Time) value).toLocalTime());
+                                    }
+                                    break;
+                                case "java.lang.String":
+                                    if (argType == LocalDateTime.class) {
+                                        method.invoke(entity, DateTimes.toLocalDateTime(value.toString()));
+                                    } else if (argType == Instant.class) {
+                                        method.invoke(entity, DateTimes.toInstant(value.toString()));
+                                    } else if (argType == LocalDate.class) {
+                                        method.invoke(entity, DateTimes.toLocalDate(value.toString()));
+                                    } else if (argType == LocalTime.class) {
+                                        method.invoke(entity, DateTimes.toLocalTime(value.toString()));
+                                    }
+                                    break;
+                            }
+                        } else if (Map.class.isAssignableFrom(argType) || Collection.class.isAssignableFrom(argType) || !argType.getTypeName().startsWith("java.")) {
+                            if (valueType.equals("org.postgresql.util.PGobject")) {
+                                Class<?> pgObjClass = value.getClass();
+                                String pgType = (String) pgObjClass.getDeclaredMethod("getType").invoke(value);
+                                String pgValue = (String) pgObjClass.getDeclaredMethod("getValue").invoke(value);
+                                if (pgType.equals("json") || pgType.equals("jsonb")) {
+                                    method.invoke(entity, json2Obj(pgValue, argType));
+                                }
+                                // I think this is json string and you want convert to object.
+                            } else if (valueType.equals("java.lang.String")) {
+                                method.invoke(entity, json2Obj(value.toString(), argType));
+                                // PostgreSQL array and exclude blob
+                            } else if (valueType.startsWith("[L") || (valueType.endsWith("[]") && !valueType.equals("byte[]"))) {
+                                if (List.class.isAssignableFrom(argType)) {
+                                    method.invoke(entity, Arrays.asList((Object[]) value));
+                                } else if (Set.class.isAssignableFrom(argType)) {
+                                    method.invoke(entity, new HashSet<>(Arrays.asList((Object[]) value)));
+                                }
+                            } else {
+                                method.invoke(entity, value);
                             }
                         } else {
                             method.invoke(entity, value);
                         }
-                    } else {
-                        method.invoke(entity, value);
                     }
                 }
             }
+            return entity;
+        } catch (NoSuchMethodException | InstantiationException | InvocationTargetException | IntrospectionException | IllegalAccessException e) {
+            throw new RuntimeException("convert to " + clazz.getTypeName() + "error: ", e);
         }
-        return entity;
     }
 
     /**
@@ -390,7 +435,7 @@ public final class DataRow {
         List<String> names = new ArrayList<>();
         List<String> types = new ArrayList<>();
         List<Object> values = new ArrayList<>();
-        Iterator<Method> methods = ReflectUtil.getGetMethods(entity.getClass()).iterator();
+        Iterator<Method> methods = ReflectUtil.getReadMethods(entity.getClass()).iterator();
         while (methods.hasNext()) {
             Method method = methods.next();
             Class<?> returnType = method.getReturnType();

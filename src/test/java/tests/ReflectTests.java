@@ -7,10 +7,7 @@ import tests.entity.User;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.Stream;
+import java.util.*;
 
 public class ReflectTests {
     @Test
@@ -23,17 +20,18 @@ public class ReflectTests {
         User user = row.toEntity(User.class);
 
         System.out.println(user);
+        System.out.println(user.getRoles().get(1));
 
     }
 
     @Test
     public void classTest() throws Exception{
-        System.out.println(Map.class.isAssignableFrom(HashMap.class));
+        System.out.println(Collection.class.isAssignableFrom(ArrayList.class));
     }
 
     @Test
     public void beanTest() throws Exception {
-        ReflectUtil.getSetMethods(User.class)
+        ReflectUtil.getWriteMethods(User.class)
                 .forEach(method -> {
                     // set方法的第一个参数类型
                     Type pType = method.getGenericParameterTypes()[0];
@@ -52,7 +50,7 @@ public class ReflectTests {
 
     @Test
     public void convert() throws Exception {
-        ReflectUtil.getGetMethods(User.class)
+        ReflectUtil.getReadMethods(User.class)
                 .forEach(m -> {
                     System.out.println(m.getReturnType() == Class.class);
                 });
