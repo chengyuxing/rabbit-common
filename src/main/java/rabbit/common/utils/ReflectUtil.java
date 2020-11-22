@@ -126,6 +126,7 @@ public final class ReflectUtil {
      * json字符串转对象（需要jackson库）
      *
      * @param json json
+     * @param targetType 目标类型
      * @return 对象
      */
     public static Object json2Obj(String json, Class<?> targetType) {
