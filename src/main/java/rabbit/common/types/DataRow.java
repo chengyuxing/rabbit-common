@@ -429,36 +429,37 @@ public final class DataRow {
      *
      * @param entity 实体
      * @return DataRow
-     * @throws IntrospectionException    Introspection ex
-     * @throws InvocationTargetException InvocationTarget ex
-     * @throws IllegalAccessException    IllegalAccess ex
      */
-    public static DataRow fromEntity(Object entity) throws IntrospectionException, InvocationTargetException, IllegalAccessException {
-        List<String> names = new ArrayList<>();
-        List<String> types = new ArrayList<>();
-        List<Object> values = new ArrayList<>();
-        Iterator<Method> methods = ReflectUtil.getReadMethods(entity.getClass()).iterator();
-        while (methods.hasNext()) {
-            Method method = methods.next();
-            Class<?> returnType = method.getReturnType();
-            if (returnType != Class.class) {
-                String field = method.getName();
-                if (field.startsWith("get")) {
-                    field = field.substring(3);
-                } else if (field.startsWith("is")) {
-                    field = field.substring(2);
-                }
-                Object value = method.invoke(entity);
-                if (value != null) {
-                    String type = returnType.getTypeName();
-                    field = field.substring(0, 1).toLowerCase().concat(field.substring(1));
-                    names.add(field);
-                    types.add(type);
-                    values.add(value);
+    public static DataRow fromEntity(Object entity) {
+        try {
+            List<String> names = new ArrayList<>();
+            List<String> types = new ArrayList<>();
+            List<Object> values = new ArrayList<>();
+            Iterator<Method> methods = ReflectUtil.getReadMethods(entity.getClass()).iterator();
+            while (methods.hasNext()) {
+                Method method = methods.next();
+                Class<?> returnType = method.getReturnType();
+                if (returnType != Class.class) {
+                    String field = method.getName();
+                    if (field.startsWith("get")) {
+                        field = field.substring(3);
+                    } else if (field.startsWith("is")) {
+                        field = field.substring(2);
+                    }
+                    Object value = method.invoke(entity);
+                    if (value != null) {
+                        String type = returnType.getTypeName();
+                        field = field.substring(0, 1).toLowerCase().concat(field.substring(1));
+                        names.add(field);
+                        types.add(type);
+                        values.add(value);
+                    }
                 }
             }
+            return of(names.toArray(new String[0]), types.toArray(new String[0]), values.toArray());
+        } catch (IllegalAccessException | IntrospectionException | InvocationTargetException e) {
+            throw new RuntimeException("convert to DataRow error: ", e);
         }
-        return of(names.toArray(new String[0]), types.toArray(new String[0]), values.toArray());
     }
 
     /**
