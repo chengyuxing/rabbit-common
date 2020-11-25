@@ -303,11 +303,11 @@ public final class DataRow {
      * @return 一个Map
      */
     public <T> Map<String, T> toMap(Function<Object, T> valueConvert) {
-        return getNames().stream().collect(
-                HashMap::new,
-                (current, k) -> current.put(k, valueConvert.apply(get(k))),
-                HashMap::putAll
-        );
+        Map<String, T> map = new HashMap<>();
+        for (int i = 0; i < names.length; i++) {
+            map.put(names[i], valueConvert.apply(get(i)));
+        }
+        return map;
     }
 
     /**
@@ -316,7 +316,11 @@ public final class DataRow {
      * @return map
      */
     public Map<String, Object> toMap() {
-        return toMap(v -> v);
+        Map<String, Object> map = new HashMap<>();
+        for (int i = 0; i < names.length; i++) {
+            map.put(names[i], get(i));
+        }
+        return map;
     }
 
     /**
@@ -487,22 +491,25 @@ public final class DataRow {
     }
 
     /**
-     * 从List转换到DataRow
+     * 从一组键值对创建一个DataRow
      *
-     * @param list  数据
-     * @param names 列字段名
+     * @param pairs 键值对 k v，k v...
      * @return DataRow
      */
-    public static DataRow fromList(List<?> list, String... names) {
+    public static DataRow fromPair(Object... pairs) {
+        if (pairs.length == 0 || pairs.length % 2 != 0) {
+            throw new IllegalArgumentException("key value are not a pair.");
+        }
+        String[] names = new String[pairs.length / 2];
         String[] types = new String[names.length];
         Object[] values = new Object[names.length];
         for (int i = 0; i < names.length; i++) {
-            Object value = list.get(i);
-            values[i] = value;
-            if (value == null) {
+            names[i] = pairs[i << 1].toString();
+            values[i] = pairs[(i << 1) + 1];
+            if (values[i] == null) {
                 types[i] = "null";
             } else {
-                types[i] = value.getClass().getName();
+                types[i] = values[i].getClass().getName();
             }
         }
         return of(names, types, values);

@@ -10,19 +10,7 @@ import java.lang.reflect.Type;
 import java.util.*;
 
 public class ReflectTests {
-    @Test
-    public void test1() throws Exception {
-        DataRow row = DataRow.fromList(Arrays.asList("chengyuxing", 27, 13, new String[]{"a", "b", "c"}),
-                "name", "id", "age", "roles");
 
-        System.out.println(row);
-
-        User user = row.toEntity(User.class);
-
-        System.out.println(user);
-        System.out.println(user.getRoles().get(1));
-
-    }
 
     @Test
     public void classTest() throws Exception{

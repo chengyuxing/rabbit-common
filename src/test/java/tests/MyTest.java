@@ -1,5 +1,7 @@
 package tests;
 
+import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import rabbit.common.tuple.Quintuple;
 import rabbit.common.tuple.Tuples;
@@ -24,6 +26,30 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class MyTest {
+
+    static Map<String, Object> map = new HashMap<>();
+    static DataRow row = DataRow.empty();
+
+    @BeforeClass
+    public static void init() {
+        map.put("a", 1);
+        map.put("b", 2);
+        map.put("name", "chengyuxing");
+
+        row = DataRow.fromPair("a", 1,
+                "b", 2,
+                "name", "chengyuxing");
+    }
+
+    @Test
+    public void rowTest2() throws Exception {
+        System.out.println(row.toMap());
+    }
+
+    @Test
+    public void mapTest() throws Exception {
+        System.out.println(DataRow.fromMap(map));
+    }
 
     @Test
     public void tsv() throws Exception {
@@ -93,14 +119,6 @@ public class MyTest {
     @Test
     public void readFile() throws Exception {
         System.out.println((char) 58);
-    }
-
-    @Test
-    public void rowTest() throws Exception {
-        DataRow row = DataRow.fromList(
-                Arrays.asList(1, "cyx", true, 0.01),
-                "id", "name", "success", "score");
-        System.out.println(row);
     }
 
     @Test
