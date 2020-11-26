@@ -500,7 +500,7 @@ public final class DataRow {
         if (pairs.length == 0 || pairs.length % 2 != 0) {
             throw new IllegalArgumentException("key value are not a pair.");
         }
-        String[] names = new String[pairs.length / 2];
+        String[] names = new String[pairs.length >> 1];
         String[] types = new String[names.length];
         Object[] values = new Object[names.length];
         for (int i = 0; i < names.length; i++) {
