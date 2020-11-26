@@ -98,7 +98,7 @@ public class DateTimes {
                 second = Integer.parseInt(timeMatcher.group("s").substring(1));
             }
         }
-        if (year == 0 && hour == -1) {
+        if (hour == -1) {
             throw new IllegalArgumentException("un know date time format: " + s);
         }
         return LocalDateTime.of(year, month, day, hour, minus, second);
