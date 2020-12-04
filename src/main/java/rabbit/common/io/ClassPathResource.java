@@ -20,7 +20,7 @@ public class ClassPathResource {
      *
      * @param path 路径
      */
-    ClassPathResource(String path) {
+    public ClassPathResource(String path) {
         this.path = cleanPath(path);
         classLoader = getClassLoader();
     }
@@ -96,6 +96,7 @@ public class ClassPathResource {
 
     /**
      * 获取文件名后缀
+     *
      * @return 文件名后缀
      */
     public String getFilenameExtension() {

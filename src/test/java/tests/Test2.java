@@ -2,8 +2,10 @@ package tests;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
+import rabbit.common.io.FileResource;
 import rabbit.common.types.DataRow;
 
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -13,7 +15,7 @@ public class Test2 {
 
     static List<DataRow> rows = new ArrayList<>();
 
-//    @BeforeClass
+    //    @BeforeClass
     public static void init() {
         for (int i = 0; i < 10000; i++) {
             DataRow row = DataRow.of(
@@ -26,7 +28,7 @@ public class Test2 {
     }
 
     @Test
-    public void rTest() throws Exception{
+    public void rTest() throws Exception {
         System.out.println(rows.get(111).getString("c"));
     }
 
@@ -40,5 +42,11 @@ public class Test2 {
     public void speedTest() throws Exception {
         List<Map<String, Object>> maps = rows.stream().map(DataRow::toMap).collect(Collectors.toList());
         System.out.println(maps.size());
+    }
+
+    @Test
+    public void fileTest() throws Exception {
+        FileResource resource = new FileResource("file:/Users/chengyuxing/Downloads/Bob.app.zip");
+        System.out.println(resource.getURL());
     }
 }
