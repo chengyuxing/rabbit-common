@@ -9,9 +9,8 @@ import java.util.stream.Stream;
  *
  * @param <T> 类型参数
  */
-public final class ImmutableList<T> implements Iterator<T>, Iterable<T> {
+public final class ImmutableList<T> {
     private final List<T> elements;
-    private int currentIndex;
 
     ImmutableList(List<T> elements) {
         this.elements = Collections.unmodifiableList(new ArrayList<>(elements));
@@ -333,25 +332,5 @@ public final class ImmutableList<T> implements Iterator<T>, Iterable<T> {
      */
     public List<T> toList() {
         return elements;
-    }
-
-    @Override
-    public boolean hasNext() {
-        return currentIndex < elements.size();
-    }
-
-    @Override
-    public T next() {
-        if (hasNext()) {
-            T element = elements.get(currentIndex);
-            currentIndex++;
-            return element;
-        }
-        throw new NoSuchElementException("no more element!");
-    }
-
-    @Override
-    public Iterator<T> iterator() {
-        return this;
     }
 }

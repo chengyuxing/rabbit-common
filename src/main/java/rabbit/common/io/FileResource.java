@@ -7,9 +7,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 /**
- * sql文件资源，支持读取本地目录下的sql文件和classpath下的sql文件<br>
- * 默认读取classpath下的sql文件<br>
- * 若要读取本地目录下的sql，格式为{@code file:/root/sqls/my.sql}
+ * 文件资源，支持读取本地目录下的文件和classpath下的文件<br>
+ * 默认读取classpath下的文件<br>
+ * 若要读取本地目录下的文件，格式为{@code file:/root/files/my.txt}
  */
 public class FileResource extends ClassPathResource {
     /**
