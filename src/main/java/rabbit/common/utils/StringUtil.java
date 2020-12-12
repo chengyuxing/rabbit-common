@@ -41,6 +41,17 @@ public class StringUtil {
         return Pair.of(items, splitSymbols);
     }
 
+    public static boolean startsWiths(String str, String[] keywords) {
+        boolean ok = false;
+        for (String keyword : keywords) {
+            if (str.startsWith(keyword)) {
+                ok = true;
+                break;
+            }
+        }
+        return ok;
+    }
+
     /**
      * 判断字符串是否有长度
      *
