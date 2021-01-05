@@ -1,4 +1,4 @@
-package rabbit.common.types;
+package tests;
 
 import rabbit.common.utils.DateTimes;
 import rabbit.common.utils.ReflectUtil;
@@ -15,99 +15,79 @@ import java.util.function.Function;
 
 import static rabbit.common.utils.ReflectUtil.json2Obj;
 
-/**
- * 行数据类型
- */
-public final class DataRow {
-    private final String[] names;
-    private final String[] types;
-    private final Object[] values;
+public class DataRow2 {
+    private final Object[] grid;
+    private static final int rows = 3;
+    private final int columns;
 
-    private DataRow(String[] names, String[] types, Object[] values) {
-        this.names = names;
-        this.types = types;
-        this.values = values;
-    }
-
-    /**
-     * 新建一个DataRow
-     *
-     * @param names  字段
-     * @param types  类型
-     * @param values 值
-     * @return 新实例
-     */
-    public static DataRow of(String[] names, String[] types, Object[] values) {
+    DataRow2(String[] names, String[] types, Object[] values) {
         if (names.length == types.length && types.length == values.length) {
-            return new DataRow(names, types, values);
+            columns = names.length;
+            grid = new Object[rows * columns];
+            System.arraycopy(names, 0, grid, 0, columns);
+            System.arraycopy(types, 0, grid, columns, columns);
+            System.arraycopy(values, 0, grid, columns << 1, columns);
+        } else {
+            throw new IllegalArgumentException("all of 3 args length not equal!");
         }
-        throw new IllegalArgumentException("all of 3 args's length not equal!");
     }
 
-    /**
-     * 新建一个DataRow
-     *
-     * @param names  字段
-     * @param values 值
-     * @return 新实例
-     */
-    public static DataRow of(String[] names, Object[] values) {
+    public static DataRow2 of(String[] names, String[] types, Object[] values) {
+        return new DataRow2(names, types, values);
+    }
+
+    public static DataRow2 of(String[] names, Object[] values) {
         String[] types = new String[values.length];
         for (int i = 0; i < values.length; i++) {
-            types[i] = values[i].getClass().getName();
+            Object value = values[i];
+            if (value == null) {
+                types[i] = "null";
+            } else {
+                types[i] = value.getClass().getName();
+            }
         }
         return of(names, types, values);
     }
 
-    /**
-     * @return 一个空的DataRow
-     */
-    public static DataRow empty() {
+    private void checkIndexIsValid(int column) {
+        if (column < 0 || column >= columns) {
+            throw new IndexOutOfBoundsException("Index out of range: " + column);
+        }
+    }
+
+    public static DataRow2 empty() {
         return of(new String[0], new String[0], new Object[0]);
     }
 
-    /**
-     * 判断是否为空
-     *
-     * @return 是否为空
-     */
     public boolean isEmpty() {
-        return names.length == 0;
+        return columns == 0;
     }
 
-    /**
-     * 获取值
-     *
-     * @return 值
-     */
     public List<Object> getValues() {
+        Object[] values = new Object[columns];
+        System.arraycopy(grid, columns << 1, values, 0, columns);
         return Arrays.asList(values);
     }
 
-    /**
-     * 获取字段
-     *
-     * @return 字段
-     */
     public List<String> getNames() {
+        String[] names = new String[columns];
+        //noinspection SuspiciousSystemArraycopy
+        System.arraycopy(grid, 0, names, 0, columns);
         return Arrays.asList(names);
     }
 
-    /**
-     * 获取类型
-     *
-     * @return 类型
-     */
     public List<String> getTypes() {
+        String[] types = new String[columns];
+        //noinspection SuspiciousSystemArraycopy
+        System.arraycopy(grid, columns, types, 0, columns);
         return Arrays.asList(types);
     }
 
-    /**
-     * 根据字段名获取类型
-     *
-     * @param name 字段
-     * @return 类型
-     */
+    public String getType(int index) {
+        checkIndexIsValid(index);
+        return grid[columns + index].toString();
+    }
+
     public String getType(String name) {
         int index = indexOf(name);
         if (index == -1) {
@@ -116,35 +96,12 @@ public final class DataRow {
         return getType(index);
     }
 
-    /**
-     * 获取值类型
-     *
-     * @param index 索引
-     * @return 值类型
-     */
-    public String getType(int index) {
-        return types[index];
-    }
-
-    /**
-     * 获取值
-     *
-     * @param index 索引
-     * @param <T>   类型参数
-     * @return 值
-     */
     @SuppressWarnings("unchecked")
     public <T> T get(int index) {
-        return (T) values[index];
+        checkIndexIsValid(index);
+        return (T) grid[(columns << 1) + index];
     }
 
-    /**
-     * 获取值
-     *
-     * @param name 名称
-     * @param <T>  类型参数
-     * @return 值
-     */
     public <T> T get(String name) {
         int index = indexOf(name);
         if (index == -1) {
@@ -153,34 +110,6 @@ public final class DataRow {
         return get(index);
     }
 
-    /**
-     * 获取可为空的值
-     *
-     * @param index 索引
-     * @param <T>   类型参数
-     * @return 值
-     */
-    public <T> Optional<T> getNullable(int index) {
-        return Optional.ofNullable(get(index));
-    }
-
-    /**
-     * 获取可为空的值
-     *
-     * @param name 名称
-     * @param <T>  类型参数
-     * @return 值
-     */
-    public <T> Optional<T> getNullable(String name) {
-        return Optional.ofNullable(get(name));
-    }
-
-    /**
-     * 根据索引获取一个字符串
-     *
-     * @param index 索引
-     * @return 字符串或null
-     */
     public String getString(int index) {
         Object value = get(index);
         if (value == null) {
@@ -189,12 +118,6 @@ public final class DataRow {
         return value.toString();
     }
 
-    /**
-     * 根据名字获取一个字符串
-     *
-     * @param name 索引
-     * @return 字符串或null
-     */
     public String getString(String name) {
         int index = indexOf(name);
         if (index == -1) {
@@ -203,12 +126,6 @@ public final class DataRow {
         return getString(index);
     }
 
-    /**
-     * 根据索引获取一个整型
-     *
-     * @param index 索引
-     * @return 整型或null
-     */
     public Integer getInt(int index) {
         Object value = get(index);
         if (value == null) {
@@ -220,13 +137,6 @@ public final class DataRow {
         return Integer.parseInt(value.toString());
     }
 
-
-    /**
-     * 根据名字获取一个整型
-     *
-     * @param name 名字
-     * @return 整型或null
-     */
     public Integer getInt(String name) {
         int index = indexOf(name);
         if (index == -1) {
@@ -235,12 +145,18 @@ public final class DataRow {
         return getInt(index);
     }
 
-    /**
-     * 获取一个双精度类型数组
-     *
-     * @param index 索引
-     * @return 双精度数字
-     */
+    public Double getDouble(String name) {
+        int index = indexOf(name);
+        if (index == -1) {
+            return null;
+        }
+        return getDouble(index);
+    }
+
+    public int size() {
+        return columns;
+    }
+
     public Double getDouble(int index) {
         Object value = get(index);
         if (value == null) {
@@ -252,73 +168,21 @@ public final class DataRow {
         return Double.parseDouble(value.toString());
     }
 
-    /**
-     * 获取一个双精度类型数组
-     *
-     * @param name 名字
-     * @return 双精度数字
-     */
-    public Double getDouble(String name) {
-        int index = indexOf(name);
-        if (index == -1) {
-            return null;
-        }
-        return getDouble(index);
+    public <T> Optional<T> getNullable(int index) {
+        return Optional.ofNullable(get(index));
     }
 
-    /**
-     * 获取一个长整型值
-     *
-     * @param index 索引
-     * @return 双精度数字
-     */
-    public Long getLong(int index) {
-        Object value = get(index);
-        if (value == null) {
-            return null;
-        }
-        if (value instanceof Long) {
-            return (Long) value;
-        }
-        return Long.parseLong(value.toString());
+    public <T> Optional<T> getNullable(String name) {
+        return Optional.ofNullable(get(name));
     }
 
-    /**
-     * 获取一个长整型值
-     *
-     * @param name 名字
-     * @return 双精度数字
-     */
-    public Long getLong(String name) {
-        int index = indexOf(name);
-        if (index == -1) {
-            return null;
-        }
-        return getLong(index);
-    }
-
-    /**
-     * 行数据列数
-     *
-     * @return 列数
-     */
-    public int size() {
-        return values.length;
-    }
-
-    /**
-     * 获取指定字段名的索引
-     *
-     * @param name 字段名
-     * @return 字段名位置索引
-     */
     public int indexOf(String name) {
         int index = -1;
         if (name == null) {
             return index;
         }
-        for (int i = 0; i < names.length; i++) {
-            if (names[i].equals(name)) {
+        for (int i = 0; i < columns; i++) {
+            if (grid[i].equals(name)) {
                 index = i;
                 break;
             }
@@ -326,51 +190,22 @@ public final class DataRow {
         return index;
     }
 
-    /**
-     * 判断键名是否存在
-     *
-     * @param name 键名
-     * @return 键名是否存在
-     */
-    public boolean containsName(String name) {
-        return indexOf(name) != -1;
-    }
-
-    /**
-     * 转换为Map
-     *
-     * @param valueConvert 值转换器
-     * @param <T>          值类型参数
-     * @return 一个Map
-     */
     public <T> Map<String, T> toMap(Function<Object, T> valueConvert) {
         Map<String, T> map = new HashMap<>();
-        for (int i = 0; i < names.length; i++) {
-            map.put(names[i], valueConvert.apply(get(i)));
+        for (int i = 0; i < columns; i++) {
+            map.put(grid[i].toString(), valueConvert.apply(get(i)));
         }
         return map;
     }
 
-    /**
-     * 转为Map
-     *
-     * @return map
-     */
     public Map<String, Object> toMap() {
         Map<String, Object> map = new HashMap<>();
-        for (int i = 0; i < names.length; i++) {
-            map.put(names[i], get(i));
+        for (int i = 0; i < columns; i++) {
+            map.put(grid[i].toString(), get(i));
         }
         return map;
     }
 
-    /**
-     * 转为一个标准的javaBean实体
-     *
-     * @param clazz 实体类
-     * @param <T>   类型参数
-     * @return 实体
-     */
     public <T> T toEntity(Class<T> clazz) {
         try {
             T entity = clazz.newInstance();
@@ -469,13 +304,7 @@ public final class DataRow {
         }
     }
 
-    /**
-     * 从一个标准的javaBean实体转为DataRow类型
-     *
-     * @param entity 实体
-     * @return DataRow
-     */
-    public static DataRow fromEntity(Object entity) {
+    public static DataRow2 fromEntity(Object entity) {
         try {
             List<String> names = new ArrayList<>();
             List<String> types = new ArrayList<>();
@@ -507,13 +336,7 @@ public final class DataRow {
         }
     }
 
-    /**
-     * 从map转换到DataRow
-     *
-     * @param map map
-     * @return DataRow
-     */
-    public static DataRow fromMap(Map<?, ?> map) {
+    public static DataRow2 fromMap(Map<?, ?> map) {
         String[] names = new String[map.keySet().size()];
         String[] types = new String[names.length];
         Object[] values = new Object[names.length];
@@ -531,13 +354,7 @@ public final class DataRow {
         return of(names, types, values);
     }
 
-    /**
-     * 从一组键值对创建一个DataRow
-     *
-     * @param pairs 键值对 k v，k v...
-     * @return DataRow
-     */
-    public static DataRow fromPair(Object... pairs) {
+    public static DataRow2 fromPair(Object... pairs) {
         if (pairs.length == 0 || pairs.length % 2 != 0) {
             throw new IllegalArgumentException("key value are not a pair.");
         }
@@ -554,14 +371,5 @@ public final class DataRow {
             }
         }
         return of(names, types, values);
-    }
-
-    @Override
-    public String toString() {
-        return "DataRow{" +
-                "names=" + Arrays.toString(names) +
-                ", types=" + Arrays.toString(types) +
-                ", values=" + Arrays.toString(values) +
-                '}';
     }
 }

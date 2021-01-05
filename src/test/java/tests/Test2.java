@@ -1,12 +1,11 @@
 package tests;
 
-import org.junit.BeforeClass;
 import org.junit.Test;
 import rabbit.common.io.FileResource;
 import rabbit.common.types.DataRow;
 
-import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -14,9 +13,11 @@ import java.util.stream.Collectors;
 public class Test2 {
 
     static List<DataRow> rows = new ArrayList<>();
+    static List<DataRow2> rows2 = new ArrayList<>();
 
     //    @BeforeClass
-    public static void init() {
+    @Test
+    public void init() {
         for (int i = 0; i < 10000; i++) {
             DataRow row = DataRow.of(
                     new String[]{"a", "b", "c", "d", "e"},
@@ -25,6 +26,33 @@ public class Test2 {
             );
             rows.add(row);
         }
+    }
+
+    @Test
+    public void mp() throws Exception {
+        Map<String, Object> map = new HashMap<>();
+        map.put("x", "d");
+        System.out.println(map.get("a"));
+    }
+
+    @Test
+    public void d1() throws Exception {
+        DataRow row = DataRow.of(
+                new String[]{"a", "b", "c", "d", "e"},
+                new String[]{"String", "Double", "String", "String", "String"},
+                new Object[]{null, 2, "12", 4, 5}
+        );
+        System.out.println(row.getInt("k"));
+    }
+
+    @Test
+    public void d2() throws Exception {
+        DataRow2 row = DataRow2.of(
+                new String[]{"a", "b", "c", "d", "e"},
+                new String[]{"String", "Object", "String", "String", "String"},
+                new Object[]{1, 2, 3, 4, 5}
+        );
+        System.out.println(row.getString(4));
     }
 
     @Test

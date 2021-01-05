@@ -41,6 +41,28 @@ public final class Exps {
     }
 
     /**
+     * 从一个数组中返回第一个不为null的值，如果数组长度为0返回null
+     *
+     * @param values 一组值
+     * @param <T>    类型参数
+     * @return 不为null的值或全部为null
+     */
+    @SafeVarargs
+    public static <T> T findFirstNonNull(T... values) {
+        if (values.length == 0) {
+            return null;
+        }
+        T res = null;
+        for (T v : values) {
+            if (v != null) {
+                res = v;
+                break;
+            }
+        }
+        return res;
+    }
+
+    /**
      * 非空赋值表达式
      *
      * @param value 值
