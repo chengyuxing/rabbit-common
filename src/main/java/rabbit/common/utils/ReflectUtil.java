@@ -116,6 +116,9 @@ public final class ReflectUtil {
             Object jacksonObj = getJackson();
             Method method = jacksonObj.getClass().getDeclaredMethod("writeValueAsString", Object.class);
             Object jsonStr = method.invoke(jacksonObj, obj);
+            if (jsonStr.equals("null")) {
+                return null;
+            }
             return jsonStr.toString();
         } catch (ClassNotFoundException | IllegalAccessException | InstantiationException | NoSuchMethodException | InvocationTargetException e) {
             throw new RuntimeException("convert to json error: ", e);
@@ -125,7 +128,7 @@ public final class ReflectUtil {
     /**
      * json字符串转对象（需要jackson库）
      *
-     * @param json json
+     * @param json       json
      * @param targetType 目标类型
      * @return 对象
      */
