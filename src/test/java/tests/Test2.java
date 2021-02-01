@@ -3,6 +3,7 @@ package tests;
 import org.junit.Test;
 import rabbit.common.io.FileResource;
 import rabbit.common.types.DataRow;
+import rabbit.common.utils.DateTimes;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -76,5 +77,11 @@ public class Test2 {
     public void fileTest() throws Exception {
         FileResource resource = new FileResource("file:/Users/chengyuxing/Downloads/Bob.app.zip");
         System.out.println(resource.getURL());
+    }
+
+    @Test
+    public void dtTest() throws Exception{
+        System.out.println(DateTimes.toLocalDateTime("20210201092132"));
+        System.out.println("20210201092100".length());
     }
 }

@@ -75,6 +75,9 @@ public class DateTimes {
      * @return 本地日期时间
      */
     public static LocalDateTime toLocalDateTime(String s) {
+        if (s.matches("\\d{14}")) {
+            return LocalDateTime.parse(s, DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+        }
         int year;
         int month = 1, day = 1, hour = -1, minus = 0, second = 0;
         Matcher dateMatcher = DATE_PATTERN.matcher(s);

@@ -54,7 +54,11 @@ public final class DataRow {
     public static DataRow of(String[] names, Object[] values) {
         String[] types = new String[values.length];
         for (int i = 0; i < values.length; i++) {
-            types[i] = values[i].getClass().getName();
+            if (values[i] == null) {
+                types[i] = "null";
+            } else {
+                types[i] = values[i].getClass().getName();
+            }
         }
         return of(names, types, values);
     }
