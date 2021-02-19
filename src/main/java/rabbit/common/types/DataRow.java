@@ -16,7 +16,7 @@ import java.util.function.Function;
 import static rabbit.common.utils.ReflectUtil.json2Obj;
 
 /**
- * 行数据类型
+ * 不可变行数据类型
  */
 public final class DataRow {
     private final String[] names;
@@ -338,6 +338,71 @@ public final class DataRow {
      */
     public boolean containsName(String name) {
         return indexOf(name) != -1;
+    }
+
+    /**
+     * 合并一个数据行
+     *
+     * @param other 另一个数据行
+     * @return 新的数据行
+     */
+    public DataRow concat(DataRow other) {
+        String[] newNames = new String[size() + other.size()];
+        Object[] newValues = new Object[newNames.length];
+        String[] newTypes = new String[newNames.length];
+        System.arraycopy(names, 0, newNames, 0, names.length);
+        System.arraycopy(other.names, 0, newNames, names.length, other.names.length);
+
+        System.arraycopy(values, 0, newValues, 0, values.length);
+        System.arraycopy(other.values, 0, newValues, values.length, other.values.length);
+
+        System.arraycopy(types, 0, newTypes, 0, types.length);
+        System.arraycopy(other.types, 0, newTypes, types.length, other.types.length);
+
+        return DataRow.of(newNames, newTypes, newValues);
+    }
+
+    /**
+     * 添加一个键值对
+     *
+     * @param name  字段名
+     * @param value 值
+     * @return 一个新的数据行
+     */
+    public DataRow add(String name, Object value) {
+        return concat(DataRow.fromPair(name, value));
+    }
+
+    /**
+     * 根据字段名移除一个值
+     *
+     * @param name 字段名
+     * @return 一个新的数据行
+     */
+    public DataRow remove(String name) {
+        int idx = indexOf(name);
+        if (idx != -1) {
+            String[] newNames = new String[size() - 1];
+            String[] newTypes = new String[newNames.length];
+            Object[] newValues = new Object[newNames.length];
+
+            if (idx == 0) {
+                System.arraycopy(names, 1, newNames, 0, newNames.length);
+            } else if (idx == newNames.length) {
+                System.arraycopy(names, 0, newNames, 0, newNames.length);
+            } else {
+                System.arraycopy(names, 0, newNames, 0, idx);
+                System.arraycopy(names, idx + 1, newNames, idx, newNames.length - idx);
+            }
+
+            for (int i = 0; i < newNames.length; i++) {
+                String newName = newNames[i];
+                newTypes[i] = getType(newName);
+                newValues[i] = get(newName);
+            }
+            return DataRow.of(newNames, newTypes, newValues);
+        }
+        throw new NoSuchElementException("name:\"" + name + "\" does not exist!");
     }
 
     /**

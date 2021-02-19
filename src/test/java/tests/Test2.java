@@ -80,8 +80,24 @@ public class Test2 {
     }
 
     @Test
-    public void dtTest() throws Exception{
+    public void dtTest() throws Exception {
         System.out.println(DateTimes.toLocalDateTime("20210201092132"));
         System.out.println("20210201092100".length());
+    }
+
+    @Test
+    public void concat() throws Exception {
+        DataRow row1 = DataRow.fromPair("a", 1, "b", 2);
+        DataRow row2 = DataRow.fromPair("c", 11, "d", 23);
+
+        System.out.println(row1.concat(row2).add("e", 90).add("f", 999));
+        System.out.println(row1);
+    }
+
+    @Test
+    public void removeElement() throws Exception{
+        DataRow row = DataRow.fromPair("a", 1, "b", 2, "c", 3, "d", 4, "e", 5);
+        System.out.println(row);
+        System.out.println(row.remove("ds"));
     }
 }
