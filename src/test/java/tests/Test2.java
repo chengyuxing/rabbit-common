@@ -98,6 +98,6 @@ public class Test2 {
     public void removeElement() throws Exception{
         DataRow row = DataRow.fromPair("a", 1, "b", 2, "c", 3, "d", 4, "e", 5);
         System.out.println(row);
-        System.out.println(row.remove("ds"));
+        System.out.println(row.remove("b"));
     }
 }

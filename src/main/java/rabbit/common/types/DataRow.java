@@ -23,7 +23,7 @@ public final class DataRow {
     private final String[] types;
     private final Object[] values;
 
-    private DataRow(String[] names, String[] types, Object[] values) {
+    DataRow(String[] names, String[] types, Object[] values) {
         this.names = names;
         this.types = types;
         this.values = values;
@@ -41,7 +41,7 @@ public final class DataRow {
         if (names.length == types.length && types.length == values.length) {
             return new DataRow(names, types, values);
         }
-        throw new IllegalArgumentException("all of 3 args's length not equal!");
+        throw new IllegalArgumentException("all of 3 args length not equal!");
     }
 
     /**
