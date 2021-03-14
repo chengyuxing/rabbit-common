@@ -1,7 +1,6 @@
 package rabbit.common.utils;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -31,9 +30,8 @@ public class ResourceUtil {
      * @param suffix   文件后缀
      * @return Stream
      * @throws IOException        没有此路径
-     * @throws URISyntaxException 路径格式异常
      */
-    public static Stream<Path> getResources(Path basePath, String suffix) throws IOException, URISyntaxException {
+    public static Stream<Path> getResources(Path basePath, String suffix) throws IOException {
         return getResources(basePath, 5, suffix);
     }
 

@@ -4,6 +4,7 @@ import org.junit.Test;
 import rabbit.common.io.FileResource;
 import rabbit.common.types.DataRow;
 import rabbit.common.utils.DateTimes;
+import rabbit.common.utils.StringUtil;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -95,9 +96,36 @@ public class Test2 {
     }
 
     @Test
-    public void removeElement() throws Exception{
+    public void removeElement() throws Exception {
         DataRow row = DataRow.fromPair("a", 1, "b", 2, "c", 3, "d", 4, "e", 5);
         System.out.println(row);
         System.out.println(row.remove("b"));
+    }
+
+    @Test
+    public void StrTests() throws Exception {
+        System.out.println(StringUtil.startsWithIgnoreCase("Select * from Test.user", "SELECT"));
+    }
+
+    @Test
+    public void sss() throws Exception {
+        String str = ";;;;;;;;]\n  \t\r   Select * from Test.user;;;\t   ;;";
+//        System.out.println(StringUtil.trimStarts(str, ";", "\n", " ", "]", "\t", "\r"));
+        System.out.println(StringUtil.trim(str, ";", "\n", "\t", "]", " ", "\r"));
+    }
+
+    @Test
+    public void IdxOfI() throws Exception {
+        String str = "Select * from Test.user";
+        System.out.println(StringUtil.containsIgnoreCase(str, "TEST"));
+        System.out.println(StringUtil.charEqualIgnoreCase('S', 's'));
+        System.out.println(!StringUtil.containsAllIgnoreCase(str, "from", "user"));
+        System.out.println(StringUtil.containsIgnoreCase(str, "我的"));
+    }
+
+    @Test
+    public void sdfg() throws Exception{
+        char a = 20115;
+        System.out.println(a);
     }
 }
