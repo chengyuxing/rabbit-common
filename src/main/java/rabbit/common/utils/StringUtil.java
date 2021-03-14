@@ -266,6 +266,13 @@ public class StringUtil {
         return indexOfIgnoreCase(source, target) > -1;
     }
 
+    /**
+     * 忽略大小写判断被查询的字符串是否包含其中一个目标字符串
+     *
+     * @param source  被查询的字符串
+     * @param targets 被包含的字符串组
+     * @return 是否包含任意一个
+     */
     public static boolean containsAnyIgnoreCase(String source, String... targets) {
         if (targets.length < 1) {
             return true;
@@ -278,6 +285,13 @@ public class StringUtil {
         return false;
     }
 
+    /**
+     * 忽略大小写判断被查询的字符串是否包含全部目标字符串
+     *
+     * @param source  被查询的字符串
+     * @param targets 被包含的字符串组
+     * @return 是否包含全部
+     */
     public static boolean containsAllIgnoreCase(String source, String... targets) {
         if (targets.length < 1) {
             return true;
