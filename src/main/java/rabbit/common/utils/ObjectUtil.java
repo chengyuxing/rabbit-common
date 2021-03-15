@@ -3,9 +3,9 @@ package rabbit.common.utils;
 import java.util.Optional;
 
 /**
- * 表达式
+ * 简单基本对象工具类
  */
-public final class Exps {
+public final class ObjectUtil {
     /**
      * 不限长赋值表达式<br>
      * 逻辑形如: if(a==b) return v1 else if(a==c) return v2 else if(a==d) return v3 (可选)全部匹配不到的默认值: else return v4

@@ -1,28 +1,19 @@
 package tests;
 
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import rabbit.common.tuple.Quintuple;
 import rabbit.common.tuple.Tuples;
 import rabbit.common.types.DataRow;
 import rabbit.common.types.ImmutableList;
-import rabbit.common.utils.Exps;
+import rabbit.common.utils.ObjectUtil;
 import rabbit.common.io.TSVWriter;
-import rabbit.common.utils.ReflectUtil;
-import rabbit.common.utils.ResourceUtil;
-import rabbit.common.utils.StringUtil;
 
 import java.beans.*;
-import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.net.URL;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class MyTest {
@@ -90,7 +81,7 @@ public class MyTest {
     @Test
     public void decodeTest() throws Exception {
         int money = 10000800;
-        Object v = Exps.decode(money, 10, "穷光蛋",
+        Object v = ObjectUtil.decode(money, 10, "穷光蛋",
                 100, "西北风",
                 1000, "打工族",
                 10000, "小康生活",
@@ -98,7 +89,7 @@ public class MyTest {
                 1000000, "MN", "LK");
         System.out.println(v);
 
-        System.out.println(Exps.nullable("null", "asd"));
+        System.out.println(ObjectUtil.nullable("null", "asd"));
     }
 
     @Test
