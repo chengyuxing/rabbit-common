@@ -128,4 +128,13 @@ public class Test2 {
         char a = 20115;
         System.out.println(a);
     }
+
+    @Test
+    public void testArgs() throws Exception{
+        len("a","b","c");
+    }
+
+    public static void len(String... args) {
+        System.out.println(args.length);
+    }
 }
