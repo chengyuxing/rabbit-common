@@ -6,6 +6,7 @@ import rabbit.common.types.DataRow;
 import rabbit.common.utils.DateTimes;
 import rabbit.common.utils.StringUtil;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -124,14 +125,17 @@ public class Test2 {
     }
 
     @Test
-    public void sdfg() throws Exception{
+    public void sdfg() throws Exception {
         char a = 20115;
         System.out.println(a);
     }
 
     @Test
-    public void testArgs() throws Exception{
-        len("a","b","c");
+    public void testArgs() throws Exception {
+        DataRow.fromPair("id", 2, "name", "cyx", "dt", Instant.now())
+                .foreach((n, v) -> {
+                    System.out.println(n + " -> " + v);
+                });
     }
 
     public static void len(String... args) {

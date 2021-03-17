@@ -11,6 +11,7 @@ import java.sql.Timestamp;
 import java.time.*;
 import java.time.temporal.Temporal;
 import java.util.*;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 import static rabbit.common.utils.ReflectUtil.json2Obj;
@@ -623,6 +624,17 @@ public final class DataRow {
             }
         }
         return of(names, types, values);
+    }
+
+    /**
+     * 遍历名称和值
+     *
+     * @param consumer 回调函数
+     */
+    public void foreach(BiConsumer<String, Object> consumer) {
+        for (int i = 0; i < size(); i++) {
+            consumer.accept(names[i], values[i]);
+        }
     }
 
     @Override
