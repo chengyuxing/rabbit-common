@@ -24,6 +24,6 @@ public class ExpressionTest {
 
     @Test
     public void num() throws Exception {
-        System.out.println("-0.09".matches(CExpression.NUMBER_REGEX));
+//        System.out.println("-0.09".matches(CExpression.NUMBER_REGEX));
     }
 }
