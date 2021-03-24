@@ -81,7 +81,7 @@ public class FastExpression {
      * 布尔运算表达式动态解析计算<br>
      * e.g.
      * <blockquote>
-     * <pre>(true || false) && !(!(true && false || !!false)) || false</pre>
+     * {@code (true || false) && !(!(true && false || !!false)) || false}
      * </blockquote>
      *
      * @param expression 布尔表达式
