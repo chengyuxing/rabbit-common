@@ -1,4 +1,4 @@
-package rabbit.common.types;
+package rabbit.common.script;
 
 import java.util.Map;
 import java.util.regex.Matcher;

@@ -1,4 +1,4 @@
-package rabbit.common.types;
+package rabbit.common.script;
 
 import rabbit.common.tuple.Pair;
 import rabbit.common.utils.StringUtil;
@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static rabbit.common.types.Comparators.compare;
+import static rabbit.common.script.Comparators.compare;
 
 /**
  * 快速条件表达式解析器<br>

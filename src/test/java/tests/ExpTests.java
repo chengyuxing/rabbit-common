@@ -1,11 +1,10 @@
 package tests;
 
 import org.junit.Test;
-import rabbit.common.types.FastExpression;
+import rabbit.common.script.FastExpression;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
-import java.util.regex.Matcher;
 
 public class ExpTests {
     boolean exp = (true || false) && !(!(true && false || !!false)) || false;
