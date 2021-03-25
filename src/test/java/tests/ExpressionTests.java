@@ -2,8 +2,8 @@ package tests;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
-import rabbit.common.script.CExpression;
-import rabbit.common.script.FastExpression;
+import rabbit.common.script.impl.CExpression;
+import rabbit.common.script.impl.FastExpression;
 
 import java.util.HashMap;
 import java.util.Map;

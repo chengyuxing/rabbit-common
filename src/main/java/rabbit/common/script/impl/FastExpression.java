@@ -1,5 +1,7 @@
-package rabbit.common.script;
+package rabbit.common.script.impl;
 
+import rabbit.common.script.Comparators;
+import rabbit.common.script.IExpression;
 import rabbit.common.tuple.Pair;
 import rabbit.common.utils.StringUtil;
 
@@ -12,6 +14,7 @@ import static rabbit.common.script.Comparators.compare;
 
 /**
  * 快速条件表达式解析器<br>
+ * 基于自行定制实现bool表达式脚本解析，功能较单一，但速度极快<br>
  * 支持的逻辑运算符: {@code &&, ||}<br>
  * e.g.
  * <blockquote>
@@ -20,9 +23,8 @@ import static rabbit.common.script.Comparators.compare;
  *
  * @see Comparators
  */
-public class FastExpression {
+public class FastExpression extends IExpression {
     private static final Pattern FILTER_PATTERN = Pattern.compile("\\s*:(?<name>\\w+)\\s*(?<op>[><=!@~]{1,2})\\s*(?<value>\\w+|'[^']*'|\"[^\"]*\"|-?[.\\d]+)\\s*");
-    private final String expression;
 
     /**
      * 构造函数
@@ -30,7 +32,7 @@ public class FastExpression {
      * @param expression 表达式
      */
     FastExpression(String expression) {
-        this.expression = expression;
+        super(expression);
     }
 
     /**
@@ -53,6 +55,7 @@ public class FastExpression {
      * @param args 参数字典
      * @return 逻辑运算的结果
      */
+    @Override
     public boolean calc(Map<String, Object> args) {
         return calc(expression, args);
     }

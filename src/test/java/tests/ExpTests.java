@@ -1,7 +1,7 @@
 package tests;
 
 import org.junit.Test;
-import rabbit.common.script.FastExpression;
+import rabbit.common.script.impl.FastExpression;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
@@ -20,5 +20,10 @@ public class ExpTests {
     @Test
     public void test2() throws Exception {
         System.out.println(SCRIPT_ENGINE.eval(expression));
+    }
+
+    @Test
+    public void ccc() throws Exception{
+        System.out.println("string.class".substring(0,"string.class".lastIndexOf(".class")));
     }
 }
