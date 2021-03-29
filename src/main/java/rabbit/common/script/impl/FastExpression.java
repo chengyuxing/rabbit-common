@@ -89,6 +89,7 @@ public class FastExpression extends IExpression {
      *
      * @param expression 布尔表达式
      * @return true或false
+     * @throws RuntimeException if expression syntax error.
      */
     public static boolean boolExpressionEval(String expression) {
         expression = expression.trim();

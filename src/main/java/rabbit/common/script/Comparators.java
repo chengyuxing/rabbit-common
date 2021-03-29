@@ -1,6 +1,7 @@
 package rabbit.common.script;
 
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -22,8 +23,17 @@ public class Comparators {
      * @param value 被比对的值
      * @param args  参数字典
      * @return 比较结果
+     * @throws IllegalArgumentException      如果参数为空或null
+     * @throws NoSuchElementException        如果参数中没有包含指定名称的键
+     * @throws UnsupportedOperationException 如果使用 {@code >, <, >=, <=} 比较非数字类型的值
      */
     public static boolean compare(String name, String op, String value, Map<String, Object> args) {
+        if (args == null || args.isEmpty()) {
+            throw new IllegalArgumentException("args must not be null or empty.");
+        }
+        if (!args.containsKey(name)) {
+            throw new NoSuchElementException("can not found named arg '" + name + "' from args.");
+        }
         Object source = args.get(name);
         if (op.equals(">") || op.equals("<") || op.equals(">=") || op.equals("<=")) {
             if (source == null) {
@@ -45,6 +55,7 @@ public class Comparators {
      * @param value 被比对的值
      * @param args  参数字典
      * @return 比较结果
+     * @throws UnsupportedOperationException 如果比较操作符不在预设中
      */
     public static boolean compareNumber(String name, String op, String value, Map<String, Object> args) {
         double targetNum = Double.parseDouble(value);
@@ -77,6 +88,7 @@ public class Comparators {
      * @param value 被比对的值
      * @param args  参数字典
      * @return 比较结果
+     * @throws UnsupportedOperationException 如果使用 {@code >, <, >=, <=} 比较非数字类型的值
      */
     public static boolean compareNonNumber(String name, String op, String value, Map<String, Object> args) {
         Object source = args.get(name);
