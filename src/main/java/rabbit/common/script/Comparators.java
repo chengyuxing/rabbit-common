@@ -1,7 +1,5 @@
 package rabbit.common.script;
 
-import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -18,48 +16,37 @@ public class Comparators {
     /**
      * 值对比
      *
-     * @param name  对应参数字典的key名
-     * @param op    操作符
-     * @param value 被比对的值
-     * @param args  参数字典
+     * @param source 数据源值
+     * @param op     操作符
+     * @param value  被比对的值
      * @return 比较结果
-     * @throws IllegalArgumentException      如果参数为空或null
-     * @throws NoSuchElementException        如果参数中没有包含指定名称的键
      * @throws UnsupportedOperationException 如果使用 {@code >, <, >=, <=} 比较非数字类型的值
      */
-    public static boolean compare(String name, String op, String value, Map<String, Object> args) {
-        if (args == null || args.isEmpty()) {
-            throw new IllegalArgumentException("args must not be null or empty.");
-        }
-        if (!args.containsKey(name)) {
-            throw new NoSuchElementException("can not found named arg '" + name + "' from args.");
-        }
-        Object source = args.get(name);
+    public static boolean compare(Object source, String op, String value) {
         if (op.equals(">") || op.equals("<") || op.equals(">=") || op.equals("<=")) {
             if (source == null) {
                 return false;
             }
             if (source.toString().matches(NUMBER_REGEX) && value.matches(NUMBER_REGEX)) {
-                return compareNumber(name, op, value, args);
+                return compareNumber(source, op, value);
             }
-            throw new UnsupportedOperationException(String.format("can not compare NonNumber: %s %s %s", name, op, value));
+            throw new UnsupportedOperationException(String.format("can not compare NonNumber: %s %s %s", source, op, value));
         }
-        return compareNonNumber(name, op, value, args);
+        return compareNonNumber(source, op, value);
     }
 
     /**
      * 对比数字类型
      *
-     * @param name  对应参数字典的key名
-     * @param op    操作符
-     * @param value 被比对的值
-     * @param args  参数字典
+     * @param source 数据源值
+     * @param op     操作符
+     * @param value  被比对的值
      * @return 比较结果
      * @throws UnsupportedOperationException 如果比较操作符不在预设中
      */
-    public static boolean compareNumber(String name, String op, String value, Map<String, Object> args) {
+    public static boolean compareNumber(Object source, String op, String value) {
         double targetNum = Double.parseDouble(value);
-        double sourceNum = Double.parseDouble(args.get(name).toString());
+        double sourceNum = Double.parseDouble(source.toString());
         switch (op) {
             case "=":
             case "==":
@@ -76,22 +63,20 @@ public class Comparators {
             case "<>":
                 return sourceNum != targetNum;
             default:
-                throw new UnsupportedOperationException(String.format("unKnow operation of child expression: %s %s %s", name, op, value));
+                throw new UnsupportedOperationException(String.format("unKnow operation of child expression: %s %s %s", source, op, value));
         }
     }
 
     /**
      * 对比非数字类型
      *
-     * @param name  对应参数字典的key名
-     * @param op    操作符
-     * @param value 被比对的值
-     * @param args  参数字典
+     * @param source 数据源值
+     * @param op     操作符
+     * @param value  被比对的值
      * @return 比较结果
      * @throws UnsupportedOperationException 如果使用 {@code >, <, >=, <=} 比较非数字类型的值
      */
-    public static boolean compareNonNumber(String name, String op, String value, Map<String, Object> args) {
-        Object source = args.get(name);
+    public static boolean compareNonNumber(Object source, String op, String value) {
         switch (op) {
             case "=":
             case "==":

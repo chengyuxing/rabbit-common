@@ -25,6 +25,7 @@ import static rabbit.common.script.Comparators.compare;
  */
 public class FastExpression extends IExpression {
     private static final Pattern FILTER_PATTERN = Pattern.compile("\\s*:(?<name>\\w+)\\s*(?<op>[><=!@~]{1,2})\\s*(?<value>\\w+|'[^']*'|\"[^\"]*\"|-?[.\\d]+)\\s*");
+    private boolean checkArgsKey = true;
 
     /**
      * 构造函数
@@ -54,6 +55,8 @@ public class FastExpression extends IExpression {
      *
      * @param args 参数字典
      * @return 逻辑运算的结果
+     * @throws IllegalArgumentException 如果设置了检查参数，参数中不存在的值进行计算则抛出错误
+     * @throws ArithmeticException      如果表达式语法错误
      */
     @Override
     public boolean calc(Map<String, Object> args) {
@@ -66,6 +69,8 @@ public class FastExpression extends IExpression {
      * @param expression 一组布尔值
      * @param args       参数字典
      * @return 运算后的布尔结果
+     * @throws IllegalArgumentException 如果设置了检查参数，参数中不存在的值进行计算则抛出错误
+     * @throws ArithmeticException      如果表达式语法错误
      */
     boolean calc(String expression, Map<String, Object> args) {
         Matcher m = FILTER_PATTERN.matcher(expression);
@@ -74,10 +79,33 @@ public class FastExpression extends IExpression {
             String name = m.group("name");
             String op = m.group("op");
             String value = m.group("value");
-            boolean bool = compare(name, op, value, args);
+            if (checkArgsKey) {
+                if (!args.containsKey(name)) {
+                    throw new IllegalArgumentException("value of key: '" + name + "' is not exists in " + args + " while calculate expression.");
+                }
+            }
+            boolean bool = compare(args.get(name), op, value);
             return calc(expression.replace(filter, bool + ""), args);
         }
         return boolExpressionEval(expression);
+    }
+
+    /**
+     * 设置是否检查参数是否存在
+     *
+     * @param checkArgsKey 检查参数
+     */
+    public void setCheckArgsKey(boolean checkArgsKey) {
+        this.checkArgsKey = checkArgsKey;
+    }
+
+    /**
+     * 获取是否检查参数当前状态
+     *
+     * @return 是否检查
+     */
+    public boolean isCheckArgsKey() {
+        return checkArgsKey;
     }
 
     /**
@@ -188,7 +216,7 @@ public class FastExpression extends IExpression {
                     expression = expression.replace(outerChild, res + "");
                     break;
                 } else {
-                    throw new RuntimeException("expression syntax error:" + outerChild);
+                    throw new ArithmeticException("expression syntax error:" + outerChild);
                 }
             }
         }
