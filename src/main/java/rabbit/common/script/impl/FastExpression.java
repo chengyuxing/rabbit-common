@@ -71,6 +71,7 @@ public class FastExpression extends IExpression {
      * @return 运算后的布尔结果
      * @throws IllegalArgumentException 如果设置了检查参数，参数中不存在的值进行计算则抛出错误
      * @throws ArithmeticException      如果表达式语法错误
+     * @throws NullPointerException     如果设置了检查参数，参数为null则抛出异常
      */
     boolean calc(String expression, Map<String, Object> args) {
         Matcher m = FILTER_PATTERN.matcher(expression);
@@ -80,11 +81,15 @@ public class FastExpression extends IExpression {
             String op = m.group("op");
             String value = m.group("value");
             if (checkArgsKey) {
+                if (args == null) {
+                    throw new NullPointerException("args must not be null.");
+                }
                 if (!args.containsKey(name)) {
                     throw new IllegalArgumentException("value of key: '" + name + "' is not exists in " + args + " while calculate expression.");
                 }
             }
-            boolean bool = compare(args.get(name), op, value);
+            Object source = args == null ? null : args.get(name);
+            boolean bool = compare(source, op, value);
             return calc(expression.replace(filter, bool + ""), args);
         }
         return boolExpressionEval(expression);
