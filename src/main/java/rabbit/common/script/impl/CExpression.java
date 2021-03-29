@@ -85,11 +85,15 @@ public class CExpression extends IExpression {
             String op = m.group("op");
             String value = m.group("value");
             if (checkArgsKey) {
+                if (args == null) {
+                    throw new NullPointerException("args must not be null.");
+                }
                 if (!args.containsKey(name)) {
                     throw new IllegalArgumentException("value of key: '" + name + "' is not exists in " + args + " while calculate expression.");
                 }
             }
-            boolean bool = compare(args.get(name), op, value);
+            Object source = args == null ? null : args.get(name);
+            boolean bool = compare(source, op, value);
             return calc(expression.replace(filter, bool + ""), args);
         }
         return Boolean.parseBoolean(SCRIPT_ENGINE.eval(expression).toString());
