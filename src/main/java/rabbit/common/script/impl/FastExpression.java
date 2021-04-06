@@ -156,18 +156,18 @@ public class FastExpression extends IExpression {
                 }
                 lastStep = false;
             }
-            // if last step, it's not nest any children expression
+            // if last step, it's not nest any sub expression
             // just get start to the end.
             if (i == 0 && lastStep) {
                 start = 0;
                 end = chars.length - 1;
             }
-            // children expression calc.
+            // sub expression calc.
             if (end > -1 && start > -1) {
                 // e.g. !!(true || false)
-                String outerChild = expression.substring(start, end + 1);
+                String outerSub = expression.substring(start, end + 1);
                 // 2 or more symbols of '!'
-                int inverseCount = outerChild.lastIndexOf("!(") + 1;
+                int inverseCount = outerSub.lastIndexOf("!(") + 1;
                 boolean inverse = false;
                 // if count of '!' is odd number, it means result must be inverse.
                 if (inverseCount % 2 == 1) {
@@ -175,11 +175,11 @@ public class FastExpression extends IExpression {
                 }
                 // except '(', ')' ,'!' symbols
                 // e.g. true || false
-                String innerChild = expression.substring(start + inverseCount + 1, end);
+                String innerSub = expression.substring(start + inverseCount + 1, end);
                 if (lastStep) {
-                    innerChild = outerChild;
+                    innerSub = outerSub;
                 }
-                Pair<List<String>, List<String>> s = StringUtil.regexSplit(innerChild, "(?<op>\\|\\||&&)", "op");
+                Pair<List<String>, List<String>> s = StringUtil.regexSplit(innerSub, "(?<op>\\|\\||&&)", "op");
                 List<String> values = s.getItem1();
                 List<String> ops = s.getItem2();
                 if (values.size() > 0) {
@@ -215,13 +215,13 @@ public class FastExpression extends IExpression {
                     if (inverse) {
                         res = !res;
                     }
-                    // replace the children expression result
+                    // replace the target sub expression result
                     // expression = expression.substring(0, start) + res + expression.substring(end + 1);
                     // if more than one same outer expression and result, just replace all, no need calc again!
-                    expression = expression.replace(outerChild, res + "");
+                    expression = expression.replace(outerSub, res + "");
                     break;
                 } else {
-                    throw new ArithmeticException("expression syntax error:" + outerChild);
+                    throw new ArithmeticException("expression syntax error:" + outerSub);
                 }
             }
         }

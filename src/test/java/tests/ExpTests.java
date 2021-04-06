@@ -2,6 +2,7 @@ package tests;
 
 import org.junit.Test;
 import rabbit.common.script.impl.FastExpression;
+import rabbit.common.utils.StringUtil;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
@@ -25,5 +26,11 @@ public class ExpTests {
     @Test
     public void ccc() throws Exception{
         System.out.println("string.class".substring(0,"string.class".lastIndexOf(".class")));
+    }
+
+    @Test
+    public void starts() throws Exception{
+        System.out.println(StringUtil.startsWithsIgnoreCase("aaaaaaa",new String[0]));
+        System.out.println("aaaa".startsWith(""));
     }
 }

@@ -63,7 +63,7 @@ public class Comparators {
             case "<>":
                 return sourceNum != targetNum;
             default:
-                throw new UnsupportedOperationException(String.format("unKnow operation of child expression: %s %s %s", source, op, value));
+                throw new UnsupportedOperationException(String.format("unKnow operation of sub expression: %s %s %s", source, op, value));
         }
     }
 
