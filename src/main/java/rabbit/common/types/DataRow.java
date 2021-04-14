@@ -144,6 +144,17 @@ public final class DataRow {
     }
 
     /**
+     * 获取可空值
+     *
+     * @param index 索引
+     * @param <T>   类型参数
+     * @return 可空值
+     */
+    public <T> Optional<T> getOptional(int index) {
+        return Optional.ofNullable(get(index));
+    }
+
+    /**
      * 获取值
      *
      * @param name 名称
@@ -159,24 +170,13 @@ public final class DataRow {
     }
 
     /**
-     * 获取可为空的值
+     * 获取可空值
      *
-     * @param index 索引
-     * @param <T>   类型参数
-     * @return 值
-     */
-    public <T> Optional<T> getNullable(int index) {
-        return Optional.ofNullable(get(index));
-    }
-
-    /**
-     * 获取可为空的值
-     *
-     * @param name 名称
+     * @param name 名字
      * @param <T>  类型参数
-     * @return 值
+     * @return 可空值
      */
-    public <T> Optional<T> getNullable(String name) {
+    public <T> Optional<T> getOptional(String name) {
         return Optional.ofNullable(get(name));
     }
 
@@ -195,9 +195,19 @@ public final class DataRow {
     }
 
     /**
+     * 根据索引获取一个可为空的字符串
+     *
+     * @param index 索引
+     * @return 可空字符串
+     */
+    public Optional<String> getOptionalString(int index) {
+        return Optional.ofNullable(getString(index));
+    }
+
+    /**
      * 根据名字获取一个字符串
      *
-     * @param name 索引
+     * @param name 名字
      * @return 字符串或null
      */
     public String getString(String name) {
@@ -206,6 +216,16 @@ public final class DataRow {
             return null;
         }
         return getString(index);
+    }
+
+    /**
+     * 根据名字获取一个可为空的字符串
+     *
+     * @param name 名字
+     * @return 可空字符串
+     */
+    public Optional<String> getOptionalString(String name) {
+        return Optional.ofNullable(getString(name));
     }
 
     /**
@@ -225,6 +245,15 @@ public final class DataRow {
         return Integer.parseInt(value.toString());
     }
 
+    /**
+     * 根据索引获取一个可为空的整型
+     *
+     * @param index 索引
+     * @return 可空整型
+     */
+    public Optional<Integer> getOptionalInt(int index) {
+        return Optional.ofNullable(getInt(index));
+    }
 
     /**
      * 根据名字获取一个整型
@@ -241,10 +270,20 @@ public final class DataRow {
     }
 
     /**
+     * 根据名字获取一个可为空的整型
+     *
+     * @param name 名字
+     * @return 可空整型
+     */
+    public Optional<Integer> getOptionalInt(String name) {
+        return Optional.ofNullable(getInt(name));
+    }
+
+    /**
      * 获取一个双精度类型数组
      *
      * @param index 索引
-     * @return 双精度数字
+     * @return 双精度数字或null
      */
     public Double getDouble(int index) {
         Object value = get(index);
@@ -255,6 +294,16 @@ public final class DataRow {
             return (Double) value;
         }
         return Double.parseDouble(value.toString());
+    }
+
+    /**
+     * 获取一个可空双精度类型数组
+     *
+     * @param index 索引
+     * @return 可空双精度数字
+     */
+    public Optional<Double> getOptionalDouble(int index) {
+        return Optional.ofNullable(getDouble(index));
     }
 
     /**
@@ -269,6 +318,16 @@ public final class DataRow {
             return null;
         }
         return getDouble(index);
+    }
+
+    /**
+     * 获取一个双精度类型数组
+     *
+     * @param name 名字
+     * @return 可空双精度数字
+     */
+    public Optional<Double> getOptionalDouble(String name) {
+        return Optional.ofNullable(getDouble(name));
     }
 
     /**
@@ -289,6 +348,16 @@ public final class DataRow {
     }
 
     /**
+     * 获取一个可空长整型值
+     *
+     * @param index 索引
+     * @return 可空长整型值
+     */
+    public Optional<Long> getOptionalLong(int index) {
+        return Optional.ofNullable(getLong(index));
+    }
+
+    /**
      * 获取一个长整型值
      *
      * @param name 名字
@@ -300,6 +369,16 @@ public final class DataRow {
             return null;
         }
         return getLong(index);
+    }
+
+    /**
+     * 获取一个可空长整型值
+     *
+     * @param name 名字
+     * @return 可空长整型值
+     */
+    public Optional<Long> getOptionalLong(String name) {
+        return Optional.ofNullable(getLong(name));
     }
 
     /**
