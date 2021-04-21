@@ -12,6 +12,7 @@ import java.time.*;
 import java.time.temporal.Temporal;
 import java.util.*;
 import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import static rabbit.common.utils.ReflectUtil.json2Obj;
@@ -714,6 +715,22 @@ public final class DataRow {
         for (int i = 0; i < size(); i++) {
             consumer.accept(names[i], values[i]);
         }
+    }
+
+    /**
+     * 归并操作符
+     *
+     * @param mapper 映射(初始值类型，名字，值)
+     * @param init   初始值
+     * @param <T>    结果类型参数
+     * @return 归并后的结果
+     */
+    public <T> T reduce(TiFunction<T, String, Object, T> mapper, T init) {
+        T acc = init;
+        for (int i = 0; i < size(); i++) {
+            acc = mapper.apply(acc, names[i], values[i]);
+        }
+        return acc;
     }
 
     @Override
