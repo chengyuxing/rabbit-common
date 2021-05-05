@@ -1,8 +1,8 @@
 package tests;
 
 import org.junit.Test;
-import rabbit.common.script.impl.FastExpression;
-import rabbit.common.utils.StringUtil;
+import com.github.chengyuxing.common.script.impl.FastExpression;
+import com.github.chengyuxing.common.utils.StringUtil;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;

@@ -1,7 +1,7 @@
 package tests.ck;
 
 import org.junit.Test;
-import rabbit.common.script.impl.CExpression;
+import com.github.chengyuxing.common.script.impl.CExpression;
 
 import java.util.HashMap;
 import java.util.Map;

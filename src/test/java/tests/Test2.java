@@ -1,10 +1,10 @@
 package tests;
 
 import org.junit.Test;
-import rabbit.common.io.FileResource;
-import rabbit.common.types.DataRow;
-import rabbit.common.utils.DateTimes;
-import rabbit.common.utils.StringUtil;
+import com.github.chengyuxing.common.io.FileResource;
+import com.github.chengyuxing.common.types.DataRow;
+import com.github.chengyuxing.common.utils.DateTimes;
+import com.github.chengyuxing.common.utils.StringUtil;
 
 import java.time.Instant;
 import java.util.*;

@@ -1,6 +1,6 @@
 package tests;
 
-import rabbit.common.script.IExpression;
+import com.github.chengyuxing.common.script.IExpression;
 
 import java.util.Map;
 

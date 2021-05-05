@@ -1,8 +1,7 @@
 package tests;
 
 import org.junit.Test;
-import rabbit.common.types.DataRow;
-import rabbit.common.utils.ReflectUtil;
+import com.github.chengyuxing.common.utils.ReflectUtil;
 import tests.entity.User;
 
 import java.lang.reflect.ParameterizedType;

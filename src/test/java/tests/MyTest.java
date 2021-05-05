@@ -2,12 +2,12 @@ package tests;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
-import rabbit.common.tuple.Quintuple;
-import rabbit.common.tuple.Tuples;
-import rabbit.common.types.DataRow;
-import rabbit.common.types.ImmutableList;
-import rabbit.common.utils.ObjectUtil;
-import rabbit.common.io.TSVWriter;
+import com.github.chengyuxing.common.tuple.Quintuple;
+import com.github.chengyuxing.common.tuple.Tuples;
+import com.github.chengyuxing.common.types.DataRow;
+import com.github.chengyuxing.common.types.ImmutableList;
+import com.github.chengyuxing.common.utils.ObjectUtil;
+import com.github.chengyuxing.common.io.TSVWriter;
 
 import java.beans.*;
 import java.lang.reflect.InvocationTargetException;
