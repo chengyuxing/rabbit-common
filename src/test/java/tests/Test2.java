@@ -7,10 +7,7 @@ import rabbit.common.utils.DateTimes;
 import rabbit.common.utils.StringUtil;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class Test2 {
@@ -126,8 +123,14 @@ public class Test2 {
 
     @Test
     public void sdfg() throws Exception {
-        char a = 20115;
-        System.out.println(a);
+        DataRow dataRow = DataRow.fromPair("name", "cyx", "age", 27, "address", "kunming");
+
+        LinkedHashMap<String, Object> map = dataRow.reduce((acc, name, value) -> {
+            acc.put(name, value);
+            return acc;
+        }, new LinkedHashMap<>());
+
+        System.out.println(map);
     }
 
     @Test

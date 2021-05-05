@@ -2,6 +2,9 @@ package rabbit.common.io;
 
 import java.util.Properties;
 
+/**
+ * 值类型化的properties
+ */
 public class TypedProperties extends Properties {
     public int getInt(String key) {
         return Integer.parseInt(getProperty(key));

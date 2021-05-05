@@ -12,7 +12,6 @@ import java.time.*;
 import java.time.temporal.Temporal;
 import java.util.*;
 import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import static rabbit.common.utils.ReflectUtil.json2Obj;
@@ -489,14 +488,14 @@ public final class DataRow {
     /**
      * 转换为Map
      *
-     * @param valueConvert 值转换器
-     * @param <T>          值类型参数
+     * @param mapper 值转换器
+     * @param <T>    值类型参数
      * @return 一个Map
      */
-    public <T> Map<String, T> toMap(Function<Object, T> valueConvert) {
+    public <T> Map<String, T> toMap(Function<Object, T> mapper) {
         Map<String, T> map = new HashMap<>();
         for (int i = 0; i < names.length; i++) {
-            map.put(names[i], valueConvert.apply(get(i)));
+            map.put(names[i], mapper.apply(get(i)));
         }
         return map;
     }
