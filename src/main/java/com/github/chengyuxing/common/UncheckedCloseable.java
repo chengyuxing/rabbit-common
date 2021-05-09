@@ -1,4 +1,4 @@
-package com.github.chengyuxing.common.types;
+package com.github.chengyuxing.common;
 
 /**
  * 未检查异常的可关闭对象接口

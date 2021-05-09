@@ -1,4 +1,4 @@
-package com.github.chengyuxing.common.types;
+package com.github.chengyuxing.common;
 
 /**
  * 命名的线程变量

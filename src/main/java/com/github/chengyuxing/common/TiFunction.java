@@ -1,4 +1,4 @@
-package com.github.chengyuxing.common.types;
+package com.github.chengyuxing.common;
 
 /**
  * 提供3个参数的函数接口

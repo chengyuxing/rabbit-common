@@ -1,6 +1,6 @@
 package com.github.chengyuxing.common.io;
 
-import com.github.chengyuxing.common.types.DataRow;
+import com.github.chengyuxing.common.DataRow;
 
 import java.io.IOException;
 import java.io.OutputStream;

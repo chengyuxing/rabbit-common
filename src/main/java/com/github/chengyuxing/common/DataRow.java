@@ -1,6 +1,5 @@
-package com.github.chengyuxing.common.types;
+package com.github.chengyuxing.common;
 
-import com.github.chengyuxing.common.utils.DateTimes;
 import com.github.chengyuxing.common.utils.ReflectUtil;
 
 import java.beans.IntrospectionException;

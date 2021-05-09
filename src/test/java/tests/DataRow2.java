@@ -1,6 +1,6 @@
 package tests;
 
-import com.github.chengyuxing.common.utils.DateTimes;
+import com.github.chengyuxing.common.DateTimes;
 import com.github.chengyuxing.common.utils.ReflectUtil;
 
 import java.beans.IntrospectionException;

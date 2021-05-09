@@ -1,4 +1,4 @@
-package com.github.chengyuxing.common.types;
+package com.github.chengyuxing.common;
 
 import java.util.*;
 import java.util.function.*;

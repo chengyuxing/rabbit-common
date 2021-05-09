@@ -1,7 +1,7 @@
 package com.github.chengyuxing.common.io;
 
-import com.github.chengyuxing.common.types.DataRow;
-import com.github.chengyuxing.common.types.UncheckedCloseable;
+import com.github.chengyuxing.common.DataRow;
+import com.github.chengyuxing.common.UncheckedCloseable;
 
 import java.io.BufferedReader;
 import java.io.IOException;

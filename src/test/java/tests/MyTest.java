@@ -4,8 +4,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import com.github.chengyuxing.common.tuple.Quintuple;
 import com.github.chengyuxing.common.tuple.Tuples;
-import com.github.chengyuxing.common.types.DataRow;
-import com.github.chengyuxing.common.types.ImmutableList;
+import com.github.chengyuxing.common.DataRow;
+import com.github.chengyuxing.common.ImmutableList;
 import com.github.chengyuxing.common.utils.ObjectUtil;
 import com.github.chengyuxing.common.io.TSVWriter;
 

@@ -2,8 +2,8 @@ package tests;
 
 import org.junit.Test;
 import com.github.chengyuxing.common.io.FileResource;
-import com.github.chengyuxing.common.types.DataRow;
-import com.github.chengyuxing.common.utils.DateTimes;
+import com.github.chengyuxing.common.DataRow;
+import com.github.chengyuxing.common.DateTimes;
 import com.github.chengyuxing.common.utils.StringUtil;
 
 import java.time.Instant;

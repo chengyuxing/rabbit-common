@@ -1,4 +1,4 @@
-package com.github.chengyuxing.common.utils;
+package com.github.chengyuxing.common;
 
 import java.time.*;
 import java.time.format.DateTimeFormatter;
