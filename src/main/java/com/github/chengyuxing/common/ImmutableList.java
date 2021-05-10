@@ -331,6 +331,6 @@ public final class ImmutableList<T> {
      * @return 列表
      */
     public List<T> toList() {
-        return elements;
+        return new ArrayList<>(elements);
     }
 }

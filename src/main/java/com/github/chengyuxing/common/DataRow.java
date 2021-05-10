@@ -716,9 +716,9 @@ public final class DataRow {
     }
 
     /**
-     * 归并操作符
+     * 归并操作
      *
-     * @param mapper 映射(初始值类型，名字，值)
+     * @param mapper 映射(初始值，名字，值)
      * @param init   初始值
      * @param <T>    结果类型参数
      * @return 归并后的结果
