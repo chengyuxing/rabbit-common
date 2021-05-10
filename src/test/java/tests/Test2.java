@@ -1,5 +1,6 @@
 package tests;
 
+import com.github.chengyuxing.common.utils.ReflectUtil;
 import org.junit.Test;
 import com.github.chengyuxing.common.io.FileResource;
 import com.github.chengyuxing.common.DataRow;
@@ -135,10 +136,11 @@ public class Test2 {
 
     @Test
     public void testArgs() throws Exception {
-        DataRow.fromPair("id", 2, "name", "cyx", "dt", Instant.now())
-                .foreach((n, v) -> {
-                    System.out.println(n + " -> " + v);
-                });
+        DataRow dataRow = DataRow.fromPair("id", 2, "name", "cyx", "dt", Instant.now());
+        String json = ReflectUtil.obj2Json(dataRow);
+        System.out.println(json);
+
+        System.out.println(ReflectUtil.json2Obj(json, DataRow.class));
     }
 
     public static void len(String... args) {
