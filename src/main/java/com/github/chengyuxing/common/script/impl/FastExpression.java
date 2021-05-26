@@ -131,7 +131,7 @@ public class FastExpression extends IExpression {
         char[] chars = expression.toCharArray();
         int start = -1;
         int end = -1;
-        boolean lastStep = true;
+        boolean lastStep = true;    // it means expression not contains '(,)' anymore, e.g. 'true && false || true || false'
         for (int i = chars.length - 1; i >= 0; i--) {
             char c = chars[i];
             if (c == ')') {
@@ -166,23 +166,20 @@ public class FastExpression extends IExpression {
                 String outerSub = expression.substring(start, end + 1);
                 // 2 or more symbols of '!'
                 int inverseCount = outerSub.lastIndexOf("!(") + 1;
-                boolean inverse = false;
                 // if count of '!' is odd number, it means result must be inverse.
-                if (inverseCount % 2 == 1) {
-                    inverse = true;
-                }
-                // except '(', ')' ,'!' symbols
-                // e.g. true || false
+                boolean inverse = inverseCount % 2 == 1;
+                // except '(', ')' ,'!' symbols, e.g. 'true || false'
                 String innerSub = expression.substring(start + inverseCount + 1, end);
                 if (lastStep) {
                     innerSub = outerSub;
                 }
+                //start resolve bool value expression, e.g. 'true && false || true || false'
                 Pair<List<String>, List<String>> s = StringUtil.regexSplit(innerSub, "(?<op>\\|\\||&&)", "op");
                 List<String> values = s.getItem1();
                 List<String> ops = s.getItem2();
                 if (values.size() > 0) {
                     boolean res = false;
-                    // it's look like (true)
+                    // it's look like '(true)'
                     if (ops.isEmpty()) {
                         res = parseBool(values.get(0));
                     } else {
