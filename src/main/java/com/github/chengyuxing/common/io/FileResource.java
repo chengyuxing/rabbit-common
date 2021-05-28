@@ -7,9 +7,13 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 /**
- * 文件资源，支持读取本地目录下的文件和classpath下的文件<br>
- * 默认读取classpath下的文件<br>
- * 若要读取本地目录下的文件，格式为{@code file:/root/files/my.txt}
+ * 文件资源读取辅助工具类<br>
+ * e.g. 文件格式
+ * <blockquote>
+ * <pre>windows: file:\\D:\\rabbit.sql</pre>
+ * <pre>Linux/Unix: file:/root/rabbit.sql</pre>
+ * <pre>ClassPath: sql/rabbit.sql</pre>
+ * </blockquote>
  */
 public class FileResource extends ClassPathResource {
     /**

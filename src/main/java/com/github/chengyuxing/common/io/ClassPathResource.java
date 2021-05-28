@@ -26,16 +26,6 @@ public class ClassPathResource {
     }
 
     /**
-     * 创建一个新实例
-     *
-     * @param path 路径
-     * @return 类路径资源
-     */
-    public static ClassPathResource of(String path) {
-        return new ClassPathResource(path);
-    }
-
-    /**
      * 清理路径
      *
      * @param path 路径
