@@ -39,12 +39,13 @@ public class WatchDog {
         if (futureMap.containsKey(name)) {
             return false;
         }
-        futureMap.put(name, schedule.scheduleAtFixedRate(runnable, 1, period, unit));
+        long seconds = unit.toSeconds(period);
+        futureMap.put(name, schedule.scheduleAtFixedRate(runnable, 1, seconds, TimeUnit.SECONDS));
         return true;
     }
 
     /**
-     * 添加一个监听
+     * 添加一个监听,周期为一秒
      *
      * @param name     名称
      * @param runnable 执行方法
