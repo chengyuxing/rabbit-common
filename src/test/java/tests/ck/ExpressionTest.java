@@ -1,9 +1,15 @@
 package tests.ck;
 
+import com.github.chengyuxing.common.console.Color;
+import com.github.chengyuxing.common.console.Printer;
+import com.github.chengyuxing.common.tuple.Pair;
+import com.github.chengyuxing.common.utils.StringUtil;
 import org.junit.Test;
 import com.github.chengyuxing.common.script.impl.CExpression;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class ExpressionTest {
@@ -24,6 +30,7 @@ public class ExpressionTest {
 
     @Test
     public void num() throws Exception {
-//        System.out.println("-0.09".matches(CExpression.NUMBER_REGEX));
+        Printer.println("我喜欢你", Color.PURPLE);
+        System.out.println(Printer.colorful("我喜欢你", Color.RED) + Printer.colorful("Hello world!", Color.SILVER));
     }
 }
