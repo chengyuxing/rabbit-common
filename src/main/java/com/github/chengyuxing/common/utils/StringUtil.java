@@ -267,6 +267,17 @@ public class StringUtil {
     }
 
     /**
+     * 忽略大小写判断被查询的字符串是否匹配目标字符串
+     *
+     * @param source 被查询的字符串
+     * @param target 被包含的字符串
+     * @return 是否匹配
+     */
+    public static boolean matchesIgnoreCase(String source, String target) {
+        return indexOfIgnoreCase(source, target) > -1 && source.length() == target.length();
+    }
+
+    /**
      * 忽略大小写判断被查询的字符串是否包含其中一个目标字符串
      *
      * @param source  被查询的字符串
@@ -286,6 +297,25 @@ public class StringUtil {
     }
 
     /**
+     * 忽略大小写判断被查询的字符串是否匹配其中一个目标字符串
+     *
+     * @param source  被查询的字符串
+     * @param targets 被包含的字符串组
+     * @return 是否包含任意一个
+     */
+    public static boolean matchesAnyIgnoreCase(String source, String... targets) {
+        if (targets.length < 1) {
+            return true;
+        }
+        for (String target : targets) {
+            if (matchesIgnoreCase(source, target)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * 忽略大小写判断被查询的字符串是否包含全部目标字符串
      *
      * @param source  被查询的字符串
@@ -298,6 +328,25 @@ public class StringUtil {
         }
         for (String target : targets) {
             if (!containsIgnoreCase(source, target)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * 忽略大小写判断被查询的字符串是否包含全部目标字符串
+     *
+     * @param source  被查询的字符串
+     * @param targets 被包含的字符串组
+     * @return 是否包含全部
+     */
+    public static boolean matchesAllIgnoreCase(String source, String... targets) {
+        if (targets.length < 1) {
+            return true;
+        }
+        for (String target : targets) {
+            if (!matchesIgnoreCase(source, target)) {
                 return false;
             }
         }
