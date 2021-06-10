@@ -1,5 +1,7 @@
 package com.github.chengyuxing.common.script;
 
+import com.github.chengyuxing.common.utils.StringUtil;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -11,8 +13,6 @@ import java.util.regex.Pattern;
  * {@code @ (正则匹配), !@ (正则不匹配)}<br>
  */
 public class Comparators {
-    public static final String NUMBER_REGEX = "-?([0-9]|(0\\.\\d+)|([1-9]+\\.?\\d+))";
-
     /**
      * 值对比
      *
@@ -27,7 +27,7 @@ public class Comparators {
             if (source == null) {
                 return false;
             }
-            if (source.toString().matches(NUMBER_REGEX) && value.matches(NUMBER_REGEX)) {
+            if (StringUtil.isNumeric(source.toString()) && StringUtil.isNumeric(value)) {
                 return compareNumber(source, op, value);
             }
             throw new UnsupportedOperationException(String.format("can not compare NonNumber: %s %s %s", source, op, value));

@@ -1,5 +1,6 @@
 package com.github.chengyuxing.common.utils;
 
+
 import com.github.chengyuxing.common.tuple.Pair;
 
 import java.util.ArrayList;
@@ -11,6 +12,7 @@ import java.util.regex.Pattern;
  * 字符串工具类
  */
 public class StringUtil {
+    public static final String NUMBER_REGEX = "-?([0-9]|(0\\.\\d+)|([1-9]+\\.?\\d+))";
 
     /**
      * 根据正则表达式所匹配的分组分割字符串<br>
@@ -375,5 +377,18 @@ public class StringUtil {
      */
     public static boolean hasLength(String str) {
         return str != null && !str.isEmpty();
+    }
+
+    /**
+     * 判断是否是数字
+     *
+     * @param numeric 字符串数字
+     * @return 是否是数字
+     */
+    public static boolean isNumeric(String numeric) {
+        if (numeric == null) {
+            return false;
+        }
+        return numeric.matches(NUMBER_REGEX);
     }
 }
