@@ -3,6 +3,7 @@ package com.github.chengyuxing.common;
 import com.github.chengyuxing.common.utils.ReflectUtil;
 
 import java.beans.IntrospectionException;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.Time;
@@ -515,13 +516,33 @@ public final class DataRow {
     /**
      * 转为一个标准的javaBean实体
      *
-     * @param clazz 实体类
-     * @param <T>   类型参数
+     * @param clazz                 实体类
+     * @param <T>                   类型参数
+     * @param constructorParamNames 如果实体类只有一个带参数的构造函数，指定参数名
      * @return 实体
      */
-    public <T> T toEntity(Class<T> clazz) {
+    public <T> T toEntity(Class<T> clazz, String... constructorParamNames) {
         try {
-            T entity = clazz.newInstance();
+            T entity;
+            if (constructorParamNames.length > 0) {
+                Class<?>[] classes = new Class[constructorParamNames.length];
+                Object[] values = new Object[classes.length];
+                for (int i = 0; i < constructorParamNames.length; i++) {
+                    classes[i] = Class.forName(getType(constructorParamNames[i]));
+                    values[i] = get(constructorParamNames[i]);
+                }
+                Constructor<T> constructor = clazz.getDeclaredConstructor(classes);
+                if (!constructor.isAccessible()) {
+                    constructor.setAccessible(true);
+                }
+                entity = constructor.newInstance(values);
+            } else {
+                Constructor<T> constructor = clazz.getDeclaredConstructor();
+                if (!constructor.isAccessible()) {
+                    constructor.setAccessible(true);
+                }
+                entity = constructor.newInstance();
+            }
             Iterator<Method> methods = ReflectUtil.getWriteMethods(clazz).iterator();
             while (methods.hasNext()) {
                 Method method = methods.next();
@@ -613,7 +634,9 @@ public final class DataRow {
             }
             return entity;
         } catch (NoSuchMethodException | InstantiationException | InvocationTargetException | IntrospectionException | IllegalAccessException e) {
-            throw new RuntimeException("convert to " + clazz.getTypeName() + "error: ", e);
+            throw new RuntimeException("convert to " + clazz.getTypeName() + " error: ", e);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException("generate " + clazz + " constructor error: ", e);
         }
     }
 

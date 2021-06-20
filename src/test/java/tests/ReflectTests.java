@@ -1,18 +1,41 @@
 package tests;
 
-import org.junit.Test;
+import com.github.chengyuxing.common.DataRow;
 import com.github.chengyuxing.common.utils.ReflectUtil;
+import org.junit.Test;
+import tests.entity.Coord;
+import tests.entity.Location;
 import tests.entity.User;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.stream.Stream;
 
 public class ReflectTests {
 
+    @Test
+    public void r2e() throws Exception {
+        int x = 10, y = 18;
+        DataRow row = DataRow.fromPair("x", x, "y", y, "name", "昆明市");
+        System.out.println(row);
+        System.out.println(row.toEntity(Coord.class, "x", "y"));
+    }
 
     @Test
-    public void classTest() throws Exception{
+    public void reflect() throws Exception{
+        Constructor<?>[] constructors = Location.class.getDeclaredConstructors();
+        Stream.of(constructors).forEach(c->{
+            System.out.println(Arrays.toString(c.getGenericParameterTypes()));
+        });
+        System.out.println(int.class.getSimpleName());
+    }
+
+    @Test
+    public void classTest() throws Exception {
         System.out.println(Collection.class.isAssignableFrom(ArrayList.class));
     }
 
