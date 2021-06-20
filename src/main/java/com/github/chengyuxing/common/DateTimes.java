@@ -156,4 +156,8 @@ public class DateTimes {
     public static Date toDate(String s) {
         return new Date(toEpochMilli(s));
     }
+
+    public static DateTimes now() {
+        return of(LocalDateTime.now());
+    }
 }
