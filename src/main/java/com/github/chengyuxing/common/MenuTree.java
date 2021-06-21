@@ -1,6 +1,7 @@
 package com.github.chengyuxing.common;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 菜单树生成帮助类
@@ -97,6 +98,8 @@ public class MenuTree {
         return rootNode.get(0);
     }
 
+    public static final AtomicInteger i = new AtomicInteger(0);
+
     /**
      * 节点聚合操作
      *
@@ -104,15 +107,16 @@ public class MenuTree {
      * @param root      根结点
      */
     private static void nodesAgg(List<Tree> treeNodes, List<Tree> root) {
+        i.incrementAndGet();
         if (treeNodes.isEmpty()) {
             return;
         }
         for (int i = root.size() - 1, j = 0; i >= j; i--, j++) {
+            Tree backward = root.get(i);
+            Tree forward = root.get(j);
             Iterator<Tree> iterator = treeNodes.iterator();
             while (iterator.hasNext()) {
                 Tree next = iterator.next();
-                Tree backward = root.get(i);
-                Tree forward = root.get(j);
                 if (forward.getId().equals(next.getPid())) {
                     forward.getChildren().add(next);
                     iterator.remove();
@@ -121,7 +125,12 @@ public class MenuTree {
                     iterator.remove();
                 }
             }
-            nodesAgg(treeNodes, root.get(j).getChildren());
+            if (i != j) {
+                nodesAgg(treeNodes, root.get(j).getChildren());
+                nodesAgg(treeNodes, root.get(i).getChildren());
+            } else {
+                nodesAgg(treeNodes, root.get(j).getChildren());
+            }
         }
     }
 }
