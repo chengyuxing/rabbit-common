@@ -1,7 +1,6 @@
 package com.github.chengyuxing.common;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 菜单树生成帮助类
@@ -98,8 +97,6 @@ public class MenuTree {
         return rootNode.get(0);
     }
 
-    public static final AtomicInteger i = new AtomicInteger(0);
-
     /**
      * 节点聚合操作
      *
@@ -107,7 +104,9 @@ public class MenuTree {
      * @param root      根结点
      */
     private static void nodesAgg(List<Tree> treeNodes, List<Tree> root) {
-        i.incrementAndGet();
+        if (root.isEmpty()) {
+            return;
+        }
         if (treeNodes.isEmpty()) {
             return;
         }
