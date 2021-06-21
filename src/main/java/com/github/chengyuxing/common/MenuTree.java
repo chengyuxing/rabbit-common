@@ -72,14 +72,14 @@ public class MenuTree {
         }
     }
 
-    private final List<Tree> nodes;
+    private final List<? extends Tree> nodes;
 
     /**
      * 构造函数
      *
      * @param nodes 节点数据
      */
-    public MenuTree(List<Tree> nodes) {
+    public MenuTree(List<? extends Tree> nodes) {
         this.nodes = new ArrayList<>(nodes);
     }
 
