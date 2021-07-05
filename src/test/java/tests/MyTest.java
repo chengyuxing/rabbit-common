@@ -60,6 +60,7 @@ public class MyTest {
             row.add(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
             row.add("昆明市");
             row.add(i % 3 == 0 ? "" : "ok");
+            row.add("530111199305107036");
             LineIO.writeLine(csv, row, ",");
             LineIO.writeLine(tsv, row, "\t");
         }
@@ -71,10 +72,9 @@ public class MyTest {
                 .limit(10)
                 .forEach(System.out::println);
 
-        LineIO.readLines(new FileInputStream("/Users/chengyuxing/Downloads/lines.tsv"), "\t")
-                .skip(10)
-                .limit(10)
-                .forEach(System.out::println);
+        long i = LineIO.readLines(new FileInputStream("/Users/chengyuxing/Downloads/lines.tsv"), "\t")
+                .count();
+        System.out.println(i);
     }
 
     @Test

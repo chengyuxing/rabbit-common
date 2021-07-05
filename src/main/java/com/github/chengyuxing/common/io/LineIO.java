@@ -62,8 +62,12 @@ public class LineIO {
             @Override
             public boolean tryAdvance(Consumer<? super List<String>> action) {
                 try {
-                    action.accept(Arrays.asList(reader.readLine().split(delimiter)));
-                    return true;
+                    String line = reader.readLine();
+                    if (line != null) {
+                        action.accept(Arrays.asList(line.split(delimiter)));
+                        return true;
+                    }
+                    return false;
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
