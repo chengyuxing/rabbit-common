@@ -1,19 +1,25 @@
 package tests;
 
-import org.junit.BeforeClass;
-import org.junit.Test;
-import com.github.chengyuxing.common.tuple.Quintuple;
-import com.github.chengyuxing.common.tuple.Tuples;
 import com.github.chengyuxing.common.DataRow;
 import com.github.chengyuxing.common.ImmutableList;
+import com.github.chengyuxing.common.io.LineIO;
+import com.github.chengyuxing.common.tuple.Quintuple;
+import com.github.chengyuxing.common.tuple.Tuples;
 import com.github.chengyuxing.common.utils.ObjectUtil;
-import com.github.chengyuxing.common.io.TSVWriter;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
-import java.beans.*;
+import java.beans.IntrospectionException;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 public class MyTest {
@@ -44,7 +50,8 @@ public class MyTest {
 
     @Test
     public void tsv() throws Exception {
-        TSVWriter writer = TSVWriter.of("/Users/chengyuxing/Downloads/bytes.tsv");
+        FileOutputStream csv = new FileOutputStream("/Users/chengyuxing/Downloads/lines.csv");
+        FileOutputStream tsv = new FileOutputStream("/Users/chengyuxing/Downloads/lines.tsv");
         for (int i = 0; i < 10000; i++) {
             List<Object> row = new ArrayList<>();
             row.add("chengyuxing");
@@ -53,9 +60,21 @@ public class MyTest {
             row.add(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
             row.add("昆明市");
             row.add(i % 3 == 0 ? "" : "ok");
-            writer.writeLine(row);
+            LineIO.writeLine(csv, row, ",");
+            LineIO.writeLine(tsv, row, "\t");
         }
-        writer.close();
+    }
+
+    @Test
+    public void read() throws Exception {
+        LineIO.readLines(Paths.get("/Users/chengyuxing/Downloads/lines.tsv"), "\t")
+                .limit(10)
+                .forEach(System.out::println);
+
+        LineIO.readLines(new FileInputStream("/Users/chengyuxing/Downloads/lines.tsv"), "\t")
+                .skip(10)
+                .limit(10)
+                .forEach(System.out::println);
     }
 
     @Test
