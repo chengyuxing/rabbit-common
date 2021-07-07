@@ -111,7 +111,7 @@ public class LineIO {
     }
 
     /**
-     * 写入多行行到输出流
+     * 写入多行到输出流
      *
      * @param out       输出流
      * @param rows      行数据
