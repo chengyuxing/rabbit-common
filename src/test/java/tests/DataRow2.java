@@ -209,9 +209,7 @@ public class DataRow2 {
     public <T> T toEntity(Class<T> clazz) {
         try {
             T entity = clazz.newInstance();
-            Iterator<Method> methods = ReflectUtil.getWriteMethods(clazz).iterator();
-            while (methods.hasNext()) {
-                Method method = methods.next();
+            for (Method method : ReflectUtil.getWRMethods(clazz).getItem2()) {
                 if (method.getName().startsWith("set")) {
                     String field = method.getName().substring(3);
                     field = field.substring(0, 1).toLowerCase().concat(field.substring(1));
@@ -309,7 +307,7 @@ public class DataRow2 {
             List<String> names = new ArrayList<>();
             List<String> types = new ArrayList<>();
             List<Object> values = new ArrayList<>();
-            Iterator<Method> methods = ReflectUtil.getReadMethods(entity.getClass()).iterator();
+            Iterator<Method> methods = ReflectUtil.getWRMethods(entity.getClass()).getItem1().iterator();
             while (methods.hasNext()) {
                 Method method = methods.next();
                 Class<?> returnType = method.getReturnType();
@@ -371,5 +369,13 @@ public class DataRow2 {
             }
         }
         return of(names, types, values);
+    }
+
+    @Override
+    public String toString() {
+        return "DataRow2{" +
+                "grid=" + Arrays.toString(grid) +
+                ", columns=" + columns +
+                '}';
     }
 }

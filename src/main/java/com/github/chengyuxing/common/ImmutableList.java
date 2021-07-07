@@ -225,7 +225,7 @@ public final class ImmutableList<T> {
      * @param action 动作
      * @return 是否包含
      */
-    public boolean includesBY(Function<T, Boolean> action) {
+    public boolean includesBy(Function<T, Boolean> action) {
         return findBy(action::apply).isPresent();
     }
 

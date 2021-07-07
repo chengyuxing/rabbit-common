@@ -11,7 +11,7 @@ package com.github.chengyuxing.common.tuple;
  * @param <T6> 类型参数6
  */
 public class Sextuple<T1, T2, T3, T4, T5, T6> extends Quintuple<T1, T2, T3, T4, T5> {
-    private final T6 item6;
+    protected final T6 item6;
 
     Sextuple(T1 item1, T2 item2, T3 item3, T4 item4, T5 item5, T6 item6) {
         super(item1, item2, item3, item4, item5);
@@ -24,5 +24,10 @@ public class Sextuple<T1, T2, T3, T4, T5, T6> extends Quintuple<T1, T2, T3, T4, 
 
     public T6 getItem6() {
         return item6;
+    }
+
+    @Override
+    public String toString() {
+        return "(" + item1 + ", " + item2 + ", " + item3 + ", " + item4 + ", " + item5 + ", " + item6 + ")";
     }
 }

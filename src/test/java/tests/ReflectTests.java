@@ -41,7 +41,7 @@ public class ReflectTests {
 
     @Test
     public void beanTest() throws Exception {
-        ReflectUtil.getWriteMethods(User.class)
+        ReflectUtil.getWRMethods(User.class).getItem2()
                 .forEach(method -> {
                     // set方法的第一个参数类型
                     Type pType = method.getGenericParameterTypes()[0];
@@ -60,7 +60,7 @@ public class ReflectTests {
 
     @Test
     public void convert() throws Exception {
-        ReflectUtil.getReadMethods(User.class)
+        ReflectUtil.getWRMethods(User.class).getItem1()
                 .forEach(m -> {
                     System.out.println(m.getReturnType() == Class.class);
                 });

@@ -1,5 +1,9 @@
 package tests;
 
+import org.junit.Test;
+
+import java.util.*;
+
 public class User {
     private String name;
     private String address;
@@ -37,4 +41,18 @@ public class User {
     public void setOld(boolean old) {
         this.old = old;
     }
+
+
+    @Test
+    public void x() throws Exception {
+        Map<String, Object> map = new HashMap<>();
+        map.put("name", "cyx");
+        List<Object> l = new ArrayList<>();
+        l.add("ages");
+        l.add(map);
+        List<Object> list = Collections.unmodifiableList(l);
+        map.put("age", 28);
+        System.out.println(list);
+    }
+
 }

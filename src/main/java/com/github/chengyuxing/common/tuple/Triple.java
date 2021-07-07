@@ -8,7 +8,7 @@ package com.github.chengyuxing.common.tuple;
  * @param <T3> 类型参数3
  */
 public class Triple<T1, T2, T3> extends Pair<T1, T2> {
-    private final T3 item3;
+    protected final T3 item3;
 
     Triple(T1 item1, T2 item2, T3 item3) {
         super(item1, item2);
@@ -21,5 +21,10 @@ public class Triple<T1, T2, T3> extends Pair<T1, T2> {
 
     public T3 getItem3() {
         return item3;
+    }
+
+    @Override
+    public String toString() {
+        return "(" + item1 + ", " + item2 + ", " + item3 + ")";
     }
 }

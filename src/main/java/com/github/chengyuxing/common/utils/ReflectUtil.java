@@ -1,13 +1,15 @@
 package com.github.chengyuxing.common.utils;
 
+import com.github.chengyuxing.common.tuple.Pair;
+
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Objects;
-import java.util.stream.Stream;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 反射工具类
@@ -40,31 +42,27 @@ public final class ReflectUtil {
     }
 
     /**
-     * 获取标准javaBean的所有写方法
+     * 获取标准javaBean的所有读/写方法(getter,setter)
      *
      * @param clazz 类
      * @return 类的set方法组
      * @throws IntrospectionException ex
      */
-    public static Stream<Method> getWriteMethods(Class<?> clazz) throws IntrospectionException {
+    public static Pair<List<Method>, List<Method>> getWRMethods(Class<?> clazz) throws IntrospectionException {
+        List<Method> rs = new ArrayList<>();
+        List<Method> ws = new ArrayList<>();
         BeanInfo beanInfo = Introspector.getBeanInfo(clazz);
-        return Stream.of(beanInfo.getPropertyDescriptors())
-                .map(PropertyDescriptor::getWriteMethod)
-                .filter(Objects::nonNull);
-    }
-
-    /**
-     * 获取标准javaBean的所有读方法
-     *
-     * @param clazz 类
-     * @return 类的set方法组
-     * @throws IntrospectionException ex
-     */
-    public static Stream<Method> getReadMethods(Class<?> clazz) throws IntrospectionException {
-        BeanInfo beanInfo = Introspector.getBeanInfo(clazz);
-        return Stream.of(beanInfo.getPropertyDescriptors())
-                .map(PropertyDescriptor::getReadMethod)
-                .filter(Objects::nonNull);
+        for (PropertyDescriptor p : beanInfo.getPropertyDescriptors()) {
+            Method w = p.getWriteMethod();
+            Method r = p.getReadMethod();
+            if (w != null) {
+                ws.add(w);
+            }
+            if (r != null) {
+                rs.add(r);
+            }
+        }
+        return Pair.of(rs, ws);
     }
 
     /**

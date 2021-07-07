@@ -10,7 +10,7 @@ package com.github.chengyuxing.common.tuple;
  * @param <T5> 类型参数5
  */
 public class Quintuple<T1, T2, T3, T4, T5> extends Quadruple<T1, T2, T3, T4> {
-    private final T5 item5;
+    protected final T5 item5;
 
     Quintuple(T1 item1, T2 item2, T3 item3, T4 item4, T5 item5) {
         super(item1, item2, item3, item4);
@@ -23,5 +23,10 @@ public class Quintuple<T1, T2, T3, T4, T5> extends Quadruple<T1, T2, T3, T4> {
 
     public T5 getItem5() {
         return item5;
+    }
+
+    @Override
+    public String toString() {
+        return "(" + item1 + ", " + item2 + ", " + item3 + ", " + item4 + ", " + item5 + ")";
     }
 }
