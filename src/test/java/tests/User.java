@@ -1,6 +1,7 @@
 package tests;
 
 import com.github.chengyuxing.common.DataRow;
+import com.github.chengyuxing.common.tuple.Tuples;
 import com.github.chengyuxing.common.utils.ReflectUtil;
 import org.junit.Test;
 import org.nutz.json.Json;
@@ -49,10 +50,11 @@ public class User {
 
     @Test
     public void x() throws Exception {
-        DataRow row = DataRow.fromPair("name", "cyx", "age", 29, "now", LocalDateTime.now().toString(), "x", Arrays.asList(1, 2, 3, 4), "bytea", new byte[]{-1,2,-10,3});
+        DataRow row = DataRow.fromPair("name", "cyx", "age", 29, "now", LocalDateTime.now().toString(), "x", Arrays.asList(1, 2, 3, 4), "bytea", new byte[]{-1, 2, -10, 3});
         System.out.println(row);
         System.out.println(ReflectUtil.obj2Json(row));
         System.out.println(Json.toJson(row));
+        System.out.println(ReflectUtil.obj2Json(Tuples.triple("a", "b", LocalDateTime.now().toString())));
     }
 
 }
