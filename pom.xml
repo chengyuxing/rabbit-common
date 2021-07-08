@@ -148,6 +148,12 @@
             <version>2.9.8</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.nutz</groupId>
+            <artifactId>nutz</artifactId>
+            <version>1.r.68.v20191031</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>

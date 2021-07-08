@@ -21,28 +21,11 @@ import static com.github.chengyuxing.common.utils.ReflectUtil.json2Obj;
  */
 public final class DataRow {
     private final String[] names;
-    private final String[] types;
     private final Object[] values;
 
-    DataRow(String[] names, String[] types, Object[] values) {
+    DataRow(String[] names, Object[] values) {
         this.names = names;
-        this.types = types;
         this.values = values;
-    }
-
-    /**
-     * 新建一个DataRow
-     *
-     * @param names  字段
-     * @param types  类型
-     * @param values 值
-     * @return 新实例
-     */
-    public static DataRow of(String[] names, String[] types, Object[] values) {
-        if (names.length == types.length && types.length == values.length) {
-            return new DataRow(names, types, values);
-        }
-        throw new IllegalArgumentException("all of 3 args length not equal!");
     }
 
     /**
@@ -53,31 +36,26 @@ public final class DataRow {
      * @return 新实例
      */
     public static DataRow of(String[] names, Object[] values) {
-        String[] types = new String[values.length];
-        for (int i = 0; i < values.length; i++) {
-            if (values[i] == null) {
-                types[i] = "null";
-            } else {
-                types[i] = values[i].getClass().getName();
-            }
+        if (names.length == values.length) {
+            return new DataRow(names, values);
         }
-        return of(names, types, values);
+        throw new IllegalArgumentException("all of 3 args length not equal!");
     }
 
     /**
      * @return 一个空的DataRow
      */
     public static DataRow empty() {
-        return of(new String[0], new String[0], new Object[0]);
+        return of(new String[0], new Object[0]);
     }
 
     /**
-     * 判断是否为空
+     * 如果有元素则判断为非空
      *
-     * @return 是否为空
+     * @return 是否为非空
      */
-    public boolean isEmpty() {
-        return names.length == 0;
+    public boolean nonEmpty() {
+        return names.length != 0;
     }
 
     /**
@@ -99,19 +77,10 @@ public final class DataRow {
     }
 
     /**
-     * 获取类型
-     *
-     * @return 类型
-     */
-    public List<String> getTypes() {
-        return Arrays.asList(types);
-    }
-
-    /**
      * 根据字段名获取类型
      *
      * @param name 字段
-     * @return 类型
+     * @return 如果值存在或不为null返回值类型名称，否则返回null
      */
     public String getType(String name) {
         int index = indexOf(name);
@@ -125,10 +94,14 @@ public final class DataRow {
      * 获取值类型
      *
      * @param index 索引
-     * @return 值类型
+     * @return 如果值不为null返回值类型名称，否则返回null
      */
     public String getType(int index) {
-        return types[index];
+        Object v = get(index);
+        if (v == null) {
+            return null;
+        }
+        return v.getClass().getName();
     }
 
     /**
@@ -429,17 +402,13 @@ public final class DataRow {
     public DataRow concat(DataRow other) {
         String[] newNames = new String[size() + other.size()];
         Object[] newValues = new Object[newNames.length];
-        String[] newTypes = new String[newNames.length];
         System.arraycopy(names, 0, newNames, 0, names.length);
         System.arraycopy(other.names, 0, newNames, names.length, other.names.length);
 
         System.arraycopy(values, 0, newValues, 0, values.length);
         System.arraycopy(other.values, 0, newValues, values.length, other.values.length);
 
-        System.arraycopy(types, 0, newTypes, 0, types.length);
-        System.arraycopy(other.types, 0, newTypes, types.length, other.types.length);
-
-        return DataRow.of(newNames, newTypes, newValues);
+        return DataRow.of(newNames, newValues);
     }
 
     /**
@@ -463,7 +432,6 @@ public final class DataRow {
         int idx = indexOf(name);
         if (idx != -1) {
             String[] newNames = new String[size() - 1];
-            String[] newTypes = new String[newNames.length];
             Object[] newValues = new Object[newNames.length];
 
             if (idx == 0) {
@@ -477,10 +445,9 @@ public final class DataRow {
 
             for (int i = 0; i < newNames.length; i++) {
                 String newName = newNames[i];
-                newTypes[i] = getType(newName);
                 newValues[i] = get(newName);
             }
-            return DataRow.of(newNames, newTypes, newValues);
+            return DataRow.of(newNames, newValues);
         }
         throw new NoSuchElementException("name:\"" + name + "\" does not exist!");
     }
@@ -613,7 +580,7 @@ public final class DataRow {
                             } else if (valueType.equals("java.lang.String")) {
                                 method.invoke(entity, json2Obj(value.toString(), argType));
                                 // PostgreSQL array and exclude blob
-                            } else if (valueType.startsWith("[L") || (valueType.endsWith("[]") && !valueType.equals("byte[]"))) {
+                            } else if (valueType.startsWith("[L") && valueType.endsWith(";")) {
                                 if (List.class.isAssignableFrom(argType)) {
                                     method.invoke(entity, Arrays.asList((Object[]) value));
                                 } else if (Set.class.isAssignableFrom(argType)) {
@@ -647,7 +614,6 @@ public final class DataRow {
     public static DataRow fromEntity(Object entity) {
         try {
             List<String> names = new ArrayList<>();
-            List<String> types = new ArrayList<>();
             List<Object> values = new ArrayList<>();
             for (Method method : ReflectUtil.getWRMethods(entity.getClass()).getItem1()) {
                 Class<?> returnType = method.getReturnType();
@@ -660,15 +626,13 @@ public final class DataRow {
                     }
                     Object value = method.invoke(entity);
                     if (value != null) {
-                        String type = returnType.getTypeName();
                         field = field.substring(0, 1).toLowerCase().concat(field.substring(1));
                         names.add(field);
-                        types.add(type);
                         values.add(value);
                     }
                 }
             }
-            return of(names.toArray(new String[0]), types.toArray(new String[0]), values.toArray());
+            return of(names.toArray(new String[0]), values.toArray());
         } catch (IllegalAccessException | IntrospectionException | InvocationTargetException e) {
             throw new RuntimeException("convert to DataRow error: ", e);
         }
@@ -682,20 +646,14 @@ public final class DataRow {
      */
     public static DataRow fromMap(Map<?, ?> map) {
         String[] names = new String[map.keySet().size()];
-        String[] types = new String[names.length];
         Object[] values = new Object[names.length];
         int i = 0;
         for (Object key : map.keySet()) {
             names[i] = key.toString();
             values[i] = map.get(key);
-            if (values[i] == null) {
-                types[i] = "null";
-            } else {
-                types[i] = values[i].getClass().getName();
-            }
             i++;
         }
-        return of(names, types, values);
+        return of(names, values);
     }
 
     /**
@@ -709,18 +667,12 @@ public final class DataRow {
             throw new IllegalArgumentException("key value are not a pair.");
         }
         String[] names = new String[pairs.length >> 1];
-        String[] types = new String[names.length];
         Object[] values = new Object[names.length];
         for (int i = 0; i < names.length; i++) {
             names[i] = pairs[i << 1].toString();
             values[i] = pairs[(i << 1) + 1];
-            if (values[i] == null) {
-                types[i] = "null";
-            } else {
-                types[i] = values[i].getClass().getName();
-            }
         }
-        return of(names, types, values);
+        return of(names, values);
     }
 
     /**
@@ -752,10 +704,14 @@ public final class DataRow {
 
     @Override
     public String toString() {
-        return "DataRow{" +
+        String[] types = new String[values.length];
+        for (int i = 0; i < types.length; i++) {
+            types[i] = getType(i);
+        }
+        return "DataRow{\n" +
                 "names=" + Arrays.toString(names) +
-                ", types=" + Arrays.toString(types) +
-                ", values=" + Arrays.toString(values) +
-                '}';
+                "\ntypes=" + Arrays.toString(types) +
+                "\nvalues=" + Arrays.toString(values) +
+                "\n}";
     }
 }

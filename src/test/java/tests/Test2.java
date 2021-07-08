@@ -22,7 +22,6 @@ public class Test2 {
         for (int i = 0; i < 10000; i++) {
             DataRow row = DataRow.of(
                     new String[]{"a", "b", "c", "d", "e"},
-                    new String[]{"String", "String", "String", "String", "String"},
                     new Object[]{1, 2, 3, 4, 5}
             );
             rows.add(row);
@@ -40,7 +39,6 @@ public class Test2 {
     public void d1() throws Exception {
         DataRow row = DataRow.of(
                 new String[]{"a", "b", "c", "d", "e"},
-                new String[]{"String", "Double", "String", "String", "String"},
                 new Object[]{null, 2, "12", 4, 5}
         );
         System.out.println(row.getInt("k"));
