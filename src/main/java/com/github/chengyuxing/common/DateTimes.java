@@ -78,6 +78,9 @@ public class DateTimes {
         if (s.matches("\\d{14}")) {
             return LocalDateTime.parse(s, DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
         }
+        if (s.matches("\\d{8}")) {
+            return LocalDateTime.parse(s, DateTimeFormatter.ofPattern("yyyyMMdd"));
+        }
         int year;
         int month = 1, day = 1, hour = -1, minus = 0, second = 0;
         Matcher dateMatcher = DATE_PATTERN.matcher(s);
@@ -157,7 +160,21 @@ public class DateTimes {
         return new Date(toEpochMilli(s));
     }
 
+    /**
+     * 获取当前时间
+     *
+     * @return 当前时间
+     */
     public static DateTimes now() {
         return of(LocalDateTime.now());
+    }
+
+    /**
+     * 获取当前时间戳
+     *
+     * @return 当前时间戳
+     */
+    public static long currentTimestamp() {
+        return Instant.now().toEpochMilli();
     }
 }
