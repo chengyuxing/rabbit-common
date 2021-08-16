@@ -2,7 +2,7 @@ package tests;
 
 import com.github.chengyuxing.common.DataRow;
 import com.github.chengyuxing.common.ImmutableList;
-import com.github.chengyuxing.common.io.LineIO;
+import com.github.chengyuxing.common.io.Lines;
 import com.github.chengyuxing.common.tuple.Quintuple;
 import com.github.chengyuxing.common.tuple.Tuples;
 import com.github.chengyuxing.common.utils.ObjectUtil;
@@ -61,18 +61,18 @@ public class MyTest {
             row.add("昆明市");
             row.add(i % 3 == 0 ? "" : "ok");
             row.add("530111199305107036");
-            LineIO.writeLine(csv, row, ",");
-            LineIO.writeLine(tsv, row, "\t");
+            Lines.writeLine(csv, row, ",");
+            Lines.writeLine(tsv, row, "\t");
         }
     }
 
     @Test
     public void read() throws Exception {
-        LineIO.readLines(Paths.get("/Users/chengyuxing/Downloads/lines.tsv"), "\t")
+        Lines.readLines(Paths.get("/Users/chengyuxing/Downloads/lines.tsv"), "\t")
                 .limit(10)
                 .forEach(System.out::println);
 
-        long i = LineIO.readLines(new FileInputStream("/Users/chengyuxing/Downloads/lines.tsv"), "\t")
+        long i = Lines.readLines(new FileInputStream("/Users/chengyuxing/Downloads/lines.tsv"), "\t")
                 .count();
         System.out.println(i);
     }

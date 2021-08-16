@@ -689,12 +689,12 @@ public final class DataRow {
     /**
      * 归并操作
      *
-     * @param mapper 映射(初始值，名字，值)
      * @param init   初始值
+     * @param mapper 映射(初始值，名字，值)
      * @param <T>    结果类型参数
      * @return 归并后的结果
      */
-    public <T> T reduce(TiFunction<T, String, Object, T> mapper, T init) {
+    public <T> T reduce(T init, TiFunction<T, String, Object, T> mapper) {
         T acc = init;
         for (int i = 0; i < size(); i++) {
             acc = mapper.apply(acc, names[i], values[i]);

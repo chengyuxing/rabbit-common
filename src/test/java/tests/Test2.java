@@ -124,10 +124,10 @@ public class Test2 {
     public void sdfg() throws Exception {
         DataRow dataRow = DataRow.fromPair("name", "cyx", "age", 27, "address", "kunming");
 
-        LinkedHashMap<String, Object> map = dataRow.reduce((acc, name, value) -> {
+        LinkedHashMap<String, Object> map = dataRow.reduce(new LinkedHashMap<>(), (acc, name, value) -> {
             acc.put(name, value);
             return acc;
-        }, new LinkedHashMap<>());
+        });
 
         System.out.println(map);
     }

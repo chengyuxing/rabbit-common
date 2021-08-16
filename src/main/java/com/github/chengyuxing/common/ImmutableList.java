@@ -57,7 +57,7 @@ public final class ImmutableList<T> {
      * @param <R>    结果类型参数
      * @return R
      */
-    public <R> R reduce(TiFunction<R, T, Integer, R> action, R init) {
+    public <R> R reduce(R init, TiFunction<R, T, Integer, R> action) {
         R acc = init;
         for (int i = 0; i < elements.size(); i++) {
             acc = action.apply(acc, elements.get(i), i);
@@ -68,13 +68,13 @@ public final class ImmutableList<T> {
     /**
      * 归并计算
      *
-     * @param action 动作（累加器，当前值）
      * @param init   初始值
+     * @param action 动作（累加器，当前值）
      * @param <R>    结果类型参数
      * @return R
      */
-    public <R> R reduce(BiFunction<R, T, R> action, R init) {
-        return reduce((acc, current, index) -> action.apply(acc, current), init);
+    public <R> R reduce(R init, BiFunction<R, T, R> action) {
+        return reduce(init, (acc, current, index) -> action.apply(acc, current));
     }
 
     /**
@@ -94,12 +94,12 @@ public final class ImmutableList<T> {
      * @return 过滤后的不可变集合
      */
     public ImmutableList<T> where(BiPredicate<T, Integer> predicate) {
-        return of(reduce((acc, current, index) -> {
+        return of(reduce(new ArrayList<>(), (acc, current, index) -> {
             if (predicate.test(current, index)) {
                 acc.add(current);
             }
             return acc;
-        }, new ArrayList<>()));
+        }));
     }
 
     /**
@@ -128,14 +128,14 @@ public final class ImmutableList<T> {
      */
     public <K> ImmutableList<T> distinctBy(Function<T, K> action) {
         final Set<K> keys = new HashSet<>();
-        List<T> result = reduce((acc, current) -> {
+        List<T> result = reduce(new ArrayList<>(), (acc, current) -> {
             K key = action.apply(current);
             if (!keys.contains(key)) {
                 keys.add(key);
                 acc.add(current);
             }
             return acc;
-        }, new ArrayList<>());
+        });
         keys.clear();
         return of(result);
     }
@@ -148,10 +148,10 @@ public final class ImmutableList<T> {
      * @return 映射后新的不可变集合
      */
     public <R> ImmutableList<R> map(Function<T, R> action) {
-        return of(reduce((acc, current) -> {
+        return of(reduce(new ArrayList<>(), (acc, current) -> {
             acc.add(action.apply(current));
             return acc;
-        }, new ArrayList<>()));
+        }));
     }
 
     /**
@@ -162,14 +162,14 @@ public final class ImmutableList<T> {
      * @return 分组后的集合
      */
     public <K> Map<K, List<T>> groupBy(Function<T, K> action) {
-        return reduce((acc, current) -> {
+        return reduce(new HashMap<>(), (acc, current) -> {
             K key = action.apply(current);
             if (!acc.containsKey(key)) {
                 acc.put(key, new ArrayList<>());
             }
             acc.get(key).add(current);
             return acc;
-        }, new HashMap<>());
+        });
     }
 
     /**
@@ -179,7 +179,7 @@ public final class ImmutableList<T> {
      * @return 分组后的不可变集合
      */
     public ImmutableList<List<T>> grouped(int size) {
-        return of(reduce((acc, current, index) -> {
+        return of(reduce(new ArrayList<>(), (acc, current, index) -> {
             List<T> group;
             if (index % size == 0) {
                 group = new ArrayList<>();
@@ -188,7 +188,7 @@ public final class ImmutableList<T> {
             int newIndex = index / size;
             acc.get(newIndex).add(current);
             return acc;
-        }, new ArrayList<>()));
+        }));
     }
 
     /**
@@ -236,7 +236,7 @@ public final class ImmutableList<T> {
      * @return 和
      */
     public long sum(Function<T, Integer> action) {
-        return reduce((acc, element) -> acc + action.apply(element), 0);
+        return reduce(0, (acc, element) -> acc + action.apply(element));
     }
 
     /**
@@ -246,7 +246,7 @@ public final class ImmutableList<T> {
      * @return 积
      */
     public long product(Function<T, Integer> action) {
-        return reduce((acc, current) -> acc * action.apply(current), 1);
+        return reduce(0, (acc, current) -> acc * action.apply(current));
     }
 
     /**
@@ -255,10 +255,10 @@ public final class ImmutableList<T> {
      * @param action 动作
      */
     public void foreach(Consumer<T> action) {
-        reduce((acc, element) -> {
+        reduce(0, (acc, element) -> {
             action.accept(element);
             return 0;
-        }, 0);
+        });
     }
 
     /**

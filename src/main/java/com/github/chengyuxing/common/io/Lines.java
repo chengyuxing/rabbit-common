@@ -15,7 +15,7 @@ import java.util.stream.StreamSupport;
 /**
  * 行基本类型数据输入输出帮助累
  */
-public class LineIO {
+public class Lines {
     /**
      * 读取行到一个流，(需要手动关闭)
      *
