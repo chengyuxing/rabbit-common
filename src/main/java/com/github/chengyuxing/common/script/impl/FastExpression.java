@@ -57,7 +57,7 @@ public class FastExpression extends IExpression {
      * @throws ArithmeticException      如果表达式语法错误
      */
     @Override
-    public boolean calc(Map<String, Object> args) {
+    public boolean calc(Map<String, ?> args) {
         return calc(expression, args);
     }
 
@@ -71,7 +71,7 @@ public class FastExpression extends IExpression {
      * @throws ArithmeticException      如果表达式语法错误
      * @throws NullPointerException     如果设置了检查参数，参数为null则抛出异常
      */
-    boolean calc(String expression, Map<String, Object> args) {
+    boolean calc(String expression, Map<String, ?> args) {
         Matcher m = FILTER_PATTERN.matcher(expression);
         if (m.find()) {
             String filter = m.group(0);

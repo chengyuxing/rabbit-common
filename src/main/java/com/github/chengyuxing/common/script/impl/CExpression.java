@@ -61,7 +61,7 @@ public class CExpression extends IExpression {
      * @throws ArithmeticException      如果表达式语法错误
      */
     @Override
-    public boolean calc(Map<String, Object> args) {
+    public boolean calc(Map<String, ?> args) {
         try {
             return calc(expression, args);
         } catch (ScriptException e) {
@@ -77,7 +77,7 @@ public class CExpression extends IExpression {
      * @return 运算后的布尔结果
      * @throws IllegalArgumentException 如果设置了检查参数，参数中不存在的值进行计算则抛出错误
      */
-    boolean calc(String expression, Map<String, Object> args) throws ScriptException {
+    boolean calc(String expression, Map<String, ?> args) throws ScriptException {
         Matcher m = FILTER_PATTERN.matcher(expression);
         if (m.find()) {
             String filter = m.group(0);

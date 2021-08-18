@@ -13,5 +13,5 @@ public abstract class IExpression {
         this.expression = expression;
     }
 
-    public abstract boolean calc(Map<String, Object> args);
+    public abstract boolean calc(Map<String, ?> args);
 }

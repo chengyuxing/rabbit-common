@@ -10,7 +10,7 @@ public class XExpression extends IExpression {
     }
 
     @Override
-    public boolean calc(Map<String, Object> args) {
+    public boolean calc(Map<String, ?> args) {
         return expression.startsWith("a");
     }
 }
