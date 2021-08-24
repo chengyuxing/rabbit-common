@@ -1,9 +1,6 @@
 package com.github.chengyuxing.common.io;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -27,10 +24,11 @@ public interface IOutput {
      * @throws IOException ioEx
      */
     default void saveTo(OutputStream outputStream, boolean close) throws IOException {
-        outputStream.write(toBytes());
+        BufferedOutputStream out = new BufferedOutputStream(outputStream);
+        out.write(toBytes());
         if (close) {
-            outputStream.flush();
-            outputStream.close();
+            out.flush();
+            out.close();
         }
     }
 
