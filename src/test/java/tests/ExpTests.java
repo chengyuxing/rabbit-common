@@ -6,12 +6,34 @@ import com.github.chengyuxing.common.utils.StringUtil;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class ExpTests {
     boolean exp = (true || false) && !(!(true && false || !!false)) || false;
     static String expression = "(true || false) && (!(true && false || !!false)) || false";
     static String expression2 = "true && false || !false";
     static final ScriptEngine SCRIPT_ENGINE = new ScriptEngineManager().getEngineByName("nashorn");
+
+    @Test
+    public void regexTest() throws Exception{
+        FastExpression expression = FastExpression.of(":id @ '^2\\d*$'");
+        Map<String, Object> map = new HashMap<>();
+        map.put("id", "2");
+        boolean res = expression.calc(map);
+        System.out.println(res);
+    }
+
+    @Test
+    public void str() throws Exception{
+        Pattern p = Pattern.compile("^'(\\S+)'$");
+        Matcher m = p.matcher("'abc''def'''d'");
+        while (m.find()) {
+            System.out.println(m.group());
+        }
+    }
 
     @Test
     public void test1() throws Exception {
