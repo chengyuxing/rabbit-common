@@ -24,9 +24,7 @@ public class DataRowTests {
         DataRow dr = DataRow.fromPair("dt", "2021-12-23",
                 "ldt", LocalDateTime.now(),
                 "id", 12);
-        dr.foreach((name, value) -> {
-            System.out.println(dr.getType(name));
-        });
+        System.out.println(dr);
         System.out.println(dr.toEntity(Entity.class));
     }
 

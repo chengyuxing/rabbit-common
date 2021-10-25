@@ -3,7 +3,6 @@ package com.github.chengyuxing.common;
 import com.github.chengyuxing.common.utils.ReflectUtil;
 
 import java.beans.IntrospectionException;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
@@ -486,31 +485,17 @@ public final class DataRow {
      *
      * @param clazz                 实体类
      * @param <T>                   类型参数
-     * @param constructorParamNames 如果实体类只有一个带参数的构造函数，指定参数名
+     * @param constructorParameters 如果实体类只有一个带参数的构造函数，则指定参数<br>
+     *                              e.g.
+     *                              <blockquote>
+     *                              <pre>DataRow row = DataRow.fromPair("x", 2, "y", 5, ...);</pre>
+     *                              <pre>row.toEntity(A.class, row.get("x"), row.get("y"));</pre>
+     *                              </blockquote>
      * @return 实体
      */
-    public <T> T toEntity(Class<T> clazz, String... constructorParamNames) {
+    public <T> T toEntity(Class<T> clazz, Object... constructorParameters) {
         try {
-            T entity;
-            if (constructorParamNames.length > 0) {
-                Class<?>[] classes = new Class[constructorParamNames.length];
-                Object[] values = new Object[classes.length];
-                for (int i = 0; i < constructorParamNames.length; i++) {
-                    classes[i] = Class.forName(getType(constructorParamNames[i]));
-                    values[i] = get(constructorParamNames[i]);
-                }
-                Constructor<T> constructor = clazz.getDeclaredConstructor(classes);
-                if (!constructor.isAccessible()) {
-                    constructor.setAccessible(true);
-                }
-                entity = constructor.newInstance(values);
-            } else {
-                Constructor<T> constructor = clazz.getDeclaredConstructor();
-                if (!constructor.isAccessible()) {
-                    constructor.setAccessible(true);
-                }
-                entity = constructor.newInstance();
-            }
+            T entity = ReflectUtil.getInstance(clazz, constructorParameters);
             for (Method method : ReflectUtil.getWRMethods(clazz).getItem2()) {
                 if (method.getName().startsWith("set")) {
                     String field = method.getName().substring(3);
@@ -518,16 +503,58 @@ public final class DataRow {
                     Object value = get(field);
                     // dataRow field type
                     String drValueType = getType(field);
-                    if (value != null && drValueType != null) {
+                    if (value != null && drValueType != null && method.getParameterCount() == 1) {
                         // entity field type
                         Class<?> enFieldType = method.getParameterTypes()[0];
-                        // if entity field type is java Date type
-                        if (enFieldType == Date.class) {
+                        if (enFieldType == String.class) {
+                            method.invoke(entity, value.toString());
+                        } else if (enFieldType == Character.class || enFieldType == char.class) {
+                            if (drValueType.equals("java.lang.String")) {
+                                method.invoke(entity, value.toString().charAt(0));
+                            } else {
+                                method.invoke(entity, value);
+                            }
+                        } else if (enFieldType == Integer.class || enFieldType == int.class) {
+                            if (drValueType.equals("java.lang.String")) {
+                                method.invoke(entity, Integer.parseInt(value.toString()));
+                            } else if (drValueType.equals("java.math.BigDecimal")) {
+                                method.invoke(entity, ((BigDecimal) value).intValue());
+                            } else {
+                                method.invoke(entity, value);
+                            }
+                        } else if (enFieldType == Long.class || enFieldType == long.class) {
+                            if (drValueType.equals("java.lang.String")) {
+                                method.invoke(entity, Long.parseLong(value.toString()));
+                            } else if (drValueType.equals("java.math.BigDecimal")) {
+                                method.invoke(entity, ((BigDecimal) value).longValue());
+                            } else {
+                                method.invoke(entity, value);
+                            }
+                        } else if (enFieldType == Double.class || enFieldType == double.class) {
+                            if (drValueType.equals("java.lang.String")) {
+                                method.invoke(entity, Double.parseDouble(value.toString()));
+                            } else if (drValueType.equals("java.math.BigDecimal")) {
+                                method.invoke(entity, ((BigDecimal) value).doubleValue());
+                            } else {
+                                method.invoke(entity, value);
+                            }
+                        } else if (enFieldType == Float.class || enFieldType == float.class) {
+                            if (drValueType.equals("java.lang.String")) {
+                                method.invoke(entity, Float.parseFloat(value.toString()));
+                            } else if (drValueType.equals("java.math.BigDecimal")) {
+                                method.invoke(entity, ((BigDecimal) value).floatValue());
+                            } else {
+                                method.invoke(entity, value);
+                            }
+                            // if entity field type is java Date type
+                        } else if (enFieldType == Date.class) {
                             // just set child class, 'java.sql.' date time type
                             if (Date.class.isAssignableFrom(value.getClass())) {
                                 method.invoke(entity, value);
                             } else if (drValueType.equals("java.lang.String")) {
                                 method.invoke(entity, DateTimes.toDate(value.toString()));
+                            } else {
+                                method.invoke(entity, value);
                             }
                             //if entity field type is java8 new date time api，convert sql date time type
                         } else if (Temporal.class.isAssignableFrom(enFieldType)) {
@@ -576,6 +603,9 @@ public final class DataRow {
                                         method.invoke(entity, DateTimes.toLocalTime(value.toString()));
                                     }
                                     break;
+                                default:
+                                    method.invoke(entity, value);
+                                    break;
                             }
                             // if entity filed type is Map, Collection, or not starts with java.
                             // reason：about not starts with java, allow Map, Collection, user's custom entity, except others.
@@ -597,24 +627,12 @@ public final class DataRow {
                                     method.invoke(entity, Arrays.asList((Object[]) value));
                                 } else if (Set.class.isAssignableFrom(enFieldType)) {
                                     method.invoke(entity, new HashSet<>(Arrays.asList((Object[]) value)));
+                                } else {
+                                    method.invoke(entity, value);
                                 }
                             } else {
                                 method.invoke(entity, value);
                             }
-                        } else if (enFieldType == String.class) {
-                            method.invoke(entity, value.toString());
-                        } else if (enFieldType == Integer.class) {
-                            if (drValueType.equals("java.lang.String")) {
-                                method.invoke(entity, Integer.parseInt(value.toString()));
-                            } else if (drValueType.equals("java.math.BigDecimal")) {
-                                method.invoke(entity, ((BigDecimal) value).intValue());
-                            }
-                        } else if (enFieldType == Long.class && drValueType.equals("java.lang.String")) {
-                            method.invoke(entity, Long.parseLong(value.toString()));
-                        } else if (enFieldType == Double.class && drValueType.equals("java.lang.String")) {
-                            method.invoke(entity, Double.parseDouble(value.toString()));
-                        } else if (enFieldType == Float.class && drValueType.equals("java.lang.String")) {
-                            method.invoke(entity, Float.parseFloat(value.toString()));
                         } else {
                             method.invoke(entity, value);
                         }
@@ -624,8 +642,6 @@ public final class DataRow {
             return entity;
         } catch (NoSuchMethodException | InstantiationException | InvocationTargetException | IntrospectionException | IllegalAccessException e) {
             throw new RuntimeException("convert to " + clazz.getTypeName() + " error: ", e);
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException("generate " + clazz + " constructor error: ", e);
         }
     }
 

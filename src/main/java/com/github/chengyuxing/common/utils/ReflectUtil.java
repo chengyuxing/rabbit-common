@@ -6,6 +6,7 @@ import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -138,5 +139,39 @@ public final class ReflectUtil {
         } catch (ClassNotFoundException | IllegalAccessException | InstantiationException | NoSuchMethodException | InvocationTargetException e) {
             throw new RuntimeException("convert to json error: ", e);
         }
+    }
+
+    /**
+     * 获取指定类的一个实例
+     *
+     * @param clazz                 javaBean实体类
+     * @param constructorParameters 构造函数参数
+     * @param <T>                   实例类型参数
+     * @return 类的实例
+     * @throws NoSuchMethodException     如果类中没有相应的方法
+     * @throws InvocationTargetException 调用目标类异常
+     * @throws InstantiationException    实例化异常
+     * @throws IllegalAccessException    类访问权限异常
+     */
+    public static <T> T getInstance(Class<T> clazz, Object... constructorParameters) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+        T entity;
+        if (constructorParameters.length > 0) {
+            Class<?>[] classes = new Class[constructorParameters.length];
+            for (int i = 0; i < constructorParameters.length; i++) {
+                classes[i] = constructorParameters[i].getClass();
+            }
+            Constructor<T> constructor = clazz.getDeclaredConstructor(classes);
+            if (!constructor.isAccessible()) {
+                constructor.setAccessible(true);
+            }
+            entity = constructor.newInstance(constructorParameters);
+        } else {
+            Constructor<T> constructor = clazz.getDeclaredConstructor();
+            if (!constructor.isAccessible()) {
+                constructor.setAccessible(true);
+            }
+            entity = constructor.newInstance();
+        }
+        return entity;
     }
 }

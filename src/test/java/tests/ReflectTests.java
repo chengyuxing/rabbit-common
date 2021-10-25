@@ -22,13 +22,13 @@ public class ReflectTests {
         int x = 10, y = 18;
         DataRow row = DataRow.fromPair("x", x, "y", y, "name", "昆明市");
         System.out.println(row);
-        System.out.println(row.toEntity(Coord.class, "x", "y"));
+        System.out.println(row.toEntity(Coord.class, row.get("x"), row.get("y")));
     }
 
     @Test
-    public void reflect() throws Exception{
+    public void reflect() throws Exception {
         Constructor<?>[] constructors = Location.class.getDeclaredConstructors();
-        Stream.of(constructors).forEach(c->{
+        Stream.of(constructors).forEach(c -> {
             System.out.println(Arrays.toString(c.getGenericParameterTypes()));
         });
         System.out.println(int.class.getSimpleName());
