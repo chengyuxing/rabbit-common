@@ -6,6 +6,7 @@ import java.beans.IntrospectionException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.*;
@@ -515,82 +516,105 @@ public final class DataRow {
                     String field = method.getName().substring(3);
                     field = field.substring(0, 1).toLowerCase().concat(field.substring(1));
                     Object value = get(field);
-                    String valueType = getType(field);
-                    if (value != null && valueType != null) {
-                        Class<?> argType = method.getParameterTypes()[0];
-                        if (argType == Date.class) {
-                            switch (valueType) {
-                                case "java.sql.Time":
-                                    method.invoke(entity, new Date(((Time) value).toLocalTime().atDate(LocalDate.now()).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()));
-                                    break;
-                                case "java.sql.Timestamp":
-                                    method.invoke(entity, new Date(((Timestamp) value).toInstant().toEpochMilli()));
-                                    break;
-                                case "java.sql.Date":
-                                    method.invoke(entity, new Date(((java.sql.Date) value).toLocalDate().atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()));
-                                    break;
-                                case "java.lang.String":
-                                    method.invoke(entity, DateTimes.toDate(value.toString()));
-                                    break;
+                    // dataRow field type
+                    String drValueType = getType(field);
+                    if (value != null && drValueType != null) {
+                        // entity field type
+                        Class<?> enFieldType = method.getParameterTypes()[0];
+                        // if entity field type is java Date type
+                        if (enFieldType == Date.class) {
+                            // just set child class, 'java.sql.' date time type
+                            if (Date.class.isAssignableFrom(value.getClass())) {
+                                method.invoke(entity, value);
+                            } else if (drValueType.equals("java.lang.String")) {
+                                method.invoke(entity, DateTimes.toDate(value.toString()));
                             }
-                        } else if (Temporal.class.isAssignableFrom(argType)) {
-                            switch (valueType) {
+                            //if entity field type is java8 new date time api，convert sql date time type
+                        } else if (Temporal.class.isAssignableFrom(enFieldType)) {
+                            switch (drValueType) {
                                 case "java.sql.Date":
-                                    if (argType == LocalDate.class) {
+                                    if (enFieldType == LocalDate.class) {
                                         method.invoke(entity, ((java.sql.Date) value).toLocalDate());
                                     }
                                     break;
                                 case "java.sql.Timestamp":
-                                    if (argType == LocalDateTime.class) {
+                                    if (enFieldType == LocalDateTime.class) {
                                         method.invoke(entity, ((Timestamp) value).toLocalDateTime());
-                                    } else if (argType == Instant.class) {
+                                    } else if (enFieldType == Instant.class) {
                                         method.invoke(entity, ((Timestamp) value).toInstant());
-                                    } else if (argType == LocalDate.class) {
+                                    } else if (enFieldType == LocalDate.class) {
                                         method.invoke(entity, ((Timestamp) value).toLocalDateTime().toLocalDate());
-                                    } else if (argType == LocalTime.class) {
+                                    } else if (enFieldType == LocalTime.class) {
                                         method.invoke(entity, ((Timestamp) value).toLocalDateTime().toLocalTime());
                                     }
                                     break;
                                 case "java.sql.Time":
-                                    if (argType == LocalTime.class) {
+                                    if (enFieldType == LocalTime.class) {
                                         method.invoke(entity, ((Time) value).toLocalTime());
                                     }
                                     break;
+                                case "java.util.Date":
+                                    ZonedDateTime zoneDt = ((Date) value).toInstant().atZone(ZoneId.systemDefault());
+                                    if (enFieldType == LocalDateTime.class) {
+                                        method.invoke(entity, zoneDt.toLocalDateTime());
+                                    } else if (enFieldType == Instant.class) {
+                                        method.invoke(entity, zoneDt.toInstant());
+                                    } else if (enFieldType == LocalDate.class) {
+                                        method.invoke(entity, zoneDt.toLocalDate());
+                                    } else if (enFieldType == LocalTime.class) {
+                                        method.invoke(entity, zoneDt.toLocalTime());
+                                    }
+                                    break;
                                 case "java.lang.String":
-                                    if (argType == LocalDateTime.class) {
+                                    if (enFieldType == LocalDateTime.class) {
                                         method.invoke(entity, DateTimes.toLocalDateTime(value.toString()));
-                                    } else if (argType == Instant.class) {
+                                    } else if (enFieldType == Instant.class) {
                                         method.invoke(entity, DateTimes.toInstant(value.toString()));
-                                    } else if (argType == LocalDate.class) {
+                                    } else if (enFieldType == LocalDate.class) {
                                         method.invoke(entity, DateTimes.toLocalDate(value.toString()));
-                                    } else if (argType == LocalTime.class) {
+                                    } else if (enFieldType == LocalTime.class) {
                                         method.invoke(entity, DateTimes.toLocalTime(value.toString()));
                                     }
                                     break;
                             }
-                        } else if (Map.class.isAssignableFrom(argType) || Collection.class.isAssignableFrom(argType) || !argType.getTypeName().startsWith("java.")) {
-                            if (valueType.equals("org.postgresql.util.PGobject")) {
+                            // if entity filed type is Map, Collection, or not starts with java.
+                            // reason：about not starts with java, allow Map, Collection, user's custom entity, except others.
+                        } else if (Map.class.isAssignableFrom(enFieldType) || Collection.class.isAssignableFrom(enFieldType) || !enFieldType.getTypeName().startsWith("java.")) {
+                            // if dataRow from PostgreSQL
+                            if (drValueType.equals("org.postgresql.util.PGobject")) {
                                 Class<?> pgObjClass = value.getClass();
                                 String pgType = (String) pgObjClass.getDeclaredMethod("getType").invoke(value);
                                 String pgValue = (String) pgObjClass.getDeclaredMethod("getValue").invoke(value);
                                 if (pgType.equals("json") || pgType.equals("jsonb")) {
-                                    method.invoke(entity, json2Obj(pgValue, argType));
+                                    method.invoke(entity, json2Obj(pgValue, enFieldType));
                                 }
                                 // I think this is json string and you want convert to object.
-                            } else if (valueType.equals("java.lang.String")) {
-                                method.invoke(entity, json2Obj(value.toString(), argType));
+                            } else if (drValueType.equals("java.lang.String")) {
+                                method.invoke(entity, json2Obj(value.toString(), enFieldType));
                                 // PostgreSQL array and exclude blob
-                            } else if (valueType.startsWith("[L") && valueType.endsWith(";")) {
-                                if (List.class.isAssignableFrom(argType)) {
+                            } else if (drValueType.startsWith("[L") && drValueType.endsWith(";")) {
+                                if (List.class.isAssignableFrom(enFieldType)) {
                                     method.invoke(entity, Arrays.asList((Object[]) value));
-                                } else if (Set.class.isAssignableFrom(argType)) {
+                                } else if (Set.class.isAssignableFrom(enFieldType)) {
                                     method.invoke(entity, new HashSet<>(Arrays.asList((Object[]) value)));
                                 }
                             } else {
                                 method.invoke(entity, value);
                             }
-                        } else if (argType == String.class) {
+                        } else if (enFieldType == String.class) {
                             method.invoke(entity, value.toString());
+                        } else if (enFieldType == Integer.class) {
+                            if (drValueType.equals("java.lang.String")) {
+                                method.invoke(entity, Integer.parseInt(value.toString()));
+                            } else if (drValueType.equals("java.math.BigDecimal")) {
+                                method.invoke(entity, ((BigDecimal) value).intValue());
+                            }
+                        } else if (enFieldType == Long.class && drValueType.equals("java.lang.String")) {
+                            method.invoke(entity, Long.parseLong(value.toString()));
+                        } else if (enFieldType == Double.class && drValueType.equals("java.lang.String")) {
+                            method.invoke(entity, Double.parseDouble(value.toString()));
+                        } else if (enFieldType == Float.class && drValueType.equals("java.lang.String")) {
+                            method.invoke(entity, Float.parseFloat(value.toString()));
                         } else {
                             method.invoke(entity, value);
                         }
