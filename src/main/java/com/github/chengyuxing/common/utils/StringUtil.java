@@ -391,4 +391,33 @@ public class StringUtil {
         }
         return numeric.matches(NUMBER_REGEX);
     }
+
+    /**
+     * 从一个指定索引开始查找一段字符串内容直到不为空白字符
+     *
+     * @param text    内容
+     * @param index   起始索引
+     * @param reverse 是否反向查找
+     * @return 不为空白字符的坐标
+     */
+    public static int searchIndexUntilNotBlank(String text, int index, boolean reverse) {
+        if (reverse) {
+            while (index-- > 0) {
+                char c = text.charAt(index);
+                if (c != '\n' && c != '\t' && c != '\r' && c != ' ') {
+                    return index;
+                }
+            }
+            return 0;
+        } else {
+            int lastIndex = text.length() - 1;
+            while (index++ < lastIndex) {
+                char c = text.charAt(index);
+                if (c != '\n' && c != '\t' && c != '\r' && c != ' ') {
+                    return index;
+                }
+            }
+            return lastIndex + 1;
+        }
+    }
 }
