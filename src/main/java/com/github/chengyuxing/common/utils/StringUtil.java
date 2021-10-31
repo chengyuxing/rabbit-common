@@ -398,7 +398,7 @@ public class StringUtil {
      * @param text    内容
      * @param index   起始索引
      * @param reverse 是否反向查找
-     * @return 不为空白字符的坐标
+     * @return 不为空白字符的索引，如果为-1，说明第一个字符是空白，如果为字符串的长度，则说明最后一个字符也是空白
      */
     public static int searchIndexUntilNotBlank(String text, int index, boolean reverse) {
         if (reverse) {
@@ -408,7 +408,7 @@ public class StringUtil {
                     return index;
                 }
             }
-            return 0;
+            return -1;
         } else {
             int lastIndex = text.length() - 1;
             while (index++ < lastIndex) {
