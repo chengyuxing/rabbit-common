@@ -363,7 +363,7 @@ public class StringUtil {
      * @return 是否相等
      */
     public static boolean charEqualIgnoreCase(char a, char b) {
-        if (a >= 65 && a <= 122 && b >= 65 && b <= 122 && a != b) {
+        if (((a >= 65 && a <= 90) || (a >= 97 && a <= 122)) && ((b >= 65 && b <= 90) || (b >= 97 && b <= 122)) && a != b) {
             return Math.abs(a - b) == 32;
         }
         return a == b;
