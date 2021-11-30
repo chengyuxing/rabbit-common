@@ -420,4 +420,40 @@ public class StringUtil {
             return lastIndex + 1;
         }
     }
+
+    /**
+     * 忽略大小写查询子字符在字符串中串出现的次数
+     *
+     * @param str    字符串
+     * @param substr 子字符串
+     * @return 出现次数
+     */
+    public static int countOfContainsIgnoreCase(final String str, final String substr) {
+        String source = str;
+        int count = 0;
+        int idx;
+        while ((idx = indexOfIgnoreCase(source, substr)) != -1) {
+            count++;
+            source = source.substring(idx + 1);
+        }
+        return count;
+    }
+
+    /**
+     * 查询子字符在字符串中串出现的次数
+     *
+     * @param str    字符串
+     * @param substr 子字符串
+     * @return 出现次数
+     */
+    public static int countOfContains(final String str, final String substr) {
+        String source = str;
+        int count = 0;
+        int idx;
+        while ((idx = source.indexOf(substr)) != -1) {
+            count++;
+            source = source.substring(idx + 1);
+        }
+        return count;
+    }
 }
