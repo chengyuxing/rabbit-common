@@ -80,10 +80,10 @@ public class FastExpression extends IExpression {
             String value = m.group("value");
             if (checkArgsKey) {
                 if (args == null) {
-                    throw new NullPointerException("args must not be null.");
+                    throw new NullPointerException("args must not be null or field 'checkArgsKey' is true.");
                 }
                 if (!args.containsKey(name)) {
-                    throw new IllegalArgumentException("value of key: '" + name + "' is not exists in " + args + " while calculate expression.");
+                    throw new IllegalArgumentException("value of key: '" + name + "' is not exists in " + args + " while calculate expression, or field 'checkArgsKey' is true.");
                 }
             }
             Object source = args == null ? null : args.get(name);
