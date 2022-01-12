@@ -14,6 +14,8 @@ import java.util.regex.Pattern;
 public class StringUtil {
     public static final String NUMBER_REGEX = "-?([0-9]|(0\\.\\d+)|([1-9]+\\.?\\d+))";
 
+    public static final String NEW_LINE = "\n";
+    public static final String TAB = "\t";
     /**
      * 根据正则表达式所匹配的分组分割字符串<br>
      * 例如一个字符串 {@code aaa##bbb%%ddd}<br>
