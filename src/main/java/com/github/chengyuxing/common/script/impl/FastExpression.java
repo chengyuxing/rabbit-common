@@ -124,7 +124,7 @@ public class FastExpression extends IExpression {
      */
     public static boolean boolExpressionEval(String expression) {
         expression = expression.trim();
-        // finally get result
+        // finally, get result
         if (expression.equals("true") || expression.equals("false")) {
             return Boolean.parseBoolean(expression);
         }
@@ -186,18 +186,19 @@ public class FastExpression extends IExpression {
                         for (int x = 0; x < ops.size(); x++) {
                             String op = ops.get(x).trim();
                             boolean currentValue = parseBool(values.get(x));
-                            // 'or' short logic calc
-                            if (x == 0 && currentValue && op.equals("||")) {
-                                res = true;
-                                break;
+                            if (x == 0) {
+                                // 'or' short calc
+                                if (currentValue && op.equals("||")) {
+                                    res = true;
+                                    break;
+                                }
+                                // 'and' short calc，just break because 'false' is default
+                                if (!currentValue && op.equals("&&")) {
+                                    break;
+                                }
+                                // if short calc didn't match, make first var as result, then calc next step
+                                res = currentValue;
                             }
-                            // 'and' short logic calc
-                            if (x == 0 && !currentValue && op.equals("&&")) {
-                                res = false;
-                                break;
-                            }
-                            // else prepare the next calc
-                            res = currentValue;
                             boolean nextValue = parseBool(values.get(x + 1));
                             if (op.equals("||")) {
                                 res = res || nextValue;

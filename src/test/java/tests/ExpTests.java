@@ -12,7 +12,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class ExpTests {
-    boolean exp = (true || false) && !(!(true && false || !!false)) || false;
+    boolean exp = (true || false) && (!(true && false || !!false)) || false;
     static String expression = "(true || false) && (!(true && false || !!false)) || false";
     static String expression2 = "true && false || !false";
     static final ScriptEngine SCRIPT_ENGINE = new ScriptEngineManager().getEngineByName("nashorn");
@@ -38,6 +38,11 @@ public class ExpTests {
     @Test
     public void test1() throws Exception {
         System.out.println(FastExpression.boolExpressionEval(expression));
+    }
+
+    @Test
+    public void test3() throws Exception{
+        System.out.println(FastExpression.boolExpressionEval("true && false && true && true && true"));
     }
 
     @Test
