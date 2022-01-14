@@ -43,6 +43,18 @@ public final class DataRow {
     }
 
     /**
+     * 新建一个DataRow
+     *
+     * @param names  字段
+     * @param types  类型
+     * @param values 值
+     * @return 新实例
+     */
+    public static DataRow of(String[] names, String[] types, Object[] values) {
+        return of(names, values);
+    }
+
+    /**
      * @return 一个空的DataRow
      */
     public static DataRow empty() {
