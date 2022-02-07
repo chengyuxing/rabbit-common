@@ -15,6 +15,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 import static com.github.chengyuxing.common.utils.ReflectUtil.json2Obj;
+import static com.github.chengyuxing.common.utils.ReflectUtil.obj2Json;
 
 /**
  * 不可变行数据类型
@@ -646,6 +647,15 @@ public final class DataRow {
     }
 
     /**
+     * 转为一个json字符串
+     *
+     * @return json字符串
+     */
+    public String toJson() {
+        return obj2Json(toMap());
+    }
+
+    /**
      * 从一个标准的javaBean实体转为DataRow类型
      *
      * @param entity 实体
@@ -713,6 +723,16 @@ public final class DataRow {
             values[i] = pairs[(i << 1) + 1];
         }
         return of(names, values);
+    }
+
+    /**
+     * 从一个json对象字符串创建一个DataRow
+     *
+     * @param json json对象字符串 e.g. {@code {"a":1,"b":2}}
+     * @return DataRow
+     */
+    public static DataRow fromJson(String json) {
+        return fromMap((Map<?, ?>) json2Obj(json, Map.class));
     }
 
     /**
