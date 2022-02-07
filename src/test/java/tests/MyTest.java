@@ -47,7 +47,7 @@ public class MyTest {
         rows.add(DataRow.fromPair("a", 4, "b", "x3"));
         rows.add(DataRow.fromPair("a", 5, "b", "x4"));
 
-        System.out.println(DataRow.zip(rows));
+        System.out.println(DataRow.zip(rows).toJson());
     }
 
     @Test
