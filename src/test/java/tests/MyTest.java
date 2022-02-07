@@ -40,7 +40,8 @@ public class MyTest {
 
     @Test
     public void rowTest2() throws Exception {
-        System.out.println(row.toMap());
+        System.out.println(row.toJson());
+        System.out.println(DataRow.fromJson("{\"a\":1,\"b\":2,\"name\":\"chengyuxing\"}"));
     }
 
     @Test
