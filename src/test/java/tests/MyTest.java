@@ -39,6 +39,18 @@ public class MyTest {
     }
 
     @Test
+    public void test2() throws Exception{
+        List<DataRow> rows = new ArrayList<>();
+        rows.add(DataRow.fromPair("a", 1, "b", "x"));
+        rows.add(DataRow.fromPair("a", 2, "b", "x1"));
+        rows.add(DataRow.fromPair("a", 3, "b", "x2"));
+        rows.add(DataRow.fromPair("a", 4, "b", "x3"));
+        rows.add(DataRow.fromPair("a", 5, "b", "x4"));
+
+        System.out.println(DataRow.zip(rows));
+    }
+
+    @Test
     public void rowTest2() throws Exception {
         System.out.println(row.toJson());
         System.out.println(DataRow.fromJson("{\"a\":1,\"b\":2,\"name\":\"chengyuxing\"}"));

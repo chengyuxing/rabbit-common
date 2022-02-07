@@ -656,6 +656,33 @@ public final class DataRow {
     }
 
     /**
+     * 组合多个DataRow以创建一个DataRow（数据行转为列）
+     *
+     * @param rows 数据行集合 （为保证正确性，默认以第一行字段为列名，每行字段都必须相同）
+     * @return 一行以列存储形式的数据行
+     */
+    @SuppressWarnings({"unchecked", "ConstantConditions"})
+    public static DataRow zip(List<DataRow> rows) {
+        if (rows.isEmpty()) {
+            return empty();
+        }
+        String[] names = rows.get(0).names;
+        Object[] pairs = new Object[names.length << 1];
+        for (int i = 0; i < names.length; i++) {
+            int vi = i << 1;
+            pairs[vi] = names[i];
+            pairs[vi + 1] = new ArrayList<>();
+        }
+        DataRow res = DataRow.fromPair(pairs);
+        for (DataRow row : rows) {
+            for (String name : names) {
+                ((ArrayList<Object>)res.get(name)).add(row.get(name));
+            }
+        }
+        return res;
+    }
+
+    /**
      * 从一个标准的javaBean实体转为DataRow类型
      *
      * @param entity 实体
