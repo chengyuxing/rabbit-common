@@ -662,21 +662,28 @@ public final class DataRow {
      * @return 一行以列存储形式的数据行
      */
     @SuppressWarnings({"unchecked", "ConstantConditions"})
-    public static DataRow zip(List<DataRow> rows) {
+    public static DataRow zip(Collection<DataRow> rows) {
         if (rows.isEmpty()) {
             return empty();
         }
-        String[] names = rows.get(0).names;
-        Object[] pairs = new Object[names.length << 1];
-        for (int i = 0; i < names.length; i++) {
-            int vi = i << 1;
-            pairs[vi] = names[i];
-            pairs[vi + 1] = new ArrayList<>();
-        }
-        DataRow res = DataRow.fromPair(pairs);
+        boolean first = true;
+        DataRow res = null;
+        String[] names = null;
         for (DataRow row : rows) {
+            if (first) {
+                names = row.names;
+                Object[] pairs = new Object[names.length << 1];
+                for (int i = 0; i < names.length; i++) {
+                    int vi = i << 1;
+                    pairs[vi] = names[i];
+                    pairs[vi + 1] = new ArrayList<>();
+                }
+                res = DataRow.fromPair(pairs);
+                first = false;
+            }
+
             for (String name : names) {
-                ((ArrayList<Object>)res.get(name)).add(row.get(name));
+                ((ArrayList<Object>) res.get(name)).add(row.get(name));
             }
         }
         return res;
