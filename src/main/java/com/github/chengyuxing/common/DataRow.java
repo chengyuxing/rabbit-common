@@ -666,6 +666,9 @@ public final class DataRow {
         if (rows.isEmpty()) {
             return empty();
         }
+        if (rows.size() == 1) {
+            return rows.iterator().next();
+        }
         boolean first = true;
         DataRow res = null;
         String[] names = null;
