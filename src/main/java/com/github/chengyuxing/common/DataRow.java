@@ -750,7 +750,7 @@ public final class DataRow {
      * @return DataRow
      */
     public static DataRow fromPair(Object... pairs) {
-        if (pairs.length == 0 || pairs.length % 2 != 0) {
+        if (pairs.length == 0 || (pairs.length & 1) != 0) {
             throw new IllegalArgumentException("key value are not a pair.");
         }
         String[] names = new String[pairs.length >> 1];

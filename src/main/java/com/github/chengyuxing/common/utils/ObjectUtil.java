@@ -24,7 +24,7 @@ public final class ObjectUtil {
         objs[0] = equal;
         objs[1] = result;
         System.arraycopy(more, 0, objs, 2, more.length);
-        boolean isOdd = objs.length % 2 != 0;
+        boolean isOdd = (objs.length & 1) != 0;
         R res = null;
         for (int i = 0; i < objs.length; i += 2) {
             if (value.equals(objs[i])) {

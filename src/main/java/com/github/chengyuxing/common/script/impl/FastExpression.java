@@ -167,7 +167,7 @@ public class FastExpression extends IExpression {
                 // 2 or more symbols of '!'
                 int inverseCount = outerSub.lastIndexOf("!(") + 1;
                 // if count of '!' is odd number, it means result must be inverse.
-                boolean inverse = inverseCount % 2 == 1;
+                boolean inverse = (inverseCount & 1) == 1;
                 // except '(', ')' ,'!' symbols, e.g. 'true || false'
                 String innerSub = expression.substring(start + inverseCount + 1, end);
                 if (lastStep) {
@@ -234,7 +234,7 @@ public class FastExpression extends IExpression {
         String v = bool.trim();
         int inverseCount = v.lastIndexOf('!') + 1;
         boolean boolV = Boolean.parseBoolean(v.substring(inverseCount));
-        if (inverseCount % 2 == 1) {
+        if ((inverseCount & 1) == 1) {
             boolV = !boolV;
         }
         return boolV;
