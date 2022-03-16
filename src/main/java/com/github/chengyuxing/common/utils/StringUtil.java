@@ -16,6 +16,7 @@ public class StringUtil {
 
     public static final String NEW_LINE = "\n";
     public static final String TAB = "\t";
+
     /**
      * 根据正则表达式所匹配的分组分割字符串<br>
      * 例如一个字符串 {@code aaa##bbb%%ddd}<br>
@@ -294,6 +295,25 @@ public class StringUtil {
         }
         for (String target : targets) {
             if (containsIgnoreCase(source, target)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 判断被查询的字符串是否包含其中一个目标字符串
+     *
+     * @param source  被查询的字符串
+     * @param targets 被包含的字符串组
+     * @return 是否包含任意一个
+     */
+    public static boolean containsAny(String source, String... targets) {
+        if (targets.length < 1) {
+            return true;
+        }
+        for (String target : targets) {
+            if (source.contains(target)) {
                 return true;
             }
         }
