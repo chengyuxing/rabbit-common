@@ -2,6 +2,7 @@ package com.github.chengyuxing.common.script;
 
 import com.github.chengyuxing.common.utils.StringUtil;
 
+import java.util.Collection;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -130,7 +131,16 @@ public class Comparators {
             return source == null;
         }
         if (value.equals("blank")) {
-            return source == null || "".equals(source.toString().trim());
+            if (source == null) {
+                return true;
+            }
+            if (source instanceof Object[]) {
+                return ((Object[]) source).length == 0;
+            }
+            if (source instanceof Collection) {
+                return ((Collection<?>) source).isEmpty();
+            }
+            return "".equals(source.toString().trim());
         }
         if (value.equals("true")) {
             return source.equals(true);

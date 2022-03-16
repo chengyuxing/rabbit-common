@@ -1,11 +1,13 @@
 package tests;
 
-import org.junit.Test;
+import com.github.chengyuxing.common.script.Comparators;
 import com.github.chengyuxing.common.script.impl.FastExpression;
 import com.github.chengyuxing.common.utils.StringUtil;
+import org.junit.Test;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -19,7 +21,7 @@ public class ExpTests {
     static final ScriptEngine SCRIPT_ENGINE = new ScriptEngineManager().getEngineByName("nashorn");
 
     @Test
-    public void regexTest() throws Exception{
+    public void regexTest() throws Exception {
         FastExpression expression = FastExpression.of(":id @ '^2\\d*$'");
         Map<String, Object> map = new HashMap<>();
         map.put("id", "2");
@@ -28,7 +30,7 @@ public class ExpTests {
     }
 
     @Test
-    public void str() throws Exception{
+    public void str() throws Exception {
         Pattern p = Pattern.compile("^'(\\S+)'$");
         Matcher m = p.matcher("'abc''def'''d'");
         while (m.find()) {
@@ -43,7 +45,7 @@ public class ExpTests {
     }
 
     @Test
-    public void test3() throws Exception{
+    public void test3() throws Exception {
         System.out.println(FastExpression.boolExpressionEval("true && false && true && true && true"));
     }
 
@@ -53,13 +55,18 @@ public class ExpTests {
     }
 
     @Test
-    public void ccc() throws Exception{
-        System.out.println("string.class".substring(0,"string.class".lastIndexOf(".class")));
+    public void ccc() throws Exception {
+        System.out.println("string.class".substring(0, "string.class".lastIndexOf(".class")));
     }
 
     @Test
-    public void starts() throws Exception{
-        System.out.println(StringUtil.startsWithsIgnoreCase("aaaaaaa",new String[0]));
+    public void starts() throws Exception {
+        System.out.println(StringUtil.startsWithsIgnoreCase("aaaaaaa", new String[0]));
         System.out.println("aaaa".startsWith(""));
+    }
+
+    @Test
+    public void eq() throws Exception {
+        System.out.println(Comparators.equal(Collections.emptyList(), "blank"));
     }
 }
