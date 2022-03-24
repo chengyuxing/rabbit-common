@@ -14,6 +14,7 @@ import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
+import static com.github.chengyuxing.common.utils.ObjectUtil.getValue;
 import static com.github.chengyuxing.common.utils.ReflectUtil.json2Obj;
 import static com.github.chengyuxing.common.utils.ReflectUtil.obj2Json;
 
@@ -132,8 +133,10 @@ public final class DataRow {
      * 获取值
      *
      * @param name 名称
-     * @param <T>  类型参数
+     * @param <T>  结果类型参数
      * @return 值
+     * @see #at(String)
+     * @see #at(Object...)
      */
     public <T> T get(String name) {
         int index = indexOf(name);
@@ -141,6 +144,69 @@ public final class DataRow {
             return null;
         }
         return get(index);
+    }
+
+    /**
+     * 使用json路径表达式来取多层嵌套对象的值，以 "/" 开头，
+     * <blockquote>
+     * 字符串为对象键名，数字为数组索引，例如：
+     * <pre>
+     *       DataRow: {a:{b:[{name:cyx},{name:jack}]}}
+     *       使用json路径表达式：get("/a/b/0/name")
+     *       结果：cyx
+     *           </pre>
+     * </blockquote>
+     *
+     * @param jsonPathExp json路径表达式（{@code /a/b/0/name}）
+     * @return 值
+     * @see #at(Object...)
+     */
+    public <T> T at(String jsonPathExp) {
+        if (!jsonPathExp.startsWith("/")) {
+            throw new IllegalArgumentException("json path expression [ " + jsonPathExp + " ] syntax error: first char must be \"/\".");
+        }
+        Object[] paths = jsonPathExp.substring(1).split("/");
+        return at(paths);
+    }
+
+    /**
+     * 使用数组成员表示路径来取多层嵌套对象的值
+     * <blockquote>
+     * 字符串为对象键名，数字为数组索引，例如：
+     * <pre>
+     *       DataRow: {a:{b:[{name:cyx},{name:jack}]}}
+     *       使用json路径表达式：get("a","b",0,"name")
+     *       结果：cyx
+     *           </pre>
+     * </blockquote>
+     *
+     * @param pathPart 数组成员表示的嵌套对象路径（{@code "a","b",0,"name"}）
+     * @return 值
+     * @see #at(String)
+     */
+    @SuppressWarnings("unchecked")
+    public <T> T at(Object... pathPart) {
+        if (pathPart.length == 0) {
+            throw new IllegalArgumentException("args must not empty.");
+        }
+        Object value = get(pathPart[0].toString());
+        if (pathPart.length == 1) {
+            return (T) value;
+        }
+        try {
+            for (int i = 1; i < pathPart.length; i++) {
+                value = getValue(value, pathPart[i].toString());
+            }
+            return (T) value;
+        } catch (InvocationTargetException e) {
+            throw new RuntimeException("invoke error:", e);
+        } catch (NoSuchMethodException e) {
+            throw new RuntimeException("cannot find field of getMethod: ", e);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException("target object access denied: ", e);
+        } catch (NoSuchFieldException e) {
+            throw new RuntimeException("cannot find field：", e);
+        }
     }
 
     /**

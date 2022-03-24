@@ -1,12 +1,17 @@
 package tests;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.chengyuxing.common.DataRow;
 import com.github.chengyuxing.common.script.Comparators;
 import com.github.chengyuxing.common.script.impl.FastExpression;
 import com.github.chengyuxing.common.utils.StringUtil;
 import org.junit.Test;
+import tests.entity.Coord;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -68,5 +73,13 @@ public class ExpTests {
     @Test
     public void eq() throws Exception {
         System.out.println(Comparators.equal(Collections.emptyList(), "blank"));
+    }
+
+    @Test
+    public void testJson() throws Exception {
+        DataRow row = DataRow.fromPair("user", Arrays.asList("a", "b", "c", new Coord(18, 22)));
+        System.out.println(row);
+        System.out.println((Integer) row.at("/user/3/y"));
+        System.out.println((Integer) row.at("user", 3, "x"));
     }
 }

@@ -1,5 +1,10 @@
 package com.github.chengyuxing.common.utils;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Collection;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -38,6 +43,43 @@ public final class ObjectUtil {
             }
         }
         return res;
+    }
+
+    /**
+     * 获取一个对象或数组的值
+     *
+     * @param value 对象
+     * @param key   键名或索引
+     * @return 值
+     * @throws NoSuchMethodException     如果是javaBean并且没有此字段
+     * @throws InvocationTargetException 如果调用目标错误
+     * @throws IllegalAccessException    如果此字段不可访问
+     */
+    public static Object getValue(Object value, String key) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, NoSuchFieldException {
+        if (key.matches("\\d")) {
+            int idx = Integer.parseInt(key);
+            if (value instanceof Collection) {
+                int i = 0;
+                for (Object v : (Collection<?>) value) {
+                    if (i++ == idx) {
+                        return v;
+                    }
+                }
+            }
+            if (value instanceof Object[]) {
+                return ((Object[]) value)[idx];
+            }
+        }
+        if (value instanceof Map) {
+            return ((Map<?, ?>) value).get(key);
+        }
+        Class<?> clazz = value.getClass();
+        Class<?> type = clazz.getDeclaredField(key).getType();
+        Method m = clazz.getDeclaredMethod(ReflectUtil.initGetMethod(key, type));
+        if (!m.isAccessible()) {
+            m.setAccessible(true);
+        }
+        return m.invoke(value);
     }
 
     /**
