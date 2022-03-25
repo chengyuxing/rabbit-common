@@ -152,7 +152,7 @@ public final class DataRow {
      * 字符串为对象键名，数字为数组索引，例如：
      * <pre>
      *       DataRow: {a:{b:[{name:cyx},{name:jack}]}}
-     *       使用json路径表达式：get("/a/b/0/name")
+     *       json路径表达式："/a/b/0/name"
      *       结果：cyx
      *           </pre>
      * </blockquote>
@@ -172,12 +172,12 @@ public final class DataRow {
     }
 
     /**
-     * 使用数组成员表示路径来取多层嵌套对象的值
+     * 使用路径数组成员表示路径来取多层嵌套对象的值
      * <blockquote>
-     * 字符串为对象键名，数字为数组索引，例如：
+     * 字符串为对象键名，数字为索引，例如：
      * <pre>
      *       DataRow: {a:{b:[{name:cyx},{name:jack}]}}
-     *       使用json路径表达式：get("a","b",0,"name")
+     *       路径数组成员："a","b",0,"name"
      *       结果：cyx
      *           </pre>
      * </blockquote>

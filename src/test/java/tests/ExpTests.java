@@ -78,7 +78,7 @@ public class ExpTests {
         DataRow row = DataRow.fromPair("user", Arrays.asList("a", "b", "c", new Coord(18, 22)));
         System.out.println(row);
         System.out.println((Integer) row.at("/user/3/y"));
-        System.out.println((Integer) row.at("user", 3, "x"));
+        System.out.println((Integer) row.at(0, 3, "x"));
     }
 
     @Test
