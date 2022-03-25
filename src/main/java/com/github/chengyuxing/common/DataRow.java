@@ -136,7 +136,7 @@ public final class DataRow {
      * @param <T>  结果类型参数
      * @return 值
      * @see #at(String)
-     * @see #at(Object...)
+     * @see #at(Object, Object...)
      */
     public <T> T get(String name) {
         int index = indexOf(name);
@@ -159,14 +159,16 @@ public final class DataRow {
      *
      * @param jsonPathExp json路径表达式（{@code /a/b/0/name}）
      * @return 值
-     * @see #at(Object...)
+     * @see #at(Object, Object...)
      */
     public <T> T at(String jsonPathExp) {
-        if (!jsonPathExp.startsWith("/")) {
-            throw new IllegalArgumentException("json path expression [ " + jsonPathExp + " ] syntax error: first char must be \"/\".");
+        String pathsS = jsonPathExp;
+        if (jsonPathExp.startsWith("/")) {
+            pathsS = pathsS.substring(1);
         }
-        Object[] paths = jsonPathExp.substring(1).split("/");
-        return at(paths);
+        Object[] paths = pathsS.split("/");
+        Object[] more = Arrays.copyOfRange(paths, 1, paths.length);
+        return at(paths[0], more);
     }
 
     /**
@@ -180,24 +182,28 @@ public final class DataRow {
      *           </pre>
      * </blockquote>
      *
-     * @param pathPart 数组成员表示的嵌套对象路径（{@code "a","b",0,"name"}）
+     * @param key  对象第一层的键
+     * @param more 对象内层更多的键
+     * @param <T>  结果类型
      * @return 值
      * @see #at(String)
      */
     @SuppressWarnings("unchecked")
-    public <T> T at(Object... pathPart) {
-        if (pathPart.length == 0) {
-            throw new IllegalArgumentException("args must not empty.");
+    public <T> T at(Object key, Object... more) {
+        Object obj;
+        if (key instanceof Integer) {
+            obj = get((Integer) key);
+        } else {
+            obj = get(key.toString());
         }
-        Object value = get(pathPart[0].toString());
-        if (pathPart.length == 1) {
-            return (T) value;
+        if (more.length == 0) {
+            return (T) obj;
         }
         try {
-            for (int i = 1; i < pathPart.length; i++) {
-                value = getValue(value, pathPart[i].toString());
+            for (Object o : more) {
+                obj = getValue(obj, o.toString());
             }
-            return (T) value;
+            return (T) obj;
         } catch (InvocationTargetException e) {
             throw new RuntimeException("invoke error:", e);
         } catch (NoSuchMethodException e) {

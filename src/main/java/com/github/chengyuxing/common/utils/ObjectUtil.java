@@ -1,6 +1,7 @@
 package com.github.chengyuxing.common.utils;
 
-import java.lang.reflect.Field;
+import com.github.chengyuxing.common.DataRow;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collection;
@@ -51,9 +52,10 @@ public final class ObjectUtil {
      * @param value 对象
      * @param key   键名或索引
      * @return 值
-     * @throws NoSuchMethodException     如果是javaBean并且没有此字段
-     * @throws InvocationTargetException 如果调用目标错误
-     * @throws IllegalAccessException    如果此字段不可访问
+     * @throws NoSuchMethodException     如果是javaBean并且没有此字段的get方法
+     * @throws InvocationTargetException 如果调用目标javaBean错误
+     * @throws IllegalAccessException    如果javaBean此字段不可访问
+     * @throws NoSuchFieldException      如果javaBean没有相应的字段
      */
     public static Object getValue(Object value, String key) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, NoSuchFieldException {
         if (key.matches("\\d")) {
@@ -69,9 +71,15 @@ public final class ObjectUtil {
             if (value instanceof Object[]) {
                 return ((Object[]) value)[idx];
             }
+            if (value instanceof DataRow) {
+                return ((DataRow) value).get(idx);
+            }
         }
         if (value instanceof Map) {
             return ((Map<?, ?>) value).get(key);
+        }
+        if (value instanceof DataRow) {
+            return ((DataRow) value).get(key);
         }
         Class<?> clazz = value.getClass();
         Class<?> type = clazz.getDeclaredField(key).getType();
@@ -80,6 +88,30 @@ public final class ObjectUtil {
             m.setAccessible(true);
         }
         return m.invoke(value);
+    }
+
+    /**
+     * 获取一个深层嵌套对象的值
+     *
+     * @param obj         深层嵌套的对象
+     * @param jsonPathExp json路径表达式（{@code /a/b/0/name}）
+     * @return 值
+     * @throws NoSuchFieldException      如果是javaBean并且没有此字段
+     * @throws InvocationTargetException 如果调用目标javaBean错误
+     * @throws NoSuchMethodException     如果是javaBean并且没有此字段的get方法
+     * @throws IllegalAccessException    如果javaBean此字段不可访问
+     */
+    public static Object getDeepNestValue(Object obj, String jsonPathExp) throws NoSuchFieldException, InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+        if (!jsonPathExp.startsWith("/")) {
+            throw new IllegalArgumentException("json path expression syntax error, must startsWith '/', for example '/" + jsonPathExp + "'");
+        }
+        String trimStart = jsonPathExp.substring(1);
+        if (!trimStart.contains("/")) {
+            return getValue(obj, trimStart);
+        }
+        String key = trimStart.substring(0, trimStart.indexOf("/"));
+        String tail = trimStart.substring(trimStart.indexOf("/"));
+        return getDeepNestValue(getValue(obj, key), tail);
     }
 
     /**

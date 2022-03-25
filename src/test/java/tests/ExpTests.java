@@ -5,16 +5,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.chengyuxing.common.DataRow;
 import com.github.chengyuxing.common.script.Comparators;
 import com.github.chengyuxing.common.script.impl.FastExpression;
+import com.github.chengyuxing.common.utils.ObjectUtil;
 import com.github.chengyuxing.common.utils.StringUtil;
 import org.junit.Test;
 import tests.entity.Coord;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -81,5 +79,18 @@ public class ExpTests {
         System.out.println(row);
         System.out.println((Integer) row.at("/user/3/y"));
         System.out.println((Integer) row.at("user", 3, "x"));
+    }
+
+    @Test
+    public void deepValue() throws Exception{
+        List<Map<String, Object>> list = new ArrayList<>();
+        Map<String, Object> map = new HashMap<>();
+        Coord coord = new Coord(11, 34);
+        map.put("coord", coord);
+        list.add(map);
+
+        String props = "/0/coord/x";
+
+        System.out.println(ObjectUtil.getDeepNestValue(list,props));
     }
 }
