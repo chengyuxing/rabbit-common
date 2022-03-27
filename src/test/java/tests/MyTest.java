@@ -48,6 +48,7 @@ public class MyTest {
         rows.add(DataRow.fromPair("a", 5, "b", "x4"));
 
         System.out.println(DataRow.zip(rows).toJson());
+        System.out.println((String) DataRow.zip(rows).at("/b/3"));
     }
 
     @Test

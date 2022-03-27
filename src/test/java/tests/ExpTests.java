@@ -74,6 +74,13 @@ public class ExpTests {
     }
 
     @Test
+    public void pickTest() throws Exception {
+        DataRow row = DataRow.fromPair("a", 1, "b", 2, "c", 3, "d", 4);
+        System.out.println(row.pick("d", "c", "a"));
+        System.out.println((Integer) row.at("/c"));
+    }
+
+    @Test
     public void testJson() throws Exception {
         DataRow row = DataRow.fromPair("user", Arrays.asList("a", "b", "c", new Coord(18, 22)));
         System.out.println(row);
@@ -82,7 +89,7 @@ public class ExpTests {
     }
 
     @Test
-    public void deepValue() throws Exception{
+    public void deepValue() throws Exception {
         List<Map<String, Object>> list = new ArrayList<>();
         Map<String, Object> map = new HashMap<>();
         Coord coord = new Coord(11, 34);
@@ -91,6 +98,6 @@ public class ExpTests {
 
         String props = "/0/coord/x";
 
-        System.out.println(ObjectUtil.getDeepNestValue(list,props));
+        System.out.println(ObjectUtil.getDeepNestValue(list, props));
     }
 }

@@ -526,6 +526,26 @@ public final class DataRow {
     }
 
     /**
+     * 挑出一些字段名生成一个新的DataRow
+     *
+     * @param name 字段名
+     * @param more 更多字段名
+     * @return 新的DataRow
+     */
+    public DataRow pick(String name, String... more) {
+        List<String> allNames = new ArrayList<>();
+        allNames.add(name);
+        allNames.addAll(Arrays.asList(more));
+        DataRow res = empty();
+        for (String n : names) {
+            if (!allNames.contains(n)) {
+                res = remove(n);
+            }
+        }
+        return res;
+    }
+
+    /**
      * 转换为Map
      *
      * @param mapper 值转换器
