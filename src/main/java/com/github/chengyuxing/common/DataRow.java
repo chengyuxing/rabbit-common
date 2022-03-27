@@ -533,12 +533,10 @@ public final class DataRow {
      * @return 新的DataRow
      */
     public DataRow pick(String name, String... more) {
-        List<String> allNames = new ArrayList<>(Arrays.asList(more));
-        allNames.add(0, name);
-        DataRow res = empty();
-        for (String n : names) {
-            if (!allNames.contains(n)) {
-                res = remove(n);
+        DataRow res = empty().add(name, get(name));
+        if (more.length > 0) {
+            for (String n : more) {
+                res = res.add(n, get(n));
             }
         }
         return res;
