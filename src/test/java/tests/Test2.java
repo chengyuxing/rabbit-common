@@ -97,6 +97,8 @@ public class Test2 {
         DataRow row = DataRow.fromPair("a", 1, "b", 2, "c", 3, "d", 4, "e", 5);
         System.out.println(row);
         System.out.println(row.remove("b"));
+        System.out.println(row.put("c", 109));
+        System.out.println(row.cloneNew());
     }
 
     @Test
