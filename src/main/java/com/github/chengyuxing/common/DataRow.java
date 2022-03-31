@@ -526,6 +526,35 @@ public final class DataRow {
     }
 
     /**
+     * 如果字段名存在，则进行值的更新，否则进行新增操作
+     *
+     * @param name     字段名
+     * @param newValue 新的值
+     * @return 一个新的数据行
+     */
+    public DataRow put(String name, Object newValue) {
+        if (containsName(name)) {
+            String[] newNames = Arrays.copyOfRange(names, 0, names.length);
+            Object[] newValues = Arrays.copyOfRange(values, 0, values.length);
+            int index = indexOf(name);
+            newValues[index] = newValue;
+            return of(newNames, newValues);
+        }
+        return add(name, newValue);
+    }
+
+    /**
+     * 克隆一个新的DataRow
+     *
+     * @return 新的DataRow
+     */
+    public DataRow cloneNew() {
+        String[] newNames = Arrays.copyOfRange(names, 0, names.length);
+        Object[] newValues = Arrays.copyOfRange(values, 0, values.length);
+        return of(newNames, newValues);
+    }
+
+    /**
      * 挑出一些字段名生成一个新的DataRow
      *
      * @param name 字段名
