@@ -1,11 +1,15 @@
 package com.github.chengyuxing.common.console;
 
 /**
- * 可输出颜色的打印帮助类
+ * Unix-Like控制台打印帮助类
  */
 public class Printer {
     public static String colorful(String str, Color color) {
         return "\033[" + color.getCode() + "m" + str + "\033[0m";
+    }
+
+    public static String underline(String str) {
+        return "\33[4m" + str + "\33[0m";
     }
 
     public static void print(String str, Color color) {
