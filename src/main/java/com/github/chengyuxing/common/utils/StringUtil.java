@@ -4,6 +4,7 @@ package com.github.chengyuxing.common.utils;
 import com.github.chengyuxing.common.tuple.Pair;
 
 import java.util.ArrayList;
+import java.util.Formatter;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -467,5 +468,16 @@ public class StringUtil {
             source = source.substring(idx + 1);
         }
         return count;
+    }
+
+    public static String getSize(byte[] bytes) {
+        String strSize = "0KB";
+        final Formatter fmt = new Formatter();
+        if (bytes.length > 1048576) {
+            strSize = fmt.format("%.2f", bytes.length / 1048576.0) + "MB";
+        } else if (bytes.length > 0) {
+            strSize = fmt.format("%.2f", bytes.length / 1024.0) + "KB";
+        }
+        return "blob:" + strSize;
     }
 }
