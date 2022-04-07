@@ -470,6 +470,12 @@ public class StringUtil {
         return count;
     }
 
+    /**
+     * 获取字节数组对象的大小
+     *
+     * @param bytes 字节数组
+     * @return 文件大小
+     */
     public static String getSize(byte[] bytes) {
         String strSize = "0KB";
         final Formatter fmt = new Formatter();
