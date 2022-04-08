@@ -484,6 +484,6 @@ public class StringUtil {
         } else if (bytes.length > 0) {
             strSize = fmt.format("%.2f", bytes.length / 1024.0) + "KB";
         }
-        return "blob:" + strSize;
+        return strSize;
     }
 }
