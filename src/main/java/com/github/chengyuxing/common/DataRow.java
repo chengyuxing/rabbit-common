@@ -196,7 +196,7 @@ public final class DataRow extends LinkedHashMap<String, Object> {
     /**
      * 获取值
      *
-     * @param index 索引¬
+     * @param index 索引
      * @param <T>   结果类型参数
      * @return 值
      */
