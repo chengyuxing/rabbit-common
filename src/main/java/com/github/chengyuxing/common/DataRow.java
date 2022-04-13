@@ -18,7 +18,7 @@ import static com.github.chengyuxing.common.utils.ReflectUtil.json2Obj;
 import static com.github.chengyuxing.common.utils.ReflectUtil.obj2Json;
 
 /**
- * 不可变行数据类型
+ * 基于LinkedHashMap扩展的行数据类型，提供一些常用方法
  */
 public final class DataRow extends LinkedHashMap<String, Object> {
     /**
