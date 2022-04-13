@@ -1,7 +1,5 @@
 package tests;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.chengyuxing.common.DataRow;
 import com.github.chengyuxing.common.script.Comparators;
 import com.github.chengyuxing.common.script.impl.FastExpression;
@@ -86,6 +84,11 @@ public class ExpTests {
         System.out.println(row);
         System.out.println((Integer) row.at("/user/3/y"));
         System.out.println((Integer) row.at(0, 3, "x"));
+        System.out.println("------------------------");
+        DataRow row2 = DataRow.fromMap(row.toMap());
+        System.out.println(row2.get(new Integer(0)));
+        System.out.println(row2.at("/user/3/x"));
+        System.out.println(row2.at(0, 2));
     }
 
     @Test

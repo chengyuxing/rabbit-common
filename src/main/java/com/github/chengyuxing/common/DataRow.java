@@ -11,7 +11,6 @@ import java.sql.Timestamp;
 import java.time.*;
 import java.time.temporal.Temporal;
 import java.util.*;
-import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 import static com.github.chengyuxing.common.utils.ObjectUtil.getValue;
@@ -21,13 +20,36 @@ import static com.github.chengyuxing.common.utils.ReflectUtil.obj2Json;
 /**
  * 不可变行数据类型
  */
-public final class DataRow {
-    private final String[] names;
-    private final Object[] values;
+public final class DataRow extends LinkedHashMap<String, Object> {
+    /**
+     * 构造函数
+     */
+    public DataRow() {
 
-    DataRow(String[] names, Object[] values) {
-        this.names = names;
-        this.values = values;
+    }
+
+    /**
+     * 构造函数
+     *
+     * @param map 从一个map创建
+     */
+    public DataRow(Map<String, ?> map) {
+        super(map);
+    }
+
+    /**
+     * 构造函数
+     *
+     * @param names  一组键名
+     * @param values 一组键值
+     */
+    public DataRow(String[] names, Object[] values) {
+        if (names.length == values.length) {
+            for (int i = 0; i < names.length; i++) {
+                put(names[i], values[i]);
+            }
+        } else
+            throw new IllegalArgumentException("names and values length not equal!");
     }
 
     /**
@@ -38,17 +60,14 @@ public final class DataRow {
      * @return 新实例
      */
     public static DataRow of(String[] names, Object[] values) {
-        if (names.length == values.length) {
-            return new DataRow(names, values);
-        }
-        throw new IllegalArgumentException("all of 3 args length not equal!");
+        return new DataRow(names, values);
     }
 
     /**
      * @return 一个空的DataRow
      */
     public static DataRow empty() {
-        return of(new String[0], new Object[0]);
+        return new DataRow();
     }
 
     /**
@@ -57,7 +76,7 @@ public final class DataRow {
      * @return 是否为非空
      */
     public boolean nonEmpty() {
-        return names.length != 0;
+        return !isEmpty();
     }
 
     /**
@@ -66,7 +85,7 @@ public final class DataRow {
      * @return 值
      */
     public List<Object> getValues() {
-        return Arrays.asList(values);
+        return new ArrayList<>(values());
     }
 
     /**
@@ -75,7 +94,7 @@ public final class DataRow {
      * @return 字段
      */
     public List<String> getNames() {
-        return Arrays.asList(names);
+        return new ArrayList<>(keySet());
     }
 
     /**
@@ -85,11 +104,11 @@ public final class DataRow {
      * @return 如果值存在或不为null返回值类型名称，否则返回null
      */
     public String getType(String name) {
-        int index = indexOf(name);
-        if (index == -1) {
+        Object v = get(name);
+        if (v == null) {
             return null;
         }
-        return getType(index);
+        return v.getClass().getName();
     }
 
     /**
@@ -99,51 +118,101 @@ public final class DataRow {
      * @return 如果值不为null返回值类型名称，否则返回null
      */
     public String getType(int index) {
-        Object v = get(index);
-        if (v == null) {
-            return null;
+        return get(index).getClass().getName();
+    }
+
+    /**
+     * 根据索引获取键名
+     *
+     * @param index 索引
+     * @return 键名
+     */
+    public String getName(int index) {
+        Object[] keys = keySet().toArray();
+        String name = keys[index].toString();
+        for (int i = keys.length - 1; i >= 0; i--) {
+            keys[i] = null;
         }
-        return v.getClass().getName();
+        keys = null;
+        return name;
+    }
+
+    /**
+     * 获取值，如果为null，则返回默认值
+     *
+     * @param key          如果是Integer类型，则根据索引获取
+     * @param defaultValue 默认值
+     * @return 值或默认值
+     */
+    @Override
+    public Object getOrDefault(Object key, Object defaultValue) {
+        if (key instanceof Integer) {
+            Object v = get(((Integer) key).intValue());
+            if (v == null) {
+                return defaultValue;
+            }
+            return v;
+        }
+        return super.getOrDefault(key, defaultValue);
+    }
+
+    /**
+     * 获取值
+     *
+     * @param key 如果是Integer类型，则根据索引获取
+     * @return 值
+     * @see #get(int)
+     */
+    @Override
+    public Object get(Object key) {
+        if (key instanceof Integer) {
+            return get(((Integer) key).intValue());
+        }
+        return super.get(key);
     }
 
     /**
      * 获取值
      *
      * @param index 索引
-     * @param <T>   类型参数
+     * @return 值
+     */
+    public Object get(int index) {
+        return get(getName(index));
+    }
+
+    /**
+     * 获取值
+     *
+     * @param name 键名
+     * @param <T>  结果类型参数
      * @return 值
      */
     @SuppressWarnings("unchecked")
-    public <T> T get(int index) {
-        return (T) values[index];
+    public <T> T getAs(Object name) {
+        return (T) get(name);
+    }
+
+    /**
+     * 获取值
+     *
+     * @param index 索引¬
+     * @param <T>   结果类型参数
+     * @return 值
+     */
+    @SuppressWarnings("unchecked")
+    public <T> T getAs(int index) {
+        return (T) get(index);
     }
 
     /**
      * 获取可空值
      *
      * @param index 索引
-     * @param <T>   类型参数
      * @return 可空值
      */
-    public <T> Optional<T> getOptional(int index) {
+    public Optional<Object> getOptional(int index) {
         return Optional.ofNullable(get(index));
-    }
-
-    /**
-     * 获取值
-     *
-     * @param name 名称
-     * @param <T>  结果类型参数
-     * @return 值
-     * @see #at(String)
-     * @see #at(Object, Object...)
-     */
-    public <T> T get(String name) {
-        int index = indexOf(name);
-        if (index == -1) {
-            return null;
-        }
-        return get(index);
     }
 
     /**
@@ -158,11 +227,10 @@ public final class DataRow {
      * </blockquote>
      *
      * @param jsonPathExp json路径表达式（{@code /a/b/0/name}）
-     * @param <T>         结果类型参数
      * @return 值
      * @see #at(Object, Object...)
      */
-    public <T> T at(String jsonPathExp) {
+    public Object at(String jsonPathExp) {
         String pathsS = jsonPathExp;
         if (jsonPathExp.startsWith("/")) {
             pathsS = pathsS.substring(1);
@@ -185,26 +253,19 @@ public final class DataRow {
      *
      * @param key  对象第一层的键
      * @param more 对象内层更多的键
-     * @param <T>  结果类型
      * @return 值
      * @see #at(String)
      */
-    @SuppressWarnings("unchecked")
-    public <T> T at(Object key, Object... more) {
-        Object obj;
-        if (key instanceof Integer) {
-            obj = get((Integer) key);
-        } else {
-            obj = get(key.toString());
-        }
+    public Object at(Object key, Object... more) {
+        Object obj = get(key);
         if (more.length == 0) {
-            return (T) obj;
+            return obj;
         }
         try {
             for (Object o : more) {
                 obj = getValue(obj, o.toString());
             }
-            return (T) obj;
+            return obj;
         } catch (InvocationTargetException e) {
             throw new RuntimeException("invoke error:", e);
         } catch (NoSuchMethodException e) {
@@ -220,11 +281,24 @@ public final class DataRow {
      * 获取可空值
      *
      * @param name 名字
-     * @param <T>  类型参数
      * @return 可空值
      */
-    public <T> Optional<T> getOptional(String name) {
+    public Optional<Object> getOptional(String name) {
         return Optional.ofNullable(get(name));
+    }
+
+    /**
+     * 根据名字获取一个字符串
+     *
+     * @param name 名字
+     * @return 字符串或null
+     */
+    public String getString(String name) {
+        Object v = get(name);
+        if (v == null) {
+            return null;
+        }
+        return v.toString();
     }
 
     /**
@@ -234,11 +308,7 @@ public final class DataRow {
      * @return 字符串或null
      */
     public String getString(int index) {
-        Object value = get(index);
-        if (value == null) {
-            return null;
-        }
-        return value.toString();
+        return getString(getName(index));
     }
 
     /**
@@ -252,20 +322,6 @@ public final class DataRow {
     }
 
     /**
-     * 根据名字获取一个字符串
-     *
-     * @param name 名字
-     * @return 字符串或null
-     */
-    public String getString(String name) {
-        int index = indexOf(name);
-        if (index == -1) {
-            return null;
-        }
-        return getString(index);
-    }
-
-    /**
      * 根据名字获取一个可为空的字符串
      *
      * @param name 名字
@@ -276,20 +332,30 @@ public final class DataRow {
     }
 
     /**
+     * 根据名字获取一个整型
+     *
+     * @param name 名字
+     * @return 整型或null
+     */
+    public Integer getInt(String name) {
+        Object v = get(name);
+        if (v == null) {
+            return null;
+        }
+        if (v instanceof Integer) {
+            return (Integer) v;
+        }
+        return Integer.parseInt(v.toString());
+    }
+
+    /**
      * 根据索引获取一个整型
      *
      * @param index 索引
      * @return 整型或null
      */
     public Integer getInt(int index) {
-        Object value = get(index);
-        if (value == null) {
-            return null;
-        }
-        if (value instanceof Integer) {
-            return (Integer) value;
-        }
-        return Integer.parseInt(value.toString());
+        return getInt(getName(index));
     }
 
     /**
@@ -300,20 +366,6 @@ public final class DataRow {
      */
     public Optional<Integer> getOptionalInt(int index) {
         return Optional.ofNullable(getInt(index));
-    }
-
-    /**
-     * 根据名字获取一个整型
-     *
-     * @param name 名字
-     * @return 整型或null
-     */
-    public Integer getInt(String name) {
-        int index = indexOf(name);
-        if (index == -1) {
-            return null;
-        }
-        return getInt(index);
     }
 
     /**
@@ -329,42 +381,28 @@ public final class DataRow {
     /**
      * 获取一个双精度类型数组
      *
-     * @param index 索引
-     * @return 双精度数字或null
+     * @param name 名字
+     * @return 双精度数字
      */
-    public Double getDouble(int index) {
-        Object value = get(index);
-        if (value == null) {
+    public Double getDouble(String name) {
+        Object v = get(name);
+        if (v == null) {
             return null;
         }
-        if (value instanceof Double) {
-            return (Double) value;
+        if (v instanceof Double) {
+            return (Double) v;
         }
-        return Double.parseDouble(value.toString());
-    }
-
-    /**
-     * 获取一个可空双精度类型数组
-     *
-     * @param index 索引
-     * @return 可空双精度数字
-     */
-    public Optional<Double> getOptionalDouble(int index) {
-        return Optional.ofNullable(getDouble(index));
+        return Double.parseDouble(v.toString());
     }
 
     /**
      * 获取一个双精度类型数组
      *
-     * @param name 名字
-     * @return 双精度数字
+     * @param index 索引
+     * @return 双精度数字或null
      */
-    public Double getDouble(String name) {
-        int index = indexOf(name);
-        if (index == -1) {
-            return null;
-        }
-        return getDouble(index);
+    public Double getDouble(int index) {
+        return getDouble(getName(index));
     }
 
     /**
@@ -378,20 +416,40 @@ public final class DataRow {
     }
 
     /**
+     * 获取一个可空双精度类型数组
+     *
+     * @param index 索引
+     * @return 可空双精度数字
+     */
+    public Optional<Double> getOptionalDouble(int index) {
+        return Optional.ofNullable(getDouble(index));
+    }
+
+    /**
+     * 获取一个长整型值
+     *
+     * @param name 名字
+     * @return 双精度数字
+     */
+    public Long getLong(String name) {
+        Object v = get(name);
+        if (v == null) {
+            return null;
+        }
+        if (v instanceof Long) {
+            return (Long) v;
+        }
+        return Long.parseLong(v.toString());
+    }
+
+    /**
      * 获取一个长整型值
      *
      * @param index 索引
      * @return 双精度数字
      */
     public Long getLong(int index) {
-        Object value = get(index);
-        if (value == null) {
-            return null;
-        }
-        if (value instanceof Long) {
-            return (Long) value;
-        }
-        return Long.parseLong(value.toString());
+        return getLong(getName(index));
     }
 
     /**
@@ -405,20 +463,6 @@ public final class DataRow {
     }
 
     /**
-     * 获取一个长整型值
-     *
-     * @param name 名字
-     * @return 双精度数字
-     */
-    public Long getLong(String name) {
-        int index = indexOf(name);
-        if (index == -1) {
-            return null;
-        }
-        return getLong(index);
-    }
-
-    /**
      * 获取一个可空长整型值
      *
      * @param name 名字
@@ -429,130 +473,15 @@ public final class DataRow {
     }
 
     /**
-     * 行数据列数
-     *
-     * @return 列数
-     */
-    public int size() {
-        return values.length;
-    }
-
-    /**
-     * 获取指定字段名的索引
-     *
-     * @param name 字段名
-     * @return 字段名位置索引
-     */
-    public int indexOf(String name) {
-        int index = -1;
-        if (name == null) {
-            return index;
-        }
-        for (int i = 0; i < names.length; i++) {
-            if (names[i].equals(name)) {
-                index = i;
-                break;
-            }
-        }
-        return index;
-    }
-
-    /**
-     * 判断键名是否存在
-     *
-     * @param name 键名
-     * @return 键名是否存在
-     */
-    public boolean containsName(String name) {
-        return indexOf(name) != -1;
-    }
-
-    /**
-     * 合并一个数据行
-     *
-     * @param other 另一个数据行
-     * @return 新的数据行
-     */
-    public DataRow concat(DataRow other) {
-        String[] newNames = new String[size() + other.size()];
-        Object[] newValues = new Object[newNames.length];
-        System.arraycopy(names, 0, newNames, 0, names.length);
-        System.arraycopy(other.names, 0, newNames, names.length, other.names.length);
-
-        System.arraycopy(values, 0, newValues, 0, values.length);
-        System.arraycopy(other.values, 0, newValues, values.length, other.values.length);
-
-        return DataRow.of(newNames, newValues);
-    }
-
-    /**
-     * 添加一个键值对
+     * 链式添加一个键值对，如果存在则进行覆盖
      *
      * @param name  字段名
      * @param value 值
      * @return 一个新的数据行
      */
     public DataRow add(String name, Object value) {
-        return concat(DataRow.fromPair(name, value));
-    }
-
-    /**
-     * 根据字段名移除一个值
-     *
-     * @param name 字段名
-     * @return 一个新的数据行
-     */
-    public DataRow remove(String name) {
-        int idx = indexOf(name);
-        if (idx != -1) {
-            String[] newNames = new String[size() - 1];
-            Object[] newValues = new Object[newNames.length];
-
-            if (idx == 0) {
-                System.arraycopy(names, 1, newNames, 0, newNames.length);
-            } else if (idx == newNames.length) {
-                System.arraycopy(names, 0, newNames, 0, newNames.length);
-            } else {
-                System.arraycopy(names, 0, newNames, 0, idx);
-                System.arraycopy(names, idx + 1, newNames, idx, newNames.length - idx);
-            }
-
-            for (int i = 0; i < newNames.length; i++) {
-                String newName = newNames[i];
-                newValues[i] = get(newName);
-            }
-            return DataRow.of(newNames, newValues);
-        }
-        throw new NoSuchElementException("name:\"" + name + "\" does not exist!");
-    }
-
-    /**
-     * 如果字段名存在，则进行值的更新，否则进行新增操作
-     *
-     * @param name     字段名
-     * @param newValue 新的值
-     * @return 一个新的数据行
-     */
-    public DataRow put(String name, Object newValue) {
-        if (containsName(name)) {
-            String[] newNames = Arrays.copyOfRange(names, 0, names.length);
-            Object[] newValues = Arrays.copyOfRange(values, 0, values.length);
-            int index = indexOf(name);
-            newValues[index] = newValue;
-            return of(newNames, newValues);
-        }
-        return add(name, newValue);
-    }
-
-    /**
-     * 克隆一个新的DataRow
-     *
-     * @return 新的DataRow
-     */
-    public DataRow cloneNew() {
-        String[] newNames = Arrays.copyOfRange(names, 0, names.length);
-        Object[] newValues = Arrays.copyOfRange(values, 0, values.length);
-        return of(newNames, newValues);
+        put(name, value);
+        return this;
     }
 
     /**
@@ -566,7 +495,7 @@ public final class DataRow {
         DataRow res = empty().add(name, get(name));
         if (more.length > 0) {
             for (String n : more) {
-                res = res.add(n, get(n));
+                res.put(n, get(n));
             }
         }
         return res;
@@ -581,8 +510,8 @@ public final class DataRow {
      */
     public <T> Map<String, T> toMap(Function<Object, T> mapper) {
         Map<String, T> map = new HashMap<>();
-        for (int i = 0; i < names.length; i++) {
-            map.put(names[i], mapper.apply(get(i)));
+        for (String key : keySet()) {
+            map.put(key, mapper.apply(get(key)));
         }
         return map;
     }
@@ -593,11 +522,7 @@ public final class DataRow {
      * @return map
      */
     public Map<String, Object> toMap() {
-        Map<String, Object> map = new HashMap<>();
-        for (int i = 0; i < names.length; i++) {
-            map.put(names[i], get(i));
-        }
-        return map;
+        return this;
     }
 
     /**
@@ -771,7 +696,7 @@ public final class DataRow {
      * @return json字符串
      */
     public String toJson() {
-        return obj2Json(toMap());
+        return obj2Json(this);
     }
 
     /**
@@ -780,7 +705,7 @@ public final class DataRow {
      * @param rows 数据行集合 （为保证正确性，默认以第一行字段为列名，每行字段都必须相同）
      * @return 一行以列存储形式的数据行
      */
-    @SuppressWarnings({"unchecked", "ConstantConditions"})
+    @SuppressWarnings({"unchecked"})
     public static DataRow zip(Collection<DataRow> rows) {
         if (rows.isEmpty()) {
             return empty();
@@ -789,21 +714,16 @@ public final class DataRow {
             return rows.iterator().next();
         }
         boolean first = true;
-        DataRow res = null;
-        String[] names = null;
+        DataRow res = new DataRow();
+        Set<String> names = null;
         for (DataRow row : rows) {
             if (first) {
-                names = row.names;
-                Object[] pairs = new Object[names.length << 1];
-                for (int i = 0; i < names.length; i++) {
-                    int vi = i << 1;
-                    pairs[vi] = names[i];
-                    pairs[vi + 1] = new ArrayList<>();
+                names = row.keySet();
+                for (String key : row.keySet()) {
+                    res.put(key, new ArrayList<>());
                 }
-                res = DataRow.fromPair(pairs);
                 first = false;
             }
-
             for (String name : names) {
                 ((ArrayList<Object>) res.get(name)).add(row.get(name));
             }
@@ -819,8 +739,7 @@ public final class DataRow {
      */
     public static DataRow fromEntity(Object entity) {
         try {
-            List<String> names = new ArrayList<>();
-            List<Object> values = new ArrayList<>();
+            DataRow row = new DataRow();
             for (Method method : ReflectUtil.getWRMethods(entity.getClass()).getItem1()) {
                 Class<?> returnType = method.getReturnType();
                 if (returnType != Class.class) {
@@ -833,12 +752,11 @@ public final class DataRow {
                     Object value = method.invoke(entity);
                     if (value != null) {
                         field = field.substring(0, 1).toLowerCase().concat(field.substring(1));
-                        names.add(field);
-                        values.add(value);
+                        row.put(field, value);
                     }
                 }
             }
-            return of(names.toArray(new String[0]), values.toArray());
+            return row;
         } catch (IllegalAccessException | IntrospectionException | InvocationTargetException e) {
             throw new RuntimeException("convert to DataRow error: ", e);
         }
@@ -850,16 +768,8 @@ public final class DataRow {
      * @param map map
      * @return DataRow
      */
-    public static DataRow fromMap(Map<?, ?> map) {
-        String[] names = new String[map.keySet().size()];
-        Object[] values = new Object[names.length];
-        int i = 0;
-        for (Object key : map.keySet()) {
-            names[i] = key.toString();
-            values[i] = map.get(key);
-            i++;
-        }
-        return of(names, values);
+    public static DataRow fromMap(Map<String, ?> map) {
+        return new DataRow(map);
     }
 
     /**
@@ -872,13 +782,13 @@ public final class DataRow {
         if (pairs.length == 0 || (pairs.length & 1) != 0) {
             throw new IllegalArgumentException("key value are not a pair.");
         }
-        String[] names = new String[pairs.length >> 1];
-        Object[] values = new Object[names.length];
-        for (int i = 0; i < names.length; i++) {
-            names[i] = pairs[i << 1].toString();
-            values[i] = pairs[(i << 1) + 1];
+        DataRow row = new DataRow();
+        int len = pairs.length >> 1;
+        for (int i = 0; i < len; i++) {
+            int idx = i << 1;
+            row.put(pairs[idx].toString(), pairs[idx + 1]);
         }
-        return of(names, values);
+        return row;
     }
 
     /**
@@ -888,18 +798,7 @@ public final class DataRow {
      * @return DataRow
      */
     public static DataRow fromJson(String json) {
-        return fromMap((Map<?, ?>) json2Obj(json, Map.class));
-    }
-
-    /**
-     * 遍历名称和值
-     *
-     * @param consumer 回调函数
-     */
-    public void foreach(BiConsumer<String, Object> consumer) {
-        for (int i = 0; i < size(); i++) {
-            consumer.accept(names[i], values[i]);
-        }
+        return (DataRow) json2Obj(json, DataRow.class);
     }
 
     /**
@@ -912,22 +811,9 @@ public final class DataRow {
      */
     public <T> T reduce(T init, TiFunction<T, String, Object, T> mapper) {
         T acc = init;
-        for (int i = 0; i < size(); i++) {
-            acc = mapper.apply(acc, names[i], values[i]);
+        for (String key : keySet()) {
+            acc = mapper.apply(acc, key, get(key));
         }
         return acc;
-    }
-
-    @Override
-    public String toString() {
-        String[] types = new String[values.length];
-        for (int i = 0; i < types.length; i++) {
-            types[i] = getType(i);
-        }
-        return "DataRow{\n" +
-                "names=" + Arrays.toString(names) +
-                "\ntypes=" + Arrays.toString(types) +
-                "\nvalues=" + Arrays.toString(values) +
-                "\n}";
     }
 }

@@ -15,12 +15,12 @@ import java.util.function.Function;
 
 import static com.github.chengyuxing.common.utils.ReflectUtil.json2Obj;
 
-public class DataRow2 {
+public class DataRow2z {
     private final Object[] grid;
     private static final int rows = 3;
     private final int columns;
 
-    DataRow2(String[] names, String[] types, Object[] values) {
+    DataRow2z(String[] names, String[] types, Object[] values) {
         if (names.length == types.length && types.length == values.length) {
             columns = names.length;
             grid = new Object[rows * columns];
@@ -32,11 +32,11 @@ public class DataRow2 {
         }
     }
 
-    public static DataRow2 of(String[] names, String[] types, Object[] values) {
-        return new DataRow2(names, types, values);
+    public static DataRow2z of(String[] names, String[] types, Object[] values) {
+        return new DataRow2z(names, types, values);
     }
 
-    public static DataRow2 of(String[] names, Object[] values) {
+    public static DataRow2z of(String[] names, Object[] values) {
         String[] types = new String[values.length];
         for (int i = 0; i < values.length; i++) {
             Object value = values[i];
@@ -55,7 +55,7 @@ public class DataRow2 {
         }
     }
 
-    public static DataRow2 empty() {
+    public static DataRow2z empty() {
         return of(new String[0], new String[0], new Object[0]);
     }
 
@@ -302,7 +302,7 @@ public class DataRow2 {
         }
     }
 
-    public static DataRow2 fromEntity(Object entity) {
+    public static DataRow2z fromEntity(Object entity) {
         try {
             List<String> names = new ArrayList<>();
             List<String> types = new ArrayList<>();
@@ -334,7 +334,7 @@ public class DataRow2 {
         }
     }
 
-    public static DataRow2 fromMap(Map<?, ?> map) {
+    public static DataRow2z fromMap(Map<?, ?> map) {
         String[] names = new String[map.keySet().size()];
         String[] types = new String[names.length];
         Object[] values = new Object[names.length];
@@ -352,7 +352,7 @@ public class DataRow2 {
         return of(names, types, values);
     }
 
-    public static DataRow2 fromPair(Object... pairs) {
+    public static DataRow2z fromPair(Object... pairs) {
         if (pairs.length == 0 || pairs.length % 2 != 0) {
             throw new IllegalArgumentException("key value are not a pair.");
         }

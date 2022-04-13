@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 public class Test2 {
 
     static List<DataRow> rows = new ArrayList<>();
-    static List<DataRow2> rows2 = new ArrayList<>();
+    static List<DataRow2z> rows2 = new ArrayList<>();
 
     //    @BeforeClass
     @Test
@@ -46,7 +46,7 @@ public class Test2 {
 
     @Test
     public void d2() throws Exception {
-        DataRow2 row = DataRow2.of(
+        DataRow2z row = DataRow2z.of(
                 new String[]{"a", "b", "c", "d", "e"},
                 new String[]{"String", "Object", "String", "String", "String"},
                 new Object[]{1, 2, 3, 4, 5}
@@ -88,7 +88,6 @@ public class Test2 {
         DataRow row1 = DataRow.fromPair("a", 1, "b", 2);
         DataRow row2 = DataRow.fromPair("c", 11, "d", 23);
 
-        System.out.println(row1.concat(row2).add("e", 90).add("f", 999));
         System.out.println(row1);
     }
 
@@ -98,7 +97,6 @@ public class Test2 {
         System.out.println(row);
         System.out.println(row.remove("b"));
         System.out.println(row.put("c", 109));
-        System.out.println(row.cloneNew());
     }
 
     @Test
@@ -141,6 +139,20 @@ public class Test2 {
         System.out.println(json);
 
         System.out.println(ReflectUtil.json2Obj(json, DataRow.class));
+    }
+
+    @Test
+    public void testlMap() throws Exception{
+        Map<String, Integer> map = new LinkedHashMap<>();
+        map.put("c", 1);
+        map.put("b", 1);
+        map.put("a", 1);
+        map.put("d", 1);
+        System.out.println(map);
+        map.put("a", 2);
+        map.put("d", 21);
+        map.put("e", 34);
+        System.out.println(map);
     }
 
     public static void len(String... args) {
