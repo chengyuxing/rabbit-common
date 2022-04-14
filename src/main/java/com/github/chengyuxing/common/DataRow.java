@@ -12,14 +12,13 @@ import java.sql.Timestamp;
 import java.time.*;
 import java.time.temporal.Temporal;
 import java.util.*;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
-
-import static com.github.chengyuxing.common.utils.ReflectUtil.json2Obj;
-import static com.github.chengyuxing.common.utils.ReflectUtil.obj2Json;
 
 /**
  * <h1>行数据对象</h1>
- * 值存储基于自动扩容数组，逻辑和ArrayList类似，实现Map接口，同时支持根据键和索引高效取值，支持json序列化
+ * 值存储基于自动扩容数组，逻辑和ArrayList类似，实现Map接口，同时支持根据键和索引高效取值，支持json序列化<br>
+ * 注意：这是一个非线程安全的实现
  */
 public final class DataRow implements Map<String, Object> {
     private final Map<String, Integer> indices;
@@ -439,22 +438,10 @@ public final class DataRow implements Map<String, Object> {
     @Override
     public Set<Entry<String, Object>> entrySet() {
         Set<Entry<String, Object>> set = new HashSet<>();
-        indices.keySet().forEach(k -> set.add(new Entry<String, Object>() {
-            @Override
-            public String getKey() {
-                return k;
-            }
-
-            @Override
-            public Object getValue() {
-                return get(k);
-            }
-
-            @Override
-            public Object setValue(Object value) {
-                return put(k, value);
-            }
-        }));
+        int i = 0;
+        for (String key : indices.keySet()) {
+            set.add(new DataRowEntry(key, elementData[i++]));
+        }
         return set;
     }
 
@@ -471,17 +458,34 @@ public final class DataRow implements Map<String, Object> {
         String name = key.toString();
         int index = indexOf(name);
         if (index != -1) {
-            Object old = this.elementData[index];
-            int numMoved = this.size - index - 1;
+            Object old = elementData[index];
+            int numMoved = size - index - 1;
             if (numMoved > 0) {
-                System.arraycopy(this.elementData, index + 1, this.elementData, index, numMoved);
+                System.arraycopy(elementData, index + 1, elementData, index, numMoved);
             }
             int dIncIdx = --size;
-            this.elementData[dIncIdx] = null;
+            elementData[dIncIdx] = null;
             indices.remove(name);
             return old;
         }
         return null;
+    }
+
+    @Override
+    public void forEach(BiConsumer<? super String, ? super Object> action) {
+        int i = 0;
+        for (String key : indices.keySet()) {
+            String k;
+            Object v;
+            try {
+                k = key;
+                v = elementData[i++];
+            } catch (IllegalStateException ise) {
+                // this usually means the entry is no longer in the map.
+                throw new ConcurrentModificationException(ise);
+            }
+            action.accept(k, v);
+        }
     }
 
     @Override
@@ -505,19 +509,19 @@ public final class DataRow implements Map<String, Object> {
                 return value;
             }
         }
-        if (this.size < this.elementData.length) {
+        if (size < elementData.length) {
             int incIdx = size++;
-            this.elementData[incIdx] = value;
+            elementData[incIdx] = value;
             indices.put(name, incIdx);
         } else {
-            int oldCapacity = this.elementData.length;
+            int oldCapacity = elementData.length;
             int newCapacity = oldCapacity << 1;
             Object[] newElementData = (Object[]) Array.newInstance(Object.class, newCapacity);
-            System.arraycopy(this.elementData, 0, newElementData, 0, oldCapacity);
+            System.arraycopy(elementData, 0, newElementData, 0, oldCapacity);
             int incIdx = size++;
             newElementData[incIdx] = value;
             indices.put(name, incIdx);
-            this.elementData = newElementData;
+            elementData = newElementData;
         }
         return value;
     }
@@ -553,29 +557,48 @@ public final class DataRow implements Map<String, Object> {
     }
 
     /**
-     * 转换为Map
+     * 归并操作
+     *
+     * @param init   初始值
+     * @param mapper 映射(初始值，名字，值)
+     * @param <T>    结果类型参数
+     * @return 归并后的结果
+     */
+    public <T> T reduce(T init, TiFunction<T, String, Object, T> mapper) {
+        T acc = init;
+        int i = 0;
+        for (String key : indices.keySet()) {
+            acc = mapper.apply(acc, key, elementData[i++]);
+        }
+        return acc;
+    }
+
+    /**
+     * 转为一个新的LinkedHashMap
      *
      * @param mapper 值转换器
      * @param <T>    值类型参数
-     * @return 一个Map
+     * @return map
      */
     public <T> Map<String, T> toMap(Function<Object, T> mapper) {
         Map<String, T> map = new LinkedHashMap<>();
+        int i = 0;
         for (String key : indices.keySet()) {
-            map.put(key, mapper.apply(get(key)));
+            map.put(key, mapper.apply(elementData[i++]));
         }
         return map;
     }
 
     /**
-     * 转为Map
+     * 转为一个新的LinkedHashMap
      *
      * @return map
      */
     public Map<String, Object> toMap() {
         Map<String, Object> map = new LinkedHashMap<>();
+        int i = 0;
         for (String key : indices.keySet()) {
-            map.put(key, get(key));
+            map.put(key, elementData[i++]);
         }
         return map;
     }
@@ -716,11 +739,11 @@ public final class DataRow implements Map<String, Object> {
                                 String pgType = (String) pgObjClass.getDeclaredMethod("getType").invoke(value);
                                 String pgValue = (String) pgObjClass.getDeclaredMethod("getValue").invoke(value);
                                 if (pgType.equals("json") || pgType.equals("jsonb")) {
-                                    method.invoke(entity, json2Obj(pgValue, enFieldType));
+                                    method.invoke(entity, ReflectUtil.json2Obj(pgValue, enFieldType));
                                 }
                                 // I think this is json string and you want convert to object.
                             } else if (drValueType.equals("java.lang.String")) {
-                                method.invoke(entity, json2Obj(value.toString(), enFieldType));
+                                method.invoke(entity, ReflectUtil.json2Obj(value.toString(), enFieldType));
                                 // PostgreSQL array and exclude blob
                             } else if (drValueType.startsWith("[L") && drValueType.endsWith(";")) {
                                 if (List.class.isAssignableFrom(enFieldType)) {
@@ -751,7 +774,7 @@ public final class DataRow implements Map<String, Object> {
      * @return json字符串
      */
     public String toJson() {
-        return obj2Json(this);
+        return ReflectUtil.obj2Json(this);
     }
 
     /**
@@ -858,23 +881,41 @@ public final class DataRow implements Map<String, Object> {
      * @return DataRow
      */
     public static DataRow fromJson(String json) {
-        return (DataRow) json2Obj(json, DataRow.class);
+        return (DataRow) ReflectUtil.json2Obj(json, DataRow.class);
     }
 
     /**
-     * 归并操作
-     *
-     * @param init   初始值
-     * @param mapper 映射(初始值，名字，值)
-     * @param <T>    结果类型参数
-     * @return 归并后的结果
+     * 数据行对象Entry简单实现
      */
-    public <T> T reduce(T init, TiFunction<T, String, Object, T> mapper) {
-        T acc = init;
-        for (String key : indices.keySet()) {
-            acc = mapper.apply(acc, key, get(key));
+    class DataRowEntry implements Entry<String, Object> {
+
+        private final String k;
+        private final Object v;
+
+        DataRowEntry(String k, Object v) {
+            this.k = k;
+            this.v = v;
         }
-        return acc;
+
+        @Override
+        public String getKey() {
+            return k;
+        }
+
+        @Override
+        public Object getValue() {
+            return v;
+        }
+
+        @Override
+        public Object setValue(Object value) {
+            return put(k, value);
+        }
+
+        @Override
+        public String toString() {
+            return "{" + k + "=" + v + "}";
+        }
     }
 
     @Override

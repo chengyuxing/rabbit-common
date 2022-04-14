@@ -51,4 +51,18 @@ public class NewRowTest {
         System.out.println(jRow.replace("name", "cyx123"));
         System.out.println(jRow);
     }
+
+    @Test
+    public void testEach() throws Exception {
+        DataRow row = DataRow.fromPair("name", "cyx", "age", 28, "address", "昆明市");
+        row.forEach((k, v) -> System.out.println(k + ":" + v));
+        System.out.println(row.toMap());
+        for (Map.Entry<String, Object> entry : row.entrySet()) {
+            System.out.println(entry);
+            if (entry.getKey().equals("age")) {
+                entry.setValue(31);
+            }
+        }
+        System.out.println(row);
+    }
 }

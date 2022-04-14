@@ -14,7 +14,6 @@ import java.util.stream.Collectors;
 public class Test2 {
 
     static List<DataRow> rows = new ArrayList<>();
-    static List<DataRow2z> rows2 = new ArrayList<>();
 
     //    @BeforeClass
     @Test
@@ -42,16 +41,6 @@ public class Test2 {
                 new Object[]{null, 2, "12", 4, 5}
         );
         System.out.println(row.getInt("k"));
-    }
-
-    @Test
-    public void d2() throws Exception {
-        DataRow2z row = DataRow2z.of(
-                new String[]{"a", "b", "c", "d", "e"},
-                new String[]{"String", "Object", "String", "String", "String"},
-                new Object[]{1, 2, 3, 4, 5}
-        );
-        System.out.println(row.getString(4));
     }
 
     @Test
