@@ -18,6 +18,7 @@ import static com.github.chengyuxing.common.utils.ReflectUtil.json2Obj;
 import static com.github.chengyuxing.common.utils.ReflectUtil.obj2Json;
 
 /**
+ * <h1>行数据对象</h1>
  * 值存储基于自动扩容数组，逻辑和ArrayList类似，实现Map接口，同时支持根据键和索引高效取值，支持json序列化
  */
 public final class DataRow implements Map<String, Object> {
