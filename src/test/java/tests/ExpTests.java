@@ -1,6 +1,5 @@
 package tests;
 
-import com.github.chengyuxing.common.DataRow;
 import com.github.chengyuxing.common.script.Comparators;
 import com.github.chengyuxing.common.script.impl.FastExpression;
 import com.github.chengyuxing.common.utils.ObjectUtil;
@@ -69,26 +68,6 @@ public class ExpTests {
     @Test
     public void eq() throws Exception {
         System.out.println(Comparators.equal(Collections.emptyList(), "blank"));
-    }
-
-    @Test
-    public void pickTest() throws Exception {
-        DataRow row = DataRow.fromPair("a", 1, "b", 2, "c", 3, "d", 4);
-        System.out.println(row.pick("d", "c", "a"));
-        System.out.println((Integer) row.at("/c"));
-    }
-
-    @Test
-    public void testJson() throws Exception {
-        DataRow row = DataRow.fromPair("user", Arrays.asList("a", "b", "c", new Coord(18, 22)));
-        System.out.println(row);
-        System.out.println((Integer) row.at("/user/3/y"));
-        System.out.println((Integer) row.at(0, 3, "x"));
-        System.out.println("------------------------");
-        DataRow row2 = DataRow.fromMap(row.toMap());
-        System.out.println(row2.get(new Integer(0)));
-        System.out.println(row2.at("/user/3/x"));
-        System.out.println(row2.at(0, 2));
     }
 
     @Test

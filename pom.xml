@@ -6,7 +6,7 @@
     <description>一个公共类库工具类</description>
     <groupId>com.github.chengyuxing</groupId>
     <artifactId>rabbit-common</artifactId>
-    <version>2.1.8</version>
+    <version>2.1.9</version>
     <packaging>jar</packaging>
     <name>rabbit-common</name>
     <url>https://github.com/chengyuxing/rabbit-common</url>
@@ -134,6 +134,12 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.12</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.zaxxer</groupId>
+            <artifactId>HikariCP</artifactId>
+            <version>4.0.3</version>
             <scope>test</scope>
         </dependency>
         <dependency>

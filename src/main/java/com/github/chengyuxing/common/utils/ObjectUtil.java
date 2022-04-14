@@ -1,7 +1,5 @@
 package com.github.chengyuxing.common.utils;
 
-import com.github.chengyuxing.common.DataRow;
-
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collection;
@@ -71,15 +69,9 @@ public final class ObjectUtil {
             if (value instanceof Object[]) {
                 return ((Object[]) value)[idx];
             }
-            if (value instanceof DataRow) {
-                return ((DataRow) value).get(idx);
-            }
         }
         if (value instanceof Map) {
             return ((Map<?, ?>) value).get(key);
-        }
-        if (value instanceof DataRow) {
-            return ((DataRow) value).get(key);
         }
         Class<?> clazz = value.getClass();
         Class<?> type = clazz.getDeclaredField(key).getType();
