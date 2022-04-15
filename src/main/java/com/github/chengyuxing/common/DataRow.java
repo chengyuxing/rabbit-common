@@ -97,7 +97,7 @@ public final class DataRow implements Map<String, Object> {
      * @param name 字段
      * @return 如果值存在或不为null返回值类型名称，否则返回null
      */
-    public String getType(String name) {
+    public Class<?> getType(String name) {
         int index = indexOf(name);
         if (index == -1) {
             return null;
@@ -111,12 +111,12 @@ public final class DataRow implements Map<String, Object> {
      * @param index 索引
      * @return 如果值不为null返回值类型名称，否则返回null
      */
-    public String getType(int index) {
-        Object v = getAs(index);
+    public Class<?> getType(int index) {
+        Object v = elementData[index];
         if (v == null) {
             return null;
         }
-        return v.getClass().getName();
+        return v.getClass();
     }
 
     /**
@@ -625,8 +625,9 @@ public final class DataRow implements Map<String, Object> {
                     field = field.substring(0, 1).toLowerCase().concat(field.substring(1));
                     Object value = get(field);
                     // dataRow field type
-                    String drValueType = getType(field);
-                    if (value != null && drValueType != null && method.getParameterCount() == 1) {
+                    Class<?> drValueClass = getType(field);
+                    if (value != null && drValueClass != null && method.getParameterCount() == 1) {
+                        String drValueType = drValueClass.getName();
                         // entity field type
                         Class<?> enFieldType = method.getParameterTypes()[0];
                         if (enFieldType == String.class) {
@@ -922,7 +923,9 @@ public final class DataRow implements Map<String, Object> {
     public String toString() {
         String[] types = new String[size];
         for (int i = 0; i < size; i++) {
-            types[i] = getType(i);
+            Class<?> type = getType(i);
+            String typeName = type == null ? "unKnow" : type.getName();
+            types[i] = typeName;
         }
         return "DataRow{\n" +
                 "names=" + names() +
