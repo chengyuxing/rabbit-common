@@ -11,7 +11,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * 快速条件表达式解析器<br>
+ * <h2>快速条件表达式解析器</h2>
  * 基于自行定制实现bool表达式脚本解析，功能较单一，但速度极快<br>
  * 支持的逻辑运算符: {@code &&, ||}<br>
  * e.g.

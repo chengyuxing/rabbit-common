@@ -444,7 +444,31 @@ public final class DataRow implements Map<String, Object> {
         Set<Entry<String, Object>> set = new HashSet<>();
         int i = 0;
         for (String key : indices.keySet()) {
-            set.add(new DataRowEntry(key, elementData[i++]));
+            final int idx = i++;
+            set.add(new Entry<String, Object>() {
+
+                @Override
+                public String getKey() {
+                    return key;
+                }
+
+                @Override
+                public Object getValue() {
+                    return elementData[idx];
+                }
+
+                @Override
+                public Object setValue(Object value) {
+                    Object old = elementData[idx];
+                    elementData[idx] = value;
+                    return old;
+                }
+
+                @Override
+                public String toString() {
+                    return "{" + key + "=" + elementData[idx] + "}";
+                }
+            });
         }
         return set;
     }
@@ -887,40 +911,6 @@ public final class DataRow implements Map<String, Object> {
      */
     public static DataRow fromJson(String json) {
         return (DataRow) ReflectUtil.json2Obj(json, DataRow.class);
-    }
-
-    /**
-     * 数据行对象Entry简单实现
-     */
-    class DataRowEntry implements Entry<String, Object> {
-
-        private final String k;
-        private final Object v;
-
-        DataRowEntry(String k, Object v) {
-            this.k = k;
-            this.v = v;
-        }
-
-        @Override
-        public String getKey() {
-            return k;
-        }
-
-        @Override
-        public Object getValue() {
-            return v;
-        }
-
-        @Override
-        public Object setValue(Object value) {
-            return put(k, value);
-        }
-
-        @Override
-        public String toString() {
-            return "{" + k + "=" + v + "}";
-        }
     }
 
     @Override
