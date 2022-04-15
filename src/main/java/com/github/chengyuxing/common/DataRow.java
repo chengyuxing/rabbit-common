@@ -16,9 +16,13 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 /**
- * <h1>行数据对象</h1>
- * 值存储基于自动扩容数组，逻辑和ArrayList类似，实现Map接口，同时支持根据键和索引高效取值，支持json序列化<br>
- * 注意：这是一个非线程安全的实现
+ * 一个同时支持根据键和索引高效取值的（{@code key|index-value}）容器<br>
+ * <blockquote>
+ * {@link #getString(String)}<br>
+ * {@link #getString(int)}
+ * </blockquote>
+ * 值存储基于数组，自动扩容机制和{@link ArrayList}类似，实现{@link Map}接口，支持{@code json}序列化，
+ * 内部使用{@link LinkedHashMap}来维护键的顺序和值的索引，这是一个非线程安全的实现。
  */
 public final class DataRow implements Map<String, Object> {
     private final Map<String, Integer> indices;
