@@ -72,7 +72,7 @@ public final class DataRow implements Map<String, Object> {
             }
             return row;
         }
-        throw new IllegalArgumentException("all of 3 args length not equal!");
+        throw new IllegalArgumentException("names and values length not equal!");
     }
 
     /**
