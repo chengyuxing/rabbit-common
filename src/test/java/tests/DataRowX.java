@@ -1,8 +1,11 @@
-package com.github.chengyuxing.common;
+package tests;
 
+import com.github.chengyuxing.common.DateTimes;
+import com.github.chengyuxing.common.TiFunction;
 import com.github.chengyuxing.common.utils.ReflectUtil;
 
 import java.beans.IntrospectionException;
+import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
@@ -11,18 +14,28 @@ import java.sql.Timestamp;
 import java.time.*;
 import java.time.temporal.Temporal;
 import java.util.*;
-import java.util.function.BiPredicate;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 /**
- * 对LinkedHashMap进行一些扩展的数据行对象
+ * 一个同时支持根据键和索引高效取值的（{@code key|index-value}）容器<br>
+ * <blockquote>
+ * {@link #getString(String)}<br>
+ * {@link #getString(int)}
+ * </blockquote>
+ * 值存储基于数组，自动扩容机制和{@link ArrayList}类似，实现{@link Map}接口，支持{@code json}序列化，
+ * 内部使用{@link LinkedHashMap}来维护键的顺序和值的索引，这是一个非线程安全的实现。
  */
-public final class DataRow extends LinkedHashMap<String, Object> {
+public final class DataRowX implements Map<String, Object> {
+    private Entry<String, Object>[] elementData;
+    private int size;
+
     /**
      * 一个空的DataRow（初始化大小为16）
      */
-    public DataRow() {
-        super();
+    @SuppressWarnings("unchecked")
+    public DataRowX() {
+        elementData = (Entry<String, Object>[]) Array.newInstance(Entry.class, 16);
     }
 
     /**
@@ -30,15 +43,16 @@ public final class DataRow extends LinkedHashMap<String, Object> {
      *
      * @param capacity 初始容量大小
      */
-    public DataRow(int capacity) {
-        super(capacity);
+    @SuppressWarnings("unchecked")
+    public DataRowX(int capacity) {
+        elementData = (Entry<String, Object>[]) Array.newInstance(Entry.class, capacity);
     }
 
     /**
      * @return 一个空的DataRow（初始化大小为16）
      */
-    public static DataRow empty() {
-        return new DataRow();
+    public static DataRowX empty() {
+        return new DataRowX();
     }
 
     /**
@@ -48,18 +62,18 @@ public final class DataRow extends LinkedHashMap<String, Object> {
      * @param values 一组值
      * @return 新实例，初始化小为字段名数组的长度
      */
-    public static DataRow of(String[] names, Object[] values) {
+    public static DataRowX of(String[] names, Object[] values) {
         if (names.length == values.length) {
             if (names.length == 0) {
-                return new DataRow(0);
+                return new DataRowX(0);
             }
-            DataRow row = new DataRow(names.length);
+            DataRowX row = new DataRowX(names.length);
             for (int i = 0; i < names.length; i++) {
                 row.put(names[i], values[i]);
             }
             return row;
         }
-        throw new IllegalArgumentException("names and values length not equal!");
+        throw new IllegalArgumentException("keys and values length not equal!");
     }
 
     /**
@@ -69,8 +83,8 @@ public final class DataRow extends LinkedHashMap<String, Object> {
      * @see #values()
      */
     @Deprecated
-    public Collection<Object> getValues() {
-        return values();
+    public List<Object> getValues() {
+        return (List<Object>) values();
     }
 
     /**
@@ -79,7 +93,11 @@ public final class DataRow extends LinkedHashMap<String, Object> {
      * @return 字段名集合
      */
     public List<String> names() {
-        return new ArrayList<>(keySet());
+        List<String> list = new ArrayList<>();
+        for (int i = 0; i < size; i++) {
+            list.add(elementData[i].getKey());
+        }
+        return list;
     }
 
     /**
@@ -89,7 +107,21 @@ public final class DataRow extends LinkedHashMap<String, Object> {
      * @return 如果值存在或不为null返回值类型名称，否则返回null
      */
     public Class<?> getType(String name) {
-        Object v = get(name);
+        int index = indexOf(name);
+        if (index == -1) {
+            return null;
+        }
+        return getType(index);
+    }
+
+    /**
+     * 获取值类型
+     *
+     * @param index 索引
+     * @return 如果值不为null返回值类型名称，否则返回null
+     */
+    public Class<?> getType(int index) {
+        Object v = elementData[index].getValue();
         if (v == null) {
             return null;
         }
@@ -97,23 +129,15 @@ public final class DataRow extends LinkedHashMap<String, Object> {
     }
 
     /**
-     * 获取第一个值
+     * 获取值
      *
+     * @param index 索引
+     * @param <T>   类型参数
      * @return 值
      */
-    public Object getFirst() {
-        return this.entrySet().iterator().next().getValue();
-    }
-
-    /**
-     * 获取第一个值
-     *
-     * @param <T> 类型参数
-     * @return 第一个值
-     */
     @SuppressWarnings("unchecked")
-    public <T> T getFirstAs() {
-        return (T) getFirst();
+    public <T> T getAs(int index) {
+        return (T) elementData[index].getValue();
     }
 
     /**
@@ -131,6 +155,17 @@ public final class DataRow extends LinkedHashMap<String, Object> {
     /**
      * 获取可空值
      *
+     * @param index 索引
+     * @param <T>   类型参数
+     * @return 可空值
+     */
+    public <T> Optional<T> getOptional(int index) {
+        return Optional.ofNullable(getAs(index));
+    }
+
+    /**
+     * 获取可空值
+     *
      * @param name 名字
      * @param <T>  类型参数
      * @return 可空值
@@ -140,17 +175,41 @@ public final class DataRow extends LinkedHashMap<String, Object> {
     }
 
     /**
+     * 根据索引获取一个字符串
+     *
+     * @param index 索引
+     * @return 字符串或null
+     */
+    public String getString(int index) {
+        Object value = getAs(index);
+        if (value == null) {
+            return null;
+        }
+        return value.toString();
+    }
+
+    /**
+     * 根据索引获取一个可为空的字符串
+     *
+     * @param index 索引
+     * @return 可空字符串
+     */
+    public Optional<String> getOptionalString(int index) {
+        return Optional.ofNullable(getString(index));
+    }
+
+    /**
      * 根据名字获取一个字符串
      *
      * @param name 名字
      * @return 字符串或null
      */
     public String getString(String name) {
-        Object v = get(name);
-        if (v == null) {
+        int index = indexOf(name);
+        if (index == -1) {
             return null;
         }
-        return v.toString();
+        return getString(index);
     }
 
     /**
@@ -164,13 +223,13 @@ public final class DataRow extends LinkedHashMap<String, Object> {
     }
 
     /**
-     * 根据名字获取一个整型
+     * 根据索引获取一个整型
      *
-     * @param name 名字
+     * @param index 索引
      * @return 整型或null
      */
-    public Integer getInt(String name) {
-        Object value = get(name);
+    public Integer getInt(int index) {
+        Object value = getAs(index);
         if (value == null) {
             return null;
         }
@@ -178,6 +237,30 @@ public final class DataRow extends LinkedHashMap<String, Object> {
             return (Integer) value;
         }
         return Integer.parseInt(value.toString());
+    }
+
+    /**
+     * 根据索引获取一个可为空的整型
+     *
+     * @param index 索引
+     * @return 可空整型
+     */
+    public Optional<Integer> getOptionalInt(int index) {
+        return Optional.ofNullable(getInt(index));
+    }
+
+    /**
+     * 根据名字获取一个整型
+     *
+     * @param name 名字
+     * @return 整型或null
+     */
+    public Integer getInt(String name) {
+        int index = indexOf(name);
+        if (index == -1) {
+            return null;
+        }
+        return getInt(index);
     }
 
     /**
@@ -193,11 +276,11 @@ public final class DataRow extends LinkedHashMap<String, Object> {
     /**
      * 获取一个双精度类型数组
      *
-     * @param name 键名
+     * @param index 索引
      * @return 双精度数字或null
      */
-    public Double getDouble(String name) {
-        Object value = get(name);
+    public Double getDouble(int index) {
+        Object value = getAs(index);
         if (value == null) {
             return null;
         }
@@ -205,6 +288,30 @@ public final class DataRow extends LinkedHashMap<String, Object> {
             return (Double) value;
         }
         return Double.parseDouble(value.toString());
+    }
+
+    /**
+     * 获取一个可空双精度类型数组
+     *
+     * @param index 索引
+     * @return 可空双精度数字
+     */
+    public Optional<Double> getOptionalDouble(int index) {
+        return Optional.ofNullable(getDouble(index));
+    }
+
+    /**
+     * 获取一个双精度类型数组
+     *
+     * @param name 名字
+     * @return 双精度数字
+     */
+    public Double getDouble(String name) {
+        int index = indexOf(name);
+        if (index == -1) {
+            return null;
+        }
+        return getDouble(index);
     }
 
     /**
@@ -220,11 +327,11 @@ public final class DataRow extends LinkedHashMap<String, Object> {
     /**
      * 获取一个长整型值
      *
-     * @param name 键名
+     * @param index 索引
      * @return 双精度数字
      */
-    public Long getLong(String name) {
-        Object value = get(name);
+    public Long getLong(int index) {
+        Object value = getAs(index);
         if (value == null) {
             return null;
         }
@@ -232,6 +339,30 @@ public final class DataRow extends LinkedHashMap<String, Object> {
             return (Long) value;
         }
         return Long.parseLong(value.toString());
+    }
+
+    /**
+     * 获取一个可空长整型值
+     *
+     * @param index 索引
+     * @return 可空长整型值
+     */
+    public Optional<Long> getOptionalLong(int index) {
+        return Optional.ofNullable(getLong(index));
+    }
+
+    /**
+     * 获取一个长整型值
+     *
+     * @param name 名字
+     * @return 双精度数字
+     */
+    public Long getLong(String name) {
+        int index = indexOf(name);
+        if (index == -1) {
+            return null;
+        }
+        return getLong(index);
     }
 
     /**
@@ -245,37 +376,213 @@ public final class DataRow extends LinkedHashMap<String, Object> {
     }
 
     /**
+     * 获取指定字段名的索引
+     *
+     * @param name 字段名
+     * @return 字段名位置索引
+     */
+    public int indexOf(Object name) {
+        if (name == null) {
+            for (int i = 0; i < size; i++)
+                if (elementData[i].getKey() == null)
+                    return i;
+        } else {
+            for (int i = 0; i < size; i++)
+                if (name.equals(elementData[i].getKey()))
+                    return i;
+        }
+        return -1;
+    }
+
+    @Override
+    public int size() {
+        return size;
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return size == 0;
+    }
+
+    @Override
+    public boolean containsKey(Object key) {
+        return indexOf(key) != -1;
+    }
+
+    @Override
+    public boolean containsValue(Object value) {
+        for (int i = 0; i < size; i++) {
+            if (value.equals(elementData[i].getValue())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public Object get(Object key) {
+        int index = indexOf(key);
+        if (index == -1) {
+            return null;
+        }
+        return elementData[index].getValue();
+    }
+
+    /**
+     * 清空所有元素
+     */
+    @Override
+    public void clear() {
+        for (int i = 0; i < size; i++) {
+            elementData[i] = null;
+        }
+        size = 0;
+    }
+
+    @Override
+    public Set<String> keySet() {
+        return new HashSet<>(names());
+    }
+
+    @Override
+    public Collection<Object> values() {
+        List<Object> list = new ArrayList<>();
+        for (int i = 0; i < size; i++) {
+            list.add(elementData[i].getValue());
+        }
+        return list;
+    }
+
+    @Override
+    public Set<Entry<String, Object>> entrySet() {
+        return new HashSet<>(Arrays.asList(elementData));
+    }
+
+    @Override
+    public Object put(String key, Object value) {
+        return addOrUpdate(key, value, true);
+    }
+
+    @Override
+    public Object remove(Object key) {
+        int index = indexOf(key);
+        if (index != -1) {
+            Object old = elementData[index].getValue();
+            int numMoved = size - index - 1;
+            if (numMoved > 0) {
+                System.arraycopy(elementData, index + 1, elementData, index, numMoved);
+            }
+            int dIncIdx = --size;
+            elementData[dIncIdx] = null;
+            return old;
+        }
+        return null;
+    }
+
+    /**
      * 移除值为null的所有元素
      *
      * @return 不存在null值的当前对象
      */
-    public DataRow removeIfAbsent() {
-        Iterator<Map.Entry<String, Object>> iterator = entrySet().iterator();
-        //noinspection Java8CollectionRemoveIf
-        while (iterator.hasNext()) {
-            if (iterator.next().getValue() == null) {
-                iterator.remove();
+    public DataRowX removeIfAbsent() {
+        for (int index = 0; index < size; index++) {
+            if (elementData[index].getValue() == null) {
+                int numMoved = size - index - 1;
+                if (numMoved > 0) {
+                    System.arraycopy(elementData, index + 1, elementData, index, numMoved);
+                }
+                int dIncIdx = --size;
+                elementData[dIncIdx] = null;
             }
         }
         return this;
     }
 
-    /**
-     * 根据条件移除元素
-     *
-     * @param predicate 条件
-     * @return 移除匹配元素后的当前对象
-     */
-    public DataRow removeIf(BiPredicate<String, Object> predicate) {
-        Iterator<Map.Entry<String, Object>> iterator = entrySet().iterator();
-        //noinspection Java8CollectionRemoveIf
-        while (iterator.hasNext()) {
-            Map.Entry<String, Object> next = iterator.next();
-            if (predicate.test(next.getKey(), next.getValue())) {
-                iterator.remove();
+    @Override
+    public void forEach(BiConsumer<? super String, ? super Object> action) {
+        for (int i = 0; i < size; i++) {
+            String k;
+            Object v;
+            try {
+                k = elementData[i].getKey();
+                v = elementData[i].getValue();
+            } catch (IllegalStateException ise) {
+                // this usually means the entry is no longer in the map.
+                throw new ConcurrentModificationException(ise);
             }
+            action.accept(k, v);
         }
-        return this;
+    }
+
+    @Override
+    public void putAll(Map<? extends String, ?> m) {
+        m.forEach(this::put);
+    }
+
+    /**
+     * 如果不存在就添加否则更新
+     *
+     * @param name   键名
+     * @param value  值
+     * @param update 是否进行更新
+     * @return 更新后的值
+     */
+    @SuppressWarnings("unchecked")
+    private Object addOrUpdate(String name, Object value, boolean update) {
+//        if (update) {
+//            int idx = indexOf(name);
+//            if (idx != -1) {
+//                elementData[idx].setValue(value);
+//                return value;
+//            }
+//        }
+        if (size < elementData.length) {
+            int incIdx = size++;
+            elementData[incIdx] = new Entry<String, Object>() {
+                @Override
+                public String getKey() {
+                    return name;
+                }
+
+                @Override
+                public Object getValue() {
+                    return value;
+                }
+
+                @Override
+                public Object setValue(Object newValue) {
+                    Object oldValue = elementData[incIdx].getValue();
+                    elementData[incIdx].setValue(newValue);
+                    return oldValue;
+                }
+            };
+        } else {
+            int oldCapacity = elementData.length;
+            int newCapacity = oldCapacity << 1;
+            Entry<String, Object>[] newElementData = (Entry<String, Object>[]) Array.newInstance(Entry.class, newCapacity);
+            System.arraycopy(elementData, 0, newElementData, 0, oldCapacity);
+            int incIdx = size++;
+            newElementData[incIdx] = new Entry<String, Object>() {
+                @Override
+                public String getKey() {
+                    return name;
+                }
+
+                @Override
+                public Object getValue() {
+                    return value;
+                }
+
+                @Override
+                public Object setValue(Object newValue) {
+                    Object oldValue = elementData[incIdx].getValue();
+                    elementData[incIdx].setValue(newValue);
+                    return oldValue;
+                }
+            };
+            elementData = newElementData;
+        }
+        return value;
     }
 
     /**
@@ -285,7 +592,7 @@ public final class DataRow extends LinkedHashMap<String, Object> {
      * @param value 值
      * @return 对象自身
      */
-    public DataRow add(String name, Object value) {
+    public DataRowX set(String name, Object value) {
         put(name, value);
         return this;
     }
@@ -297,9 +604,9 @@ public final class DataRow extends LinkedHashMap<String, Object> {
      * @param more 更多字段名
      * @return 新的DataRow
      */
-    public DataRow pick(String name, String... more) {
-        DataRow row = new DataRow(more.length + 1);
-        row.put(name, get(name));
+    public DataRowX pick(String name, String... more) {
+        DataRowX row = new DataRowX(more.length + 1);
+        row.put(name, getAs(name));
         if (more.length > 0) {
             for (String n : more) {
                 row.put(n, get(n));
@@ -318,8 +625,8 @@ public final class DataRow extends LinkedHashMap<String, Object> {
      */
     public <T> T reduce(T init, TiFunction<T, String, Object, T> mapper) {
         T acc = init;
-        for (Map.Entry<String, Object> e : entrySet()) {
-            acc = mapper.apply(acc, e.getKey(), e.getValue());
+        for (int i = 0; i < size; i++) {
+            acc = mapper.apply(acc, elementData[i].getKey(), elementData[i].getValue());
         }
         return acc;
     }
@@ -333,8 +640,8 @@ public final class DataRow extends LinkedHashMap<String, Object> {
      */
     public <T> Map<String, T> toMap(Function<Object, T> mapper) {
         Map<String, T> map = new LinkedHashMap<>();
-        for (Map.Entry<String, Object> e : entrySet()) {
-            map.put(e.getKey(), mapper.apply(e.getValue()));
+        for (int i = 0; i < size; i++) {
+            map.put(elementData[i].getKey(), mapper.apply(elementData[i]));
         }
         return map;
     }
@@ -346,8 +653,8 @@ public final class DataRow extends LinkedHashMap<String, Object> {
      */
     public Map<String, Object> toMap() {
         Map<String, Object> map = new LinkedHashMap<>();
-        for (Map.Entry<String, Object> e : entrySet()) {
-            map.put(e.getKey(), e.getValue());
+        for (int i = 0; i < size; i++) {
+            map.put(elementData[i].getKey(), elementData[i]);
         }
         return map;
     }
@@ -360,7 +667,7 @@ public final class DataRow extends LinkedHashMap<String, Object> {
      * @param constructorParameters 如果实体类只有一个带参数的构造函数，则指定参数<br>
      *                              e.g.
      *                              <blockquote>
-     *                              <pre>DataRow row = DataRow.fromPair("x", 2, "y", 5, ...);</pre>
+     *                              <pre>DataRowX row = DataRowX.fromPair("x", 2, "y", 5, ...);</pre>
      *                              <pre>row.toEntity(A.class, row.get("x"), row.get("y"));</pre>
      *                              </blockquote>
      * @return 实体
@@ -534,22 +841,22 @@ public final class DataRow extends LinkedHashMap<String, Object> {
      * @return 一行以列存储形式的数据行
      */
     @SuppressWarnings({"unchecked"})
-    public static DataRow zip(Collection<DataRow> rows) {
+    public static DataRowX zip(Collection<DataRowX> rows) {
         if (rows.isEmpty()) {
-            return new DataRow(0);
+            return new DataRowX(0);
         }
         if (rows.size() == 1) {
             return rows.iterator().next();
         }
         boolean first = true;
-        DataRow res = null;
-        Set<String> names = null;
-        for (DataRow row : rows) {
+        DataRowX res = null;
+        List<String> names = null;
+        for (DataRowX row : rows) {
             if (first) {
-                res = new DataRow(row.size());
-                names = row.keySet();
+                res = new DataRowX(row.size);
+                names = row.names();
                 for (String name : names) {
-                    res.put(name, new ArrayList<>());
+                    res.addOrUpdate(name, new ArrayList<>(), false);
                 }
                 first = false;
             }
@@ -564,11 +871,11 @@ public final class DataRow extends LinkedHashMap<String, Object> {
      * 从一个标准的javaBean实体转为DataRow类型
      *
      * @param entity 实体
-     * @return DataRow
+     * @return DataRowX
      */
-    public static DataRow fromEntity(Object entity) {
+    public static DataRowX fromEntity(Object entity) {
         try {
-            DataRow row = DataRow.empty();
+            DataRowX row = DataRowX.empty();
             for (Method method : ReflectUtil.getWRMethods(entity.getClass()).getItem1()) {
                 Class<?> returnType = method.getReturnType();
                 if (returnType != Class.class) {
@@ -581,13 +888,13 @@ public final class DataRow extends LinkedHashMap<String, Object> {
                     Object value = method.invoke(entity);
                     if (value != null) {
                         field = field.substring(0, 1).toLowerCase().concat(field.substring(1));
-                        row.put(field, value);
+                        row.addOrUpdate(field, value, false);
                     }
                 }
             }
             return row;
         } catch (IllegalAccessException | IntrospectionException | InvocationTargetException e) {
-            throw new RuntimeException("convert to DataRow error: ", e);
+            throw new RuntimeException("convert to DataRowX error: ", e);
         }
     }
 
@@ -595,12 +902,12 @@ public final class DataRow extends LinkedHashMap<String, Object> {
      * 从map转换到DataRow
      *
      * @param map map
-     * @return DataRow
+     * @return DataRowX
      */
-    public static DataRow fromMap(Map<?, ?> map) {
-        DataRow row = new DataRow(map.size());
+    public static DataRowX fromMap(Map<?, ?> map) {
+        DataRowX row = new DataRowX(map.size());
         for (Object key : map.keySet()) {
-            row.put(key.toString(), map.get(key));
+            row.addOrUpdate(key.toString(), map.get(key), false);
         }
         return row;
     }
@@ -609,14 +916,14 @@ public final class DataRow extends LinkedHashMap<String, Object> {
      * 从一组键值对创建一个DataRow
      *
      * @param pairs 键值对 k v，k v...
-     * @return DataRow
+     * @return DataRowX
      */
-    public static DataRow fromPair(Object... pairs) {
+    public static DataRowX fromPair(Object... pairs) {
         if (pairs.length == 0 || (pairs.length & 1) != 0) {
             throw new IllegalArgumentException("key value are not a pair.");
         }
         int capacity = pairs.length >> 1;
-        DataRow row = new DataRow(capacity);
+        DataRowX row = new DataRowX(capacity);
         for (int i = 0; i < capacity; i++) {
             int idx = i << 1;
             row.put(pairs[idx].toString(), pairs[idx + 1]);
@@ -628,10 +935,25 @@ public final class DataRow extends LinkedHashMap<String, Object> {
      * 从一个json对象字符串创建一个DataRow
      *
      * @param json json对象字符串 e.g. {@code {"a":1,"b":2}}
-     * @return DataRow
+     * @return DataRowX
      */
-    public static DataRow fromJson(String json) {
-        return (DataRow) ReflectUtil.json2Obj(json, DataRow.class);
+    public static DataRowX fromJson(String json) {
+        return (DataRowX) ReflectUtil.json2Obj(json, DataRowX.class);
+    }
+
+    @Override
+    public String toString() {
+        String[] types = new String[size];
+        for (int i = 0; i < size; i++) {
+            Class<?> type = getType(i);
+            String typeName = type == null ? "unKnow" : type.getName();
+            types[i] = typeName;
+        }
+        return "DataRowX{\n" +
+                "names=" + names() +
+                "\ntypes=" + Arrays.toString(types) +
+                "\nvalues=" + values() +
+                "\n}";
     }
 }
 

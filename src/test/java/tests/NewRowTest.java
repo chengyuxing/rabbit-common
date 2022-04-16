@@ -38,7 +38,6 @@ public class NewRowTest {
         System.out.println(jRow);
         System.out.println(jRow.size());
         System.out.println(jRow.getString("address"));
-        System.out.println(jRow.getString(1));
 
         System.out.println(jRow.reduce(new ArrayList<>(), (acc, k, v) -> {
             if (v instanceof List) {
@@ -56,13 +55,20 @@ public class NewRowTest {
     public void testEach() throws Exception {
         DataRow row = DataRow.fromPair("name", "cyx", "age", 28, "address", "昆明市");
         row.forEach((k, v) -> System.out.println(k + ":" + v));
-        System.out.println(row.toMap());
-        for (Map.Entry<String, Object> entry : row.entrySet()) {
-            System.out.println(entry);
-            if (entry.getKey().equals("age")) {
-                entry.setValue(31);
-            }
-        }
+        Map<String, Object> newMap = row.toMap();
+        newMap.remove("age");
         System.out.println(row);
+        System.out.println(newMap);
+        System.out.println(row.removeIf((k, v) -> v instanceof String));
+    }
+
+    @Test
+    public void testD() throws Exception {
+        DataRow row = DataRow.fromPair("name", null, "age", 28);
+        row.put("address", "kunming");
+        row.put("email", null);
+        System.out.println(row.names().remove(1));
+        System.out.println(row);
+//        System.out.println(row.removeIfAbsent());
     }
 }
