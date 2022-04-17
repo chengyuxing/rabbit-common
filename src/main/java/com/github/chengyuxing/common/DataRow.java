@@ -26,6 +26,15 @@ public final class DataRow extends LinkedHashMap<String, Object> {
     }
 
     /**
+     * 从一个Map创建一个DataRow
+     *
+     * @param m map
+     */
+    public DataRow(Map<? extends String, ?> m) {
+        super(m);
+    }
+
+    /**
      * 一个空的DataRow
      *
      * @param capacity 初始容量大小
@@ -254,6 +263,25 @@ public final class DataRow extends LinkedHashMap<String, Object> {
         //noinspection Java8CollectionRemoveIf
         while (iterator.hasNext()) {
             if (iterator.next().getValue() == null) {
+                iterator.remove();
+            }
+        }
+        return this;
+    }
+
+    /**
+     * 移除值为null且不包含在指定keys中的所有元素
+     *
+     * @param keys 需忽略的键名集合
+     * @return 移除匹配元素后的当前对象
+     */
+    public DataRow removeIfAbsentExclude(String... keys) {
+        Iterator<Map.Entry<String, Object>> iterator = entrySet().iterator();
+        //为了内部一点性能就不使用函数接口了
+        //noinspection Java8CollectionRemoveIf
+        while (iterator.hasNext()) {
+            Map.Entry<String, Object> e = iterator.next();
+            if (e.getValue() == null && !Arrays.asList(keys).contains(e.getKey())) {
                 iterator.remove();
             }
         }
@@ -513,7 +541,8 @@ public final class DataRow extends LinkedHashMap<String, Object> {
                 }
             }
             return entity;
-        } catch (NoSuchMethodException | InstantiationException | InvocationTargetException | IntrospectionException | IllegalAccessException e) {
+        } catch (NoSuchMethodException | InstantiationException | InvocationTargetException | IntrospectionException |
+                 IllegalAccessException e) {
             throw new RuntimeException("convert to " + clazz.getTypeName() + " error: ", e);
         }
     }
@@ -597,12 +626,8 @@ public final class DataRow extends LinkedHashMap<String, Object> {
      * @param map map
      * @return DataRow
      */
-    public static DataRow fromMap(Map<?, ?> map) {
-        DataRow row = new DataRow(map.size());
-        for (Object key : map.keySet()) {
-            row.put(key.toString(), map.get(key));
-        }
-        return row;
+    public static DataRow fromMap(Map<? extends String, ?> map) {
+        return new DataRow(map);
     }
 
     /**
