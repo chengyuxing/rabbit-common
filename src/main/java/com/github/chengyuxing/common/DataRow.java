@@ -92,6 +92,16 @@ public final class DataRow extends LinkedHashMap<String, Object> {
     }
 
     /**
+     * 根据索引获取值
+     *
+     * @param index 索引
+     * @return 值
+     */
+    public Object iget(int index) {
+        return values().toArray()[index];
+    }
+
+    /**
      * 根据字段名获取类型
      *
      * @param name 字段
@@ -103,6 +113,17 @@ public final class DataRow extends LinkedHashMap<String, Object> {
             return null;
         }
         return v.getClass();
+    }
+
+    /**
+     * 根据字段名获取类型
+     *
+     * @param index 索引
+     * @return 如果值存在或不为null返回值类型名称，否则返回null
+     * @throws IndexOutOfBoundsException 如果索引超出界限
+     */
+    public Class<?> getType(int index) {
+        return iget(index).getClass();
     }
 
     /**
@@ -126,7 +147,7 @@ public final class DataRow extends LinkedHashMap<String, Object> {
     }
 
     /**
-     * 获取值
+     * 根据名字获取值
      *
      * @param name 名称
      * @param <T>  结果类型参数
@@ -138,7 +159,20 @@ public final class DataRow extends LinkedHashMap<String, Object> {
     }
 
     /**
-     * 获取可空值
+     * 根据索引获取值
+     *
+     * @param index 索引
+     * @param <T>   结果类型参数
+     * @return 值
+     * @throws IndexOutOfBoundsException 如果索引超出界限
+     */
+    @SuppressWarnings("unchecked")
+    public <T> T getAs(int index) {
+        return (T) iget(index);
+    }
+
+    /**
+     * 根据名字获取可空值
      *
      * @param name 名字
      * @param <T>  类型参数
@@ -146,6 +180,18 @@ public final class DataRow extends LinkedHashMap<String, Object> {
      */
     public <T> Optional<T> getOptional(String name) {
         return Optional.ofNullable(getAs(name));
+    }
+
+    /**
+     * 根据索引获取可空值
+     *
+     * @param index 索引
+     * @param <T>   类型参数
+     * @return 可空值
+     * @throws IndexOutOfBoundsException 如果索引超出界限
+     */
+    public <T> Optional<T> getOptional(int index) {
+        return Optional.ofNullable(getAs(index));
     }
 
     /**
@@ -163,6 +209,18 @@ public final class DataRow extends LinkedHashMap<String, Object> {
     }
 
     /**
+     * 根据索引获取一个字符串
+     *
+     * @param index 索引
+     * @return 字符串或null
+     * @throws IndexOutOfBoundsException 如果索引超出界限
+     */
+    public String getString(int index) {
+        Object v = iget(index);
+        return v == null ? null : v.toString();
+    }
+
+    /**
      * 根据名字获取一个可为空的字符串
      *
      * @param name 名字
@@ -170,6 +228,17 @@ public final class DataRow extends LinkedHashMap<String, Object> {
      */
     public Optional<String> getOptionalString(String name) {
         return Optional.ofNullable(getString(name));
+    }
+
+    /**
+     * 根据索引获取一个可为空的字符串
+     *
+     * @param index 索引
+     * @return 可空字符串
+     * @throws IndexOutOfBoundsException 如果索引超出界限
+     */
+    public Optional<String> getOptionalString(int index) {
+        return Optional.ofNullable(getString(index));
     }
 
     /**
@@ -190,6 +259,24 @@ public final class DataRow extends LinkedHashMap<String, Object> {
     }
 
     /**
+     * 根据索引获取一个整型
+     *
+     * @param index 索引
+     * @return 整型或null
+     * @throws IndexOutOfBoundsException 如果索引超出界限
+     */
+    public Integer getInt(int index) {
+        Object value = iget(index);
+        if (value == null) {
+            return null;
+        }
+        if (value instanceof Integer) {
+            return (Integer) value;
+        }
+        return Integer.parseInt(value.toString());
+    }
+
+    /**
      * 根据名字获取一个可为空的整型
      *
      * @param name 名字
@@ -200,7 +287,18 @@ public final class DataRow extends LinkedHashMap<String, Object> {
     }
 
     /**
-     * 获取一个双精度类型数组
+     * 根据索引获取一个可为空的整型
+     *
+     * @param index 索引
+     * @return 可空整型
+     * @throws IndexOutOfBoundsException 如果索引超出界限
+     */
+    public Optional<Integer> getOptionalInt(int index) {
+        return Optional.ofNullable(getInt(index));
+    }
+
+    /**
+     * 根据索引获取一个双精度类型数组
      *
      * @param name 键名
      * @return 双精度数字或null
@@ -217,13 +315,42 @@ public final class DataRow extends LinkedHashMap<String, Object> {
     }
 
     /**
-     * 获取一个双精度类型数组
+     * 根据索引获取一个双精度类型数组
+     *
+     * @param index 索引
+     * @return 双精度数字或null
+     * @throws IndexOutOfBoundsException 如果索引超出界限
+     */
+    public Double getDouble(int index) {
+        Object value = iget(index);
+        if (value == null) {
+            return null;
+        }
+        if (value instanceof Double) {
+            return (Double) value;
+        }
+        return Double.parseDouble(value.toString());
+    }
+
+    /**
+     * 根据名字获取一个双精度类型数组
      *
      * @param name 名字
      * @return 可空双精度数字
      */
     public Optional<Double> getOptionalDouble(String name) {
         return Optional.ofNullable(getDouble(name));
+    }
+
+    /**
+     * 根据索引获取一个双精度类型数组
+     *
+     * @param index 索引
+     * @return 可空双精度数字
+     * @throws IndexOutOfBoundsException 如果索引超出界限
+     */
+    public Optional<Double> getOptionalDouble(int index) {
+        return Optional.ofNullable(getDouble(index));
     }
 
     /**
@@ -244,13 +371,42 @@ public final class DataRow extends LinkedHashMap<String, Object> {
     }
 
     /**
-     * 获取一个可空长整型值
+     * 根据索引获取一个长整型值
+     *
+     * @param index 索引
+     * @return 双精度数字
+     * @throws IndexOutOfBoundsException 如果索引超出界限
+     */
+    public Long getLong(int index) {
+        Object value = iget(index);
+        if (value == null) {
+            return null;
+        }
+        if (value instanceof Long) {
+            return (Long) value;
+        }
+        return Long.parseLong(value.toString());
+    }
+
+    /**
+     * 根据名字获取一个可空长整型值
      *
      * @param name 名字
      * @return 可空长整型值
      */
     public Optional<Long> getOptionalLong(String name) {
         return Optional.ofNullable(getLong(name));
+    }
+
+    /**
+     * 根据索引获取一个可空长整型值
+     *
+     * @param index 索引
+     * @return 可空长整型值
+     * @throws IndexOutOfBoundsException 如果索引超出界限
+     */
+    public Optional<Long> getOptionalLong(int index) {
+        return Optional.ofNullable(getLong(index));
     }
 
     /**
@@ -626,8 +782,12 @@ public final class DataRow extends LinkedHashMap<String, Object> {
      * @param map map
      * @return DataRow
      */
-    public static DataRow fromMap(Map<? extends String, ?> map) {
-        return new DataRow(map);
+    public static DataRow fromMap(Map<?, ?> map) {
+        DataRow row = new DataRow(map.size());
+        for (Map.Entry<?, ?> e : map.entrySet()) {
+            row.put(e.getKey().toString(), e.getValue());
+        }
+        return row;
     }
 
     /**

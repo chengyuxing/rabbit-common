@@ -54,12 +54,11 @@ public class NewRowTest {
     @Test
     public void testEach() throws Exception {
         DataRow row = DataRow.fromPair("name", "cyx", "age", 28, "address", "昆明市");
-        row.forEach((k, v) -> System.out.println(k + ":" + v));
         Map<String, Object> newMap = row.toMap();
         newMap.remove("age");
         System.out.println(row);
         System.out.println(newMap);
-        System.out.println(row.removeIf((k, v) -> v instanceof String));
+        System.out.println(row.getString(2));
     }
 
     @Test
