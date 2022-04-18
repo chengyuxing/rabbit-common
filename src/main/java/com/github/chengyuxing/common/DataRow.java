@@ -96,9 +96,13 @@ public final class DataRow extends LinkedHashMap<String, Object> {
      *
      * @param index 索引
      * @return 值
+     * @throws IndexOutOfBoundsException 如果索引超出界限
      */
     public Object iget(int index) {
-        return values().toArray()[index];
+        Object[] values = values().toArray();
+        Object v = values[index];
+        Arrays.fill(values, null);
+        return v;
     }
 
     /**

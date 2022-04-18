@@ -4,10 +4,7 @@ import com.github.chengyuxing.common.DataRow;
 import com.github.chengyuxing.common.utils.ReflectUtil;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class NewRowTest {
     @Test
@@ -53,12 +50,13 @@ public class NewRowTest {
 
     @Test
     public void testEach() throws Exception {
-        DataRow row = DataRow.fromPair("name", "cyx", "age", 28, "address", "昆明市");
+        DataRow row = DataRow.fromPair("name", "cyx", "age", 28, "address", Arrays.asList("china", "yunnan", "kunming"));
         Map<String, Object> newMap = row.toMap();
         newMap.remove("age");
         System.out.println(row);
         System.out.println(newMap);
-        System.out.println(row.getString(2));
+        System.out.println(row.getString(0));
+        System.out.println(row);
     }
 
     @Test

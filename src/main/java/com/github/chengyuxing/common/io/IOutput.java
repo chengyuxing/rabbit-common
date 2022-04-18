@@ -3,6 +3,7 @@ package com.github.chengyuxing.common.io;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
 /**
  * 数据输出帮助通用接口
@@ -49,7 +50,7 @@ public interface IOutput {
      * @throws IOException ioEx
      */
     default void saveTo(String path) throws IOException {
-        saveTo(new FileOutputStream(path));
+        saveTo(Files.newOutputStream(Paths.get(path)));
     }
 
     /**
@@ -59,7 +60,7 @@ public interface IOutput {
      * @throws IOException ioEx
      */
     default void saveTo(File file) throws IOException {
-        saveTo(new FileOutputStream(file));
+        saveTo(Files.newOutputStream(file.toPath()));
     }
 
     /**

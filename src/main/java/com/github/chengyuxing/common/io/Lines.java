@@ -26,6 +26,7 @@ public class Lines {
      * @throws IOException 如果路径错误
      * @see Stream#close()
      */
+    @SuppressWarnings("resource")
     public static Stream<List<String>> readLines(Path path, String delimiter, Charset charset) throws IOException {
         return Files.lines(path, charset).map(l -> Arrays.asList(l.split(delimiter)));
     }
