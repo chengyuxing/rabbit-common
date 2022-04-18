@@ -225,27 +225,6 @@ public final class DataRow extends LinkedHashMap<String, Object> {
     }
 
     /**
-     * 根据名字获取一个可为空的字符串
-     *
-     * @param name 名字
-     * @return 可空字符串
-     */
-    public Optional<String> getOptionalString(String name) {
-        return Optional.ofNullable(getString(name));
-    }
-
-    /**
-     * 根据索引获取一个可为空的字符串
-     *
-     * @param index 索引
-     * @return 可空字符串
-     * @throws IndexOutOfBoundsException 如果索引超出界限
-     */
-    public Optional<String> getOptionalString(int index) {
-        return Optional.ofNullable(getString(index));
-    }
-
-    /**
      * 根据名字获取一个整型
      *
      * @param name 名字
@@ -278,27 +257,6 @@ public final class DataRow extends LinkedHashMap<String, Object> {
             return (Integer) value;
         }
         return Integer.parseInt(value.toString());
-    }
-
-    /**
-     * 根据名字获取一个可为空的整型
-     *
-     * @param name 名字
-     * @return 可空整型
-     */
-    public Optional<Integer> getOptionalInt(String name) {
-        return Optional.ofNullable(getInt(name));
-    }
-
-    /**
-     * 根据索引获取一个可为空的整型
-     *
-     * @param index 索引
-     * @return 可空整型
-     * @throws IndexOutOfBoundsException 如果索引超出界限
-     */
-    public Optional<Integer> getOptionalInt(int index) {
-        return Optional.ofNullable(getInt(index));
     }
 
     /**
@@ -337,27 +295,6 @@ public final class DataRow extends LinkedHashMap<String, Object> {
     }
 
     /**
-     * 根据名字获取一个双精度类型数组
-     *
-     * @param name 名字
-     * @return 可空双精度数字
-     */
-    public Optional<Double> getOptionalDouble(String name) {
-        return Optional.ofNullable(getDouble(name));
-    }
-
-    /**
-     * 根据索引获取一个双精度类型数组
-     *
-     * @param index 索引
-     * @return 可空双精度数字
-     * @throws IndexOutOfBoundsException 如果索引超出界限
-     */
-    public Optional<Double> getOptionalDouble(int index) {
-        return Optional.ofNullable(getDouble(index));
-    }
-
-    /**
      * 获取一个长整型值
      *
      * @param name 键名
@@ -390,27 +327,6 @@ public final class DataRow extends LinkedHashMap<String, Object> {
             return (Long) value;
         }
         return Long.parseLong(value.toString());
-    }
-
-    /**
-     * 根据名字获取一个可空长整型值
-     *
-     * @param name 名字
-     * @return 可空长整型值
-     */
-    public Optional<Long> getOptionalLong(String name) {
-        return Optional.ofNullable(getLong(name));
-    }
-
-    /**
-     * 根据索引获取一个可空长整型值
-     *
-     * @param index 索引
-     * @return 可空长整型值
-     * @throws IndexOutOfBoundsException 如果索引超出界限
-     */
-    public Optional<Long> getOptionalLong(int index) {
-        return Optional.ofNullable(getLong(index));
     }
 
     /**
