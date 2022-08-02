@@ -22,7 +22,7 @@ import java.util.regex.Pattern;
  * @see Comparators
  */
 public class FastExpression extends IExpression {
-    private static final Pattern FILTER_PATTERN = Pattern.compile("\\s*:(?<name>\\w+)\\s*(?<op>[><=!@~]{1,2})\\s*(?<value>\\w+|'[^']*'|\"[^\"]*\"|-?[.\\d]+)\\s*");
+    private static final Pattern FILTER_PATTERN = Pattern.compile("\\s*:(?<name>[\\w.]+)\\s*(?<op>[><=!@~]{1,2})\\s*(?<value>\\w+|'[^']*'|\"[^\"]*\"|-?[.\\d]+)\\s*");
     private boolean checkArgsKey = true;
 
     /**
