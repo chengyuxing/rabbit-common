@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
 
 /**
  * 字符串表达式值比较器<br>
- * 支持比较的数据类型: {@code null, blank(空白字符串和null),true, false, 字符串(''或""), 数字}<br>
+ * 支持比较的数据类型: {@code null, blank(空白字符串、null、空集合、空数组),true, false, 字符串(''或""), 数字}<br>
  * 支持的比较操作符: {@code >, <, >=, <=, == (=), != (<>)}<br>
  * {@code ~ (正则查找包含), !~ (正则查找不包含)}<br>
  * {@code @ (正则匹配), !@ (正则不匹配)}<br>

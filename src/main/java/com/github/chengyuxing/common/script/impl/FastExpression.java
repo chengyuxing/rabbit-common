@@ -2,9 +2,11 @@ package com.github.chengyuxing.common.script.impl;
 
 import com.github.chengyuxing.common.script.Comparators;
 import com.github.chengyuxing.common.script.IExpression;
+import com.github.chengyuxing.common.script.IPipe;
 import com.github.chengyuxing.common.tuple.Pair;
 import com.github.chengyuxing.common.utils.StringUtil;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -16,14 +18,22 @@ import java.util.regex.Pattern;
  * 支持的逻辑运算符: {@code &&, ||}<br>
  * e.g.
  * <blockquote>
- * {@code !(:id >= 0 || :name <> blank) && :age<=21}
+ * {@code !(:id >= 0 || :name | length <= 3) && :age<=21}
  * </blockquote>
  *
  * @see Comparators
  */
 public class FastExpression extends IExpression {
-    private static final Pattern FILTER_PATTERN = Pattern.compile("\\s*:(?<name>[\\w.]+)\\s*(?<op>[><=!@~]{1,2})\\s*(?<value>\\w+|'[^']*'|\"[^\"]*\"|-?[.\\d]+)\\s*");
+    private static final Map<String, IPipe<?>> GLOBAL_PIPES = new HashMap<>();
+    private Map<String, IPipe<?>> customPipes = new HashMap<>();
+    private static final Pattern FILTER_PATTERN = Pattern.compile("\\s*:(?<name>[\\w.]+)(?<pipes>(\\s*\\|\\s*\\w+)*)?\\s*(?<op>[><=!@~]{1,2})\\s*(?<value>\\w+|'[^']*'|\"[^\"]*\"|-?[.\\d]+)\\s*");
     private boolean checkArgsKey = true;
+
+    static {
+        GLOBAL_PIPES.put("length", new IPipe.Length());
+        GLOBAL_PIPES.put("upper", new IPipe.Upper());
+        GLOBAL_PIPES.put("lower", new IPipe.Lower());
+    }
 
     /**
      * 构造函数
@@ -76,6 +86,7 @@ public class FastExpression extends IExpression {
         if (m.find()) {
             String filter = m.group(0);
             String name = m.group("name");
+            String pipes = m.group("pipes");
             String op = m.group("op");
             String value = m.group("value");
             if (checkArgsKey) {
@@ -87,10 +98,36 @@ public class FastExpression extends IExpression {
                 }
             }
             Object source = args == null ? null : args.get(name);
+            if (pipes != null && !pipes.trim().equals("")) {
+                source = pipedValue(source, pipes);
+            }
             boolean bool = Comparators.compare(source, op, value);
-            return calc(expression.replace(filter, bool + ""), args);
+            return calc(expression.replace(filter, Boolean.toString(bool)), args);
         }
         return boolExpressionEval(expression);
+    }
+
+    /**
+     * 通过一系列管道来处理值
+     *
+     * @param value 值
+     * @param pipes 管道 e.g. {@code :name | length == 10}
+     * @return 经过管道处理后的值
+     */
+    Object pipedValue(Object value, String pipes) {
+        String[] pipeArr = pipes.trim().substring(1).split("\\|");
+        Object res = value;
+        for (String p : pipeArr) {
+            String pipe = p.trim();
+            if (customPipes.containsKey(pipe)) {
+                res = customPipes.get(pipe).transform(res);
+            } else if (GLOBAL_PIPES.containsKey(pipe)) {
+                res = GLOBAL_PIPES.get(pipe).transform(res);
+            } else {
+                throw new RuntimeException("cannot find pipe '" + pipe + "'");
+            }
+        }
+        return res;
     }
 
     /**
@@ -100,6 +137,15 @@ public class FastExpression extends IExpression {
      */
     public void setCheckArgsKey(boolean checkArgsKey) {
         this.checkArgsKey = checkArgsKey;
+    }
+
+    /**
+     * 配置自定义的管道
+     *
+     * @param customPipes 自定义管道字典
+     */
+    public void setCustomPipes(Map<String, IPipe<?>> customPipes) {
+        this.customPipes = customPipes;
     }
 
     /**
