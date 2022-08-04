@@ -18,7 +18,7 @@ import java.util.regex.Pattern;
  * 支持的逻辑运算符: {@code &&, ||}<br>
  * e.g.
  * <blockquote>
- * <pre>!(:id{@code >=} 0 || :name | {@linkplain IPipe length}{@code <=} 3) && :age{@code >} 21</pre>
+ * <pre>!(:id{@code >=} 0 || :name | {@linkplain IPipe length}{@code <= 3) &&} :age{@code >} 21</pre>
  * </blockquote>
  *
  * @see Comparators
