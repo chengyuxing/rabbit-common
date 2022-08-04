@@ -18,7 +18,7 @@ import java.util.regex.Pattern;
  * 支持的逻辑运算符: {@code &&, ||}<br>
  * e.g.
  * <blockquote>
- * {@code !(:id >= 0 || :name | length <= 3) && :age<=21}
+ * <pre>!(:id{@code >=} 0 || :name | {@linkplain IPipe length}{@code <=} 3) && :age{@code >} 21</pre>
  * </blockquote>
  *
  * @see Comparators
@@ -111,7 +111,7 @@ public class FastExpression extends IExpression {
      * 通过一系列管道来处理值
      *
      * @param value 值
-     * @param pipes 管道 e.g. {@code | upper | length | ...}
+     * @param pipes 管道 e.g.  <code>| {@linkplain IPipe upper} | {@linkplain IPipe length} | ...</code>
      * @return 经过管道处理后的值
      */
     public Object pipedValue(Object value, String pipes) {
