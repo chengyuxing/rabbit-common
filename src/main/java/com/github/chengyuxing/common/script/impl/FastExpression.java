@@ -111,10 +111,10 @@ public class FastExpression extends IExpression {
      * 通过一系列管道来处理值
      *
      * @param value 值
-     * @param pipes 管道 e.g. {@code :name | length == 10}
+     * @param pipes 管道 e.g. {@code | upper | length | ...}
      * @return 经过管道处理后的值
      */
-    Object pipedValue(Object value, String pipes) {
+    public Object pipedValue(Object value, String pipes) {
         String[] pipeArr = pipes.trim().substring(1).split("\\|");
         Object res = value;
         for (String p : pipeArr) {
