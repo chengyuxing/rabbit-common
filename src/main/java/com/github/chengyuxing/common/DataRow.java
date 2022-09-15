@@ -529,60 +529,64 @@ public final class DataRow extends LinkedHashMap<String, Object> {
                             if (Date.class.isAssignableFrom(value.getClass())) {
                                 method.invoke(entity, value);
                             } else if (drValueType.equals("java.lang.String")) {
-                                method.invoke(entity, DateTimes.toDate(value.toString()));
+                                if (!value.equals("")) {
+                                    method.invoke(entity, DateTimes.toDate(value.toString()));
+                                }
                             } else {
                                 method.invoke(entity, value);
                             }
                             //if entity field type is java8 new date time api，convert sql date time type
                         } else if (Temporal.class.isAssignableFrom(enFieldType)) {
-                            switch (drValueType) {
-                                case "java.sql.Date":
-                                    if (enFieldType == LocalDate.class) {
-                                        method.invoke(entity, ((java.sql.Date) value).toLocalDate());
-                                    }
-                                    break;
-                                case "java.sql.Timestamp":
-                                    if (enFieldType == LocalDateTime.class) {
-                                        method.invoke(entity, ((Timestamp) value).toLocalDateTime());
-                                    } else if (enFieldType == Instant.class) {
-                                        method.invoke(entity, ((Timestamp) value).toInstant());
-                                    } else if (enFieldType == LocalDate.class) {
-                                        method.invoke(entity, ((Timestamp) value).toLocalDateTime().toLocalDate());
-                                    } else if (enFieldType == LocalTime.class) {
-                                        method.invoke(entity, ((Timestamp) value).toLocalDateTime().toLocalTime());
-                                    }
-                                    break;
-                                case "java.sql.Time":
-                                    if (enFieldType == LocalTime.class) {
-                                        method.invoke(entity, ((Time) value).toLocalTime());
-                                    }
-                                    break;
-                                case "java.util.Date":
-                                    ZonedDateTime zoneDt = ((Date) value).toInstant().atZone(ZoneId.systemDefault());
-                                    if (enFieldType == LocalDateTime.class) {
-                                        method.invoke(entity, zoneDt.toLocalDateTime());
-                                    } else if (enFieldType == Instant.class) {
-                                        method.invoke(entity, zoneDt.toInstant());
-                                    } else if (enFieldType == LocalDate.class) {
-                                        method.invoke(entity, zoneDt.toLocalDate());
-                                    } else if (enFieldType == LocalTime.class) {
-                                        method.invoke(entity, zoneDt.toLocalTime());
-                                    }
-                                    break;
-                                case "java.lang.String":
-                                    if (enFieldType == LocalDateTime.class) {
-                                        method.invoke(entity, DateTimes.toLocalDateTime(value.toString()));
-                                    } else if (enFieldType == Instant.class) {
-                                        method.invoke(entity, DateTimes.toInstant(value.toString()));
-                                    } else if (enFieldType == LocalDate.class) {
-                                        method.invoke(entity, DateTimes.toLocalDate(value.toString()));
-                                    } else if (enFieldType == LocalTime.class) {
-                                        method.invoke(entity, DateTimes.toLocalTime(value.toString()));
-                                    }
-                                    break;
-                                default:
-                                    method.invoke(entity, value);
-                                    break;
+                            if (!value.equals("")) {
+                                switch (drValueType) {
+                                    case "java.sql.Date":
+                                        if (enFieldType == LocalDate.class) {
+                                            method.invoke(entity, ((java.sql.Date) value).toLocalDate());
+                                        }
+                                        break;
+                                    case "java.sql.Timestamp":
+                                        if (enFieldType == LocalDateTime.class) {
+                                            method.invoke(entity, ((Timestamp) value).toLocalDateTime());
+                                        } else if (enFieldType == Instant.class) {
+                                            method.invoke(entity, ((Timestamp) value).toInstant());
+                                        } else if (enFieldType == LocalDate.class) {
+                                            method.invoke(entity, ((Timestamp) value).toLocalDateTime().toLocalDate());
+                                        } else if (enFieldType == LocalTime.class) {
+                                            method.invoke(entity, ((Timestamp) value).toLocalDateTime().toLocalTime());
+                                        }
+                                        break;
+                                    case "java.sql.Time":
+                                        if (enFieldType == LocalTime.class) {
+                                            method.invoke(entity, ((Time) value).toLocalTime());
+                                        }
+                                        break;
+                                    case "java.util.Date":
+                                        ZonedDateTime zoneDt = ((Date) value).toInstant().atZone(ZoneId.systemDefault());
+                                        if (enFieldType == LocalDateTime.class) {
+                                            method.invoke(entity, zoneDt.toLocalDateTime());
+                                        } else if (enFieldType == Instant.class) {
+                                            method.invoke(entity, zoneDt.toInstant());
+                                        } else if (enFieldType == LocalDate.class) {
+                                            method.invoke(entity, zoneDt.toLocalDate());
+                                        } else if (enFieldType == LocalTime.class) {
+                                            method.invoke(entity, zoneDt.toLocalTime());
+                                        }
+                                        break;
+                                    case "java.lang.String":
+                                        if (enFieldType == LocalDateTime.class) {
+                                            method.invoke(entity, DateTimes.toLocalDateTime(value.toString()));
+                                        } else if (enFieldType == Instant.class) {
+                                            method.invoke(entity, DateTimes.toInstant(value.toString()));
+                                        } else if (enFieldType == LocalDate.class) {
+                                            method.invoke(entity, DateTimes.toLocalDate(value.toString()));
+                                        } else if (enFieldType == LocalTime.class) {
+                                            method.invoke(entity, DateTimes.toLocalTime(value.toString()));
+                                        }
+                                        break;
+                                    default:
+                                        method.invoke(entity, value);
+                                        break;
+                                }
                             }
                             // if entity filed type is Map, Collection, or not starts with java.
                             // reason：about not starts with java, allow Map, Collection, user's custom entity, except others.
