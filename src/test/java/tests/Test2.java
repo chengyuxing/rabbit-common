@@ -8,6 +8,7 @@ import com.github.chengyuxing.common.utils.StringUtil;
 import org.junit.Test;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -25,6 +26,40 @@ public class Test2 {
             );
             rows.add(row);
         }
+    }
+
+    public static class Now {
+        private Date a;
+        private LocalDateTime b;
+
+        @Override
+        public String toString() {
+            return "Now{" +
+                    "a=" + a +
+                    ", b=" + b +
+                    '}';
+        }
+
+        public LocalDateTime getB() {
+            return b;
+        }
+
+        public void setB(LocalDateTime b) {
+            this.b = b;
+        }
+
+        public Date getA() {
+            return a;
+        }
+
+        public void setA(Date a) {
+            this.a = a;
+        }
+    }
+
+    @Test
+    public void testdd() throws Exception {
+        System.out.println(DataRow.fromPair("a", "2022-12-23", "b", "2022-12-01").toEntity(Now.class));
     }
 
     @Test
@@ -131,7 +166,7 @@ public class Test2 {
     }
 
     @Test
-    public void testlMap() throws Exception{
+    public void testlMap() throws Exception {
         Map<String, Integer> map = new LinkedHashMap<>();
         map.put("c", 1);
         map.put("b", 1);
