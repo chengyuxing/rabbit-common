@@ -46,10 +46,10 @@ public final class ReflectUtil {
      * 获取标准javaBean的所有读/写方法(getter,setter)
      *
      * @param clazz 类
-     * @return 类的set方法组
+     * @return 类的get和set方法组
      * @throws IntrospectionException ex
      */
-    public static Pair<List<Method>, List<Method>> getWRMethods(Class<?> clazz) throws IntrospectionException {
+    public static Pair<List<Method>, List<Method>> getRWMethods(Class<?> clazz) throws IntrospectionException {
         List<Method> rs = new ArrayList<>();
         List<Method> ws = new ArrayList<>();
         BeanInfo beanInfo = Introspector.getBeanInfo(clazz);

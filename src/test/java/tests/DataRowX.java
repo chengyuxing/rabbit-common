@@ -675,7 +675,7 @@ public final class DataRowX implements Map<String, Object> {
     public <T> T toEntity(Class<T> clazz, Object... constructorParameters) {
         try {
             T entity = ReflectUtil.getInstance(clazz, constructorParameters);
-            for (Method method : ReflectUtil.getWRMethods(clazz).getItem2()) {
+            for (Method method : ReflectUtil.getRWMethods(clazz).getItem2()) {
                 if (method.getName().startsWith("set")) {
                     String field = method.getName().substring(3);
                     field = field.substring(0, 1).toLowerCase().concat(field.substring(1));
@@ -876,7 +876,7 @@ public final class DataRowX implements Map<String, Object> {
     public static DataRowX fromEntity(Object entity) {
         try {
             DataRowX row = DataRowX.empty();
-            for (Method method : ReflectUtil.getWRMethods(entity.getClass()).getItem1()) {
+            for (Method method : ReflectUtil.getRWMethods(entity.getClass()).getItem1()) {
                 Class<?> returnType = method.getReturnType();
                 if (returnType != Class.class) {
                     String field = method.getName();
