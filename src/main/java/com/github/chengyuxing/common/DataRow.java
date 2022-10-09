@@ -354,10 +354,10 @@ public final class DataRow extends LinkedHashMap<String, Object> {
     public DataRow removeIfAbsentExclude(String... keys) {
         Iterator<Map.Entry<String, Object>> iterator = entrySet().iterator();
         //为了内部一点性能就不使用函数接口了
-        //noinspection Java8CollectionRemoveIf
+        List<String> keysList = Arrays.asList(keys);
         while (iterator.hasNext()) {
             Map.Entry<String, Object> e = iterator.next();
-            if (e.getValue() == null && !Arrays.asList(keys).contains(e.getKey())) {
+            if (e.getValue() == null && !keysList.contains(e.getKey())) {
                 iterator.remove();
             }
         }
