@@ -1,12 +1,11 @@
 package tests;
 
 import com.github.chengyuxing.common.DataRow;
+import com.github.chengyuxing.common.MapExtends;
+import com.github.chengyuxing.common.utils.StringUtil;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class MapTests {
 
@@ -20,6 +19,29 @@ public class MapTests {
     }
 
     @Test
+    public void testzz() throws Exception {
+        DataRow row = DataRow.fromPair("Name", "cyx", "age", 27);
+        System.out.println(row.getIgnoreCase("name"));
+        System.out.println(row.containsKeyIgnoreCase("AGE"));
+    }
+
+    @Test
+    public void testaa() throws Exception {
+        class MyMap extends HashMap<String, Object> implements MapExtends<Object> {
+        }
+        MyMap map = new MyMap();
+        map.put("a", 1);
+        map.put("b", 2);
+        map.put("c", 3);
+        System.out.println(map.getIgnoreCase("B"));
+    }
+
+    @Test
+    public void testss() throws Exception {
+        System.out.println(StringUtil.containsIgnoreCase("axjHd7DugC", "jhd"));
+    }
+
+    @Test
     public void testMap() throws Exception {
         Map<String, Object> row = new LinkedHashMap<>();
         for (int i = 0; i < 10000; i++) {
@@ -28,7 +50,7 @@ public class MapTests {
         System.out.println(row.get("a780"));
     }
 
-//    @Test
+    //    @Test
     public void testList() throws Exception {
         List<String> list = new ArrayList<>();
         for (int i = 0; i < 10000; i++) {
