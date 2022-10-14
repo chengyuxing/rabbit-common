@@ -11,13 +11,12 @@ import java.sql.Timestamp;
 import java.time.*;
 import java.time.temporal.Temporal;
 import java.util.*;
-import java.util.function.BiPredicate;
 import java.util.function.Function;
 
 /**
  * 对LinkedHashMap进行一些扩展的数据行对象
  */
-public final class DataRow extends LinkedHashMap<String, Object> {
+public final class DataRow extends LinkedHashMap<String, Object> implements MapExtends<Object> {
     /**
      * 一个空的DataRow（初始化大小为16）
      */
@@ -69,17 +68,6 @@ public final class DataRow extends LinkedHashMap<String, Object> {
             return row;
         }
         throw new IllegalArgumentException("names and values length not equal!");
-    }
-
-    /**
-     * 获取值集合
-     *
-     * @return 值集合
-     * @see #values()
-     */
-    @Deprecated
-    public Collection<Object> getValues() {
-        return values();
     }
 
     /**
@@ -327,59 +315,6 @@ public final class DataRow extends LinkedHashMap<String, Object> {
             return (Long) value;
         }
         return Long.parseLong(value.toString());
-    }
-
-    /**
-     * 移除值为null的所有元素
-     *
-     * @return 不存在null值的当前对象
-     */
-    public DataRow removeIfAbsent() {
-        Iterator<Map.Entry<String, Object>> iterator = entrySet().iterator();
-        //noinspection Java8CollectionRemoveIf
-        while (iterator.hasNext()) {
-            if (iterator.next().getValue() == null) {
-                iterator.remove();
-            }
-        }
-        return this;
-    }
-
-    /**
-     * 移除值为null且不包含在指定keys中的所有元素
-     *
-     * @param keys 需忽略的键名集合
-     * @return 移除匹配元素后的当前对象
-     */
-    public DataRow removeIfAbsentExclude(String... keys) {
-        Iterator<Map.Entry<String, Object>> iterator = entrySet().iterator();
-        //为了内部一点性能就不使用函数接口了
-        List<String> keysList = Arrays.asList(keys);
-        while (iterator.hasNext()) {
-            Map.Entry<String, Object> e = iterator.next();
-            if (e.getValue() == null && !keysList.contains(e.getKey())) {
-                iterator.remove();
-            }
-        }
-        return this;
-    }
-
-    /**
-     * 根据条件移除元素
-     *
-     * @param predicate 条件
-     * @return 移除匹配元素后的当前对象
-     */
-    public DataRow removeIf(BiPredicate<String, Object> predicate) {
-        Iterator<Map.Entry<String, Object>> iterator = entrySet().iterator();
-        //noinspection Java8CollectionRemoveIf
-        while (iterator.hasNext()) {
-            Map.Entry<String, Object> next = iterator.next();
-            if (predicate.test(next.getKey(), next.getValue())) {
-                iterator.remove();
-            }
-        }
-        return this;
     }
 
     /**
