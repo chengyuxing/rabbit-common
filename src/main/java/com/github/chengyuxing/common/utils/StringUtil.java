@@ -3,9 +3,9 @@ package com.github.chengyuxing.common.utils;
 
 import com.github.chengyuxing.common.tuple.Pair;
 
-import java.util.ArrayList;
-import java.util.Formatter;
-import java.util.List;
+import java.lang.reflect.InvocationTargetException;
+import java.util.*;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -13,7 +13,8 @@ import java.util.regex.Pattern;
  * 字符串工具类
  */
 public class StringUtil {
-    public static final String NUMBER_REGEX = "-?([0-9]|(0\\.\\d+)|([1-9]+\\.?\\d+))";
+    public static final Pattern STR_TEMP_REGEX = Pattern.compile("\\$\\{(?<key>[\\w\\d._-]+)}");
+    public static final String NUMBER_REGEX = "-?(\\d|(0\\.\\d+)|([1-9]+\\.?\\d+))";
 
     public static final String NEW_LINE = "\n";
     public static final String TAB = "\t";
@@ -472,6 +473,65 @@ public class StringUtil {
         String right = str.substring(index + oldValue.length());
         String replacedFirst = left + newValue + right;
         return replaceIgnoreCase(replacedFirst, oldValue, newValue);
+    }
+
+    /**
+     * 字符串格式化<br>
+     * <blockquote>
+     * e.g.
+     * <pre>参数：{name: "world", days: ["Mon", "Tue", "Thr"]}</pre>
+     * <pre>字符串：Hello ${name} ${days.0}!</pre>
+     * <pre>输出：Hello world Mon!</pre>
+     * </blockquote>
+     *
+     * @param str       字符串
+     * @param args      参数
+     * @param formatter 值格式化函数
+     * @return 格式化后的字符串
+     */
+    public static String format(String str, Map<String, Object> args, Function<Object, String> formatter) {
+        if (args.isEmpty()) {
+            return str;
+        }
+        String res = str;
+        try {
+            Matcher m = STR_TEMP_REGEX.matcher(str);
+            while (m.find()) {
+                String keyPath = m.group("key");
+                int dotIdx = keyPath.indexOf(".");
+                if (dotIdx == -1) {
+                    if (args.containsKey(keyPath)) {
+                        res = res.replace("${" + keyPath + "}", formatter.apply(args.get(keyPath)));
+                    }
+                } else {
+                    String key = keyPath.substring(0, dotIdx);
+                    if (args.containsKey(key)) {
+                        res = res.replace("${" + keyPath + "}", formatter.apply(ObjectUtil.getDeepNestValue(args, "/" + keyPath.replace(".", "/"))));
+                    }
+                }
+            }
+            return res;
+        } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException |
+                 IllegalAccessException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
+    /**
+     * 字符串格式化<br>
+     * <blockquote>
+     * e.g.
+     * <pre>参数：{name: "world", days: ["Mon", "Tue", "Thr"]}</pre>
+     * <pre>字符串：Hello ${name} ${days.0}!</pre>
+     * <pre>输出：Hello world Mon!</pre>
+     * </blockquote>
+     *
+     * @param str  字符串
+     * @param args 参数
+     * @return 格式化后的字符串
+     */
+    public static String format(String str, Map<String, Object> args) {
+        return format(str, args, Object::toString);
     }
 
     /**
