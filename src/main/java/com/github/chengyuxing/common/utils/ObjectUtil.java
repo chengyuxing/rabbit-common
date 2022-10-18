@@ -168,6 +168,31 @@ public final class ObjectUtil {
     }
 
     /**
+     * 集合中是否忽略大小写包含某个元素
+     *
+     * @param collection 集合
+     * @param value      查询值
+     * @return 是否包含
+     */
+    public static boolean containsIgnoreCase(Collection<String> collection, String value) {
+        Iterator<String> i = collection.iterator();
+        if (value == null) {
+            while (i.hasNext()) {
+                if (i.next() == null) {
+                    return true;
+                }
+            }
+        } else {
+            while (i.hasNext()) {
+                if (i.next().equalsIgnoreCase(value)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
      * map的key忽略大小写获取一个值
      *
      * @param map map
