@@ -15,8 +15,8 @@ public class ExpressionTests {
     @BeforeClass
     public static void init() {
         args.put("id", -1);
-        args.put("name", null);
-        args.put("age", 17);
+        args.put("NAME", null);
+        args.put("AGE", 17);
     }
 
     @Test
