@@ -13,26 +13,28 @@ public class ResourceUtil {
     /**
      * 递归获取指定目录下的文件
      *
-     * @param path   基本路径
-     * @param depth  深度
-     * @param suffix 文件后缀
+     * @param path       基本路径
+     * @param depth      深度
+     * @param suffix     文件后缀
+     * @param moreSuffix 更多的后缀
      * @return Stream
      * @throws IOException 没有此路径
      */
-    public static Stream<Path> getResources(Path path, int depth, String suffix) throws IOException {
-        return Files.find(path, depth, (p, attr) -> p.toString().endsWith(suffix) && !attr.isDirectory());
+    public static Stream<Path> getResources(Path path, int depth, String suffix, String... moreSuffix) throws IOException {
+        return Files.find(path, depth, (p, attr) -> (StringUtil.endsWithIgnoreCase(p.toString(), suffix) || StringUtil.endsWithsIgnoreCase(p.toString(), moreSuffix)) && !attr.isDirectory());
     }
 
     /**
      * 递归获取指定目录下的文件深度为5
      *
-     * @param basePath 基本路径
-     * @param suffix   文件后缀
+     * @param basePath   基本路径
+     * @param suffix     文件后缀
+     * @param moreSuffix 更多的后缀
      * @return Stream
-     * @throws IOException        没有此路径
+     * @throws IOException 没有此路径
      */
-    public static Stream<Path> getResources(Path basePath, String suffix) throws IOException {
-        return getResources(basePath, 5, suffix);
+    public static Stream<Path> getResources(Path basePath, String suffix, String... moreSuffix) throws IOException {
+        return getResources(basePath, 5, suffix, moreSuffix);
     }
 
     /**

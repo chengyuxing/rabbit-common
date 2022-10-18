@@ -461,6 +461,9 @@ public class StringUtil {
      * @return 替换后的字符串
      */
     public static String replaceIgnoreCase(String str, String oldValue, String newValue) {
+        if (oldValue.equalsIgnoreCase(newValue)) {
+            return str;
+        }
         int index = indexOfIgnoreCase(str, oldValue);
         if (index == -1) {
             return str;
