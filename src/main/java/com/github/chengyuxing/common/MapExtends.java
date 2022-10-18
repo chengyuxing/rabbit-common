@@ -1,6 +1,6 @@
 package com.github.chengyuxing.common;
 
-import com.github.chengyuxing.common.utils.ObjectUtil;
+import com.github.chengyuxing.common.utils.CollectionUtil;
 
 import java.util.Arrays;
 import java.util.Iterator;
@@ -20,7 +20,7 @@ public interface MapExtends<V> extends Map<String, V> {
      * @return 是否包含
      */
     default boolean containsKeyIgnoreCase(String key) {
-        return ObjectUtil.containsKeyIgnoreCase(this, key);
+        return CollectionUtil.containsKeyIgnoreCase(this, key);
     }
 
     /**
@@ -30,7 +30,7 @@ public interface MapExtends<V> extends Map<String, V> {
      * @return 值
      */
     default V getIgnoreCase(String key) {
-        return ObjectUtil.getValueIgnoreCase(this, key);
+        return CollectionUtil.getValueIgnoreCase(this, key);
     }
 
     /**

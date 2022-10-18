@@ -39,7 +39,7 @@ public class MyTest {
     }
 
     @Test
-    public void test2() throws Exception{
+    public void test2() throws Exception {
         List<DataRow> rows = new ArrayList<>();
         rows.add(DataRow.fromPair("a", 1, "b", "x"));
         rows.add(DataRow.fromPair("a", 2, "b", "x1"));
@@ -112,16 +112,16 @@ public class MyTest {
 
     @Test
     public void decodeTest() throws Exception {
-        int money = 10000800;
-        Object v = ObjectUtil.decode(money, 10, "穷光蛋",
+        int money = 10;
+        Object v = ObjectUtil.decode(money, 11, "穷光蛋",
                 100, "西北风",
                 1000, "打工族",
                 10000, "小康生活",
                 100000, "大老板",
-                1000000, "MN", "LK");
+                1000000, "MN", "LN");
         System.out.println(v);
 
-        System.out.println(ObjectUtil.nullable("null", "asd"));
+//        System.out.println(ObjectUtil.nullable("null", "asd"));
     }
 
     @Test

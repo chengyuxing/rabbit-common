@@ -3,7 +3,6 @@ package com.github.chengyuxing.common.utils;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
 
@@ -19,28 +18,26 @@ public final class ObjectUtil {
      * @param equal  比较值
      * @param result 结果
      * @param more   更多
-     * @param <T>    值类型
-     * @param <R>    结果类型
      * @return 结果
      */
-    @SuppressWarnings("unchecked")
-    public static <T, R> R decode(T value, T equal, R result, Object... more) {
+    public static Object decode(Object value, Object equal, Object result, Object... more) {
         Object[] objs = new Object[more.length + 2];
         objs[0] = equal;
         objs[1] = result;
         System.arraycopy(more, 0, objs, 2, more.length);
-        boolean isOdd = (objs.length & 1) != 0;
-        R res = null;
-        for (int i = 0; i < objs.length; i += 2) {
+
+        Object res = null;
+        int i = 0;
+        while (i < objs.length) {
             if (value.equals(objs[i])) {
-                if (i < objs.length - 1)
-                    res = (R) objs[i + 1];
+                res = objs[i + 1];
                 break;
             }
-            if (isOdd && i == objs.length - 1) {
-                res = (R) objs[i];
+            if (i == objs.length - 1) {
+                res = objs[i];
                 break;
             }
+            i += 2;
         }
         return res;
     }
@@ -139,82 +136,5 @@ public final class ObjectUtil {
      */
     public static <T> T nullable(T value, T other) {
         return Optional.ofNullable(value).orElse(other);
-    }
-
-    /**
-     * map是否忽略大小写包含指定的key
-     *
-     * @param map map
-     * @param key 需要查找的key
-     * @param <V> map值类型参数
-     * @return 是否包含
-     */
-    public static <V> boolean containsKeyIgnoreCase(Map<String, V> map, String key) {
-        Iterator<Map.Entry<String, V>> i = map.entrySet().iterator();
-        if (key == null) {
-            while (i.hasNext()) {
-                Map.Entry<String, V> e = i.next();
-                if (e.getKey() == null)
-                    return true;
-            }
-        } else {
-            while (i.hasNext()) {
-                Map.Entry<String, V> e = i.next();
-                if (key.equalsIgnoreCase(e.getKey()))
-                    return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * 集合中是否忽略大小写包含某个元素
-     *
-     * @param collection 集合
-     * @param value      查询值
-     * @return 是否包含
-     */
-    public static boolean containsIgnoreCase(Collection<String> collection, String value) {
-        Iterator<String> i = collection.iterator();
-        if (value == null) {
-            while (i.hasNext()) {
-                if (i.next() == null) {
-                    return true;
-                }
-            }
-        } else {
-            while (i.hasNext()) {
-                if (i.next().equalsIgnoreCase(value)) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    /**
-     * map的key忽略大小写获取一个值
-     *
-     * @param map map
-     * @param key 需要取值的key
-     * @param <V> 值类型参数
-     * @return 值
-     */
-    public static <V> V getValueIgnoreCase(Map<String, V> map, String key) {
-        Iterator<Map.Entry<String, V>> i = map.entrySet().iterator();
-        if (key == null) {
-            while (i.hasNext()) {
-                Map.Entry<String, V> e = i.next();
-                if (e.getKey() == null)
-                    return e.getValue();
-            }
-        } else {
-            while (i.hasNext()) {
-                Map.Entry<String, V> e = i.next();
-                if (key.equalsIgnoreCase(e.getKey()))
-                    return e.getValue();
-            }
-        }
-        return null;
     }
 }
