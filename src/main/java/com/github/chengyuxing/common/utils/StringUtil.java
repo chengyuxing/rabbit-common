@@ -453,6 +453,25 @@ public class StringUtil {
     }
 
     /**
+     * 忽略大小写进行替换
+     *
+     * @param str      字符串
+     * @param oldValue 需要被替换的旧值
+     * @param newValue 需要替换的旧值
+     * @return 替换后的字符串
+     */
+    public static String replaceIgnoreCase(String str, String oldValue, String newValue) {
+        int index = indexOfIgnoreCase(str, oldValue);
+        if (index == -1) {
+            return str;
+        }
+        String left = str.substring(0, index);
+        String right = str.substring(index + oldValue.length());
+        String replacedFirst = left + newValue + right;
+        return replaceIgnoreCase(replacedFirst, oldValue, newValue);
+    }
+
+    /**
      * 查询子字符在字符串中串出现的次数
      *
      * @param str    字符串
