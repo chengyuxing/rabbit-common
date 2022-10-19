@@ -13,7 +13,7 @@ import java.util.regex.Pattern;
  * 字符串工具类
  */
 public class StringUtil {
-    public static final Pattern STR_TEMP_REGEX = Pattern.compile("\\$\\{\\s*(?<key>[\\w\\d._-]+)\\s*}");
+    public static final Pattern STR_TEMP_PATTERN = Pattern.compile("\\$\\{\\s*(?<key>[\\w\\d._-]+)\\s*}");
     public static final String NUMBER_REGEX = "-?(\\d|(0\\.\\d+)|([1-9]+\\.?\\d+))";
 
     public static final String NEW_LINE = "\n";
@@ -495,7 +495,7 @@ public class StringUtil {
         }
         String res = str;
         try {
-            Matcher m = STR_TEMP_REGEX.matcher(str);
+            Matcher m = STR_TEMP_PATTERN.matcher(str);
             while (m.find()) {
                 String keyTemp = m.group(0);
                 String keyPath = m.group("key");
