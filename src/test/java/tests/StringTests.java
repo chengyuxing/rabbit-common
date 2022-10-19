@@ -13,12 +13,12 @@ import java.util.Map;
 public class StringTests {
     @Test
     public void test() throws Exception {
-        String sql = "${a}insert into ${Table} ${tables.fields} values (${VALUES.0.f}), (${values.0}), (${Values})${b}";
-        System.out.println(StringUtil.replaceIgnoreCase(sql, "${values}", "cyx"));
-        System.out.println(StringUtil.replaceIgnoreCase(sql, "${table}", "test.user"));
-        System.out.println(StringUtil.replaceIgnoreCase(sql, "${A}", "?"));
-        System.out.println(StringUtil.replaceIgnoreCase(sql, "${b}", "?"));
-        System.out.println(StringUtil.replaceIgnoreCase(sql, "${b}", "${a}"));
+        String sql = "${   a   }insert into ${  Table  } ${tables.fields} values (${  VALUES.0.f }), (${values.0}), (${  Values   })${b}";
+//        System.out.println(StringUtil.replaceIgnoreCase(sql, "${values}", "cyx"));
+//        System.out.println(StringUtil.replaceIgnoreCase(sql, "${table}", "test.user"));
+//        System.out.println(StringUtil.replaceIgnoreCase(sql, "${A}", "?"));
+//        System.out.println(StringUtil.replaceIgnoreCase(sql, "${b}", "?"));
+//        System.out.println(StringUtil.replaceIgnoreCase(sql, "${b}", "${a}"));
 
 
         Map<String, Object> args = new HashMap<>();
