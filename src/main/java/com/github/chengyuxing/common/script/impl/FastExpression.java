@@ -4,7 +4,7 @@ import com.github.chengyuxing.common.script.Comparators;
 import com.github.chengyuxing.common.script.IExpression;
 import com.github.chengyuxing.common.script.IPipe;
 import com.github.chengyuxing.common.tuple.Pair;
-import com.github.chengyuxing.common.utils.CollectionUtil;
+import com.github.chengyuxing.common.utils.ObjectUtil;
 import com.github.chengyuxing.common.utils.StringUtil;
 
 import java.util.HashMap;
@@ -94,16 +94,16 @@ public class FastExpression extends IExpression {
                 if (args == null) {
                     throw new NullPointerException("args must not be null or field 'checkArgsKey' is true.");
                 }
-                if (!args.containsKey(name) && !CollectionUtil.containsKeyIgnoreCase(args, name)) {
+                boolean isKeyPath = name.contains(".") && !args.containsKey(name);
+                String tk = name;
+                if (isKeyPath) {
+                    tk = name.substring(0, name.indexOf("."));
+                }
+                if (!args.containsKey(tk)) {
                     throw new IllegalArgumentException("value of key: '" + name + "' is not exists in " + args + " while calculate expression, or field 'checkArgsKey' is true.");
                 }
             }
-            Object source = null;
-            if (args.containsKey(name)) {
-                source = args.get(name);
-            } else if (CollectionUtil.containsKeyIgnoreCase(args, name)) {
-                source = CollectionUtil.getValueIgnoreCase(args, name);
-            }
+            Object source = ObjectUtil.getValueWild(args, name);
             if (pipes != null && !pipes.trim().equals("")) {
                 source = pipedValue(source, pipes);
             }
