@@ -499,21 +499,21 @@ public class StringUtil {
             while (m.find()) {
                 String keyTemp = m.group(0);
                 String keyPath = m.group("key");
-                int dotIdx = keyPath.indexOf(".");
-                if (dotIdx == -1) {
-                    if (args.containsKey(keyPath)) {
-                        res = res.replace(keyTemp, formatter.apply(args.get(keyPath)));
-                    }
+                if (args.containsKey(keyPath)) {
+                    res = res.replace(keyTemp, formatter.apply(args.get(keyPath)));
                 } else {
-                    String key = keyPath.substring(0, dotIdx);
-                    if (args.containsKey(key)) {
-                        res = res.replace(keyTemp, formatter.apply(ObjectUtil.getDeepNestValue(args, "/" + keyPath.replace(".", "/"))));
+                    int dotIdx = keyPath.indexOf(".");
+                    if (dotIdx != -1) {
+                        String key = keyPath.substring(0, dotIdx);
+                        if (args.containsKey(key)) {
+                            Object v = ObjectUtil.getDeepNestValue(args, "/" + keyPath.replace(".", "/"));
+                            res = res.replace(keyTemp, formatter.apply(v));
+                        }
                     }
                 }
             }
             return res;
-        } catch (NoSuchFieldException | InvocationTargetException | NoSuchMethodException |
-                 IllegalAccessException ex) {
+        } catch (InvocationTargetException | IllegalAccessException ex) {
             throw new RuntimeException(ex);
         }
     }
@@ -532,7 +532,55 @@ public class StringUtil {
      * @return 格式化后的字符串
      */
     public static String format(String str, Map<String, Object> args) {
-        return format(str, args, Object::toString);
+        return format(str, args, o -> {
+            if (o == null) {
+                return "";
+            }
+            return o.toString();
+        });
+    }
+
+    /**
+     * 字符串格式化<br>
+     * <blockquote>
+     * e.g.
+     * <pre>键：name</pre>
+     * <pre>值："World"</pre>
+     * <pre>字符串：Hello ${ name}!</pre>
+     * <pre>输出：Hello world!</pre>
+     * </blockquote>
+     *
+     * @param str   字符串
+     * @param key   键
+     * @param value 值
+     * @return 格式化后的字符串
+     */
+    public static String format(String str, String key, Object value) {
+        String res = str;
+        try {
+            Matcher m = STR_TEMP_PATTERN.matcher(str);
+            while (m.find()) {
+                String keyTemp = m.group(0);
+                String keyPath = m.group("key");
+                String k = key.trim();
+                if (keyPath.equals(k)) {
+                    Object v = value;
+                    if (v == null) {
+                        v = "";
+                    }
+                    res = res.replace(keyTemp, v.toString());
+                } else if (keyPath.startsWith(k + ".")) {
+                    Object v = ObjectUtil.getDeepNestValue(value, keyPath.substring(keyPath.indexOf(".")).replace(".", "/"));
+                    if (v == null) {
+                        v = "";
+                    }
+                    res = res.replace(keyTemp, v.toString());
+                }
+            }
+            return res;
+        } catch (InvocationTargetException | IllegalAccessException ex) {
+            throw new RuntimeException(ex);
+        }
     }
 
     /**
