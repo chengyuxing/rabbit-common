@@ -48,12 +48,16 @@ public final class ObjectUtil {
      * @param value 对象
      * @param key   键名或索引
      * @return 值
-     * @throws NoSuchMethodException     如果是javaBean并且没有此字段的get方法
      * @throws InvocationTargetException 如果调用目标javaBean错误
      * @throws IllegalAccessException    如果javaBean此字段不可访问
-     * @throws NoSuchFieldException      如果javaBean没有相应的字段
      */
-    public static Object getValue(Object value, String key) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, NoSuchFieldException {
+    public static Object getValue(Object value, String key) throws InvocationTargetException, IllegalAccessException {
+        if (value == null) {
+            return null;
+        }
+        if (ReflectUtil.isBasicType(value)) {
+            return null;
+        }
         if (key.matches("\\d")) {
             int idx = Integer.parseInt(key);
             if (value instanceof Collection) {
@@ -69,11 +73,20 @@ public final class ObjectUtil {
             }
         }
         if (value instanceof Map) {
-            return ((Map<?, ?>) value).get(key);
+            //noinspection unchecked
+            Map<String, ?> map = (Map<String, ?>) value;
+            if (map.containsKey(key)) {
+                return map.get(key);
+            }
+            if (CollectionUtil.containsKeyIgnoreCase(map, key)) {
+                return CollectionUtil.getValueIgnoreCase(map, key);
+            }
         }
         Class<?> clazz = value.getClass();
-        Class<?> type = clazz.getDeclaredField(key).getType();
-        Method m = clazz.getDeclaredMethod(ReflectUtil.initGetMethod(key, type));
+        Method m = ReflectUtil.getGetMethod(clazz, key);
+        if (m == null) {
+            return null;
+        }
         if (!m.isAccessible()) {
             m.setAccessible(true);
         }
@@ -86,12 +99,13 @@ public final class ObjectUtil {
      * @param obj         深层嵌套的对象
      * @param jsonPathExp json路径表达式（{@code /a/b/0/name}）
      * @return 值
-     * @throws NoSuchFieldException      如果是javaBean并且没有此字段
      * @throws InvocationTargetException 如果调用目标javaBean错误
-     * @throws NoSuchMethodException     如果是javaBean并且没有此字段的get方法
      * @throws IllegalAccessException    如果javaBean此字段不可访问
      */
-    public static Object getDeepNestValue(Object obj, String jsonPathExp) throws NoSuchFieldException, InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+    public static Object getDeepNestValue(Object obj, String jsonPathExp) throws InvocationTargetException, IllegalAccessException {
+        if (obj == null) {
+            return null;
+        }
         if (!jsonPathExp.startsWith("/")) {
             throw new IllegalArgumentException("json path expression syntax error, must startsWith '/', for example '/" + jsonPathExp + "'");
         }
@@ -102,6 +116,29 @@ public final class ObjectUtil {
         String key = trimStart.substring(0, trimStart.indexOf("/"));
         String tail = trimStart.substring(trimStart.indexOf("/"));
         return getDeepNestValue(getValue(obj, key), tail);
+    }
+
+    /**
+     * 根据键名或路径从map中获取一个值
+     *
+     * @param args       map数据
+     * @param nameOrPath 键名（可不区分大小写）或对象路径（e.g. user.name 区分大小写）
+     * @return 值
+     */
+    public static Object getValueWild(Map<String, ?> args, String nameOrPath) {
+        Object v = null;
+        if (args.containsKey(nameOrPath)) {
+            v = args.get(nameOrPath);
+        } else if (CollectionUtil.containsKeyIgnoreCase(args, nameOrPath)) {
+            v = CollectionUtil.getValueIgnoreCase(args, nameOrPath);
+        } else if (nameOrPath.contains(".")) {
+            try {
+                v = ObjectUtil.getDeepNestValue(args, "/" + nameOrPath.replace(".", "/"));
+            } catch (InvocationTargetException | IllegalAccessException e) {
+                throw new IllegalArgumentException(e);
+            }
+        }
+        return v;
     }
 
     /**
