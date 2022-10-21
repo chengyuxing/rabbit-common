@@ -7,6 +7,7 @@ import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -88,6 +89,32 @@ public final class ReflectUtil {
     }
 
     /**
+     * 某个实体类是否有指定的字段
+     *
+     * @param clazz 实体类
+     * @param field 字段名
+     * @return 是否有
+     */
+    public static Method getGetMethod(Class<?> clazz, String field) {
+        Method method = null;
+        Field[] fields = clazz.getDeclaredFields();
+        out:
+        for (Field f : fields) {
+            if (f.getName().equals(field)) {
+                Method[] methods = clazz.getDeclaredMethods();
+                for (Method m : methods) {
+                    String getMethod = initGetMethod(field, f.getType());
+                    if (m.getName().equals(getMethod)) {
+                        method = m;
+                        break out;
+                    }
+                }
+            }
+        }
+        return method;
+    }
+
+    /**
      * 获取一个jackson的ObjectMapper对象
      *
      * @return ObjectMapper
@@ -119,7 +146,8 @@ public final class ReflectUtil {
                 return null;
             }
             return jsonStr.toString();
-        } catch (ClassNotFoundException | IllegalAccessException | InstantiationException | NoSuchMethodException | InvocationTargetException e) {
+        } catch (ClassNotFoundException | IllegalAccessException | InstantiationException | NoSuchMethodException |
+                 InvocationTargetException e) {
             throw new RuntimeException("convert to json error: ", e);
         }
     }
@@ -136,7 +164,8 @@ public final class ReflectUtil {
             Object jacksonObj = getJackson();
             Method method = jacksonObj.getClass().getDeclaredMethod("readValue", String.class, Class.class);
             return method.invoke(jacksonObj, json, targetType);
-        } catch (ClassNotFoundException | IllegalAccessException | InstantiationException | NoSuchMethodException | InvocationTargetException e) {
+        } catch (ClassNotFoundException | IllegalAccessException | InstantiationException | NoSuchMethodException |
+                 InvocationTargetException e) {
             throw new RuntimeException("convert to json error: ", e);
         }
     }
