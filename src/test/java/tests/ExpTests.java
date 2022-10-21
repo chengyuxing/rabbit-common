@@ -1,5 +1,6 @@
 package tests;
 
+import com.github.chengyuxing.common.DataRow;
 import com.github.chengyuxing.common.script.Comparators;
 import com.github.chengyuxing.common.script.impl.FastExpression;
 import com.github.chengyuxing.common.utils.ObjectUtil;
@@ -22,9 +23,10 @@ public class ExpTests {
 
     @Test
     public void regexTest() throws Exception {
-        FastExpression expression = FastExpression.of(":id @ '^2\\d*$'");
+        FastExpression expression = FastExpression.of(":user.id @ '^2\\d*$'");
         Map<String, Object> map = new HashMap<>();
         map.put("id", "2");
+        map.put("user", DataRow.fromPair("id", 22));
         boolean res = expression.calc(map);
         System.out.println(res);
     }
@@ -78,8 +80,13 @@ public class ExpTests {
         map.put("coord", coord);
         list.add(map);
 
-        String props = "/0/coord/x";
+        String props = "/0/COORD/x";
 
         System.out.println(ObjectUtil.getDeepNestValue(list, props));
+    }
+
+    @Test
+    public void test5() throws Exception{
+        System.out.println(ObjectUtil.getValueWild(DataRow.fromPair("a.b", DataRow.fromPair("b", "cyx")), "a.b.b"));
     }
 }
