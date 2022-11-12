@@ -5,6 +5,7 @@ import com.github.chengyuxing.common.utils.StringUtil;
 import org.junit.Test;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -45,5 +46,10 @@ public class StringTests {
     @Test
     public void test3() throws Exception {
         System.out.println(StringUtil.format("${a.b}", "a", "b"));
+    }
+
+    @Test
+    public void testx1() throws Exception{
+        System.out.println(LocalDateTime.now().format(DateTimeFormatter.ISO_WEEK_DATE));
     }
 }
