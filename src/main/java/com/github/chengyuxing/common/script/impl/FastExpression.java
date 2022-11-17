@@ -117,25 +117,17 @@ public class FastExpression extends IExpression {
      * 通过一系列管道来处理值
      *
      * @param value 值
-     * @param pipes 管道 e.g.  <code>| {@linkplain IPipe upper} | {@linkplain IPipe length} | ...</code><br>
-     *              以竖线开头，每个管道名以竖线分割
+     * @param pipes 管道 e.g.  <code>| {@linkplain IPipe upper} | {@linkplain IPipe length} | ...</code>
      * @return 经过管道处理后的值
      */
     public Object pipedValue(Object value, String pipes) {
-        String[] pipeArr = pipes.trim().substring(1).split("\\|");
-        return pipedValue(value, pipeArr);
-    }
-
-    /**
-     * 通过一系列管道来处理值
-     *
-     * @param value 值
-     * @param pipes 管道 e.g.  <code> {@linkplain IPipe upper}, {@linkplain IPipe length}, ...</code>
-     * @return 经过管道处理后的值
-     */
-    public Object pipedValue(Object value, String... pipes) {
+        String trimPipes = pipes.trim();
+        if (!trimPipes.matches("(\\s*\\|\\s*\\w+\\s*)+")) {
+            throw new IllegalArgumentException("pipes channel syntax error: " + pipes);
+        }
+        String[] pipeArr = trimPipes.substring(1).split("\\|");
         Object res = value;
-        for (String p : pipes) {
+        for (String p : pipeArr) {
             String pipe = p.trim();
             if (customPipes.containsKey(pipe)) {
                 res = customPipes.get(pipe).transform(res);
@@ -184,7 +176,7 @@ public class FastExpression extends IExpression {
      *
      * @param expression 布尔表达式
      * @return true或false
-     * @throws ArithmeticException if expression syntax error.
+     * @throws RuntimeException if expression syntax error.
      */
     public static boolean boolExpressionEval(String expression) {
         expression = expression.trim();
