@@ -108,7 +108,7 @@ public class FastExpression extends IExpression {
                 try {
                     source = pipedValue(source, pipes);
                 } catch (Exception e) {
-                    throw new RuntimeException("an error occurred when piping value at: " + expression, e);
+                    throw new RuntimeException("an error occurred when piping value at expression -> " + expression, e);
                 }
             }
             boolean bool = Comparators.compare(source, op, value);
