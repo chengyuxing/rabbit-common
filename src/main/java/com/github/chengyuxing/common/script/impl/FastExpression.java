@@ -105,7 +105,11 @@ public class FastExpression extends IExpression {
             }
             Object source = ObjectUtil.getValueWild(args, name);
             if (pipes != null && !pipes.trim().equals("")) {
-                source = pipedValue(source, pipes);
+                try {
+                    source = pipedValue(source, pipes);
+                } catch (Exception e) {
+                    throw new RuntimeException("An error occurred when piping value at: " + expression, e);
+                }
             }
             boolean bool = Comparators.compare(source, op, value);
             return calc(expression.replace(filter, Boolean.toString(bool)), args);
