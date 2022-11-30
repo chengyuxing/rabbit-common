@@ -13,8 +13,8 @@ import java.util.regex.Pattern;
  * 字符串工具类
  */
 public class StringUtil {
-    public static final Pattern STR_TEMP_PATTERN = Pattern.compile("\\$\\{\\s*(?<key>[\\w\\d._-]+)\\s*}");
-    public static final String NUMBER_REGEX = "-?(\\d|(0\\.\\d+)|([1-9]+\\.?\\d+))";
+    public static final Pattern STR_TEMP_PATTERN = Pattern.compile("\\$\\{\\s*(?<key>[\\w._-]+)\\s*}");
+    public static final String NUMBER_REGEX = "-?(0|[1-9]\\d*)(\\.\\d+)?";
 
     public static final String NEW_LINE = "\n";
     public static final String TAB = "\t";
