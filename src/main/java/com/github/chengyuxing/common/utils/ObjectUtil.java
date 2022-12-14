@@ -71,6 +71,7 @@ public final class ObjectUtil {
             if (value instanceof Object[]) {
                 return ((Object[]) value)[idx];
             }
+            return null;
         }
         if (value instanceof Map) {
             //noinspection unchecked
@@ -81,6 +82,7 @@ public final class ObjectUtil {
             if (CollectionUtil.containsKeyIgnoreCase(map, key)) {
                 return CollectionUtil.getValueIgnoreCase(map, key);
             }
+            return null;
         }
         Class<?> clazz = value.getClass();
         Method m = ReflectUtil.getGetMethod(clazz, key);
