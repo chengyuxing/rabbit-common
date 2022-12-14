@@ -126,6 +126,9 @@ public final class ObjectUtil {
      * @return 值
      */
     public static Object getValueWild(Map<String, ?> args, String nameOrPath) {
+        if (args == null) {
+            return null;
+        }
         Object v = null;
         if (args.containsKey(nameOrPath)) {
             v = args.get(nameOrPath);
