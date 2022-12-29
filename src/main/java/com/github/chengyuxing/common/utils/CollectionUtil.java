@@ -3,6 +3,8 @@ package com.github.chengyuxing.common.utils;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * 集合工具类
@@ -83,5 +85,16 @@ public class CollectionUtil {
             }
         }
         return null;
+    }
+
+    public static boolean hasSameKeyIgnoreCase(Map<String, ?> map) {
+        Set<String> keys = map.keySet();
+        Set<String> newKeys = keys.stream().map(k -> {
+            if (k == null) {
+                return null;
+            }
+            return k.toLowerCase();
+        }).collect(Collectors.toSet());
+        return keys.size() != newKeys.size();
     }
 }

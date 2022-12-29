@@ -1,6 +1,7 @@
 package tests;
 
 import com.github.chengyuxing.common.DataRow;
+import com.github.chengyuxing.common.utils.CollectionUtil;
 import com.github.chengyuxing.common.utils.StringUtil;
 import org.junit.Test;
 
@@ -51,5 +52,10 @@ public class StringTests {
     @Test
     public void testx1() throws Exception{
         System.out.println(LocalDateTime.now().format(DateTimeFormatter.ISO_WEEK_DATE));
+    }
+
+    @Test
+    public void testCol() throws Exception{
+        System.out.println(CollectionUtil.hasSameKeyIgnoreCase(DataRow.fromPair("id", "1", "ID", "2")));
     }
 }

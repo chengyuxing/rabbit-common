@@ -339,10 +339,8 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
     public DataRow pick(String name, String... more) {
         DataRow row = new DataRow(more.length + 1);
         row.put(name, get(name));
-        if (more.length > 0) {
-            for (String n : more) {
-                row.put(n, get(n));
-            }
+        for (String n : more) {
+            row.put(n, get(n));
         }
         return row;
     }
