@@ -69,11 +69,25 @@ public class DateTimes {
         if (temporal instanceof ZonedDateTime) {
             return ((ZonedDateTime) temporal).toLocalDateTime().format(formatter);
         }
+        if (temporal instanceof OffsetDateTime) {
+            return ((OffsetDateTime) temporal).toLocalDateTime().format(formatter);
+        }
+        if (temporal instanceof OffsetTime) {
+            return ((OffsetTime) temporal).toLocalTime().format(formatter);
+        }
         throw new UnsupportedOperationException("type " + temporal.getClass().getTypeName() + "is not support currently.");
     }
 
     /**
-     * 将时间字符串转换为本地日期时间对象
+     * 将时间字符串转换为本地日期时间对象<br>
+     * 支持的时间格式：
+     * <ul>
+     *     <li>yyyyMMddHHmmss</li>
+     *     <li>yyyyMMdd</li>
+     *     <li>yyyy[-/年]MM[-/月]dd[日]</li>
+     *     <li>yyyy[-/年]MM[-/月]dd[日] HH[:时点]mm[:分]ss[秒]</li>
+     *     <li>ISO时间格式</li>
+     * </ul>
      *
      * @param s 时间字符串
      * @return 本地日期时间
@@ -82,6 +96,12 @@ public class DateTimes {
         IsoDateConvert isoDateConvert = isoDateConvert(s);
         if (isoDateConvert.isIsoDate()) {
             return LocalDateTime.parse(isoDateConvert.getDate()).atZone(isoDateConvert.getZoneId()).toLocalDateTime();
+        }
+        if (s.matches("\\d{13}")) {
+            return Instant.ofEpochMilli(Long.parseLong(s)).atZone(ZoneId.systemDefault()).toLocalDateTime();
+        }
+        if (s.matches("\\d{10}")) {
+            return Instant.ofEpochSecond(Long.parseLong(s)).atZone(ZoneId.systemDefault()).toLocalDateTime();
         }
         if (s.matches("\\d{14}")) {
             return LocalDateTime.parse(s, DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));

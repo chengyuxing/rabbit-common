@@ -9,6 +9,7 @@ import org.junit.Test;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.chrono.MinguoDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -115,7 +116,10 @@ public class Test2 {
         System.out.println(DateTimes.isoDateConvert("2019-09-25T18:00:14z"));
         System.out.println(DateTimes.isoDateConvert("2019-09-25 18:00:14"));
 
+        System.out.println(MinguoDate.now());
+
         System.out.println(DateTimes.toLocalDateTime("2019-09-26T03:45:36.656-0800"));
+        System.out.println(DateTimes.currentTimestamp());
     }
 
     @Test
