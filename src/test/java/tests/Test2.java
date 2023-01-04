@@ -108,6 +108,17 @@ public class Test2 {
     }
 
     @Test
+    public void testDt2() throws Exception {
+        System.out.println(DateTimes.isoDateConvert("2019-09-26T03:45:36.656Z"));
+        System.out.println(DateTimes.isoDateConvert("2019-09-26T03:45:36.656-0800"));
+        System.out.println(DateTimes.isoDateConvert("2019-09-25T18:00:14"));
+        System.out.println(DateTimes.isoDateConvert("2019-09-25T18:00:14z"));
+        System.out.println(DateTimes.isoDateConvert("2019-09-25 18:00:14"));
+
+        System.out.println(DateTimes.toLocalDateTime("2019-09-26T03:45:36.656-0800"));
+    }
+
+    @Test
     public void concat() throws Exception {
         DataRow row1 = DataRow.fromPair("a", 1, "b", 2);
         DataRow row2 = DataRow.fromPair("c", 11, "d", 23);

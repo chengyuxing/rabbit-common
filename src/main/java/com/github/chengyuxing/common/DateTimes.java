@@ -13,6 +13,7 @@ import java.util.regex.Pattern;
 public class DateTimes {
     static final Pattern DATE_PATTERN = Pattern.compile("(?<y>\\d{4}[-/年])?(?<m>\\d{1,2})[-/月](?<d>\\d{1,2})日?");
     static final Pattern TIME_PATTERN = Pattern.compile("(?<h>\\d{1,2})[:时点](?<m>\\d{1,2})(?<s>[:分]\\d{1,2})?秒?");
+    static final Pattern ISO_DATE_TIME = Pattern.compile("(?<date>\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,3})?)(?<zone>[zZ]|[+-]\\d{4})?");
 
     private final Temporal temporal;
 
@@ -75,6 +76,10 @@ public class DateTimes {
      * @return 本地日期时间
      */
     public static LocalDateTime toLocalDateTime(String s) {
+        IsoDateConvert isoDateConvert = isoDateConvert(s);
+        if (isoDateConvert.isIsoDate()) {
+            return LocalDateTime.parse(isoDateConvert.getDate()).atZone(isoDateConvert.getZoneId()).toLocalDateTime();
+        }
         if (s.matches("\\d{14}")) {
             return LocalDateTime.parse(s, DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
         }
@@ -108,6 +113,54 @@ public class DateTimes {
             throw new IllegalArgumentException("un know date time format: " + s);
         }
         return LocalDateTime.of(year, month, day, hour, minus, second);
+    }
+
+    public static IsoDateConvert isoDateConvert(String stringDate) {
+        return new IsoDateConvert(stringDate);
+    }
+
+    public static class IsoDateConvert {
+        private boolean isIsoDate = false;
+        private String date;
+        private ZoneId zoneId;
+
+        public IsoDateConvert(String stringDate) {
+            Matcher m = ISO_DATE_TIME.matcher(stringDate.trim());
+            if (m.matches()) {
+                isIsoDate = true;
+                date = m.group("date");
+                String zone = m.group("zone");
+                if (zone == null) {
+                    zoneId = ZoneId.systemDefault();
+                    return;
+                }
+                if ("z".equals(zone)) {
+                    zone = "Z";
+                }
+                zoneId = ZoneId.of(zone);
+            }
+        }
+
+        public String getDate() {
+            return date;
+        }
+
+        public ZoneId getZoneId() {
+            return zoneId;
+        }
+
+        public boolean isIsoDate() {
+            return isIsoDate;
+        }
+
+        @Override
+        public String toString() {
+            return "IsoDateConvert{" +
+                    "isIsoDate=" + isIsoDate +
+                    ", date='" + date + '\'' +
+                    ", zoneId=" + zoneId +
+                    '}';
+        }
     }
 
     /**
