@@ -66,6 +66,9 @@ public class DateTimes {
         if (temporal instanceof Instant) {
             return ((Instant) temporal).atZone(ZoneId.systemDefault()).format(formatter);
         }
+        if (temporal instanceof ZonedDateTime) {
+            return ((ZonedDateTime) temporal).toLocalDateTime().format(formatter);
+        }
         throw new UnsupportedOperationException("type " + temporal.getClass().getTypeName() + "is not support currently.");
     }
 
