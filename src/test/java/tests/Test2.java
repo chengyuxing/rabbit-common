@@ -9,7 +9,6 @@ import org.junit.Test;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.chrono.MinguoDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -110,16 +109,32 @@ public class Test2 {
 
     @Test
     public void testDt2() throws Exception {
-        System.out.println(DateTimes.isoDateConvert("2019-09-26T03:45:36.656Z"));
-        System.out.println(DateTimes.isoDateConvert("2019-09-26T03:45:36.656-0800"));
-        System.out.println(DateTimes.isoDateConvert("2019-09-25T18:00:14"));
-        System.out.println(DateTimes.isoDateConvert("2019-09-25T18:00:14z"));
-        System.out.println(DateTimes.isoDateConvert("2019-09-25 18:00:14"));
+        System.out.println(DateTimes.createUTCDate("2019-09-26T03:45:36.656Z"));
+        System.out.println(DateTimes.createUTCDate("2019-09-26T03:45:36.656-0800"));
+        System.out.println(DateTimes.createUTCDate("2019-09-25T18:00:14"));
+        System.out.println(DateTimes.createUTCDate("2019-09-25T18:00:14z"));
+        System.out.println(DateTimes.createUTCDate("2019-09-25 18:00:14"));
 
-        System.out.println(MinguoDate.now());
+        System.out.println(LocalDateTime.now());
 
         System.out.println(DateTimes.toLocalDateTime("2019-09-26T03:45:36.656-0800"));
         System.out.println(DateTimes.currentTimestamp());
+
+        System.out.println(DateTimes.toLocalDateTime("2021年12月23日"));
+
+        System.out.println(DateTimes.toLocalDateTime("Wed, 04 Jan 2023 09:36:48 GMT"));
+
+        System.out.println(DateTimes.toLocalDateTime("Wed Jan 04 18:52:01 CST 2023"));
+        System.out.println(DateTimes.toLocalDateTime("Wed Jan 04 2023 17:36:48 GMT+0800"));
+
+        System.out.println(DateTimes.createRFCLikeDate("Wed Jan 04 2023 17:36:48 GMT+0800"));
+
+        System.out.println(new Date());
+
+    }
+
+    @Test
+    public void testdtM() throws Exception{
     }
 
     @Test
