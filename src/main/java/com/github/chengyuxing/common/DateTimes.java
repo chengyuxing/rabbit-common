@@ -117,7 +117,6 @@ public class DateTimes {
      */
     public static LocalDateTime toLocalDateTime(String s) {
         s = s.trim().replaceAll("\\s+", " ");
-
         if (s.matches("\\d{14}")) {
             return LocalDateTime.parse(s, DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
         }
