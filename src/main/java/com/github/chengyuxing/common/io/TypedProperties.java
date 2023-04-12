@@ -1,6 +1,8 @@
 package com.github.chengyuxing.common.io;
 
-import java.util.Properties;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * 值类型化的properties
@@ -124,5 +126,77 @@ public class TypedProperties extends Properties {
             return Float.parseFloat(getProperty(key));
         }
         return defaultValue;
+    }
+
+    /**
+     * 根据逗号({@code ,})分割获取一个Stream
+     *
+     * @param key          键名
+     * @param defaultValue 默认值
+     * @return 一个Stream
+     */
+    public Stream<String> getStream(String key, Stream<String> defaultValue) {
+        if (containsKey(key)) {
+            return Stream.of(getProperty(key).split(","));
+        }
+        return defaultValue;
+    }
+
+    /**
+     * 根据逗号({@code ,})分割获取一个List，不包含空元素
+     *
+     * @param key          键名
+     * @param defaultValue 默认值
+     * @return 一个List
+     */
+    public List<String> getList(String key, List<String> defaultValue) {
+        if (containsKey(key)) {
+            return getStream(key, Stream.empty())
+                    .map(String::trim)
+                    .filter(item -> !item.equals(""))
+                    .collect(Collectors.toList());
+        }
+        return defaultValue;
+    }
+
+    /**
+     * 根据逗号({@code ,})分割获取一个Set，不包含空元素
+     *
+     * @param key          键名
+     * @param defaultValue 默认值
+     * @return 一个Set
+     */
+    public Set<String> getSet(String key, Set<String> defaultValue) {
+        List<String> list = getList(key, new ArrayList<>());
+        if (!list.isEmpty()) {
+            return new HashSet<>(list);
+        }
+        return defaultValue;
+    }
+
+    /**
+     * 根据键名前缀({@code .})获取一个Map
+     *
+     * @param key          键名前缀 e.g: datasource
+     *                     <blockquote>
+     *                     <ul>
+     *                     <li>datasource.url=jdbc:... </li>
+     *                     <li>datasource.username=...</li>
+     *                     </ul>
+     *                     </blockquote>
+     * @param defaultValue 默认值
+     * @return 一个Map
+     */
+    public Map<String, String> getMap(String key, Map<String, String> defaultValue) {
+        Map<String, String> map = keySet().stream()
+                .map(Object::toString)
+                .map(String::trim)
+                .filter(k -> k.startsWith(key + "."))
+                .filter(k -> k.length() > key.length() + 1)
+                .collect(Collectors.toMap(k -> k.substring(k.indexOf(".") + 1), this::getProperty));
+        if (map.isEmpty()) {
+            return defaultValue;
+        }
+        return map;
     }
 }
