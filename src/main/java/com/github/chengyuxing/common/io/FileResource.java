@@ -8,6 +8,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 
 /**
@@ -29,7 +30,7 @@ public class FileResource extends ClassPathResource {
      */
     public FileResource(String path) {
         super(path);
-        uriOrClasspath = path;
+        uriOrClasspath = path.trim();
     }
 
     /**
@@ -68,7 +69,8 @@ public class FileResource extends ClassPathResource {
         if (isURI()) {
             try {
                 URI uri = URI.create(uriOrClasspath);
-                if (Files.exists(Paths.get(uri))) {
+                Path p = Paths.get(uri);
+                if (!Files.isDirectory(p) && Files.exists(p)) {
                     return uri.toURL();
                 }
                 return null;

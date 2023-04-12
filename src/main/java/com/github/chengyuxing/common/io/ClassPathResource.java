@@ -33,9 +33,9 @@ public class ClassPathResource {
      */
     private String cleanPath(String path) {
         if (path.startsWith("/")) {
-            return path.substring(1);
+            return path.substring(1).trim();
         }
-        return path;
+        return path.trim();
     }
 
     /**
@@ -77,7 +77,7 @@ public class ClassPathResource {
      * @return 文件名
      */
     public String getFileName() {
-        if (path == null) {
+        if (path.equals("")) {
             return null;
         }
         int index = path.lastIndexOf("/");
@@ -90,7 +90,7 @@ public class ClassPathResource {
      * @return 文件名后缀
      */
     public String getFilenameExtension() {
-        if (path == null) {
+        if (path.equals("")) {
             return null;
         } else {
             int extIndex = path.lastIndexOf(46);
@@ -109,6 +109,9 @@ public class ClassPathResource {
      * @return 资源URL
      */
     public URL getURL() {
+        if (path.equals("")) {
+            return null;
+        }
         return classLoader != null ? classLoader.getResource(path) : ClassLoader.getSystemResource(path);
     }
 
