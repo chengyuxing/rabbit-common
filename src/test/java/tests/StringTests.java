@@ -3,6 +3,7 @@ package tests;
 import com.github.chengyuxing.common.DataRow;
 import com.github.chengyuxing.common.io.ClassPathResource;
 import com.github.chengyuxing.common.io.FileResource;
+import com.github.chengyuxing.common.io.TypedProperties;
 import com.github.chengyuxing.common.utils.CollectionUtil;
 import com.github.chengyuxing.common.utils.StringUtil;
 import org.junit.Test;
@@ -11,10 +12,12 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -67,6 +70,13 @@ public class StringTests {
     }
 
     @Test
+    public void test89() {
+        Path path = Paths.get("/Users/chengyuxing/Downloads/flatlaf-demo-3.0.jar");
+        System.out.println(Files.isDirectory(path));
+        System.out.println(Files.exists(path));
+    }
+
+    @Test
     public void test3w() throws URISyntaxException, IOException {
         FileResource resource = new FileResource("file:/Users/chengyuxing/Downloads/flatlaf-demo-3.0.jar");
         System.out.println(resource.exists());
@@ -80,7 +90,7 @@ public class StringTests {
 
     @Test
     public void test3a() throws URISyntaxException, IOException {
-        ClassPathResource resource = new ClassPathResource("mym.xql");
+        ClassPathResource resource = new ClassPathResource("my.xql");
         System.out.println(resource.exists());
         System.out.println(resource.getFileName());
         System.out.println(resource.getFilenameExtension());
@@ -88,5 +98,13 @@ public class StringTests {
         System.out.println(resource.getURL());
         System.out.println(resource.getLastModified());
         System.out.println(resource.getInputStream().available());
+    }
+
+    @Test
+    public void test8() throws IOException {
+        TypedProperties properties = new TypedProperties();
+        properties.load(new FileResource("file:/Users/chengyuxing/Downloads/xql-file-manager.properties").getInputStream());
+        System.out.println(properties.getList("filenames", Collections.emptyList()));
+        System.out.println(properties.getMap("files", Collections.emptyMap()));
     }
 }
