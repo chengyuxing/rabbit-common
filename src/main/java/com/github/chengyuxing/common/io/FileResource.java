@@ -3,12 +3,16 @@ package com.github.chengyuxing.common.io;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 /**
  * 文件资源读取辅助工具类<br>
- * e.g. 文件格式
+ * e.g. 格式支持ClassPath下相对路径和URI格式
  * <blockquote>
  * <pre>windows: file:\\D:\\rabbit.sql 或 file:/D:/rabbit.sql</pre>
  * <pre>Linux/Unix: file:/root/rabbit.sql</pre>
@@ -16,6 +20,8 @@ import java.net.URL;
  * </blockquote>
  */
 public class FileResource extends ClassPathResource {
+    private final String uriOrClasspath;
+
     /**
      * 构造函数
      *
@@ -23,6 +29,7 @@ public class FileResource extends ClassPathResource {
      */
     public FileResource(String path) {
         super(path);
+        uriOrClasspath = path;
     }
 
     /**
@@ -30,8 +37,8 @@ public class FileResource extends ClassPathResource {
      *
      * @return 是否本地文件
      */
-    private boolean isLocalFile() {
-        return getPath().startsWith("file:");
+    private boolean isURI() {
+        return uriOrClasspath.startsWith("file:");
     }
 
     /**
@@ -41,12 +48,11 @@ public class FileResource extends ClassPathResource {
      */
     @Override
     public InputStream getInputStream() {
-        String path = getPath();
-        if (isLocalFile()) {
+        if (isURI()) {
             try {
-                return new FileInputStream(path.substring(5));
+                return new FileInputStream(getURL().getFile());
             } catch (FileNotFoundException e) {
-                throw new RuntimeException(e);
+                throw new UncheckedIOException(e);
             }
         }
         return super.getInputStream();
@@ -59,13 +65,25 @@ public class FileResource extends ClassPathResource {
      */
     @Override
     public URL getURL() {
-        if (isLocalFile()) {
+        if (isURI()) {
             try {
-                return new URL(getPath());
+                URI uri = URI.create(uriOrClasspath);
+                if (Files.exists(Paths.get(uri))) {
+                    return uri.toURL();
+                }
+                return null;
             } catch (MalformedURLException e) {
                 throw new RuntimeException(e);
             }
         }
         return super.getURL();
+    }
+
+    @Override
+    public String getPath() {
+        if (isURI()) {
+            return getURL().getFile();
+        }
+        return super.getPath();
     }
 }
