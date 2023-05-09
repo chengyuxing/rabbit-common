@@ -362,7 +362,7 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
     }
 
     /**
-     * 转为一个新的LinkedHashMap
+     * 生成一个新的LinkedHashMap
      *
      * @param mapper 值转换器
      * @param <T>    值类型参数
@@ -377,16 +377,12 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
     }
 
     /**
-     * 转为一个新的LinkedHashMap
+     * 转为一个LinkedHashMap
      *
      * @return map
      */
     public Map<String, Object> toMap() {
-        Map<String, Object> map = new LinkedHashMap<>();
-        for (Map.Entry<String, Object> e : entrySet()) {
-            map.put(e.getKey(), e.getValue());
-        }
-        return map;
+        return this;
     }
 
     /**
