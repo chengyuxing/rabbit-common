@@ -587,9 +587,9 @@ public class StringUtil {
      * <blockquote>
      * e.g.
      * <pre>键：name</pre>
-     * <pre>值："World"</pre>
+     * <pre>值：World</pre>
      * <pre>字符串：Hello ${ name}!</pre>
-     * <pre>输出：Hello world!</pre>
+     * <pre>输出：Hello World!</pre>
      * </blockquote>
      *
      * @param str   字符串
@@ -599,30 +599,17 @@ public class StringUtil {
      */
     public static String format(String str, String key, Object value) {
         String res = str;
-        try {
-            Matcher m = STR_TEMP_PATTERN.matcher(str);
-            while (m.find()) {
-                String keyTemp = m.group(0);
-                String keyPath = m.group("key");
-                String k = key.trim();
-                if (keyPath.equals(k)) {
-                    Object v = value;
-                    if (v == null) {
-                        v = "";
-                    }
-                    res = res.replace(keyTemp, v.toString());
-                } else if (keyPath.startsWith(k + ".")) {
-                    Object v = ObjectUtil.getDeepNestValue(value, keyPath.substring(keyPath.indexOf(".")).replace(".", "/"));
-                    if (v == null) {
-                        v = "";
-                    }
-                    res = res.replace(keyTemp, v.toString());
+        Matcher m = STR_TEMP_PATTERN.matcher(str);
+        while (m.find()) {
+            if (Objects.equals(m.group("key"), key.trim())) {
+                Object v = value;
+                if (v == null) {
+                    v = "";
                 }
+                res = res.replace(m.group(0), v.toString());
             }
-            return res;
-        } catch (InvocationTargetException | IllegalAccessException ex) {
-            throw new RuntimeException(ex);
         }
+        return res;
     }
 
     /**

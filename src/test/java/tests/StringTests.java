@@ -55,6 +55,15 @@ public class StringTests {
     }
 
     @Test
+    public void test23() {
+        Map<String, Object> map = new HashMap<>();
+        map.put("name", "cyx");
+        map.put("address", "kunming");
+        Map<String, Object> user = new HashMap<>();
+        user.put("user", user);
+    }
+
+    @Test
     public void test3() throws Exception {
         System.out.println(StringUtil.format("${a.b}", "a", "b"));
     }
