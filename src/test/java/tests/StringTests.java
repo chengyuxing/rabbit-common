@@ -122,7 +122,7 @@ public class StringTests {
 
     @Test
     public void test10() {
-        System.out.println(Comparators.compare(null, "==", Comparators.valueOf("blank")));
+        System.out.println(Comparators.compare(null, "==", Comparators.valueOf(null)));
     }
 
     @Test

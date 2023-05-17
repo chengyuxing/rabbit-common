@@ -115,11 +115,20 @@ public class FastExpression extends IExpression {
      * @return 可用于比较计算的值
      */
     private Object getValue(String name, String pipes, Map<String, ?> args) {
-        Object value = name;
         if (isKey(name)) {
-            value = ObjectUtil.getValueWild(args, name.substring(1));
+            Object value = ObjectUtil.getValueWild(args, name.substring(1));
+            if (hasPipes(pipes)) {
+                try {
+                    value = pipedValue(value, pipes);
+                } catch (Exception e) {
+                    throw new RuntimeException("an error occurred when piping value at expression -> " + expression, e);
+                }
+            }
+            return value;
         }
-        if (pipes != null && !pipes.trim().equals("")) {
+        // 字符串字面量
+        Object value = name;
+        if (hasPipes(pipes)) {
             try {
                 value = pipedValue(value, pipes);
             } catch (Exception e) {
@@ -160,6 +169,10 @@ public class FastExpression extends IExpression {
      */
     private boolean isKey(String a) {
         return a.startsWith(":");
+    }
+
+    private boolean hasPipes(String pipes) {
+        return pipes != null && !pipes.trim().equals("");
     }
 
     /**
