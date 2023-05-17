@@ -187,7 +187,7 @@ public class FastExpression extends IExpression {
                 throw new RuntimeException("cannot find pipe '" + pipe + "'");
             }
         }
-        return Comparators.valueOf(res);
+        return res;
     }
 
     /**
