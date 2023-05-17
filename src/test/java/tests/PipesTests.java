@@ -30,7 +30,7 @@ public class PipesTests {
         FastExpression expression = FastExpression.of(":idCard|is_idcard == true");
         Map<String, IPipe<?>> pipeMap = new ConcurrentHashMap<>();
         pipeMap.put("is_idcard", new IsIdCard());
-        expression.setCustomPipes(pipeMap);
+        expression.setPipes(pipeMap);
         System.out.println(expression.calc(DataRow.fromPair("idCard", "53011119930510000X"), true));
 
         FastExpression expression2 = FastExpression.of(":name | length > 3");
