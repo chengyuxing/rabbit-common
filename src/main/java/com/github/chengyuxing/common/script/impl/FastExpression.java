@@ -63,8 +63,11 @@ public class FastExpression extends IExpression {
     }
 
     @Override
-    public Map<String, IPipe<?>> pipes() {
-        return customPipes;
+    public void setPipes(Map<String, IPipe<?>> pipes) {
+        if (pipes == null) {
+            return;
+        }
+        this.customPipes = new HashMap<>(pipes);
     }
 
     /**
@@ -176,8 +179,8 @@ public class FastExpression extends IExpression {
         Object res = value;
         for (String p : pipeArr) {
             String pipe = p.trim();
-            if (pipes().containsKey(pipe)) {
-                res = pipes().get(pipe).transform(res);
+            if (customPipes.containsKey(pipe)) {
+                res = customPipes.get(pipe).transform(res);
             } else if (GLOBAL_PIPES.containsKey(pipe)) {
                 res = GLOBAL_PIPES.get(pipe).transform(res);
             } else {
@@ -185,15 +188,6 @@ public class FastExpression extends IExpression {
             }
         }
         return res;
-    }
-
-    /**
-     * 配置自定义的管道
-     *
-     * @param customPipes 自定义管道字典
-     */
-    public void setCustomPipes(Map<String, IPipe<?>> customPipes) {
-        this.customPipes = customPipes;
     }
 
     /**

@@ -25,12 +25,11 @@ public abstract class IExpression {
     public abstract boolean calc(Map<String, ?> args, boolean require);
 
     /**
-     * 用于扩展值处理的管道
+     * 设置管道字典来扩展表达式
      *
-     * @return 管道字典
-     * @see IPipe
+     * @param pipes 管道字典
      */
-    public abstract Map<String, IPipe<?>> pipes();
+    public abstract void setPipes(Map<String, IPipe<?>> pipes);
 
     @Override
     public String toString() {

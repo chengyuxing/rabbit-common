@@ -16,7 +16,7 @@ public class XExpression extends IExpression {
     }
 
     @Override
-    public Map<String, IPipe<?>> pipes() {
-        return null;
+    public void setPipes(Map<String, IPipe<?>> pipes) {
+
     }
 }
