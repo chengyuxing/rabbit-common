@@ -117,7 +117,7 @@ public class FastExpression extends IExpression {
     private Object getValue(String name, String pipes, Map<String, ?> args) {
         if (isKey(name)) {
             Object value = ObjectUtil.getValueWild(args, name.substring(1));
-            if (hasPipes(pipes)) {
+            if (!StringUtil.isEmpty(pipes)) {
                 try {
                     value = pipedValue(value, pipes);
                 } catch (Exception e) {
@@ -128,7 +128,7 @@ public class FastExpression extends IExpression {
         }
         // 字符串字面量
         Object value = name;
-        if (hasPipes(pipes)) {
+        if (!StringUtil.isEmpty(pipes)) {
             try {
                 value = pipedValue(value, pipes);
             } catch (Exception e) {
@@ -169,10 +169,6 @@ public class FastExpression extends IExpression {
      */
     private boolean isKey(String a) {
         return a.startsWith(":");
-    }
-
-    private boolean hasPipes(String pipes) {
-        return pipes != null && !pipes.trim().equals("");
     }
 
     /**

@@ -394,6 +394,16 @@ public class StringUtil {
     }
 
     /**
+     * 判断字符串是否为空
+     *
+     * @param str 字符串
+     * @return 是否为空
+     */
+    public static boolean isEmpty(String str) {
+        return str == null || str.trim().isEmpty();
+    }
+
+    /**
      * 判断是否是数字
      *
      * @param numeric 字符串数字
