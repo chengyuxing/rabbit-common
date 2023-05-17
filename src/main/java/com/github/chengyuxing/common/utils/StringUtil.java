@@ -282,7 +282,7 @@ public class StringUtil {
      */
     public static boolean containsAnyIgnoreCase(String source, String... targets) {
         if (targets.length < 1) {
-            return true;
+            return false;
         }
         for (String target : targets) {
             if (containsIgnoreCase(source, target)) {
@@ -301,7 +301,7 @@ public class StringUtil {
      */
     public static boolean containsAny(String source, String... targets) {
         if (targets.length < 1) {
-            return true;
+            return false;
         }
         for (String target : targets) {
             if (source.contains(target)) {
@@ -320,10 +320,29 @@ public class StringUtil {
      */
     public static boolean equalsAnyIgnoreCase(String source, String... targets) {
         if (targets.length < 1) {
-            return true;
+            return false;
         }
         for (String target : targets) {
             if (source.equalsIgnoreCase(target)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 忽略大小写判断被查询的字符串是否匹配其中一个目标字符串
+     *
+     * @param source  被查询的字符串
+     * @param targets 被包含的字符串组
+     * @return 是否包含任意一个
+     */
+    public static boolean equalsAny(String source, String... targets) {
+        if (targets.length < 1) {
+            return false;
+        }
+        for (String target : targets) {
+            if (source.equals(target)) {
                 return true;
             }
         }
@@ -339,7 +358,7 @@ public class StringUtil {
      */
     public static boolean containsAllIgnoreCase(String source, String... targets) {
         if (targets.length < 1) {
-            return true;
+            return false;
         }
         for (String target : targets) {
             if (!containsIgnoreCase(source, target)) {
@@ -358,7 +377,7 @@ public class StringUtil {
      */
     public static boolean containsAll(String source, String... targets) {
         if (targets.length < 1) {
-            return true;
+            return false;
         }
         for (String target : targets) {
             if (!source.contains(target)) {
