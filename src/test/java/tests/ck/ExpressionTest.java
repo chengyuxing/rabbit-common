@@ -24,7 +24,7 @@ public class ExpressionTest {
         args.put("name", "mike");
 
         CExpression exp = CExpression.of(expression2);
-        System.out.println(exp.calc(args));
+        System.out.println(exp.calc(args, true));
 
     }
 

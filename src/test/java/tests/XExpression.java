@@ -1,6 +1,7 @@
 package tests;
 
 import com.github.chengyuxing.common.script.IExpression;
+import com.github.chengyuxing.common.script.IPipe;
 
 import java.util.Map;
 
@@ -10,7 +11,12 @@ public class XExpression extends IExpression {
     }
 
     @Override
-    public boolean calc(Map<String, ?> args) {
+    public boolean calc(Map<String, ?> args,boolean require) {
         return expression.startsWith("a");
+    }
+
+    @Override
+    public Map<String, IPipe<?>> pipes() {
+        return null;
     }
 }

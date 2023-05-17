@@ -26,8 +26,8 @@ public class ExpTests {
         FastExpression expression = FastExpression.of(":user.id @ '^2\\d*$'");
         Map<String, Object> map = new HashMap<>();
         map.put("id", "2");
-        map.put("user", DataRow.fromPair("id", 22));
-        boolean res = expression.calc(map);
+        map.put("user", DataRow.fromPair("id", "22"));
+        boolean res = expression.calc(map, true);
         System.out.println(res);
     }
 
@@ -69,7 +69,7 @@ public class ExpTests {
 
     @Test
     public void eq() throws Exception {
-        System.out.println(Comparators.equal(Collections.emptyList(), "blank"));
+        System.out.println(Comparators.equals(Collections.emptyList(), "blank"));
     }
 
     @Test
@@ -86,7 +86,7 @@ public class ExpTests {
     }
 
     @Test
-    public void test5() throws Exception{
+    public void test5() throws Exception {
         System.out.println(ObjectUtil.getValueWild(DataRow.fromPair("a.b", DataRow.fromPair("b", "cyx")), "a.b.b"));
     }
 }

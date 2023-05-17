@@ -2,6 +2,7 @@ package com.github.chengyuxing.common.script.impl;
 
 import com.github.chengyuxing.common.script.Comparators;
 import com.github.chengyuxing.common.script.IExpression;
+import com.github.chengyuxing.common.script.IPipe;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
@@ -61,12 +62,17 @@ public class CExpression extends IExpression {
      * @throws ArithmeticException      如果表达式语法错误
      */
     @Override
-    public boolean calc(Map<String, ?> args) {
+    public boolean calc(Map<String, ?> args, boolean require) {
         try {
             return calc(expression, args);
         } catch (ScriptException e) {
             throw new ArithmeticException("expression script syntax error：" + e.getMessage());
         }
+    }
+
+    @Override
+    public Map<String, IPipe<?>> pipes() {
+        return null;
     }
 
     /**

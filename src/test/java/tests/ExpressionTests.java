@@ -22,13 +22,13 @@ public class ExpressionTests {
     @Test
     public void fast() throws Exception {
         FastExpression expression = FastExpression.of(exp);
-        System.out.println(expression.calc(args));
+        System.out.println(expression.calc(args, true));
     }
 
     @Test
     public void c() throws Exception {
         CExpression expression = CExpression.of(exp);
-        System.out.println(expression.calc(args));
+        System.out.println(expression.calc(args, true));
     }
 
 }

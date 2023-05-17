@@ -399,11 +399,11 @@ public class StringUtil {
      * @param numeric 字符串数字
      * @return 是否是数字
      */
-    public static boolean isNumeric(String numeric) {
+    public static boolean isNumeric(Object numeric) {
         if (numeric == null) {
             return false;
         }
-        return numeric.matches(NUMBER_REGEX);
+        return numeric.toString().matches(NUMBER_REGEX);
     }
 
     /**

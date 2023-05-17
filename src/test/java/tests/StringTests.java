@@ -4,22 +4,19 @@ import com.github.chengyuxing.common.DataRow;
 import com.github.chengyuxing.common.io.ClassPathResource;
 import com.github.chengyuxing.common.io.FileResource;
 import com.github.chengyuxing.common.io.TypedProperties;
+import com.github.chengyuxing.common.script.Comparators;
 import com.github.chengyuxing.common.utils.CollectionUtil;
 import com.github.chengyuxing.common.utils.StringUtil;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class StringTests {
     static String sql = "${   a   } ${a.d} insert into ${  Table  } ${tables.fields} values (${  VALUES.1.f }), (${values.0}), (${  Values   })${b}";
@@ -115,5 +112,21 @@ public class StringTests {
         properties.load(new FileResource("file:/Users/chengyuxing/Downloads/xql-file-manager.properties").getInputStream());
         System.out.println(properties.getList("filenames", Collections.emptyList()));
         System.out.println(properties.getMap("files", Collections.emptyMap()));
+    }
+
+    @Test
+    public void test9() {
+        System.out.println(Comparators.equals("", "\"\""));
+        System.out.println(Comparators.regexPass(true, "\"\\w+\"", false));
+    }
+
+    @Test
+    public void test10() {
+        System.out.println(Comparators.compare(null, "==", Comparators.valueOf("blank")));
+    }
+
+    @Test
+    public void test11() {
+        System.out.println(Comparators.valueOf(18.6));
     }
 }
