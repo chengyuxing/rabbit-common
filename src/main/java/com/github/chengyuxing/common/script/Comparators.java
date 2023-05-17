@@ -60,6 +60,7 @@ public class Comparators {
      * @param b  被比较的值
      * @return 比较结果
      * @throws UnsupportedOperationException 如果比较操作符不在预设中
+     * @throws IllegalArgumentException      如果比较数字类型无效
      */
     public static boolean compareNumber(Object a, String op, Object b) {
         if (isBlank(a) && isBlank(b)) {

@@ -83,7 +83,7 @@ public class FastExpression extends IExpression {
     boolean calc(String expression, Map<String, ?> args, boolean require) {
         Matcher m = CRITERIA_PATTERN.matcher(expression);
         if (m.find()) {
-            String filter = m.group(0);
+            String criteria = m.group(0);
             String compare = m.group("compare");
             String comparePipes = m.group("comparePipes");
             String operator = m.group("operator");
@@ -98,7 +98,7 @@ public class FastExpression extends IExpression {
             Object b = getValue(compared, comparedPipes, args);
 
             boolean bool = Comparators.compare(a, operator, b);
-            return calc(expression.replace(filter, Boolean.toString(bool)), args, require);
+            return calc(expression.replace(criteria, Boolean.toString(bool)), args, require);
         }
         return boolExpressionEval(expression);
     }
