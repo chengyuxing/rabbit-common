@@ -127,7 +127,8 @@ public class StringTests {
 
     @Test
     public void test11() {
-        Object v = Comparators.valueOf("");
+        Object v = Comparators.valueOf("'abc'");
+        System.out.println(Comparators.compare("'abc'","@","^'\\w+'"));
         System.out.println(v);
         System.out.println(v.getClass());
     }

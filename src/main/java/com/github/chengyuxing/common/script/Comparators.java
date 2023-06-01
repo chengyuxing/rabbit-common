@@ -164,10 +164,6 @@ public class Comparators {
             if (v.equalsIgnoreCase("blank")) {
                 return ValueType.BLANK;
             }
-            v = getString(v);
-            if (v.equals("")) {
-                return ValueType.BLANK;
-            }
         }
         return a;
     }
@@ -183,7 +179,7 @@ public class Comparators {
             return null;
         }
         String s = value.toString();
-        if ((s.startsWith("\"") && s.endsWith("\"")) || (s.startsWith("'") && s.endsWith("'"))) {
+        if (isQuote(s)) {
             return s.substring(1, s.length() - 1);
         }
         return s;
@@ -197,6 +193,10 @@ public class Comparators {
             return (Double) value;
         }
         return Double.parseDouble(value.toString());
+    }
+
+    public static boolean isQuote(String s) {
+        return (s.startsWith("\"") && s.endsWith("\"")) || (s.startsWith("'") && s.endsWith("'"));
     }
 
     /**
@@ -228,7 +228,7 @@ public class Comparators {
             return true;
         }
         String s = value.toString();
-        return (s.startsWith("\"") && s.endsWith("\"")) || (s.startsWith("'") && s.endsWith("'"));
+        return isQuote(s);
     }
 
     public static boolean isNull(Object value) {
