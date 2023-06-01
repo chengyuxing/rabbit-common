@@ -127,6 +127,8 @@ public class StringTests {
 
     @Test
     public void test11() {
-        System.out.println(Comparators.valueOf(18.6));
+        Object v = Comparators.valueOf("");
+        System.out.println(v);
+        System.out.println(v.getClass());
     }
 }

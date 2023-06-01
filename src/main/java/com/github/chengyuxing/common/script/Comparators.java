@@ -148,7 +148,7 @@ public class Comparators {
             return ValueType.NULL;
         }
         if (isString(a)) {
-            String v = getString(a).trim();
+            String v = a.toString().trim();
             if (v.equals("")) {
                 return ValueType.BLANK;
             }
@@ -162,6 +162,10 @@ public class Comparators {
                 return ValueType.NULL;
             }
             if (v.equalsIgnoreCase("blank")) {
+                return ValueType.BLANK;
+            }
+            v = getString(v);
+            if (v.equals("")) {
                 return ValueType.BLANK;
             }
         }
