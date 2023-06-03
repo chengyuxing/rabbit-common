@@ -3,7 +3,7 @@ package tests;
 import com.github.chengyuxing.common.DataRow;
 import com.github.chengyuxing.common.script.IExpression;
 import com.github.chengyuxing.common.script.IPipe;
-import com.github.chengyuxing.common.script.MiniScriptParser;
+import com.github.chengyuxing.common.script.SimpleScriptParser;
 import com.github.chengyuxing.common.script.impl.FastExpression;
 import com.github.chengyuxing.common.utils.StringUtil;
 
@@ -14,9 +14,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class SuperParser extends MiniScriptParser {
+public class SuperParser extends SimpleScriptParser {
     @Override
-    public String forLoopTemplateFormatter(String result, Map<String, Object> args) {
+    public String forLoopBodyFormatter(String result, Map<String, Object> args) {
         return StringUtil.format(result, args);
     }
 
@@ -40,7 +40,7 @@ public class SuperParser extends MiniScriptParser {
     public static void main(String[] args) throws IOException {
         String content = Files.lines(Paths.get("/Users/chengyuxing/IdeaProjects/rabbit-common/src/test/resources/a.txt"))
                 .collect(Collectors.joining("\n"));
-        MiniScriptParser parser = new SuperParser();
+        SimpleScriptParser parser = new SuperParser();
         String res = parser.parse(content, DataRow.fromPair("id", "-90", "name", "abcdefrgjgh"), true);
         System.out.println(res);
     }

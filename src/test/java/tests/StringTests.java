@@ -18,6 +18,8 @@ import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class StringTests {
     static String sql = "${   a   } ${a.d} insert into ${  Table  } ${tables.fields} values (${  VALUES.1.f }), (${values.0}), (${  Values   })${b}";
@@ -143,5 +145,17 @@ public class StringTests {
         pipes2.put("a", pipe);
 
         System.out.println(new HashMap<>(pipes1).equals(pipes2));
+    }
+
+    @Test
+    public void test34() {
+        for (AtomicInteger i = new AtomicInteger(0); i.get() < 10; i.getAndIncrement()) {
+            inc(i);
+            System.out.println(i);
+        }
+    }
+
+    public static void inc(AtomicInteger i) {
+        i.incrementAndGet();
     }
 }

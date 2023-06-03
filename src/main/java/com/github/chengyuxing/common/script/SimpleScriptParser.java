@@ -15,7 +15,7 @@ import java.util.regex.Pattern;
 import static com.github.chengyuxing.common.utils.StringUtil.*;
 
 /**
- * <h2>迷你脚本解析器</h2>
+ * <h2>简单脚本解析器</h2>
  * <p>if语句块</p>
  * <blockquote>
  * 支持嵌套if，choose，switch
@@ -72,21 +72,29 @@ import static com.github.chengyuxing.common.utils.StringUtil.*;
  * #end
  * </pre>
  * </blockquote>
+ *
+ * @see IExpression
  */
-public abstract class MiniScriptParser {
-    public static Pattern FOR_PATTERN = Pattern.compile("(?<item>\\w+)(\\s*,\\s*(?<index>\\w+))?\\s+of\\s+:(?<list>[\\w.]+)(?<pipes>(\\s*\\|\\s*[\\w.]+)*)?(\\s+delimiter\\s+'(?<delimiter>[^']*)')?(\\s+filter\\s+(?<filter>[\\S\\s]+))?");
-    public static Pattern SWITCH_PATTERN = Pattern.compile(":(?<name>[\\w.]+)\\s*(?<pipes>(\\s*\\|\\s*\\w+)*)?");
-    public static String IF = "#if";
-    public static String FI = "#fi";
-    public static String CHOOSE = "#choose";
-    public static String WHEN = "#when";
-    public static String SWITCH = "#switch";
-    public static String CASE = "#case";
-    public static String FOR = "#for";
-    public static String DEFAULT = "#default";
-    public static String BREAK = "#break";
-    public static String END = "#end";
+public abstract class SimpleScriptParser {
+    public static final Pattern FOR_PATTERN = Pattern.compile("(?<item>\\w+)(\\s*,\\s*(?<index>\\w+))?\\s+of\\s+:(?<list>[\\w.]+)(?<pipes>(\\s*\\|\\s*[\\w.]+)*)?(\\s+delimiter\\s+'(?<delimiter>[^']*)')?(\\s+filter\\s+(?<filter>[\\S\\s]+))?");
+    public static final Pattern SWITCH_PATTERN = Pattern.compile(":(?<name>[\\w.]+)\\s*(?<pipes>(\\s*\\|\\s*\\w+)*)?");
+    public static final String IF = "#if";
+    public static final String FI = "#fi";
+    public static final String CHOOSE = "#choose";
+    public static final String WHEN = "#when";
+    public static final String SWITCH = "#switch";
+    public static final String CASE = "#case";
+    public static final String FOR = "#for";
+    public static final String DEFAULT = "#default";
+    public static final String BREAK = "#break";
+    public static final String END = "#end";
 
+    /**
+     * 配置表达式解析器具体实现
+     *
+     * @param expression 当前解析过程中的表达式
+     * @return 包含当前表达式的解析器
+     */
     protected IExpression expression(String expression) {
         return FastExpression.of(expression);
     }
@@ -94,23 +102,27 @@ public abstract class MiniScriptParser {
     /**
      * <code>#for</code> 循环体的模版内容格式化器，用于格式化自定义在循环体内的模版，例如：
      * <blockquote>
-     * <pre><code>[{name:'cyx', name:'json'}]</code></pre>
      * <pre>
-     *     #for user of :users
-     *        ${user.name}
+     *     参数：<code>users: [{name:'cyx', name:'json'}]</code>
+     *
+     *     #for user of :users delimiter ' and '
+     *        '${user.name}'
      *     #end
      * </pre>
+     * 结果：<pre>'cyx' and 'json'</pre>
      * </blockquote>
      *
+     * @param body for循环里的内容主体
+     * @param args for循环每次迭代的参数（当前索引，当前值）
      * @return 格式化后的内容
      * @see StringUtil#format(String, Map)
      */
-    protected abstract String forLoopTemplateFormatter(String result, Map<String, Object> args);
+    protected abstract String forLoopBodyFormatter(String body, Map<String, Object> args);
 
     /**
      * 格式化表达式用以寻找前缀匹配 {@code #} 的表达式
      *
-     * @param line 内容行
+     * @param line 当前解析的内容行
      * @return 满足匹配表达式格式的字符串
      * @see #IF
      */
@@ -122,10 +134,10 @@ public abstract class MiniScriptParser {
      * @param content      内容
      * @param args         逻辑表达式参数字典
      * @param checkArgsKey 检查参数中是否必须存在表达式中需要计算的key
-     * @return 解析后的sql
+     * @return 解析后的内容
      * @throws IllegalArgumentException 如果 {@code checkArgsKey} 为 {@code true} 并且 {@code args} 中不存在表达式所需要的key
      * @throws NullPointerException     如果 {@code args} 为null
-     * @see FastExpression
+     * @see IExpression
      */
     public String parse(String content, Map<String, ?> args, boolean checkArgsKey) {
         String[] lines = content.split(NEW_LINE);
@@ -312,7 +324,7 @@ public abstract class MiniScriptParser {
                     }
                     Object loopObj = ObjectUtil.getValueWild(args, listName);
                     if (pipes != null && !pipes.trim().equals("")) {
-                        loopObj = FastExpression.of("empty").pipedValue(loopObj, pipes);
+                        loopObj = expression("empty").pipedValue(loopObj, pipes);
                     }
                     Object[] loopArr;
                     if (loopObj instanceof Object[]) {
@@ -324,7 +336,7 @@ public abstract class MiniScriptParser {
                         loopArr = new Object[]{loopObj};
                     }
                     // 如果没指定分割符，默认迭代sql片段最终使用逗号连接
-                    StringJoiner forSql = new StringJoiner(delimiter == null ? ", " : delimiter.replace("\\n", "\n").replace("\\t", "\t"));
+                    StringJoiner forBody = new StringJoiner(delimiter == null ? ", " : delimiter.replace("\\n", "\n").replace("\\t", "\t"));
                     // 用于查找for定义变量的正则表达式
                     /// 需要验证下正则表达式 例如：user.address.street，超过2级
                     Pattern filterP = Pattern.compile("\\$\\{\\s*(?<tmp>(" + itemName + ")(.\\w+)*|" + idxName + ")\\s*}");
@@ -349,10 +361,10 @@ public abstract class MiniScriptParser {
                             }
                         }
                         // 准备循环迭代生产满足条件的sql片段
-                        String sqlPart = forLoopTemplateFormatter(loopPart.toString().trim(), filterArgs);
-                        forSql.add(sqlPart);
+                        String row = forLoopBodyFormatter(loopPart.toString().trim(), filterArgs);
+                        forBody.add(row);
                     }
-                    output.add(forSql.toString());
+                    output.add(forBody.toString());
                 } else {
                     throw new ScriptSyntaxException("for syntax error of expression '" + trimOuterLine + "' ");
                 }
