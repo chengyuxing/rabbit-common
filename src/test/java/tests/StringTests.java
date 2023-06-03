@@ -5,6 +5,7 @@ import com.github.chengyuxing.common.io.ClassPathResource;
 import com.github.chengyuxing.common.io.FileResource;
 import com.github.chengyuxing.common.io.TypedProperties;
 import com.github.chengyuxing.common.script.Comparators;
+import com.github.chengyuxing.common.script.IPipe;
 import com.github.chengyuxing.common.utils.CollectionUtil;
 import com.github.chengyuxing.common.utils.StringUtil;
 import org.junit.Test;
@@ -128,8 +129,19 @@ public class StringTests {
     @Test
     public void test11() {
         Object v = Comparators.valueOf("'abc'");
-        System.out.println(Comparators.compare("'abc'","@","^'\\w+'"));
+        System.out.println(Comparators.compare("'abc'", "@", "^'\\w+'"));
         System.out.println(v);
         System.out.println(v.getClass());
+    }
+
+    @Test
+    public void test12() {
+        IPipe<?> pipe = new IPipe.Length();
+        Map<String, IPipe<?>> pipes1 = new HashMap<>();
+        pipes1.put("a", pipe);
+        Map<String, IPipe<?>> pipes2 = new HashMap<>();
+        pipes2.put("a", pipe);
+
+        System.out.println(new HashMap<>(pipes1).equals(pipes2));
     }
 }

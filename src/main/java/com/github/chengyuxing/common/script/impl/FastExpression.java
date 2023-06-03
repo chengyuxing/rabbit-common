@@ -62,12 +62,45 @@ public class FastExpression extends IExpression {
         return calc(expression, args, require);
     }
 
-    @Override
+    /**
+     * 设置自定义的管道字典
+     *
+     * @param pipes 管道字典实现
+     */
     public void setPipes(Map<String, IPipe<?>> pipes) {
         if (pipes == null) {
             return;
         }
+        if (this.customPipes.equals(pipes)) {
+            return;
+        }
         this.customPipes = new HashMap<>(pipes);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @throws IllegalArgumentException 管道语法错误
+     */
+    @Override
+    public Object pipedValue(Object value, String pipes) {
+        String trimPipes = pipes.trim();
+        if (!trimPipes.matches("(\\s*\\|\\s*\\w+\\s*)+")) {
+            throw new IllegalArgumentException("pipes channel syntax error: " + pipes);
+        }
+        String[] pipeArr = trimPipes.substring(1).split("\\|");
+        Object res = value;
+        for (String p : pipeArr) {
+            String pipe = p.trim();
+            if (customPipes.containsKey(pipe)) {
+                res = customPipes.get(pipe).transform(res);
+            } else if (GLOBAL_PIPES.containsKey(pipe)) {
+                res = GLOBAL_PIPES.get(pipe).transform(res);
+            } else {
+                throw new RuntimeException("cannot find pipe '" + pipe + "'");
+            }
+        }
+        return res;
     }
 
     /**
@@ -169,34 +202,6 @@ public class FastExpression extends IExpression {
      */
     private boolean isKey(String a) {
         return a.startsWith(":");
-    }
-
-    /**
-     * 通过一系列管道来处理值
-     *
-     * @param value 值
-     * @param pipes 管道 e.g.  <code>| {@link IPipe upper} | {@link IPipe length} | ...</code>
-     * @return 经过管道处理后的值
-     * @throws IllegalArgumentException 管道语法错误
-     */
-    public Object pipedValue(Object value, String pipes) {
-        String trimPipes = pipes.trim();
-        if (!trimPipes.matches("(\\s*\\|\\s*\\w+\\s*)+")) {
-            throw new IllegalArgumentException("pipes channel syntax error: " + pipes);
-        }
-        String[] pipeArr = trimPipes.substring(1).split("\\|");
-        Object res = value;
-        for (String p : pipeArr) {
-            String pipe = p.trim();
-            if (customPipes.containsKey(pipe)) {
-                res = customPipes.get(pipe).transform(res);
-            } else if (GLOBAL_PIPES.containsKey(pipe)) {
-                res = GLOBAL_PIPES.get(pipe).transform(res);
-            } else {
-                throw new RuntimeException("cannot find pipe '" + pipe + "'");
-            }
-        }
-        return res;
     }
 
     /**

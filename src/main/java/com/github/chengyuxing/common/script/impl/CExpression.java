@@ -71,8 +71,8 @@ public class CExpression extends IExpression {
     }
 
     @Override
-    public void setPipes(Map<String, IPipe<?>> pipes) {
-
+    public Object pipedValue(Object value, String pipes) {
+        return null;
     }
 
     /**

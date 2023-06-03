@@ -1,0 +1,13 @@
+// 如果通过copyStateTo拷贝配置
+// 这里每次都会拷贝到配置文件中的files和filenames
+
+if :id > 0
+
+// 但解析的resources并不会同步更新
+// 可能resources中会存在着早已经删了文件的解析结果
+
+fi
+
+if :name|top5 == abcde
+// 所以先进行删除没有对应的脏数据
+fi

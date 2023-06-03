@@ -66,7 +66,7 @@ public class Comparators {
         if (isBlank(a) && isBlank(b)) {
             return false;
         }
-        if (StringUtil.isNumeric(a.toString()) && StringUtil.isNumeric(b.toString())) {
+        if (StringUtil.isNumeric(a) && StringUtil.isNumeric(b)) {
             double aN = getNumber(a);
             double bN = getNumber(b);
             switch (op) {

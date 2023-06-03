@@ -4,6 +4,8 @@ package com.github.chengyuxing.common.utils;
 import com.github.chengyuxing.common.tuple.Pair;
 
 import java.lang.reflect.InvocationTargetException;
+import java.net.URI;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.function.Function;
 import java.util.regex.Matcher;
@@ -657,6 +659,25 @@ public class StringUtil {
             source = source.substring(idx + 1);
         }
         return count;
+    }
+
+    /**
+     * 根据路径获取文件名
+     *
+     * @param fullFileName 文件全路径名
+     * @return 文件名
+     */
+    public static String getFileName(String fullFileName, boolean withExtension) {
+        String name;
+        if (fullFileName.startsWith("file:")) {
+            name = Paths.get(URI.create(fullFileName)).getFileName().toString();
+        } else {
+            name = Paths.get(fullFileName).getFileName().toString();
+        }
+        if (withExtension || !name.contains(".")) {
+            return name;
+        }
+        return name.substring(0, name.lastIndexOf("."));
     }
 
     /**
