@@ -15,7 +15,7 @@ import java.nio.file.Paths;
  * 文件资源读取辅助工具类<br>
  * e.g. 格式支持ClassPath下相对路径和URI格式
  * <blockquote>
- * <pre>windows: file:\\D:\\rabbit.sql 或 file:/D:/rabbit.sql</pre>
+ * <pre>windows: file:/D:/rabbit.sql</pre>
  * <pre>Linux/Unix: file:/root/rabbit.sql</pre>
  * <pre>ClassPath: sql/rabbit.sql</pre>
  * </blockquote>
