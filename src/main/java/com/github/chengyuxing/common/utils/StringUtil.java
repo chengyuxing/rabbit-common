@@ -514,16 +514,10 @@ public class StringUtil {
      * @return 替换后的字符串
      */
     public static String replaceIgnoreCase(String str, String oldValue, String newValue) {
-        if (oldValue.equalsIgnoreCase(newValue)) {
-            return str;
+        String replacedFirst = replaceFirstIgnoreCase(str, oldValue, newValue);
+        if (str.equals(replacedFirst)) {
+            return replacedFirst;
         }
-        int index = indexOfIgnoreCase(str, oldValue);
-        if (index == -1) {
-            return str;
-        }
-        String left = str.substring(0, index);
-        String right = str.substring(index + oldValue.length());
-        String replacedFirst = left + newValue + right;
         return replaceIgnoreCase(replacedFirst, oldValue, newValue);
     }
 
@@ -664,7 +658,8 @@ public class StringUtil {
     /**
      * 根据路径获取文件名
      *
-     * @param fullFileName 文件全路径名
+     * @param fullFileName  文件全路径名
+     * @param withExtension 是否包含文件后缀
      * @return 文件名
      */
     public static String getFileName(String fullFileName, boolean withExtension) {

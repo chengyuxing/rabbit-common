@@ -155,6 +155,11 @@ public class StringTests {
         }
     }
 
+    @Test
+    public void test35() {
+        System.out.println(StringUtil.replaceIgnoreCase("abc", "o", "D"));
+    }
+
     public static void inc(AtomicInteger i) {
         i.incrementAndGet();
     }
