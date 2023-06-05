@@ -125,8 +125,20 @@ public abstract class SimpleScriptParser {
      * @param line 当前解析的内容行
      * @return 满足匹配表达式格式的字符串
      * @see #IF
+     * @see #isExpression(String)
      */
     protected abstract String trimExpression(String line);
+
+    /**
+     * 判断当前行是否是动态sql的表达式
+     *
+     * @param line 当前解析的内容行
+     * @return 是否是表达式
+     * @see #trimExpression(String)
+     */
+    protected boolean isExpression(String line) {
+        return false;
+    }
 
     /**
      * 执行解析内容
