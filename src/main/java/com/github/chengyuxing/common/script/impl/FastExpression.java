@@ -217,6 +217,9 @@ public class FastExpression extends IExpression {
      */
     public static boolean boolExpressionEval(String expression) {
         expression = expression.trim();
+        if (expression.equals("")) {
+            return false;
+        }
         // finally, get result
         if (expression.equals("true") || expression.equals("false")) {
             return Boolean.parseBoolean(expression);
