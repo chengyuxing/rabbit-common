@@ -98,6 +98,9 @@ public class DateTimes {
 
     @Override
     public String toString() {
+        if (temporal == null) {
+            return "";
+        }
         return this.temporal.toString();
     }
 
