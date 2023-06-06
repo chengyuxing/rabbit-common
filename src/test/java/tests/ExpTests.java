@@ -89,4 +89,6 @@ public class ExpTests {
     public void test5() throws Exception {
         System.out.println(ObjectUtil.getValueWild(DataRow.fromPair("a.b", DataRow.fromPair("b", "cyx")), "a.b.b"));
     }
+
+
 }

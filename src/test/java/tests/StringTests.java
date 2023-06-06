@@ -163,4 +163,10 @@ public class StringTests {
     public static void inc(AtomicInteger i) {
         i.incrementAndGet();
     }
+
+    @Test
+    public void test112() throws IOException {
+        FileResource resource = new FileResource("file:/Users/chengyuxing/IdeaProjects/rabbit-common/src/test/resources/my.xql");
+        System.out.println(resource.readString());
+    }
 }
