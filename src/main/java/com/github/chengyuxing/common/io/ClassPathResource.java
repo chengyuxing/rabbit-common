@@ -2,11 +2,12 @@ package com.github.chengyuxing.common.io;
 
 import com.github.chengyuxing.common.utils.ResourceUtil;
 
-import java.io.File;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Paths;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * 类路径资源读取工具类
@@ -60,6 +61,19 @@ public class ClassPathResource {
             in = ClassLoader.getSystemResourceAsStream(path);
         }
         return in;
+    }
+
+    /**
+     * 读取为文本
+     *
+     * @return 文件文本内容
+     * @throws IOException 如果文件读取失败
+     */
+    public String readString() throws IOException {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(getInputStream()));
+             Stream<String> lines = reader.lines()) {
+            return lines.collect(Collectors.joining("\n"));
+        }
     }
 
     /**
