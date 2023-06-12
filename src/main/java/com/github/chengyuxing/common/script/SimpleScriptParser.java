@@ -78,16 +78,23 @@ import static com.github.chengyuxing.common.utils.StringUtil.*;
 public abstract class SimpleScriptParser {
     public static final Pattern FOR_PATTERN = Pattern.compile("(?<item>\\w+)(\\s*,\\s*(?<index>\\w+))?\\s+of\\s+:(?<list>[\\w.]+)(?<pipes>(\\s*\\|\\s*[\\w.]+)*)?(\\s+delimiter\\s+'(?<delimiter>[^']*)')?(\\s+filter\\s+(?<filter>[\\S\\s]+))?");
     public static final Pattern SWITCH_PATTERN = Pattern.compile(":(?<name>[\\w.]+)\\s*(?<pipes>(\\s*\\|\\s*\\w+)*)?");
-    public static final String IF = "#if";
-    public static final String FI = "#fi";
-    public static final String CHOOSE = "#choose";
-    public static final String WHEN = "#when";
-    public static final String SWITCH = "#switch";
-    public static final String CASE = "#case";
-    public static final String FOR = "#for";
-    public static final String DEFAULT = "#default";
-    public static final String BREAK = "#break";
-    public static final String END = "#end";
+    public static final String[] TAGS = new String[]{
+            "#if", "#fi",
+            "#choose", "#when",
+            "#switch", "#case",
+            "#for",
+            "#default", "#break",
+            "#end"};
+    public static final String IF = TAGS[0];
+    public static final String FI = TAGS[1];
+    public static final String CHOOSE = TAGS[2];
+    public static final String WHEN = TAGS[3];
+    public static final String SWITCH = TAGS[4];
+    public static final String CASE = TAGS[5];
+    public static final String FOR = TAGS[6];
+    public static final String DEFAULT = TAGS[7];
+    public static final String BREAK = TAGS[8];
+    public static final String END = TAGS[9];
 
     /**
      * 配置表达式解析器具体实现

@@ -77,6 +77,36 @@ public class ClassPathResource {
     }
 
     /**
+     * 读取为字节
+     *
+     * @return 文件字节
+     * @throws IOException 如果文件读取失败
+     */
+    public byte[] readBytes() throws IOException {
+        try (BufferedInputStream inputStream = new BufferedInputStream(getInputStream())) {
+            byte[] bytes = new byte[inputStream.available()];
+            //noinspection ResultOfMethodCallIgnored
+            inputStream.read(bytes);
+            return bytes;
+        }
+    }
+
+    /**
+     * 写入到输出流
+     *
+     * @param out 输出流
+     * @throws IOException 如果文件读取失败
+     */
+    public void write(OutputStream out) throws IOException {
+        try (BufferedInputStream inputStream = new BufferedInputStream(getInputStream())) {
+            byte[] buffer = new byte[4096];
+            while (inputStream.read(buffer) != -1) {
+                out.write(buffer);
+            }
+        }
+    }
+
+    /**
      * 判断文件是否存在
      *
      * @return 文件是否存在
