@@ -172,4 +172,10 @@ public class StringTests {
 //        System.out.println(resource.readBytes().length);
         resource.write(Files.newOutputStream(Paths.get("/Users/chengyuxing/Downloads/bbb.tar.gz")));
     }
+
+    @Test
+    public void test1113() throws IOException {
+        FileResource resource = new FileResource("file:/Users/chengyuxing/Downloads/flex.html");
+        System.out.println(resource.readString());
+    }
 }

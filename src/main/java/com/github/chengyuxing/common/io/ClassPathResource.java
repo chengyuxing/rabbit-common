@@ -64,14 +64,21 @@ public class ClassPathResource {
     }
 
     /**
+     * 流式读取每一行（需要主动关闭流）
+     *
+     * @return 每一行的流对象
+     */
+    public Stream<String> readLines() {
+        return new BufferedReader(new InputStreamReader(getInputStream())).lines();
+    }
+
+    /**
      * 读取为文本
      *
      * @return 文件文本内容
-     * @throws IOException 如果文件读取失败
      */
-    public String readString() throws IOException {
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(getInputStream()));
-             Stream<String> lines = reader.lines()) {
+    public String readString() {
+        try (Stream<String> lines = readLines()) {
             return lines.collect(Collectors.joining("\n"));
         }
     }
