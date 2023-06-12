@@ -167,9 +167,9 @@ public class StringTests {
 
     @Test
     public void test112() throws IOException {
-        FileResource resource = new FileResource("file:/Users/chengyuxing/Movies/my_movie/Due.West.Our.Sex.Journay.2012.一路向西.中字国粤双语.HR-HDTV.AC3.1024X576.x264.mkv");
+        FileResource resource = new FileResource("file:/Users/chengyuxing/Downloads/zulu8.68.0.21-ca-jdk8.0.362-macosx_aarch64.tar.gz");
 //        System.out.println(resource.readString());
 //        System.out.println(resource.readBytes().length);
-        resource.write(Files.newOutputStream(Paths.get("/Users/chengyuxing/Downloads/bbb.mkv")));
+        resource.write(Files.newOutputStream(Paths.get("/Users/chengyuxing/Downloads/bbb.tar.gz")));
     }
 }
