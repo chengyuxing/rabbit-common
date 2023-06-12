@@ -43,10 +43,10 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
     }
 
     /**
-     * @return 一个空的DataRow（初始化大小为16）
+     * @return 一个空的DataRow
      */
     public static DataRow empty() {
-        return new DataRow();
+        return new DataRow(0);
     }
 
     /**
@@ -59,7 +59,7 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
     public static DataRow of(String[] names, Object[] values) {
         if (names.length == values.length) {
             if (names.length == 0) {
-                return new DataRow(0);
+                return empty();
             }
             DataRow row = new DataRow(names.length);
             for (int i = 0; i < names.length; i++) {
