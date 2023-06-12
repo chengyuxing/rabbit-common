@@ -10,6 +10,7 @@ import com.github.chengyuxing.common.utils.CollectionUtil;
 import com.github.chengyuxing.common.utils.StringUtil;
 import org.junit.Test;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
@@ -166,7 +167,9 @@ public class StringTests {
 
     @Test
     public void test112() throws IOException {
-        FileResource resource = new FileResource("file:/Users/chengyuxing/IdeaProjects/rabbit-common/src/test/resources/my.xql");
-        System.out.println(resource.readString());
+        FileResource resource = new FileResource("file:/Users/chengyuxing/Movies/my_movie/Due.West.Our.Sex.Journay.2012.一路向西.中字国粤双语.HR-HDTV.AC3.1024X576.x264.mkv");
+//        System.out.println(resource.readString());
+//        System.out.println(resource.readBytes().length);
+        resource.write(Files.newOutputStream(Paths.get("/Users/chengyuxing/Downloads/bbb.mkv")));
     }
 }
