@@ -67,6 +67,7 @@ public class ClassPathResource {
     /**
      * 流式读取每一行（需要主动关闭流）
      *
+     * @param charset 编码
      * @return 每一行的流对象
      */
     public Stream<String> readLines(Charset charset) {
@@ -76,6 +77,7 @@ public class ClassPathResource {
     /**
      * 读取为文本
      *
+     * @param charset 编码
      * @return 文件文本内容
      */
     public String readString(Charset charset) {
