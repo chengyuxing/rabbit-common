@@ -58,7 +58,7 @@ public final class ObjectUtil {
         if (ReflectUtil.isBasicType(value)) {
             return null;
         }
-        if (key.matches("\\d")) {
+        if (key.matches("\\d+")) {
             int idx = Integer.parseInt(key);
             if (value instanceof Collection) {
                 int i = 0;

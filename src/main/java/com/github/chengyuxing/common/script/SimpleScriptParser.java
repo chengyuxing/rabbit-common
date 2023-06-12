@@ -1,6 +1,6 @@
 package com.github.chengyuxing.common.script;
 
-import com.github.chengyuxing.common.script.expression.ScriptSyntaxException;
+import com.github.chengyuxing.common.script.exception.ScriptSyntaxException;
 import com.github.chengyuxing.common.script.impl.FastExpression;
 import com.github.chengyuxing.common.utils.ObjectUtil;
 import com.github.chengyuxing.common.utils.StringUtil;

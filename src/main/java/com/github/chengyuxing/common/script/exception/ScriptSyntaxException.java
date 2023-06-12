@@ -1,4 +1,4 @@
-package com.github.chengyuxing.common.script.expression;
+package com.github.chengyuxing.common.script.exception;
 
 public class ScriptSyntaxException extends RuntimeException {
     public ScriptSyntaxException(String message) {

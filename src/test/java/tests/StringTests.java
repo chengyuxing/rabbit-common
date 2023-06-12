@@ -13,6 +13,7 @@ import org.junit.Test;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -170,12 +171,12 @@ public class StringTests {
         FileResource resource = new FileResource("file:/Users/chengyuxing/Downloads/zulu8.68.0.21-ca-jdk8.0.362-macosx_aarch64.tar.gz");
 //        System.out.println(resource.readString());
 //        System.out.println(resource.readBytes().length);
-        resource.write(Files.newOutputStream(Paths.get("/Users/chengyuxing/Downloads/bbb.tar.gz")));
+        resource.transferTo(Files.newOutputStream(Paths.get("/Users/chengyuxing/Downloads/bbb.tar.gz")));
     }
 
     @Test
     public void test1113() throws IOException {
         FileResource resource = new FileResource("file:/Users/chengyuxing/Downloads/flex.html");
-        System.out.println(resource.readString());
+        System.out.println(resource.readString(StandardCharsets.UTF_8));
     }
 }

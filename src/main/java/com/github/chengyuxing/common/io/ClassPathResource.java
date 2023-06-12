@@ -5,6 +5,7 @@ import com.github.chengyuxing.common.utils.ResourceUtil;
 import java.io.*;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.nio.file.Paths;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -68,8 +69,8 @@ public class ClassPathResource {
      *
      * @return 每一行的流对象
      */
-    public Stream<String> readLines() {
-        return new BufferedReader(new InputStreamReader(getInputStream())).lines();
+    public Stream<String> readLines(Charset charset) {
+        return new BufferedReader(new InputStreamReader(getInputStream(), charset)).lines();
     }
 
     /**
@@ -77,8 +78,8 @@ public class ClassPathResource {
      *
      * @return 文件文本内容
      */
-    public String readString() {
-        try (Stream<String> lines = readLines()) {
+    public String readString(Charset charset) {
+        try (Stream<String> lines = readLines(charset)) {
             return lines.collect(Collectors.joining("\n"));
         }
     }
@@ -104,7 +105,7 @@ public class ClassPathResource {
      * @param out 输出流
      * @throws IOException 如果文件读取失败
      */
-    public void write(OutputStream out) throws IOException {
+    public void transferTo(OutputStream out) throws IOException {
         try (BufferedInputStream inputStream = new BufferedInputStream(getInputStream())) {
             byte[] buffer = new byte[4096];
             while (inputStream.read(buffer) != -1) {
