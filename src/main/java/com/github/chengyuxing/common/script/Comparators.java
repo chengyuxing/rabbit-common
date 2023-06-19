@@ -174,7 +174,7 @@ public class Comparators {
      * @param value 字符串
      * @return 排除引号后的字符串
      */
-    private static String getString(Object value) {
+    public static String getString(Object value) {
         if (value == null) {
             return null;
         }
@@ -185,6 +185,12 @@ public class Comparators {
         return s;
     }
 
+    /**
+     * 获取数字值
+     *
+     * @param value 可转数字的值
+     * @return 数字值
+     */
     public static Double getNumber(Object value) {
         if (value == null) {
             return null;
