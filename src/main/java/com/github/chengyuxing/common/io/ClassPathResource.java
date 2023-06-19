@@ -65,13 +65,23 @@ public class ClassPathResource {
     }
 
     /**
+     * 创建一个新的可读字符流
+     *
+     * @param charset 编码
+     * @return 可读字符流
+     */
+    public BufferedReader getBufferedReader(Charset charset) {
+        return new BufferedReader(new InputStreamReader(getInputStream(), charset));
+    }
+
+    /**
      * 流式读取每一行（需要主动关闭流）
      *
      * @param charset 编码
      * @return 每一行的流对象
      */
     public Stream<String> readLines(Charset charset) {
-        return new BufferedReader(new InputStreamReader(getInputStream(), charset)).lines();
+        return getBufferedReader(charset).lines();
     }
 
     /**
