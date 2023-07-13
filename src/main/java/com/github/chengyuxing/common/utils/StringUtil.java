@@ -1,13 +1,14 @@
 package com.github.chengyuxing.common.utils;
 
 
+import com.github.chengyuxing.common.StringFormatter;
 import com.github.chengyuxing.common.tuple.Pair;
 
-import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.nio.file.Paths;
-import java.util.*;
-import java.util.function.Function;
+import java.util.ArrayList;
+import java.util.Formatter;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -15,11 +16,13 @@ import java.util.regex.Pattern;
  * 字符串工具类
  */
 public class StringUtil {
-    public static final Pattern STR_TEMP_PATTERN = Pattern.compile("\\$\\{\\s*(?<key>[\\w._-]+)\\s*}");
     public static final String NUMBER_REGEX = "-?(0|[1-9]\\d*)(\\.\\d+)?";
-
     public static final String NEW_LINE = "\n";
     public static final String TAB = "\t";
+    /**
+     * 字符串模版格式化器
+     */
+    public static final StringFormatter FMT = new StringFormatter();
 
     /**
      * 根据正则表达式所匹配的分组分割字符串<br>
@@ -540,101 +543,6 @@ public class StringUtil {
         String left = str.substring(0, index);
         String right = str.substring(index + oldValue.length());
         return left + newValue + right;
-    }
-
-    /**
-     * 字符串格式化<br>
-     * <blockquote>
-     * e.g.
-     * <pre>参数：{name: "world", days: ["Mon", "Tue", "Thr"]}</pre>
-     * <pre>字符串：Hello ${name} ${days.0}!</pre>
-     * <pre>输出：Hello world Mon!</pre>
-     * </blockquote>
-     *
-     * @param str       字符串
-     * @param args      参数
-     * @param formatter 值格式化函数
-     * @return 格式化后的字符串
-     */
-    public static String format(String str, Map<String, Object> args, Function<Object, String> formatter) {
-        if (args.isEmpty()) {
-            return str;
-        }
-        String res = str;
-        try {
-            Matcher m = STR_TEMP_PATTERN.matcher(str);
-            while (m.find()) {
-                String keyTemp = m.group(0);
-                String keyPath = m.group("key");
-                if (args.containsKey(keyPath)) {
-                    res = res.replace(keyTemp, formatter.apply(args.get(keyPath)));
-                } else {
-                    int dotIdx = keyPath.indexOf(".");
-                    if (dotIdx != -1) {
-                        String key = keyPath.substring(0, dotIdx);
-                        if (args.containsKey(key)) {
-                            Object v = ObjectUtil.getDeepNestValue(args, "/" + keyPath.replace(".", "/"));
-                            res = res.replace(keyTemp, formatter.apply(v));
-                        }
-                    }
-                }
-            }
-            return res;
-        } catch (InvocationTargetException | IllegalAccessException ex) {
-            throw new RuntimeException(ex);
-        }
-    }
-
-    /**
-     * 字符串格式化<br>
-     * <blockquote>
-     * e.g.
-     * <pre>参数：{name: "world", days: ["Mon", "Tue", "Thr"]}</pre>
-     * <pre>字符串：Hello ${name} ${days.0}!</pre>
-     * <pre>输出：Hello world Mon!</pre>
-     * </blockquote>
-     *
-     * @param str  字符串
-     * @param args 参数
-     * @return 格式化后的字符串
-     */
-    public static String format(String str, Map<String, Object> args) {
-        return format(str, args, o -> {
-            if (o == null) {
-                return "";
-            }
-            return o.toString();
-        });
-    }
-
-    /**
-     * 字符串格式化<br>
-     * <blockquote>
-     * e.g.
-     * <pre>键：name</pre>
-     * <pre>值：World</pre>
-     * <pre>字符串：Hello ${ name}!</pre>
-     * <pre>输出：Hello World!</pre>
-     * </blockquote>
-     *
-     * @param str   字符串
-     * @param key   键
-     * @param value 值
-     * @return 格式化后的字符串
-     */
-    public static String format(String str, String key, Object value) {
-        String res = str;
-        Matcher m = STR_TEMP_PATTERN.matcher(str);
-        while (m.find()) {
-            if (Objects.equals(m.group("key"), key.trim())) {
-                Object v = value;
-                if (v == null) {
-                    v = "";
-                }
-                res = res.replace(m.group(0), v.toString());
-            }
-        }
-        return res;
     }
 
     /**

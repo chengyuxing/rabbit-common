@@ -3,9 +3,7 @@ package com.github.chengyuxing.common.script;
 import com.github.chengyuxing.common.script.exception.ScriptSyntaxException;
 import com.github.chengyuxing.common.script.impl.FastExpression;
 import com.github.chengyuxing.common.utils.ObjectUtil;
-import com.github.chengyuxing.common.utils.StringUtil;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringJoiner;
@@ -122,7 +120,6 @@ public abstract class SimpleScriptParser {
      * @param body for循环里的内容主体
      * @param args for循环每次迭代的参数（当前索引，当前值）
      * @return 格式化后的内容
-     * @see StringUtil#format(String, Map)
      */
     protected abstract String forLoopBodyFormatter(String body, Map<String, Object> args);
 
@@ -279,7 +276,7 @@ public abstract class SimpleScriptParser {
                 if (name == null) {
                     throw new ScriptSyntaxException("switch syntax error of expression '" + trimOuterLine + "', cannot find var.");
                 }
-                Object value = ObjectUtil.getValueWild(args, name);
+                Object value = ObjectUtil.getDeepValue(args, name);
                 if (pipes != null && !pipes.trim().equals("")) {
                     value = expression("empty").pipedValue(value, pipes);
                 }
@@ -341,19 +338,11 @@ public abstract class SimpleScriptParser {
                     while (++i < j && !startsWithIgnoreCase(trimExpression(lines[i]), END)) {
                         loopPart.add(lines[i]);
                     }
-                    Object loopObj = ObjectUtil.getValueWild(args, listName);
+                    Object loopObj = ObjectUtil.getDeepValue(args, listName);
                     if (pipes != null && !pipes.trim().equals("")) {
                         loopObj = expression("empty").pipedValue(loopObj, pipes);
                     }
-                    Object[] loopArr;
-                    if (loopObj instanceof Object[]) {
-                        loopArr = (Object[]) loopObj;
-                    } else if (loopObj instanceof Collection) {
-                        //noinspection unchecked
-                        loopArr = ((Collection<Object>) loopObj).toArray();
-                    } else {
-                        loopArr = new Object[]{loopObj};
-                    }
+                    Object[] loopArr = ObjectUtil.toArray(loopObj);
                     // 如果没指定分割符，默认迭代sql片段最终使用逗号连接
                     StringJoiner forBody = new StringJoiner(delimiter == null ? ", " : delimiter.replace("\\n", "\n").replace("\\t", "\t"));
                     // 用于查找for定义变量的正则表达式
@@ -374,7 +363,7 @@ public abstract class SimpleScriptParser {
                                 filterTemps.put(tmp, ":" + tmp);
                             }
                             // 将filter子句转为支持表达式解析的子句格式
-                            expStr = StringUtil.format(expStr, filterTemps);
+                            expStr = FMT.format(expStr, filterTemps);
                             if (!expression(expStr).calc(filterArgs, checkArgsKey)) {
                                 continue;
                             }

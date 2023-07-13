@@ -82,12 +82,13 @@ public class ExpTests {
 
         String props = "/0/COORD/x";
 
-        System.out.println(ObjectUtil.getDeepNestValue(list, props));
+        System.out.println(ObjectUtil.walkDeepValue(list, props));
     }
 
     @Test
     public void test5() throws Exception {
-        System.out.println(ObjectUtil.getValueWild(DataRow.fromPair("a.b", DataRow.fromPair("b", "cyx")), "a.b.b"));
+        DataRow row = DataRow.fromPair("a.b", DataRow.fromPair("b", "cyx"));
+        System.out.println(ObjectUtil.walkDeepValue(row, "/a.b/b"));
     }
 
 

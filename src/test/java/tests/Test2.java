@@ -84,12 +84,6 @@ public class Test2 {
     }
 
     @Test
-    public void speedTest2() throws Exception {
-        List<Map<String, Object>> maps = rows.stream().map(r -> r.toMap(v -> v)).collect(Collectors.toList());
-        System.out.println(maps.size());
-    }
-
-    @Test
     public void speedTest() throws Exception {
         List<Map<String, Object>> maps = rows.stream().map(DataRow::toMap).collect(Collectors.toList());
         System.out.println(maps.size());

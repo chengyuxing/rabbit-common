@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 public class SuperParser extends SimpleScriptParser {
     @Override
     public String forLoopBodyFormatter(String result, Map<String, Object> args) {
-        return StringUtil.format(result, args);
+        return StringUtil.FMT.format(result, args);
     }
 
     @Override

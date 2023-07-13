@@ -1,17 +1,14 @@
 package com.github.chengyuxing.common;
 
+import com.github.chengyuxing.common.utils.ObjectUtil;
 import com.github.chengyuxing.common.utils.ReflectUtil;
+import com.github.chengyuxing.common.utils.StringUtil;
 
 import java.beans.IntrospectionException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.math.BigDecimal;
-import java.sql.Time;
-import java.sql.Timestamp;
-import java.time.*;
 import java.time.temporal.Temporal;
 import java.util.*;
-import java.util.function.Function;
 
 /**
  * 对LinkedHashMap进行一些扩展的数据行对象
@@ -219,14 +216,7 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
      * @return 整型或null
      */
     public Integer getInt(String name) {
-        Object value = get(name);
-        if (value == null) {
-            return null;
-        }
-        if (value instanceof Integer) {
-            return (Integer) value;
-        }
-        return Integer.parseInt(value.toString());
+        return ObjectUtil.toInteger(get(name));
     }
 
     /**
@@ -237,14 +227,7 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
      * @throws IndexOutOfBoundsException 如果索引超出界限
      */
     public Integer getInt(int index) {
-        Object value = iget(index);
-        if (value == null) {
-            return null;
-        }
-        if (value instanceof Integer) {
-            return (Integer) value;
-        }
-        return Integer.parseInt(value.toString());
+        return ObjectUtil.toInteger(iget(index));
     }
 
     /**
@@ -254,14 +237,7 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
      * @return 双精度数字或null
      */
     public Double getDouble(String name) {
-        Object value = get(name);
-        if (value == null) {
-            return null;
-        }
-        if (value instanceof Double) {
-            return (Double) value;
-        }
-        return Double.parseDouble(value.toString());
+        return ObjectUtil.toDouble(get(name));
     }
 
     /**
@@ -272,14 +248,7 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
      * @throws IndexOutOfBoundsException 如果索引超出界限
      */
     public Double getDouble(int index) {
-        Object value = iget(index);
-        if (value == null) {
-            return null;
-        }
-        if (value instanceof Double) {
-            return (Double) value;
-        }
-        return Double.parseDouble(value.toString());
+        return ObjectUtil.toDouble(iget(index));
     }
 
     /**
@@ -289,14 +258,7 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
      * @return 双精度数字
      */
     public Long getLong(String name) {
-        Object value = get(name);
-        if (value == null) {
-            return null;
-        }
-        if (value instanceof Long) {
-            return (Long) value;
-        }
-        return Long.parseLong(value.toString());
+        return ObjectUtil.toLong(get(name));
     }
 
     /**
@@ -307,14 +269,7 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
      * @throws IndexOutOfBoundsException 如果索引超出界限
      */
     public Long getLong(int index) {
-        Object value = iget(index);
-        if (value == null) {
-            return null;
-        }
-        if (value instanceof Long) {
-            return (Long) value;
-        }
-        return Long.parseLong(value.toString());
+        return ObjectUtil.toLong(iget(index));
     }
 
     /**
@@ -362,21 +317,6 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
     }
 
     /**
-     * 生成一个新的LinkedHashMap
-     *
-     * @param mapper 值转换器
-     * @param <T>    值类型参数
-     * @return map
-     */
-    public <T> Map<String, T> toMap(Function<Object, T> mapper) {
-        Map<String, T> map = new LinkedHashMap<>();
-        for (Map.Entry<String, Object> e : entrySet()) {
-            map.put(e.getKey(), mapper.apply(e.getValue()));
-        }
-        return map;
-    }
-
-    /**
      * 转为一个LinkedHashMap
      *
      * @return map
@@ -402,149 +342,78 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
         try {
             T entity = ReflectUtil.getInstance(clazz, constructorParameters);
             for (Method method : ReflectUtil.getRWMethods(clazz).getItem2()) {
-                if (method.getName().startsWith("set")) {
-                    String field = method.getName().substring(3);
-                    field = field.substring(0, 1).toLowerCase().concat(field.substring(1));
-                    Object value = get(field);
-                    // dataRow field type
-                    Class<?> drValueClass = getType(field);
-                    if (value != null && drValueClass != null && method.getParameterCount() == 1) {
-                        String drValueType = drValueClass.getName();
-                        // entity field type
-                        Class<?> enFieldType = method.getParameterTypes()[0];
-                        if (enFieldType == String.class) {
-                            method.invoke(entity, value.toString());
-                        } else if (enFieldType == Character.class || enFieldType == char.class) {
-                            if (drValueType.equals("java.lang.String")) {
-                                method.invoke(entity, value.toString().charAt(0));
-                            } else {
-                                method.invoke(entity, value);
-                            }
-                        } else if (enFieldType == Integer.class || enFieldType == int.class) {
-                            if (drValueType.equals("java.lang.String")) {
-                                method.invoke(entity, Integer.parseInt(value.toString()));
-                            } else if (drValueType.equals("java.math.BigDecimal")) {
-                                method.invoke(entity, ((BigDecimal) value).intValue());
-                            } else {
-                                method.invoke(entity, value);
-                            }
-                        } else if (enFieldType == Long.class || enFieldType == long.class) {
-                            if (drValueType.equals("java.lang.String")) {
-                                method.invoke(entity, Long.parseLong(value.toString()));
-                            } else if (drValueType.equals("java.math.BigDecimal")) {
-                                method.invoke(entity, ((BigDecimal) value).longValue());
-                            } else {
-                                method.invoke(entity, value);
-                            }
-                        } else if (enFieldType == Double.class || enFieldType == double.class) {
-                            if (drValueType.equals("java.lang.String")) {
-                                method.invoke(entity, Double.parseDouble(value.toString()));
-                            } else if (drValueType.equals("java.math.BigDecimal")) {
-                                method.invoke(entity, ((BigDecimal) value).doubleValue());
-                            } else {
-                                method.invoke(entity, value);
-                            }
-                        } else if (enFieldType == Float.class || enFieldType == float.class) {
-                            if (drValueType.equals("java.lang.String")) {
-                                method.invoke(entity, Float.parseFloat(value.toString()));
-                            } else if (drValueType.equals("java.math.BigDecimal")) {
-                                method.invoke(entity, ((BigDecimal) value).floatValue());
-                            } else {
-                                method.invoke(entity, value);
-                            }
-                            // if entity field type is java Date type
-                        } else if (enFieldType == Date.class) {
-                            // just set child class, 'java.sql.' date time type
-                            if (Date.class.isAssignableFrom(value.getClass())) {
-                                method.invoke(entity, value);
-                            } else if (drValueType.equals("java.lang.String")) {
-                                if (!value.equals("")) {
-                                    method.invoke(entity, DateTimes.toDate(value.toString()));
-                                }
-                            } else {
-                                method.invoke(entity, value);
-                            }
-                            //if entity field type is java8 new date time api，convert sql date time type
-                        } else if (Temporal.class.isAssignableFrom(enFieldType)) {
-                            if (!value.equals("")) {
-                                switch (drValueType) {
-                                    case "java.sql.Date":
-                                        if (enFieldType == LocalDate.class) {
-                                            method.invoke(entity, ((java.sql.Date) value).toLocalDate());
-                                        }
-                                        break;
-                                    case "java.sql.Timestamp":
-                                        if (enFieldType == LocalDateTime.class) {
-                                            method.invoke(entity, ((Timestamp) value).toLocalDateTime());
-                                        } else if (enFieldType == Instant.class) {
-                                            method.invoke(entity, ((Timestamp) value).toInstant());
-                                        } else if (enFieldType == LocalDate.class) {
-                                            method.invoke(entity, ((Timestamp) value).toLocalDateTime().toLocalDate());
-                                        } else if (enFieldType == LocalTime.class) {
-                                            method.invoke(entity, ((Timestamp) value).toLocalDateTime().toLocalTime());
-                                        }
-                                        break;
-                                    case "java.sql.Time":
-                                        if (enFieldType == LocalTime.class) {
-                                            method.invoke(entity, ((Time) value).toLocalTime());
-                                        }
-                                        break;
-                                    case "java.util.Date":
-                                        ZonedDateTime zoneDt = ((Date) value).toInstant().atZone(ZoneId.systemDefault());
-                                        if (enFieldType == LocalDateTime.class) {
-                                            method.invoke(entity, zoneDt.toLocalDateTime());
-                                        } else if (enFieldType == Instant.class) {
-                                            method.invoke(entity, zoneDt.toInstant());
-                                        } else if (enFieldType == LocalDate.class) {
-                                            method.invoke(entity, zoneDt.toLocalDate());
-                                        } else if (enFieldType == LocalTime.class) {
-                                            method.invoke(entity, zoneDt.toLocalTime());
-                                        }
-                                        break;
-                                    case "java.lang.String":
-                                        if (enFieldType == LocalDateTime.class) {
-                                            method.invoke(entity, DateTimes.toLocalDateTime(value.toString()));
-                                        } else if (enFieldType == Instant.class) {
-                                            method.invoke(entity, DateTimes.toInstant(value.toString()));
-                                        } else if (enFieldType == LocalDate.class) {
-                                            method.invoke(entity, DateTimes.toLocalDate(value.toString()));
-                                        } else if (enFieldType == LocalTime.class) {
-                                            method.invoke(entity, DateTimes.toLocalTime(value.toString()));
-                                        }
-                                        break;
-                                    default:
-                                        method.invoke(entity, value);
-                                        break;
-                                }
-                            }
-                            // if entity filed type is Map, Collection, or not starts with java.
-                            // reason：about not starts with java, allow Map, Collection, user's custom entity, except others.
-                        } else if (Map.class.isAssignableFrom(enFieldType) || Collection.class.isAssignableFrom(enFieldType) || !enFieldType.getTypeName().startsWith("java.")) {
-                            // if dataRow from PostgreSQL
-                            if (drValueType.equals("org.postgresql.util.PGobject")) {
-                                Class<?> pgObjClass = value.getClass();
-                                String pgType = (String) pgObjClass.getDeclaredMethod("getType").invoke(value);
-                                String pgValue = (String) pgObjClass.getDeclaredMethod("getValue").invoke(value);
-                                if (pgType.equals("json") || pgType.equals("jsonb")) {
-                                    method.invoke(entity, ReflectUtil.json2Obj(pgValue, enFieldType));
-                                }
-                                // I think this is json string and you want convert to object.
-                            } else if (drValueType.equals("java.lang.String")) {
-                                method.invoke(entity, ReflectUtil.json2Obj(value.toString(), enFieldType));
-                                // PostgreSQL array and exclude blob
-                            } else if (drValueType.startsWith("[L") && drValueType.endsWith(";")) {
-                                if (List.class.isAssignableFrom(enFieldType)) {
-                                    method.invoke(entity, Arrays.asList((Object[]) value));
-                                } else if (Set.class.isAssignableFrom(enFieldType)) {
-                                    method.invoke(entity, new HashSet<>(Arrays.asList((Object[]) value)));
-                                } else {
-                                    method.invoke(entity, value);
-                                }
-                            } else {
-                                method.invoke(entity, value);
-                            }
-                        } else {
-                            method.invoke(entity, value);
+                if (!method.getName().startsWith("set")) {
+                    continue;
+                }
+                String field = method.getName().substring(3);
+                field = field.substring(0, 1).toLowerCase().concat(field.substring(1));
+                Object value = get(field);
+                // dataRow field type
+                Class<?> dft = getType(field);
+                // entity field type
+                Class<?> eft = method.getParameterTypes()[0];
+
+                if (Objects.isNull(value) || Objects.isNull(dft) || method.getParameterCount() != 1) {
+                    continue;
+                }
+                if (eft.isAssignableFrom(dft)) {
+                    method.invoke(entity, value);
+                    continue;
+                }
+                if (eft == String.class) {
+                    method.invoke(entity, value.toString());
+                    continue;
+                }
+                if (eft == Character.class) {
+                    method.invoke(value.toString().charAt(0));
+                    continue;
+                }
+                if (eft == Integer.class) {
+                    method.invoke(ObjectUtil.toInteger(value));
+                    continue;
+                }
+                if (eft == Long.class) {
+                    method.invoke(ObjectUtil.toLong(value));
+                    continue;
+                }
+                if (eft == Double.class) {
+                    method.invoke(ObjectUtil.toDouble(value));
+                    continue;
+                }
+                if (eft == Float.class) {
+                    method.invoke(ObjectUtil.toFloat(value));
+                    continue;
+                }
+                if (eft == Date.class) {
+                    method.invoke(entity, DateTimes.toDate(value.toString()));
+                    continue;
+                }
+                if (Temporal.class.isAssignableFrom(eft)) {
+                    if (Date.class.isAssignableFrom(dft)) {
+                        method.invoke(entity, ObjectUtil.toTemporal(eft, (Date) value));
+                        continue;
+                    }
+                    if (dft == String.class) {
+                        Date date = DateTimes.toDate(value.toString());
+                        method.invoke(entity, ObjectUtil.toTemporal(eft, date));
+                    }
+                    continue;
+                }
+                // map, collection or java bean.
+                if (Map.class.isAssignableFrom(eft) || Collection.class.isAssignableFrom(eft) || !eft.getTypeName().startsWith("java.")) {
+                    // maybe json string
+                    if (dft == String.class) {
+                        method.invoke(entity, ReflectUtil.json2Obj(value.toString(), eft));
+                        continue;
+                    }
+                    // object array parsing to collection exclude blob
+                    if (dft != byte[].class && value instanceof Object[]) {
+                        if (List.class.isAssignableFrom(eft)) {
+                            method.invoke(entity, new ArrayList<>(Arrays.asList((Object[]) value)));
+                            continue;
+                        }
+                        if (Set.class.isAssignableFrom(eft)) {
+                            method.invoke(entity, new HashSet<>(Arrays.asList((Object[]) value)));
                         }
                     }
                 }
@@ -609,19 +478,21 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
             DataRow row = DataRow.empty();
             for (Method method : ReflectUtil.getRWMethods(entity.getClass()).getItem1()) {
                 Class<?> returnType = method.getReturnType();
-                if (returnType != Class.class) {
-                    String field = method.getName();
-                    if (field.startsWith("get")) {
-                        field = field.substring(3);
-                    } else if (field.startsWith("is")) {
-                        field = field.substring(2);
-                    }
-                    Object value = method.invoke(entity);
-                    if (value != null) {
-                        field = field.substring(0, 1).toLowerCase().concat(field.substring(1));
-                        row.put(field, value);
-                    }
+                if (returnType == Class.class) {
+                    continue;
                 }
+                String field = method.getName();
+                if (!StringUtil.startsWiths(field, "get", "is")) {
+                    continue;
+                }
+                if (field.startsWith("get")) {
+                    field = field.substring(3);
+                } else if (field.startsWith("is")) {
+                    field = field.substring(2);
+                }
+                field = field.substring(0, 1).toLowerCase().concat(field.substring(1));
+                Object value = method.invoke(entity);
+                row.put(field, value);
             }
             return row;
         } catch (IllegalAccessException | IntrospectionException | InvocationTargetException e) {

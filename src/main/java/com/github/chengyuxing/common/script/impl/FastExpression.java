@@ -149,7 +149,7 @@ public class FastExpression extends IExpression {
      */
     private Object getValue(String name, String pipes, Map<String, ?> args) {
         if (isKey(name)) {
-            Object value = ObjectUtil.getValueWild(args, name.substring(1));
+            Object value = ObjectUtil.getDeepValue(args, name.substring(1));
             if (!StringUtil.isEmpty(pipes)) {
                 try {
                     value = pipedValue(value, pipes);

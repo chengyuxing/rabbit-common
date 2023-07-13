@@ -2,9 +2,9 @@ package com.github.chengyuxing.common.utils;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Optional;
+import java.time.*;
+import java.time.temporal.Temporal;
+import java.util.*;
 
 /**
  * 简单基本对象工具类
@@ -48,10 +48,9 @@ public final class ObjectUtil {
      * @param value 对象
      * @param key   键名或索引
      * @return 值
-     * @throws InvocationTargetException 如果调用目标javaBean错误
-     * @throws IllegalAccessException    如果javaBean此字段不可访问
+     * @throws IllegalArgumentException 如果javaBean字段访问异常
      */
-    public static Object getValue(Object value, String key) throws InvocationTargetException, IllegalAccessException {
+    public static Object getValue(Object value, String key) {
         if (value == null) {
             return null;
         }
@@ -79,9 +78,6 @@ public final class ObjectUtil {
             if (map.containsKey(key)) {
                 return map.get(key);
             }
-            if (CollectionUtil.containsKeyIgnoreCase(map, key)) {
-                return CollectionUtil.getValueIgnoreCase(map, key);
-            }
             return null;
         }
         Class<?> clazz = value.getClass();
@@ -92,58 +88,147 @@ public final class ObjectUtil {
         if (!m.isAccessible()) {
             m.setAccessible(true);
         }
-        return m.invoke(value);
+        try {
+            return m.invoke(value);
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            throw new IllegalArgumentException("Invoke " + clazz.getName() + "#" + m.getName() + " error.", e);
+        }
     }
 
     /**
      * 获取一个深层嵌套对象的值
      *
-     * @param obj         深层嵌套的对象
-     * @param jsonPathExp json路径表达式（{@code /a/b/0/name}）
+     * @param obj  深层嵌套的对象
+     * @param path 路径表达式（{@code /a/b/0/name}）
      * @return 值
-     * @throws InvocationTargetException 如果调用目标javaBean错误
-     * @throws IllegalAccessException    如果javaBean此字段不可访问
+     * @throws IllegalArgumentException 如果调用目标javaBean错误
      */
-    public static Object getDeepNestValue(Object obj, String jsonPathExp) throws InvocationTargetException, IllegalAccessException {
+    public static Object walkDeepValue(Object obj, String path) {
         if (obj == null) {
             return null;
         }
-        if (!jsonPathExp.startsWith("/")) {
-            throw new IllegalArgumentException("json path expression syntax error, must startsWith '/', for example '/" + jsonPathExp + "'");
+        if (!path.startsWith("/")) {
+            throw new IllegalArgumentException("json path expression syntax error, must startsWith '/', for example '/" + path + "'");
         }
-        String trimStart = jsonPathExp.substring(1);
+        String trimStart = path.substring(1);
         if (!trimStart.contains("/")) {
             return getValue(obj, trimStart);
         }
         String key = trimStart.substring(0, trimStart.indexOf("/"));
         String tail = trimStart.substring(trimStart.indexOf("/"));
-        return getDeepNestValue(getValue(obj, key), tail);
+        return walkDeepValue(getValue(obj, key), tail);
     }
 
     /**
-     * 根据键名或路径从map中获取一个值
+     * 获取一个深层嵌套对象的值
      *
-     * @param args       map数据
-     * @param nameOrPath 键名（可不区分大小写）或对象路径（e.g. user.name 区分大小写）
+     * @param obj            深层嵌套的对象
+     * @param propertyChains 对象属性路径（{@code user.name}）
      * @return 值
      */
-    public static Object getValueWild(Map<String, ?> args, String nameOrPath) {
-        if (args == null) {
-            return null;
+    public static Object getDeepValue(Object obj, String propertyChains) {
+        String path = '/' + propertyChains.replace('.', '/');
+        return walkDeepValue(obj, path);
+    }
+
+    /**
+     * 将单个对象转换为对象数组
+     *
+     * @param obj 基本类型或集合或数组
+     * @return 对象数组
+     */
+    @SuppressWarnings("unchecked")
+    public static Object[] toArray(Object obj) {
+        Object[] values;
+        if (obj instanceof Object[]) {
+            values = (Object[]) obj;
+        } else if (obj instanceof Collection) {
+            values = ((Collection<Object>) obj).toArray();
+        } else {
+            values = new Object[]{obj};
         }
-        Object v = null;
-        if (args.containsKey(nameOrPath)) {
-            v = args.get(nameOrPath);
-        } else if (CollectionUtil.containsKeyIgnoreCase(args, nameOrPath)) {
-            v = CollectionUtil.getValueIgnoreCase(args, nameOrPath);
-        } else if (nameOrPath.contains(".")) {
-            try {
-                v = ObjectUtil.getDeepNestValue(args, "/" + nameOrPath.replace(".", "/"));
-            } catch (InvocationTargetException | IllegalAccessException e) {
-                throw new IllegalArgumentException(e);
-            }
+        return values;
+    }
+
+    /**
+     * 将Date转换为java8时间
+     *
+     * @param clazz java8时间的实现类
+     * @param date  日期
+     * @param <T>   类型参数
+     * @return java8时间类型
+     */
+    @SuppressWarnings("unchecked")
+    public static <T extends Temporal> T toTemporal(Class<?> clazz, Date date) {
+        if (clazz == LocalDateTime.class) {
+            return (T) date.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
         }
-        return v;
+        if (clazz == LocalDate.class) {
+            return (T) date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        }
+        if (clazz == LocalTime.class) {
+            return (T) date.toInstant().atZone(ZoneId.systemDefault()).toLocalTime();
+        }
+        if (clazz == Instant.class) {
+            return (T) date.toInstant();
+        }
+        return null;
+    }
+
+    /**
+     * 转换为整型
+     *
+     * @param obj 值
+     * @return 整型
+     */
+    public static Integer toInteger(Object obj) {
+        if (Objects.isNull(obj)) return null;
+        if (obj instanceof Integer) {
+            return (Integer) obj;
+        }
+        return Integer.parseInt(obj.toString());
+    }
+
+    /**
+     * 转换为长整型
+     *
+     * @param obj 值
+     * @return 长整型
+     */
+    public static Long toLong(Object obj) {
+        if (Objects.isNull(obj)) return null;
+        if (obj instanceof Long) {
+            return (Long) obj;
+        }
+        return Long.parseLong(obj.toString());
+    }
+
+    /**
+     * 转换为双精度型
+     *
+     * @param obj 值
+     * @return 双精度型
+     */
+    public static Double toDouble(Object obj) {
+        if (Objects.isNull(obj)) return null;
+        if (obj instanceof Double) {
+            return (Double) obj;
+        }
+        return Double.parseDouble(obj.toString());
+    }
+
+    /**
+     * 转换为浮点型
+     *
+     * @param obj 值
+     * @return 浮点型
+     */
+    public static Float toFloat(Object obj) {
+        if (Objects.isNull(obj)) return null;
+        if (obj instanceof Float) {
+            return (Float) obj;
+        }
+        return Float.parseFloat(obj.toString());
     }
 
     /**
@@ -166,17 +251,5 @@ public final class ObjectUtil {
             }
         }
         return res;
-    }
-
-    /**
-     * 非空赋值表达式
-     *
-     * @param value 值
-     * @param other 默认值
-     * @param <T>   类型参数
-     * @return 如果 value 为null 返回 other 否则返回 value
-     */
-    public static <T> T nullable(T value, T other) {
-        return Optional.ofNullable(value).orElse(other);
     }
 }

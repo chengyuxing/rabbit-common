@@ -1,6 +1,7 @@
 package tests;
 
 import com.github.chengyuxing.common.DataRow;
+import com.github.chengyuxing.common.StringFormatter;
 import com.github.chengyuxing.common.io.ClassPathResource;
 import com.github.chengyuxing.common.io.FileResource;
 import com.github.chengyuxing.common.io.TypedProperties;
@@ -10,21 +11,22 @@ import com.github.chengyuxing.common.utils.CollectionUtil;
 import com.github.chengyuxing.common.utils.StringUtil;
 import org.junit.Test;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class StringTests {
-    static String sql = "${   a   } ${a.d} insert into ${  Table  } ${tables.fields} values (${  VALUES.1.f }), (${values.0}), (${  Values   })${b}";
+    static String sql = "${   a   } ${:a.d} insert into ${  Table  } ${tables.fields} values (${  VALUES.1.f }), (${values.0}), (${  Values   })${b}";
 
     @Test
     public void test() throws Exception {
@@ -36,13 +38,33 @@ public class StringTests {
         args.put("a.d", "LocalDateTime.now()");
         args.put("tables", DataRow.fromPair("fields", "id,name,age"));
 
-        System.out.println(StringUtil.format(sql, args));
+        System.out.println(StringUtil.FMT.format(sql, args));
+    }
+
+    @Test
+    public void testq2() {
+        Map<String, Object> args = new HashMap<>();
+        args.put("Table", "test.user");
+        args.put("values", Arrays.asList("a", "b", "c"));
+        args.put("VALUES", Arrays.asList(DataRow.fromPair("f", "c,d,f"), DataRow.fromPair("f", "x,v,z")));
+        args.put("a", LocalDateTime.now());
+        args.put("a.d", "LocalDateTime.now()");
+        args.put("tables", DataRow.fromPair("fields", "id,name,age"));
+        String res = new StringFormatter().format(sql, args);
+        System.out.println(res);
     }
 
     @Test
     public void test6() throws Exception {
         String str = "${ user } <> blank && ${ user.name } !~ 'j'";
-        System.out.println(StringUtil.format(str, DataRow.fromPair("user", ":user", "user.name", ":user.name")));
+        System.out.println(StringUtil.FMT.format(str, DataRow.fromPair("user", ":user", "user.name", ":user.name")));
+    }
+
+    @Test
+    public void testForExp() {
+        Map<String, Object> map = new HashMap<>();
+        map.put("user.id", ":user.id");
+        System.out.println(StringUtil.FMT.format("${user.id} <> blank", map));
     }
 
     @Test
@@ -50,10 +72,6 @@ public class StringTests {
         String str = "insert into ${ table } ${fields} id, name, age values (${ values.data.1 }), (${values.data.1})";
         Object values = DataRow.fromPair("data", Arrays.asList("1,2,3", "4,5,6"));
 
-        String res = StringUtil.format(str, "table", "test.user");
-        String res2 = StringUtil.format(str, "values", values);
-        System.out.println(res);
-        System.out.println(res2);
     }
 
     @Test
@@ -67,7 +85,6 @@ public class StringTests {
 
     @Test
     public void test3() throws Exception {
-        System.out.println(StringUtil.format("${a.b}", "a", "b"));
     }
 
     @Test
@@ -178,5 +195,15 @@ public class StringTests {
     public void test1113() throws IOException {
         FileResource resource = new FileResource("file:/Users/chengyuxing/Downloads/flex.html");
         System.out.println(resource.readString(StandardCharsets.UTF_8));
+    }
+
+    @Test
+    public void test341() {
+        setValue(new byte[0]);
+    }
+
+    public static void setValue(Object i) {
+        System.out.println(i.getClass().getName());
+        System.out.println(i instanceof Byte[]);
     }
 }
