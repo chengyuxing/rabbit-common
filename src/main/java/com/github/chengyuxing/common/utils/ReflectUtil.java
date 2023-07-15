@@ -48,6 +48,7 @@ public final class ReflectUtil {
      * @param clazz  class
      * @param method setter
      * @return 字段名
+     * @throws NoSuchFieldException 如果没有此字段
      */
     public static Field getSetterField(Class<?> clazz, Method method) throws NoSuchFieldException {
         String mName = method.getName();
@@ -65,6 +66,7 @@ public final class ReflectUtil {
      * @param clazz  class
      * @param method getter
      * @return 字段名
+     * @throws NoSuchFieldException 如果没有此字段
      */
     public static Field getGetterField(Class<?> clazz, Method method) throws NoSuchFieldException {
         String mName = method.getName();
