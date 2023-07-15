@@ -1,10 +1,11 @@
 package com.github.chengyuxing.common;
 
+import com.github.chengyuxing.common.utils.Jackson;
 import com.github.chengyuxing.common.utils.ObjectUtil;
 import com.github.chengyuxing.common.utils.ReflectUtil;
-import com.github.chengyuxing.common.utils.StringUtil;
 
 import java.beans.IntrospectionException;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.time.temporal.Temporal;
@@ -341,12 +342,13 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
     public <T> T toEntity(Class<T> clazz, Object... constructorParameters) {
         try {
             T entity = ReflectUtil.getInstance(clazz, constructorParameters);
+            if (this.isEmpty()) return entity;
             for (Method method : ReflectUtil.getRWMethods(clazz).getItem2()) {
-                if (!method.getName().startsWith("set")) {
+                Field classField = ReflectUtil.getSetterField(clazz, method);
+                if (Objects.isNull(classField)) {
                     continue;
                 }
-                String field = method.getName().substring(3);
-                field = field.substring(0, 1).toLowerCase().concat(field.substring(1));
+                String field = classField.getName();
                 Object value = get(field);
                 // dataRow field type
                 Class<?> dft = getType(field);
@@ -403,7 +405,7 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
                 if (Map.class.isAssignableFrom(eft) || Collection.class.isAssignableFrom(eft) || !eft.getTypeName().startsWith("java.")) {
                     // maybe json string
                     if (dft == String.class) {
-                        method.invoke(entity, ReflectUtil.json2Obj(value.toString(), eft));
+                        method.invoke(entity, Jackson.toObject(value.toString(), eft));
                         continue;
                     }
                     // object array parsing to collection exclude blob
@@ -420,7 +422,7 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
             }
             return entity;
         } catch (NoSuchMethodException | InstantiationException | InvocationTargetException | IntrospectionException |
-                 IllegalAccessException e) {
+                 IllegalAccessException | NoSuchFieldException e) {
             throw new RuntimeException("convert to " + clazz.getTypeName() + " error: ", e);
         }
     }
@@ -431,7 +433,8 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
      * @return json字符串
      */
     public String toJson() {
-        return ReflectUtil.obj2Json(this);
+        if (this.isEmpty()) return "{}";
+        return Jackson.toJson(this);
     }
 
     /**
@@ -474,28 +477,20 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
      * @return DataRow
      */
     public static DataRow fromEntity(Object entity) {
+        if (Objects.isNull(entity)) return DataRow.empty();
         try {
             DataRow row = DataRow.empty();
+            Class<?> clazz = entity.getClass();
             for (Method method : ReflectUtil.getRWMethods(entity.getClass()).getItem1()) {
-                Class<?> returnType = method.getReturnType();
-                if (returnType == Class.class) {
+                Field classField = ReflectUtil.getGetterField(clazz, method);
+                if (Objects.isNull(classField)) {
                     continue;
                 }
-                String field = method.getName();
-                if (!StringUtil.startsWiths(field, "get", "is")) {
-                    continue;
-                }
-                if (field.startsWith("get")) {
-                    field = field.substring(3);
-                } else if (field.startsWith("is")) {
-                    field = field.substring(2);
-                }
-                field = field.substring(0, 1).toLowerCase().concat(field.substring(1));
                 Object value = method.invoke(entity);
-                row.put(field, value);
+                row.put(classField.getName(), value);
             }
             return row;
-        } catch (IllegalAccessException | IntrospectionException | InvocationTargetException e) {
+        } catch (IllegalAccessException | IntrospectionException | InvocationTargetException | NoSuchFieldException e) {
             throw new RuntimeException("convert to DataRow error: ", e);
         }
     }
@@ -507,6 +502,7 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
      * @return DataRow
      */
     public static DataRow fromMap(Map<?, ?> map) {
+        if (Objects.isNull(map)) return DataRow.empty();
         DataRow row = new DataRow(map.size());
         for (Map.Entry<?, ?> e : map.entrySet()) {
             row.put(e.getKey().toString(), e.getValue());
@@ -521,7 +517,8 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
      * @return DataRow
      */
     public static DataRow fromPair(Object... pairs) {
-        if (pairs.length == 0 || (pairs.length & 1) != 0) {
+        if (pairs.length == 0) return DataRow.empty();
+        if ((pairs.length & 1) != 0) {
             throw new IllegalArgumentException("key value are not a pair.");
         }
         int capacity = pairs.length >> 1;
@@ -540,7 +537,8 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
      * @return DataRow
      */
     public static DataRow fromJson(String json) {
-        return (DataRow) ReflectUtil.json2Obj(json, DataRow.class);
+        if (Objects.isNull(json)) return DataRow.empty();
+        return (DataRow) Jackson.toObject(json, DataRow.class);
     }
 }
 

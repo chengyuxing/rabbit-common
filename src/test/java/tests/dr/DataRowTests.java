@@ -1,8 +1,11 @@
 package tests.dr;
 
 import com.github.chengyuxing.common.DataRow;
+import com.github.chengyuxing.common.DateTimes;
+import com.github.chengyuxing.common.utils.ObjectUtil;
 import org.junit.Test;
 import org.postgresql.util.PGobject;
+import tests.entity.Coord;
 
 import java.time.LocalDateTime;
 import java.util.Date;
@@ -15,8 +18,6 @@ public class DataRowTests {
         en.setLdt(LocalDateTime.now());
 
         System.out.println(DataRow.fromEntity(en).toMap());
-        System.out.println(new Date().getTime());
-        System.out.println(new Date(1635132891314L));
     }
 
     @Test
@@ -38,9 +39,17 @@ public class DataRowTests {
     }
 
     @Test
-    public void testsqlDt() throws Exception{
+    public void testsqlDt() throws Exception {
         System.out.println(new Date().getTime());
         java.sql.Date ts = new java.sql.Date(1635138231902L);
         System.out.println(ts.getTime());
+    }
+
+    @Test
+    public void testIn() {
+        DataRow dataRow = DataRow.fromPair("x", 10, "y", 20);
+        Coord coord = dataRow.toEntity(Coord.class, dataRow.get("x"), dataRow.get("y"));
+        System.out.println(coord);
+        System.out.println(ObjectUtil.getValue(coord, "x"));
     }
 }

@@ -4,7 +4,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.time.*;
 import java.time.temporal.Temporal;
-import java.util.*;
+import java.util.Collection;
+import java.util.Date;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * 简单基本对象工具类
@@ -81,17 +84,19 @@ public final class ObjectUtil {
             return null;
         }
         Class<?> clazz = value.getClass();
-        Method m = ReflectUtil.getGetMethod(clazz, key);
-        if (m == null) {
-            return null;
-        }
-        if (!m.isAccessible()) {
-            m.setAccessible(true);
-        }
+        Method m = null;
         try {
+            m = ReflectUtil.getGetMethod(clazz, key);
+            if (!m.isAccessible()) {
+                m.setAccessible(true);
+            }
             return m.invoke(value);
         } catch (IllegalAccessException | InvocationTargetException e) {
             throw new IllegalArgumentException("Invoke " + clazz.getName() + "#" + m.getName() + " error.", e);
+        } catch (NoSuchFieldException e) {
+            throw new IllegalArgumentException("No such field on " + value, e);
+        } catch (NoSuchMethodException e) {
+            throw new IllegalArgumentException("No such method on " + value, e);
         }
     }
 
@@ -108,7 +113,7 @@ public final class ObjectUtil {
             return null;
         }
         if (!path.startsWith("/")) {
-            throw new IllegalArgumentException("json path expression syntax error, must startsWith '/', for example '/" + path + "'");
+            throw new IllegalArgumentException("Path expression syntax error, must startsWith '/', for example '/" + path + "'");
         }
         String trimStart = path.substring(1);
         if (!trimStart.contains("/")) {

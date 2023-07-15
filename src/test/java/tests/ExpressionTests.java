@@ -2,7 +2,6 @@ package tests;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
-import com.github.chengyuxing.common.script.impl.CExpression;
 import com.github.chengyuxing.common.script.impl.FastExpression;
 
 import java.util.HashMap;
@@ -25,10 +24,5 @@ public class ExpressionTests {
         System.out.println(expression.calc(args, true));
     }
 
-    @Test
-    public void c() throws Exception {
-        CExpression expression = CExpression.of(exp);
-        System.out.println(expression.calc(args, true));
-    }
 
 }

@@ -77,7 +77,7 @@ public class StringFormatter {
                 try {
                     String value;
                     if (isKeyPath) {
-                        value = parseValue(ObjectUtil.walkDeepValue(data, "/" + key.replace('.', '/')), isSpecial);
+                        value = parseValue(ObjectUtil.getDeepValue(data, key), isSpecial);
                     } else {
                         value = parseValue(data.get(key), isSpecial);
                     }

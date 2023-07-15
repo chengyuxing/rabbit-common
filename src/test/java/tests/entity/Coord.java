@@ -1,8 +1,8 @@
 package tests.entity;
 
 public class Coord {
-    private final int x;
-    private final int y;
+    private final Integer x;
+    private final Integer y;
 
     private String name;
 
@@ -11,11 +11,11 @@ public class Coord {
         this.y = y;
     }
 
-    public int getX() {
+    public Integer getX() {
         return x;
     }
 
-    public int getY() {
+    public Integer getY() {
         return y;
     }
 

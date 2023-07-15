@@ -1,9 +1,9 @@
 package com.github.chengyuxing.common.console;
 
 /**
- * Linux/Unix系统终端颜色
+ * 支持Ansi的系统终端颜色
  */
-public enum Color {
+public enum Color implements AnsiColor {
     DARK_RED("31"),
     RED("91"),
     DARK_GREEN("32"),
@@ -25,7 +25,8 @@ public enum Color {
         this.code = code;
     }
 
-    public String getCode() {
+    @Override
+    public String code() {
         return code;
     }
 }

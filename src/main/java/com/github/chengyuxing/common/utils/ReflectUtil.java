@@ -12,13 +12,12 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * 反射工具类
  */
 public final class ReflectUtil {
-    private static Object jackson;
-
     /**
      * 初始化get方法
      *
@@ -30,7 +29,7 @@ public final class ReflectUtil {
         String prefix = "get";
         if (type == boolean.class || type == Boolean.class)
             prefix = "is";
-        return prefix + field.substring(0, 1).toUpperCase() + field.substring(1);
+        return prefix + field.substring(0, 1).toUpperCase().concat(field.substring(1));
     }
 
     /**
@@ -40,7 +39,49 @@ public final class ReflectUtil {
      * @return set方法
      */
     public static String initSetMethod(String field) {
-        return "set" + field.substring(0, 1).toUpperCase() + field.substring(1);
+        return "set" + field.substring(0, 1).toUpperCase().concat(field.substring(1));
+    }
+
+    /**
+     * 根据方法获取字段名
+     *
+     * @param clazz  class
+     * @param method setter
+     * @return 字段名
+     */
+    public static Field getSetterField(Class<?> clazz, Method method) throws NoSuchFieldException {
+        String mName = method.getName();
+        if (mName.startsWith("set") && mName.length() > 3) {
+            String name = mName.substring(3);
+            name = name.substring(0, 1).toLowerCase().concat(name.substring(1));
+            return clazz.getDeclaredField(name);
+        }
+        return null;
+    }
+
+    /**
+     * 根据方法获取字段名
+     *
+     * @param clazz  class
+     * @param method getter
+     * @return 字段名
+     */
+    public static Field getGetterField(Class<?> clazz, Method method) throws NoSuchFieldException {
+        String mName = method.getName();
+        if (mName.equals("getClass")) {
+            return null;
+        }
+        String name = null;
+        if (mName.startsWith("get")) {
+            name = mName.substring(3);
+        } else if (mName.startsWith("is")) {
+            name = mName.substring(2);
+        }
+        if (Objects.nonNull(name) && name.length() > 0) {
+            name = name.substring(0, 1).toLowerCase().concat(name.substring(1));
+            return clazz.getDeclaredField(name);
+        }
+        return null;
     }
 
     /**
@@ -68,6 +109,78 @@ public final class ReflectUtil {
     }
 
     /**
+     * 获取实体类指定字段的getter
+     *
+     * @param clazz 实体类
+     * @param field 字段名
+     * @return getter方法
+     * @throws NoSuchFieldException  如果没有此字段
+     * @throws NoSuchMethodException 如果没有此字段的方法
+     */
+    public static Method getGetMethod(Class<?> clazz, String field) throws NoSuchFieldException, NoSuchMethodException {
+        Field f = clazz.getDeclaredField(field);
+        String methodName = initGetMethod(field, f.getType());
+        return clazz.getDeclaredMethod(methodName);
+    }
+
+    /**
+     * 获取实体类指定字段的setter
+     *
+     * @param clazz 实体类
+     * @param field 字段名
+     * @return setter方法
+     * @throws NoSuchFieldException  如果没有此字段
+     * @throws NoSuchMethodException 如果没有此字段的方法
+     */
+    public static Method getSetMethod(Class<?> clazz, String field) throws NoSuchFieldException, NoSuchMethodException {
+        Field f = clazz.getDeclaredField(field);
+        String methodName = initSetMethod(field);
+        return clazz.getDeclaredMethod(methodName, f.getType());
+    }
+
+    /**
+     * 获取一个jackson的ObjectMapper对象
+     *
+     * @return ObjectMapper
+     * @throws ClassNotFoundException 没有找到ObjectMapper
+     * @throws IllegalAccessException 非法访问
+     * @throws InstantiationException 实例化失败
+     * @see Jackson#getObjectMapper()
+     * @deprecated
+     */
+    @Deprecated
+    public static Object getJackson() throws ClassNotFoundException, IllegalAccessException, InstantiationException {
+        return Jackson.getObjectMapper();
+    }
+
+    /**
+     * 对象转json字符串（需要jackson库）
+     *
+     * @param obj 对象
+     * @return json
+     * @see Jackson#toJson(Object)
+     * @deprecated
+     */
+    @Deprecated
+    public static String obj2Json(Object obj) {
+        return Jackson.toJson(obj);
+    }
+
+    /**
+     * json字符串转对象（需要jackson库）
+     *
+     * @param json       json
+     * @param targetType 目标类型
+     * @return 对象
+     * @see Jackson#toObject(String, Class)
+     * @deprecated
+     */
+    @Deprecated
+    public static Object json2Obj(String json, Class<?> targetType) {
+        return Jackson.toObject(json, targetType);
+    }
+
+    /**
      * 判断对象是否是java的基本数据类型(包括包装类型)
      *
      * @param value 对象
@@ -86,88 +199,6 @@ public final class ReflectUtil {
                 value instanceof Character ||
                 value instanceof Float ||
                 value instanceof Byte;
-    }
-
-    /**
-     * 某个实体类是否有指定的字段
-     *
-     * @param clazz 实体类
-     * @param field 字段名
-     * @return 是否有
-     */
-    public static Method getGetMethod(Class<?> clazz, String field) {
-        Method method = null;
-        Field[] fields = clazz.getDeclaredFields();
-        out:
-        for (Field f : fields) {
-            if (f.getName().equals(field)) {
-                Method[] methods = clazz.getDeclaredMethods();
-                for (Method m : methods) {
-                    String getMethod = initGetMethod(field, f.getType());
-                    if (m.getName().equals(getMethod)) {
-                        method = m;
-                        break out;
-                    }
-                }
-            }
-        }
-        return method;
-    }
-
-    /**
-     * 获取一个jackson的ObjectMapper对象
-     *
-     * @return ObjectMapper
-     * @throws ClassNotFoundException 没有找到ObjectMapper
-     * @throws IllegalAccessException 非法访问
-     * @throws InstantiationException 实例化失败
-     */
-    public static Object getJackson() throws ClassNotFoundException, IllegalAccessException, InstantiationException {
-        // it's not necessary use sync block
-        if (jackson == null) {
-            Class<?> jacksonClass = Class.forName("com.fasterxml.jackson.databind.ObjectMapper");
-            jackson = jacksonClass.newInstance();
-        }
-        return jackson;
-    }
-
-    /**
-     * 对象转json字符串（需要jackson库）
-     *
-     * @param obj 对象
-     * @return json
-     */
-    public static String obj2Json(Object obj) {
-        try {
-            Object jacksonObj = getJackson();
-            Method method = jacksonObj.getClass().getDeclaredMethod("writeValueAsString", Object.class);
-            Object jsonStr = method.invoke(jacksonObj, obj);
-            if (jsonStr.equals("null")) {
-                return null;
-            }
-            return jsonStr.toString();
-        } catch (ClassNotFoundException | IllegalAccessException | InstantiationException | NoSuchMethodException |
-                 InvocationTargetException e) {
-            throw new RuntimeException("convert to json error: ", e);
-        }
-    }
-
-    /**
-     * json字符串转对象（需要jackson库）
-     *
-     * @param json       json
-     * @param targetType 目标类型
-     * @return 对象
-     */
-    public static Object json2Obj(String json, Class<?> targetType) {
-        try {
-            Object jacksonObj = getJackson();
-            Method method = jacksonObj.getClass().getDeclaredMethod("readValue", String.class, Class.class);
-            return method.invoke(jacksonObj, json, targetType);
-        } catch (ClassNotFoundException | IllegalAccessException | InstantiationException | NoSuchMethodException |
-                 InvocationTargetException e) {
-            throw new RuntimeException("convert to json error: ", e);
-        }
     }
 
     /**
