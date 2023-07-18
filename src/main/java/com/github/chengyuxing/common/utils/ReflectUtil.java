@@ -116,13 +116,38 @@ public final class ReflectUtil {
      * @param clazz 实体类
      * @param field 字段名
      * @return getter方法
+     * @throws NoSuchMethodException 如果没有此字段的方法
+     */
+    public static Method getGetMethod(Class<?> clazz, Field field) throws NoSuchMethodException {
+        String methodName = initGetMethod(field.getName(), field.getType());
+        return clazz.getDeclaredMethod(methodName);
+    }
+
+    /**
+     * 获取实体类指定字段的getter
+     *
+     * @param clazz 实体类
+     * @param field 字段名
+     * @return getter方法
      * @throws NoSuchFieldException  如果没有此字段
      * @throws NoSuchMethodException 如果没有此字段的方法
      */
     public static Method getGetMethod(Class<?> clazz, String field) throws NoSuchFieldException, NoSuchMethodException {
         Field f = clazz.getDeclaredField(field);
-        String methodName = initGetMethod(field, f.getType());
-        return clazz.getDeclaredMethod(methodName);
+        return getGetMethod(clazz, f);
+    }
+
+    /**
+     * 获取实体类指定字段的setter
+     *
+     * @param clazz 实体类
+     * @param field 字段名
+     * @return setter方法
+     * @throws NoSuchMethodException 如果没有此字段的方法
+     */
+    public static Method getSetMethod(Class<?> clazz, Field field) throws NoSuchMethodException {
+        String methodName = initSetMethod(field.getName());
+        return clazz.getDeclaredMethod(methodName, field.getType());
     }
 
     /**
@@ -136,8 +161,7 @@ public final class ReflectUtil {
      */
     public static Method getSetMethod(Class<?> clazz, String field) throws NoSuchFieldException, NoSuchMethodException {
         Field f = clazz.getDeclaredField(field);
-        String methodName = initSetMethod(field);
-        return clazz.getDeclaredMethod(methodName, f.getType());
+        return getSetMethod(clazz, f);
     }
 
     /**
