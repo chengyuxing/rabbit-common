@@ -3,6 +3,7 @@ package com.github.chengyuxing.common.script.impl;
 import com.github.chengyuxing.common.script.Comparators;
 import com.github.chengyuxing.common.script.IExpression;
 import com.github.chengyuxing.common.script.IPipe;
+import com.github.chengyuxing.common.script.exception.PipeNotFoundException;
 import com.github.chengyuxing.common.tuple.Pair;
 import com.github.chengyuxing.common.utils.ObjectUtil;
 import com.github.chengyuxing.common.utils.StringUtil;
@@ -81,12 +82,13 @@ public class FastExpression extends IExpression {
      * {@inheritDoc}
      *
      * @throws IllegalArgumentException 管道语法错误
+     * @throws PipeNotFoundException    没有找到管道实现
      */
     @Override
     public Object pipedValue(Object value, String pipes) {
         String trimPipes = pipes.trim();
         if (!trimPipes.matches("(\\s*\\|\\s*\\w+\\s*)+")) {
-            throw new IllegalArgumentException("pipes channel syntax error: " + pipes);
+            throw new IllegalArgumentException("pipes channel syntax error: " + pipes + " at expression -> " + expression);
         }
         String[] pipeArr = trimPipes.substring(1).split("\\|");
         Object res = value;
@@ -97,7 +99,7 @@ public class FastExpression extends IExpression {
             } else if (GLOBAL_PIPES.containsKey(pipe)) {
                 res = GLOBAL_PIPES.get(pipe).transform(res);
             } else {
-                throw new RuntimeException("cannot find pipe '" + pipe + "'");
+                throw new PipeNotFoundException("cannot find pipe '" + pipe + "' at expression -> " + expression);
             }
         }
         return res;
@@ -151,22 +153,14 @@ public class FastExpression extends IExpression {
         if (isKey(name)) {
             Object value = ObjectUtil.getDeepValue(args, name.substring(1));
             if (!StringUtil.isEmpty(pipes)) {
-                try {
-                    value = pipedValue(value, pipes);
-                } catch (Exception e) {
-                    throw new RuntimeException("an error occurred when piping value at expression -> " + expression, e);
-                }
+                value = pipedValue(value, pipes);
             }
             return value;
         }
         // 字符串字面量
         Object value = name;
         if (!StringUtil.isEmpty(pipes)) {
-            try {
-                value = pipedValue(value, pipes);
-            } catch (Exception e) {
-                throw new RuntimeException("an error occurred when piping value at expression -> " + expression, e);
-            }
+            value = pipedValue(value, pipes);
         }
         return Comparators.valueOf(value);
     }
