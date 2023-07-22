@@ -14,24 +14,7 @@ import java.util.regex.Pattern;
 public class StringFormatter {
     private static final char DEFAULT_HOLDER_PREFIX = '$';
     private static final char TEMP_HOLDER_PREFIX = '\u0c32';
-    private Pattern pattern = Pattern.compile("\\$\\{\\s*(?<key>:?[\\w._-]+)\\s*}");
-    private String specialPrefix = ":";
-
-    public StringFormatter() {
-
-    }
-
-    /**
-     * 占位符键名称的特殊前缀，可用来对特殊的对象类型值做一些特别的处理，默认为 ':'
-     *
-     * @param specialPrefix 特殊前缀
-     */
-    public StringFormatter(char specialPrefix) {
-        if (specialPrefix != ':') {
-            this.specialPrefix = String.valueOf(specialPrefix);
-            pattern = Pattern.compile("\\$\\{\\s*(?<key>\\" + this.specialPrefix + "?[\\w._-]+)\\s*}");
-        }
-    }
+    private final Pattern pattern = Pattern.compile("\\$\\{\\s*(?<key>:?[\\w._-]+)\\s*}");
 
     /**
      * 格式化字符串模版
@@ -63,7 +46,7 @@ public class StringFormatter {
             String holder = m.group(0);
             // real key e.g. :myKey
             String key = m.group("key");
-            boolean isSpecial = key.startsWith(specialPrefix);
+            boolean isSpecial = key.startsWith(":");
             if (isSpecial) {
                 key = key.substring(1);
             }
@@ -121,9 +104,5 @@ public class StringFormatter {
 
     public Pattern getPattern() {
         return pattern;
-    }
-
-    public String getSpecialPrefix() {
-        return specialPrefix;
     }
 }

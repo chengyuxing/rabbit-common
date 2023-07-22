@@ -74,8 +74,8 @@ import static com.github.chengyuxing.common.utils.StringUtil.*;
  * @see IExpression
  */
 public abstract class SimpleScriptParser {
-    public static final Pattern FOR_PATTERN = Pattern.compile("(?<item>\\w+)(\\s*,\\s*(?<index>\\w+))?\\s+of\\s+:(?<list>[\\w.]+)(?<pipes>(\\s*\\|\\s*[\\w.]+)*)?(\\s+delimiter\\s+'(?<delimiter>[^']*)')?(\\s+filter\\s+(?<filter>[\\S\\s]+))?");
-    public static final Pattern SWITCH_PATTERN = Pattern.compile(":(?<name>[\\w.]+)\\s*(?<pipes>(\\s*\\|\\s*\\w+)*)?");
+    public static final Pattern FOR_PATTERN = Pattern.compile("(?<item>[\\w_]+)(\\s*,\\s*(?<index>[\\w_]+))?\\s+of\\s+:(?<list>[\\w_.]+)(?<pipes>(\\s*\\|\\s*[\\w_.]+)*)?(\\s+delimiter\\s+'(?<delimiter>[^']*)')?(\\s+filter\\s+(?<filter>[\\S\\s]+))?");
+    public static final Pattern SWITCH_PATTERN = Pattern.compile(":(?<name>[\\w_.]+)\\s*(?<pipes>(\\s*\\|\\s*[\\w_.]+)*)?");
     public static final String[] TAGS = new String[]{
             "#if", "#fi",
             "#choose", "#when",
