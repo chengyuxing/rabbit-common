@@ -29,22 +29,36 @@ public class StringFormatter {
      * @param data     数据
      * @return 格式化后的字符串
      */
-    public String format(String template, Map<String, ?> data) {
+    public String format(final String template, final Map<String, ?> data) {
         if (Objects.isNull(template)) {
             return "";
         }
         if (template.trim().isEmpty()) {
             return template;
         }
+        if (!template.contains("${")) {
+            return template;
+        }
         if (Objects.isNull(data) || data.isEmpty()) {
             return template;
         }
+        return doFormat(template, data);
+    }
+
+    /**
+     * 递归格式化字符串模版
+     *
+     * @param template 字符串模版
+     * @param data     数据
+     * @return 格式化后的字符串
+     */
+    protected String doFormat(final String template, final Map<String, ?> data) {
         String copy = template;
         Matcher m = getPattern().matcher(copy);
         if (m.find()) {
-            // full str template key e.g. ${ :myKey  }
+            // full str template key e.g. ${ !myKey  }
             String holder = m.group(0);
-            // real key e.g. :myKey
+            // real key e.g. !myKey
             String key = m.group("key");
             boolean isSpecial = key.startsWith("!");
             if (isSpecial) {
@@ -69,7 +83,7 @@ public class StringFormatter {
                     throw new IllegalArgumentException(e);
                 }
             }
-            return format(copy, data);
+            return doFormat(copy, data);
         }
         if (copy.lastIndexOf(TEMP_HOLDER_PREFIX) != -1) {
             copy = copy.replace(TEMP_HOLDER_PREFIX, DEFAULT_HOLDER_PREFIX);
@@ -102,6 +116,11 @@ public class StringFormatter {
         return sb.toString();
     }
 
+    /**
+     * 字符串模版正则
+     *
+     * @return 字符串模版正则
+     */
     public Pattern getPattern() {
         return pattern;
     }

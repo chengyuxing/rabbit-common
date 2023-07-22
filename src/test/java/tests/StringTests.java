@@ -17,13 +17,12 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.sql.Time;
-import java.sql.Timestamp;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class StringTests {
     static String sql = "${   a   } ${!a.d} insert into ${  Table  } ${tables.fields} values (${  VALUES.1.f }), (${values.0}), (${  Values   })${b}";
@@ -38,7 +37,20 @@ public class StringTests {
         args.put("a.d", "LocalDateTime.now()");
         args.put("tables", DataRow.fromPair("fields", "id,name,age"));
 
-        System.out.println(StringUtil.FMT.format(sql, args));
+        String s = new FileResource("file:/Users/chengyuxing/Downloads/bbb.sql").readString(StandardCharsets.UTF_8);
+
+        String res = (StringUtil.FMT.format(s, args));
+        Files.write(Paths.get("/Users/chengyuxing/Downloads/ccc.sql"), res.getBytes(StandardCharsets.UTF_8));
+    }
+
+    @Test
+    public void testOut() throws IOException {
+        int i = 0;
+        List<String> list = new ArrayList<>();
+        while (++i < 2000000) {
+            list.add("\"${   a   } ${!a.d} insert into ${  Table  } ${tables.fields} values (${  VALUES.1.f }), (${values.0}), (${  Values   })${b}\\n\"");
+        }
+        Files.write(Paths.get("/Users/chengyuxing/Downloads/bbb.sql"), list);
     }
 
     @Test
@@ -58,6 +70,20 @@ public class StringTests {
     public void test6() throws Exception {
         String str = "${ user } <> blank && ${ user.name } !~ 'j'";
         System.out.println(StringUtil.FMT.format(str, DataRow.fromPair("user", ":user", "user.name", ":user.name")));
+    }
+
+    @Test
+    public void testa() {
+        Matcher m = Pattern.compile("(?<out>\\$\\{\\s*(?<key>!?[\\w._-]+)\\s*})").matcher("select ${ fields } from test.user where ${  cnd} and id in (${!idArr}) or id = ${!idArr.1}");
+        while (m.find()) {
+            System.out.println(m.group("out") + ":" + m.group("key"));
+        }
+    }
+
+    @Test
+    public void testb() {
+        StringBuffer buffer = new StringBuffer("a${name}b");
+        System.out.println(buffer.replace(1, 8, "1234567890"));
     }
 
     @Test
