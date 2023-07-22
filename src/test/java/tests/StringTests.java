@@ -26,7 +26,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class StringTests {
-    static String sql = "${   a   } ${:a.d} insert into ${  Table  } ${tables.fields} values (${  VALUES.1.f }), (${values.0}), (${  Values   })${b}";
+    static String sql = "${   a   } ${!a.d} insert into ${  Table  } ${tables.fields} values (${  VALUES.1.f }), (${values.0}), (${  Values   })${b}";
 
     @Test
     public void test() throws Exception {

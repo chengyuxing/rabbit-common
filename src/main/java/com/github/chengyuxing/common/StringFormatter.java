@@ -14,13 +14,13 @@ import java.util.regex.Pattern;
 public class StringFormatter {
     private static final char DEFAULT_HOLDER_PREFIX = '$';
     private static final char TEMP_HOLDER_PREFIX = '\u0c32';
-    private final Pattern pattern = Pattern.compile("\\$\\{\\s*(?<key>:?[\\w._-]+)\\s*}");
+    private final Pattern pattern = Pattern.compile("\\$\\{\\s*(?<key>!?[\\w._-]+)\\s*}");
 
     /**
      * 格式化字符串模版
      * e.g.
      * <blockquote>
-     * <pre>字符串：select ${ fields } from test.user where ${  cnd} and id in (${:idArr}) or id = ${:idArr.1}</pre>
+     * <pre>字符串：select ${ fields } from test.user where ${  cnd} and id in (${!idArr}) or id = ${!idArr.1}</pre>
      * <pre>参数：{fields: "id, name", cnd: "name = 'cyx'", idArr: ["a", "b", "c"]}</pre>
      * <pre>结果：select id, name from test.user where name = 'cyx' and id in ('a', 'b', 'c') or id = 'b'</pre>
      * </blockquote>
@@ -40,13 +40,13 @@ public class StringFormatter {
             return template;
         }
         String copy = template;
-        Matcher m = pattern.matcher(copy);
+        Matcher m = getPattern().matcher(copy);
         if (m.find()) {
             // full str template key e.g. ${ :myKey  }
             String holder = m.group(0);
             // real key e.g. :myKey
             String key = m.group("key");
-            boolean isSpecial = key.startsWith(":");
+            boolean isSpecial = key.startsWith("!");
             if (isSpecial) {
                 key = key.substring(1);
             }
