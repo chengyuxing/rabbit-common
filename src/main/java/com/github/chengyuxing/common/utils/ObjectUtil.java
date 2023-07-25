@@ -144,6 +144,9 @@ public final class ObjectUtil {
      */
     @SuppressWarnings("unchecked")
     public static Object[] toArray(Object obj) {
+        if (Objects.isNull(obj)) {
+            return new Object[0];
+        }
         Object[] values;
         if (obj instanceof Object[]) {
             values = (Object[]) obj;
