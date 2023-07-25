@@ -52,7 +52,7 @@ public interface IPipe<T> {
     }
 
     /**
-     * Map转为元组集合 [(item1 -> key, item2 -> value), ...]
+     * Map转为元组集合 {@code [(item1 -> key, item2 -> value), ...]}
      */
     class Map2Pairs implements IPipe<List<Pair<String, Object>>> {
         @Override
