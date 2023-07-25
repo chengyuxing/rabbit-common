@@ -7,7 +7,11 @@ import com.github.chengyuxing.common.io.FileResource;
 import com.github.chengyuxing.common.io.TypedProperties;
 import com.github.chengyuxing.common.script.Comparators;
 import com.github.chengyuxing.common.script.IPipe;
+import com.github.chengyuxing.common.script.SimpleScriptParser;
+import com.github.chengyuxing.common.script.impl.FastExpression;
+import com.github.chengyuxing.common.tuple.Pair;
 import com.github.chengyuxing.common.utils.CollectionUtil;
+import com.github.chengyuxing.common.utils.ObjectUtil;
 import com.github.chengyuxing.common.utils.StringUtil;
 import org.junit.Test;
 
@@ -24,6 +28,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.github.chengyuxing.common.utils.StringUtil.FMT;
+import static com.github.chengyuxing.common.utils.StringUtil.NEW_LINE;
+
 public class StringTests {
     static String sql = "${   a   } ${!a.d} insert into ${  Table  } ${tables.fields} values (${  VALUES.1.f }), (${values.0}), (${  Values   })${b}";
 
@@ -39,7 +46,7 @@ public class StringTests {
 
         String s = new FileResource("file:/Users/chengyuxing/Downloads/bbb.sql").readString(StandardCharsets.UTF_8);
 
-        String res = (StringUtil.FMT.format(s, args));
+        String res = (FMT.format(s, args));
         Files.write(Paths.get("/Users/chengyuxing/Downloads/ccc.sql"), res.getBytes(StandardCharsets.UTF_8));
     }
 
@@ -69,7 +76,7 @@ public class StringTests {
     @Test
     public void test6() throws Exception {
         String str = "${ user } <> blank && ${ user.name } !~ 'j'";
-        System.out.println(StringUtil.FMT.format(str, DataRow.fromPair("user", ":user", "user.name", ":user.name")));
+        System.out.println(FMT.format(str, DataRow.fromPair("user", ":user", "user.name", ":user.name")));
     }
 
     @Test
@@ -90,7 +97,7 @@ public class StringTests {
     public void testForExp() {
         Map<String, Object> map = new HashMap<>();
         map.put("user.id", ":user.id");
-        System.out.println(StringUtil.FMT.format("${user.id} <> blank", map));
+        System.out.println(FMT.format("${user.id} <> blank", map));
     }
 
     @Test
@@ -231,5 +238,100 @@ public class StringTests {
     public static void setValue(Object i) {
         System.out.println(i.getClass().getName());
         System.out.println(i instanceof Byte[]);
+    }
+
+    @Test
+    public void testT() {
+        String s = new FileResource("b.txt").readString(StandardCharsets.UTF_8);
+        System.out.println(s.replace("\\n", "\n"));
+    }
+
+    @Test
+    public void testExp() {
+        SimpleScriptParser simpleScriptParser = new SimpleScriptParser() {
+            @Override
+            protected String trimExpression(String line) {
+                String tl = line.trim();
+                if (tl.startsWith("--")) {
+                    String s = tl.substring(2).trim();
+                    if (s.startsWith("#")) {
+                        return s;
+                    }
+                }
+                return line;
+            }
+
+            @Override
+            protected String forLoopBodyFormatter(int forIndex, int varIndex, String varName, String idxName, List<String> body, Map<String, Object> args) {
+                body.removeIf(l -> {
+                    String tl = l.trim();
+                    return tl.startsWith("--") && !tl.substring(2).trim().startsWith("#");
+                });
+                String formatted = FMT.format(String.join(NEW_LINE, body), args);
+                if (varName != null) {
+                    String varParam = "_for." + forVarKey(varName, forIndex, varIndex);
+                    formatted = formatted.replace("_for." + varName, varParam);
+                }
+                if (idxName != null) {
+                    String idxParam = "_for." + forVarKey(idxName, forIndex, varIndex);
+                    formatted = formatted.replace("_for." + idxName, idxParam);
+                }
+                return formatted;
+            }
+        };
+
+        DataRow d = DataRow.fromPair(
+                "c", "blank",
+                "c1", "blank",
+                "c2", "blank",
+                "data", DataRow.fromPair(
+                        "id", 12,
+                        "name", "chengyuxing",
+                        "age", 30,
+                        "address", "昆明市"
+                ),
+                "ids", Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8),
+                "list", Arrays.asList(
+                        "A",
+                        "B",
+                        DataRow.fromPair(
+                                "nums",
+                                Arrays.asList("1", "2", "3")),
+                        "D",
+                        "E")
+        );
+
+        String s = new FileResource("me.sql").readString(StandardCharsets.UTF_8);
+
+        String res = simpleScriptParser.parse(s, d);
+        System.out.println(res);
+
+        Map<String, Object> vars = simpleScriptParser.getForVars();
+        System.out.println(vars);
+    }
+
+    @Test
+    public void testDeepValue() {
+        DataRow r = DataRow.fromPair("_for",
+                DataRow.fromPair("pair_6_3", Pair.of("name", "chengyuxing"))
+        );
+        Object value = ObjectUtil.getDeepValue(r, "_for.pair_6_3.item2");
+        System.out.println(value);
+    }
+
+    @Test
+    public void testPipe() {
+        DataRow row = DataRow.fromPair(
+                "id", 12,
+                "name", "chengyuxing",
+                "age", 30,
+                "address", "昆明市"
+        );
+        System.out.println(new IPipe.Map2Pairs().transform(row));
+    }
+
+    @Test
+    public void testPipePattern() {
+        System.out.println("|".matches(FastExpression.PIPES_PATTERN));
     }
 }

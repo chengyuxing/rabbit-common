@@ -31,10 +31,10 @@ public class PipesTests {
         Map<String, IPipe<?>> pipeMap = new ConcurrentHashMap<>();
         pipeMap.put("is_idcard", new IsIdCard());
         expression.setPipes(pipeMap);
-        System.out.println(expression.calc(DataRow.fromPair("idCard", "53011119930510000X"), true));
+        System.out.println(expression.calc(DataRow.fromPair("idCard", "53011119930510000X")));
 
         FastExpression expression2 = FastExpression.of(":name | length > 3");
-        System.out.println(expression2.calc(DataRow.fromPair("name", "cyx"), true));
+        System.out.println(expression2.calc(DataRow.fromPair("name", "cyx")));
     }
 
     @Test
@@ -44,7 +44,7 @@ public class PipesTests {
                 "id", 10,
                 "name", "cyx",
                 "age", 13
-        ), true));
+        )));
     }
 
     @Test
@@ -56,7 +56,7 @@ public class PipesTests {
         args.put("age", 30);
         args.put("alias", "cyx");
         args.put("score", 9.9);
-        System.out.println(expression.calc(args, true));
+        System.out.println(expression.calc(args));
     }
 
     static class IsIdCard implements IPipe<Boolean> {

@@ -15,10 +15,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class SuperParser extends SimpleScriptParser {
-    @Override
-    public String forLoopBodyFormatter(String result, Map<String, Object> args) {
-        return StringUtil.FMT.format(result, args);
-    }
 
     @Override
     public String trimExpression(String line) {
@@ -41,7 +37,7 @@ public class SuperParser extends SimpleScriptParser {
         String content = Files.lines(Paths.get("/Users/chengyuxing/IdeaProjects/rabbit-common/src/test/resources/a.txt"))
                 .collect(Collectors.joining("\n"));
         SimpleScriptParser parser = new SuperParser();
-        String res = parser.parse(content, DataRow.fromPair("id", "-90", "name", "abcdefrgjgh"), true);
+        String res = parser.parse(content, DataRow.fromPair("id", "-90", "name", "abcdefrgjgh"));
         System.out.println(res);
     }
 }

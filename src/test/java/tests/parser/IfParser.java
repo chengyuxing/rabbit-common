@@ -54,7 +54,7 @@ public class IfParser {
             res = true;
         } else {
             FastExpression expression = new FastExpression(root.getExpression().trim().substring(3));
-            res = expression.calc(root.getArgs(), true);
+            res = expression.calc(root.getArgs());
         }
         if (res) {
             sb.add(String.join("\n", root.getContent()));

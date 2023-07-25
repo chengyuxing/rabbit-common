@@ -11,7 +11,7 @@ public class XExpression extends IExpression {
     }
 
     @Override
-    public boolean calc(Map<String, ?> args,boolean require) {
+    public boolean calc(Map<String, ?> args) {
         return expression.startsWith("a");
     }
 

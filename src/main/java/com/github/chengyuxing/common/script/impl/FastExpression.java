@@ -11,6 +11,7 @@ import com.github.chengyuxing.common.utils.StringUtil;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -25,14 +26,17 @@ import java.util.regex.Pattern;
  * @see Comparators
  */
 public class FastExpression extends IExpression {
+    public static final String PIPES_PATTERN = "(\\s*\\|\\s*[\\w_.]+)*";
+    public static final String STRING_PATTERN = "'[^']*'|\"[^\"]*\"";
+    public static final Pattern CRITERIA_PATTERN = Pattern.compile("(?<compare>:?[\\w_.]+|" + STRING_PATTERN + ")(?<comparePipes>" + PIPES_PATTERN + ")?\\s*(?<operator>[!=<>~@]{1,2})\\s*(?<compared>:?[\\w_.]+|" + STRING_PATTERN + ")(?<comparedPipes>" + PIPES_PATTERN + ")?");
     private static final Map<String, IPipe<?>> GLOBAL_PIPES = new HashMap<>();
     private Map<String, IPipe<?>> customPipes = new HashMap<>();
-    private static final Pattern CRITERIA_PATTERN = Pattern.compile("(?<compare>:?[\\w.-]+|'[^']*'|\"[^\"]*\")(?<comparePipes>(\\s*\\|\\s*\\w+)*)?\\s*(?<operator>[!=<>~@]{1,2})\\s*(?<compared>:?[\\w.-]+|'[^']*'|\"[^\"]*\")(?<comparedPipes>(\\s*\\|\\s*\\w+)*)?");
 
     static {
         GLOBAL_PIPES.put("length", new IPipe.Length());
         GLOBAL_PIPES.put("upper", new IPipe.Upper());
         GLOBAL_PIPES.put("lower", new IPipe.Lower());
+        GLOBAL_PIPES.put("pairs", new IPipe.Map2Pairs());
     }
 
     /**
@@ -59,8 +63,9 @@ public class FastExpression extends IExpression {
     }
 
     @Override
-    public boolean calc(Map<String, ?> args, boolean require) {
-        return calc(expression, args, require);
+    public boolean calc(Map<String, ?> args) {
+        Objects.requireNonNull(args, expression + ": args must not be null.");
+        return calc(expression, args);
     }
 
     /**
@@ -87,7 +92,10 @@ public class FastExpression extends IExpression {
     @Override
     public Object pipedValue(Object value, String pipes) {
         String trimPipes = pipes.trim();
-        if (!trimPipes.matches("(\\s*\\|\\s*\\w+\\s*)+")) {
+        if (trimPipes.isEmpty()) {
+            return value;
+        }
+        if (!trimPipes.matches(PIPES_PATTERN)) {
             throw new IllegalArgumentException("pipes channel syntax error: " + pipes + " at expression -> " + expression);
         }
         String[] pipeArr = trimPipes.substring(1).split("\\|");
@@ -110,7 +118,6 @@ public class FastExpression extends IExpression {
      *
      * @param expression 一组布尔值
      * @param args       参数字典
-     * @param require    参数是否为必须
      * @return 运算后的布尔结果
      * @throws IllegalArgumentException <ul>
      *                                  <li>如果 {@code require} 为 {@code true}，参数字典中不存在的值进行计算则抛出错误</li>
@@ -118,7 +125,7 @@ public class FastExpression extends IExpression {
      *                                  </ul>
      * @throws ArithmeticException      如果表达式语法错误
      */
-    boolean calc(String expression, Map<String, ?> args, boolean require) {
+    boolean calc(String expression, Map<String, ?> args) {
         Matcher m = CRITERIA_PATTERN.matcher(expression);
         if (m.find()) {
             String criteria = m.group(0);
@@ -127,16 +134,12 @@ public class FastExpression extends IExpression {
             String operator = m.group("operator");
             String compared = m.group("compared");
             String comparedPipes = m.group("comparedPipes");
-            if (require) {
-                validateArgs(compare, args);
-                validateArgs(compared, args);
-            }
 
             Object a = getValue(compare, comparePipes, args);
             Object b = getValue(compared, comparedPipes, args);
 
             boolean bool = Comparators.compare(a, operator, b);
-            return calc(expression.replace(criteria, Boolean.toString(bool)), args, require);
+            return calc(expression.replace(criteria, Boolean.toString(bool)), args);
         }
         return boolExpressionEval(expression);
     }
@@ -149,7 +152,7 @@ public class FastExpression extends IExpression {
      * @param args  参数字典
      * @return 可用于比较计算的值
      */
-    private Object getValue(String name, String pipes, Map<String, ?> args) {
+    protected Object getValue(String name, String pipes, Map<String, ?> args) {
         if (isKey(name)) {
             Object value = ObjectUtil.getDeepValue(args, name.substring(1));
             if (!StringUtil.isEmpty(pipes)) {
@@ -166,35 +169,12 @@ public class FastExpression extends IExpression {
     }
 
     /**
-     * 验证参数必须存在
-     *
-     * @param name 参数名
-     * @param args 参数字典
-     */
-    private void validateArgs(String name, Map<String, ?> args) {
-        if (isKey(name)) {
-            String key = name.substring(1);
-            if (args == null) {
-                throw new NullPointerException("args must not be null or field 'checkArgsKey' is true.");
-            }
-            boolean isKeyPath = key.contains(".") && !args.containsKey(key);
-            String tk = key;
-            if (isKeyPath) {
-                tk = key.substring(0, key.indexOf("."));
-            }
-            if (!args.containsKey(tk)) {
-                throw new IllegalArgumentException("value of key: '" + key + "' is not exists in " + args + " while calculate expression, or field 'checkArgsKey' is true.");
-            }
-        }
-    }
-
-    /**
      * 传入的是键名还是字面量值
      *
      * @param a 字符串
      * @return 是否是键名
      */
-    private boolean isKey(String a) {
+    protected boolean isKey(String a) {
         return a.startsWith(":");
     }
 

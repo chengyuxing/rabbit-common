@@ -27,7 +27,7 @@ public class ExpTests {
         Map<String, Object> map = new HashMap<>();
         map.put("id", "2");
         map.put("user", DataRow.fromPair("id", "22"));
-        boolean res = expression.calc(map, true);
+        boolean res = expression.calc(map);
         System.out.println(res);
     }
 

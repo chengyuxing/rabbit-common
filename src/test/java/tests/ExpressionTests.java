@@ -21,7 +21,7 @@ public class ExpressionTests {
     @Test
     public void fast() throws Exception {
         FastExpression expression = FastExpression.of(exp);
-        System.out.println(expression.calc(args, true));
+        System.out.println(expression.calc(args));
     }
 
 
