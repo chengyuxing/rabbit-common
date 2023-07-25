@@ -14,7 +14,7 @@ import java.util.regex.Pattern;
 public class StringFormatter {
     private static final char DEFAULT_HOLDER_PREFIX = '$';
     private static final char TEMP_HOLDER_PREFIX = '\u0c32';
-    private final Pattern pattern = Pattern.compile("\\$\\{\\s*(?<key>!?[\\w._-]+)\\s*}");
+    private final Pattern pattern = Pattern.compile("\\$\\{\\s*(?<key>!?[\\w_.]+)\\s*}");
 
     /**
      * 格式化字符串模版

@@ -244,17 +244,12 @@ public final class ObjectUtil {
      * @return 不为null的值或全部为null
      */
     @SafeVarargs
-    public static <T> T findFirstNonNull(T... values) {
-        if (values.length == 0) {
-            return null;
-        }
-        T res = null;
+    public static <T> T coalesce(T... values) {
         for (T v : values) {
             if (v != null) {
-                res = v;
-                break;
+                return v;
             }
         }
-        return res;
+        return null;
     }
 }

@@ -408,16 +408,6 @@ public class StringUtil {
     }
 
     /**
-     * 判断字符串是否有长度
-     *
-     * @param str 字符串
-     * @return 是否有长度
-     */
-    public static boolean hasLength(String str) {
-        return str != null && !str.isEmpty();
-    }
-
-    /**
      * 判断字符串是否为空
      *
      * @param str 字符串
