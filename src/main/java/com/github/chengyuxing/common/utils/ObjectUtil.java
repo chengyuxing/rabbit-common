@@ -73,7 +73,6 @@ public final class ObjectUtil {
             if (value instanceof Object[]) {
                 return ((Object[]) value)[idx];
             }
-            return null;
         }
         if (value instanceof Map) {
             //noinspection unchecked
@@ -101,7 +100,7 @@ public final class ObjectUtil {
     }
 
     /**
-     * 获取一个深层嵌套对象的值
+     * 获取一个嵌套对象的值
      *
      * @param obj  深层嵌套的对象
      * @param path 路径表达式（{@code /a/b/0/name}）
@@ -125,13 +124,18 @@ public final class ObjectUtil {
     }
 
     /**
-     * 获取一个深层嵌套对象的值
+     * 获取一个嵌套对象的值
      *
      * @param obj            深层嵌套的对象
      * @param propertyChains 对象属性路径（{@code user.name}）
      * @return 值
      */
     public static Object getDeepValue(Object obj, String propertyChains) {
+        // maybe user.name is a key?
+        Object value = getValue(obj, propertyChains);
+        if (value != null) {
+            return value;
+        }
         String path = '/' + propertyChains.replace('.', '/');
         return walkDeepValue(obj, path);
     }

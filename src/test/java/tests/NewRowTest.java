@@ -1,6 +1,7 @@
 package tests;
 
 import com.github.chengyuxing.common.DataRow;
+import com.github.chengyuxing.common.utils.Jackson;
 import com.github.chengyuxing.common.utils.ReflectUtil;
 import org.junit.Test;
 
@@ -21,7 +22,7 @@ public class NewRowTest {
         System.out.println(row);
         System.out.println(row.containsValue("cyx"));
         System.out.println(row.put("x", "d"));
-        System.out.println(ReflectUtil.obj2Json(row));
+        System.out.println(Jackson.toJson(row));
         DataRow jRow = DataRow.fromJson("{\n" +
                 "  \"name\": \"chengyuxing\",\n" +
                 "  \"age\": 28,\n" +

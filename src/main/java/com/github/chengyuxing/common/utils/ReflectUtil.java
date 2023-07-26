@@ -165,48 +165,6 @@ public final class ReflectUtil {
     }
 
     /**
-     * 获取一个jackson的ObjectMapper对象
-     *
-     * @return ObjectMapper
-     * @throws ClassNotFoundException 没有找到ObjectMapper
-     * @throws IllegalAccessException 非法访问
-     * @throws InstantiationException 实例化失败
-     * @see Jackson#getObjectMapper()
-     * @deprecated
-     */
-    @Deprecated
-    public static Object getJackson() throws ClassNotFoundException, IllegalAccessException, InstantiationException {
-        return Jackson.getObjectMapper();
-    }
-
-    /**
-     * 对象转json字符串（需要jackson库）
-     *
-     * @param obj 对象
-     * @return json
-     * @see Jackson#toJson(Object)
-     * @deprecated
-     */
-    @Deprecated
-    public static String obj2Json(Object obj) {
-        return Jackson.toJson(obj);
-    }
-
-    /**
-     * json字符串转对象（需要jackson库）
-     *
-     * @param json       json
-     * @param targetType 目标类型
-     * @return 对象
-     * @see Jackson#toObject(String, Class)
-     * @deprecated
-     */
-    @Deprecated
-    public static Object json2Obj(String json, Class<?> targetType) {
-        return Jackson.toObject(json, targetType);
-    }
-
-    /**
      * 判断对象是否是java的基本数据类型(包括包装类型)
      *
      * @param value 对象

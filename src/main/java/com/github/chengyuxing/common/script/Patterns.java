@@ -6,5 +6,5 @@ public final class Patterns {
     //language=RegExp
     public static final String STRING_PATTERN = "'[^']*'|\"[^\"]*\"";
     //language=RegExp
-    public static final String VAR_KEY_PATTERN = "[\\w_.]+";
+    public static final String VAR_KEY_PATTERN = "[a-zA-Z_][\\w_.]*";
 }

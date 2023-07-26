@@ -3,6 +3,7 @@ package tests;
 import com.github.chengyuxing.common.DataRow;
 import com.github.chengyuxing.common.DateTimes;
 import com.github.chengyuxing.common.io.FileResource;
+import com.github.chengyuxing.common.utils.Jackson;
 import com.github.chengyuxing.common.utils.ReflectUtil;
 import com.github.chengyuxing.common.utils.StringUtil;
 import org.junit.Test;
@@ -183,10 +184,10 @@ public class Test2 {
     @Test
     public void testArgs() throws Exception {
         DataRow dataRow = DataRow.fromPair("id", 2, "name", "cyx", "dt", Instant.now());
-        String json = ReflectUtil.obj2Json(dataRow);
+        String json = Jackson.toJson(dataRow);
         System.out.println(json);
 
-        System.out.println(ReflectUtil.json2Obj(json, DataRow.class));
+        System.out.println(Jackson.toObject(json, DataRow.class));
     }
 
     @Test

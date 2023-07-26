@@ -313,8 +313,8 @@ public class StringTests {
 
     @Test
     public void testDeepValue() {
-        DataRow r = DataRow.fromPair("_for",
-                DataRow.fromPair("pair_6_3", Pair.of("name", "chengyuxing"))
+        DataRow r = DataRow.fromPair(
+                "_for", DataRow.fromPair("pair_6_3", Pair.of("name", "chengyuxing"))
         );
         Object value = ObjectUtil.getDeepValue(r, "_for.pair_6_3.item2");
         System.out.println(value);
