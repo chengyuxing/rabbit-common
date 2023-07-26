@@ -1,5 +1,6 @@
 package com.github.chengyuxing.common;
 
+import com.github.chengyuxing.common.script.Patterns;
 import com.github.chengyuxing.common.utils.ObjectUtil;
 
 import java.util.Map;
@@ -14,7 +15,7 @@ import java.util.regex.Pattern;
 public class StringFormatter {
     private static final char DEFAULT_HOLDER_PREFIX = '$';
     private static final char TEMP_HOLDER_PREFIX = '\u0c32';
-    private final Pattern pattern = Pattern.compile("\\$\\{\\s*(?<key>!?[\\w_.]+)\\s*}");
+    private final Pattern pattern = Pattern.compile("\\$\\{\\s*(?<key>!?" + Patterns.VAR_KEY_PATTERN + ")\\s*}");
 
     /**
      * 格式化字符串模版
