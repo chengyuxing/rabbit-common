@@ -30,7 +30,7 @@ where id = :id;
 
 select * from test.user where
 id = 1
--- #for id of :ids delimiter ', \n' open ' or id in (' close ')'
+-- #for id of :ids delimiter ', \n' open " or i''d in (" close ')'
     -- #if :id >= 5
     :_for.id
     -- #fi

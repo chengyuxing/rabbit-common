@@ -7,7 +7,7 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.github.chengyuxing.common.script.impl.FastExpression.PIPES_PATTERN;
+import static com.github.chengyuxing.common.script.Patterns.*;
 import static com.github.chengyuxing.common.utils.ObjectUtil.*;
 import static com.github.chengyuxing.common.utils.StringUtil.*;
 
@@ -66,11 +66,11 @@ import static com.github.chengyuxing.common.utils.StringUtil.*;
  * </pre>
  * </blockquote>
  *
- * @see IExpression
+ * @see FastExpression
  */
 public class SimpleScriptParser {
-    public static final Pattern FOR_PATTERN = Pattern.compile("(?<item>[\\w_]+)(\\s*,\\s*(?<index>[\\w_]+))?\\s+of\\s+:(?<list>[\\w_.]+)(?<pipes>" + PIPES_PATTERN + ")?(\\s+delimiter\\s+'(?<delimiter>[^']*)')?(\\s+open\\s+'(?<open>[^']*)')?(\\s+close\\s+'(?<close>[^']*)')?");
-    public static final Pattern SWITCH_PATTERN = Pattern.compile(":(?<name>[\\w_.]+)\\s*(?<pipes>" + PIPES_PATTERN + ")?");
+    public static final Pattern FOR_PATTERN = Pattern.compile("(?<item>[\\w_]+)(\\s*,\\s*(?<index>[\\w_]+))?\\s+of\\s+:(?<list>" + VAR_KEY_PATTERN + ")(?<pipes>" + PIPES_PATTERN + ")?(\\s+delimiter\\s+(?<delimiter>" + STRING_PATTERN + "))?(\\s+open\\s+(?<open>" + STRING_PATTERN + "))?(\\s+close\\s+(?<close>" + STRING_PATTERN + "))?");
+    public static final Pattern SWITCH_PATTERN = Pattern.compile(":(?<name>" + VAR_KEY_PATTERN + ")\\s*(?<pipes>" + PIPES_PATTERN + ")?");
     public static final String[] TAGS = new String[]{
             "#if", "#fi",
             "#choose", "#when",
@@ -157,15 +157,9 @@ public class SimpleScriptParser {
         if (Objects.isNull(content)) {
             return "";
         }
-        if (content.trim().isEmpty()) {
-            return content;
-        }
-        if (!containsAnyIgnoreCase(content, TAGS)) {
-            return content;
-        }
         forIndex = 0;
         forVars.clear();
-        return doParse(content, data);
+        return doParse(content, data == null ? new HashMap<>(0) : data);
     }
 
     /**
@@ -179,6 +173,12 @@ public class SimpleScriptParser {
      * @see IExpression
      */
     protected String doParse(String content, Map<String, ?> data) {
+        if (content.trim().isEmpty()) {
+            return content;
+        }
+        if (!containsAnyIgnoreCase(content, TAGS)) {
+            return content;
+        }
         String[] lines = content.split(NEW_LINE);
         StringJoiner output = new StringJoiner(NEW_LINE);
         for (int i = 0, j = lines.length; i < j; i++) {
@@ -357,11 +357,11 @@ public class SimpleScriptParser {
                                 String listName = m.group("list");
                                 String pipes = m.group("pipes");
                                 //noinspection DataFlowIssue
-                                String delimiter = coalesce(m.group("delimiter"), ", ")
+                                String delimiter = Comparators.getString(coalesce(m.group("delimiter"), ", ")
                                         .replace("\\n", NEW_LINE)
-                                        .replace("\\t", TAB);
-                                String open = coalesce(m.group("open"), "");
-                                String close = coalesce(m.group("close"), "");
+                                        .replace("\\t", TAB));
+                                String open = Comparators.getString(coalesce(m.group("open"), ""));
+                                String close = Comparators.getString(coalesce(m.group("close"), ""));
                                 //noinspection DataFlowIssue
                                 if (!open.isEmpty()) {
                                     open = open + NEW_LINE;
@@ -370,6 +370,7 @@ public class SimpleScriptParser {
                                 if (!close.isEmpty()) {
                                     close = NEW_LINE + close;
                                 }
+
                                 Object source = getDeepValue(data, listName);
                                 if (!isEmpty(pipes)) {
                                     source = expression("empty").pipedValue(source, pipes);

@@ -15,6 +15,8 @@ import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.github.chengyuxing.common.script.Patterns.*;
+
 /**
  * <h2>快速条件表达式解析器</h2>
  * 支持的逻辑运算符: {@code &&, ||, !}<br>
@@ -26,9 +28,7 @@ import java.util.regex.Pattern;
  * @see Comparators
  */
 public class FastExpression extends IExpression {
-    public static final String PIPES_PATTERN = "(\\s*\\|\\s*[\\w_.]+)*";
-    public static final String STRING_PATTERN = "'[^']*'|\"[^\"]*\"";
-    public static final Pattern CRITERIA_PATTERN = Pattern.compile("(?<compare>:?[\\w_.]+|" + STRING_PATTERN + ")(?<comparePipes>" + PIPES_PATTERN + ")?\\s*(?<operator>[!=<>~@]{1,2})\\s*(?<compared>:?[\\w_.]+|" + STRING_PATTERN + ")(?<comparedPipes>" + PIPES_PATTERN + ")?");
+    public static final Pattern CRITERIA_PATTERN = Pattern.compile("(?<compare>:?" + VAR_KEY_PATTERN + "|" + STRING_PATTERN + ")(?<comparePipes>" + PIPES_PATTERN + ")?\\s*(?<operator>[!=<>~@]{1,2})\\s*(?<compared>:?" + VAR_KEY_PATTERN + "|" + STRING_PATTERN + ")(?<comparedPipes>" + PIPES_PATTERN + ")?");
     private static final Map<String, IPipe<?>> GLOBAL_PIPES = new HashMap<>();
     private Map<String, IPipe<?>> customPipes = new HashMap<>();
 

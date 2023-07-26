@@ -28,6 +28,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.github.chengyuxing.common.script.Patterns.PIPES_PATTERN;
 import static com.github.chengyuxing.common.utils.StringUtil.FMT;
 import static com.github.chengyuxing.common.utils.StringUtil.NEW_LINE;
 
@@ -332,6 +333,6 @@ public class StringTests {
 
     @Test
     public void testPipePattern() {
-        System.out.println("|".matches(FastExpression.PIPES_PATTERN));
+        System.out.println("|".matches(PIPES_PATTERN));
     }
 }
