@@ -335,4 +335,9 @@ public class StringTests {
     public void testPipePattern() {
         System.out.println("|".matches(PIPES_PATTERN));
     }
+
+    @Test
+    public void testW() {
+        System.out.println("a_b_c".matches("\\w+"));
+    }
 }
