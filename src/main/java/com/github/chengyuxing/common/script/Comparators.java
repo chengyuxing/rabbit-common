@@ -3,6 +3,7 @@ package com.github.chengyuxing.common.script;
 import com.github.chengyuxing.common.utils.StringUtil;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -259,6 +260,9 @@ public class Comparators {
         }
         if (value instanceof Object[]) {
             return ((Object[]) value).length == 0;
+        }
+        if (value instanceof Map) {
+            return ((Map<?, ?>) value).isEmpty();
         }
         return false;
     }
