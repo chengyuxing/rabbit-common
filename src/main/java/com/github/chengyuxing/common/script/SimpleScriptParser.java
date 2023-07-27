@@ -77,7 +77,7 @@ public class SimpleScriptParser {
             "#switch", "#case",
             "#default", "#break",
             "#end",
-            "#for", "#done",};
+            "#for", "#done"};
     public static final String IF = TAGS[0];
     public static final String FI = TAGS[1];
     public static final String CHOOSE = TAGS[2];
@@ -234,8 +234,8 @@ public class SimpleScriptParser {
                 if (ifCount != 0) {
                     throw new ScriptSyntaxException("can not find pair of '#if...#fi' block at line " + i);
                 }
-                // 处理choose表达式块
             } else if (startsWithIgnoreCase(expression, CHOOSE)) {
+                // 处理choose表达式块
                 while (++i < j) {
                     String line = lines[i];
                     String trimLine = trimExpression(line);
@@ -280,8 +280,8 @@ public class SimpleScriptParser {
                         output.add(line);
                     }
                 }
-                // 处理switch表达式块，逻辑等同于choose表达式块
             } else if (startsWithIgnoreCase(expression, SWITCH)) {
+                // 处理switch表达式块，逻辑等同于choose表达式块
                 Matcher m = SWITCH_PATTERN.matcher(expression.substring(7));
                 String name = null;
                 String pipes = null;
@@ -333,9 +333,9 @@ public class SimpleScriptParser {
                         output.add(line);
                     }
                 }
+            } else if (startsWithIgnoreCase(expression, FOR)) {
                 // for表达式处理逻辑
                 // item[,idx] of :list [| pipe1 | pipe2 | ... ] [delimiter ','] [open ''] [close '']
-            } else if (startsWithIgnoreCase(expression, FOR)) {
                 forCount++;
                 List<String> buffer = new ArrayList<>();
                 while (++i < j) {
