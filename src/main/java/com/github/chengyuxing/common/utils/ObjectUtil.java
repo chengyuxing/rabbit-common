@@ -131,13 +131,11 @@ public final class ObjectUtil {
      * @return 值
      */
     public static Object getDeepValue(Object obj, String propertyChains) {
-        // maybe user.name is a key?
-        Object value = getValue(obj, propertyChains);
-        if (value != null) {
-            return value;
+        if (propertyChains.contains(".")) {
+            String path = '/' + propertyChains.replace('.', '/');
+            return walkDeepValue(obj, path);
         }
-        String path = '/' + propertyChains.replace('.', '/');
-        return walkDeepValue(obj, path);
+        return getValue(obj, propertyChains);
     }
 
     /**
