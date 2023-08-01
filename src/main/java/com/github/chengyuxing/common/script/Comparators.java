@@ -255,7 +255,7 @@ public class Comparators {
             return true;
         }
         if (value instanceof String) {
-            return getString(value).trim().isEmpty();
+            return ((String) value).trim().isEmpty();
         }
         if (value instanceof Collection) {
             return ((Collection<?>) value).isEmpty();
