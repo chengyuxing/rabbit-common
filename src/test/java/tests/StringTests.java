@@ -185,6 +185,9 @@ public class StringTests {
     public void test11() {
         Object v = Comparators.valueOf("'abc'");
         System.out.println(Comparators.compare("'abc'", "@", "^'\\w+'"));
+
+        System.out.println(Comparators.compare("'  '", "=", Comparators.ValueType.BLANK));
+
         System.out.println(v);
         System.out.println(v.getClass());
     }

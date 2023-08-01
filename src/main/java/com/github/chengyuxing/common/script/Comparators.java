@@ -150,6 +150,9 @@ public class Comparators {
         }
         if (isString(a)) {
             String v = a.toString().trim();
+            if (isQuote(v)) {
+                return getString(v);
+            }
             if (v.isEmpty()) {
                 return ValueType.BLANK;
             }
@@ -202,13 +205,6 @@ public class Comparators {
         return Double.parseDouble(value.toString());
     }
 
-    public static boolean isQuote(String s) {
-        if (s.length() < 2) {
-            return false;
-        }
-        return (s.startsWith("\"") && s.endsWith("\"")) || (s.startsWith("'") && s.endsWith("'"));
-    }
-
     /**
      * 数据值类型
      */
@@ -230,15 +226,18 @@ public class Comparators {
         }
     }
 
+    public static boolean isQuote(String s) {
+        if (s.length() < 2) {
+            return false;
+        }
+        return (s.startsWith("\"") && s.endsWith("\"")) || (s.startsWith("'") && s.endsWith("'"));
+    }
+
     public static boolean isString(Object value) {
         if (value == null) {
             return false;
         }
-        if (value instanceof String) {
-            return true;
-        }
-        String s = value.toString();
-        return isQuote(s);
+        return value instanceof String;
     }
 
     public static boolean isNull(Object value) {
@@ -256,7 +255,7 @@ public class Comparators {
             return true;
         }
         if (value instanceof String) {
-            return ((String) value).trim().isEmpty();
+            return getString(value).trim().isEmpty();
         }
         if (value instanceof Collection) {
             return ((Collection<?>) value).isEmpty();
