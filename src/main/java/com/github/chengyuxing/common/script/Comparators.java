@@ -150,7 +150,7 @@ public class Comparators {
         }
         if (isString(a)) {
             String v = a.toString().trim();
-            if (v.equals("")) {
+            if (v.isEmpty()) {
                 return ValueType.BLANK;
             }
             if (v.equalsIgnoreCase("true")) {
@@ -203,6 +203,9 @@ public class Comparators {
     }
 
     public static boolean isQuote(String s) {
+        if (s.length() < 2) {
+            return false;
+        }
         return (s.startsWith("\"") && s.endsWith("\"")) || (s.startsWith("'") && s.endsWith("'"));
     }
 
@@ -253,7 +256,7 @@ public class Comparators {
             return true;
         }
         if (value instanceof String) {
-            return ((String) value).trim().equals("");
+            return ((String) value).trim().isEmpty();
         }
         if (value instanceof Collection) {
             return ((Collection<?>) value).isEmpty();

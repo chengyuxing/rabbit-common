@@ -192,7 +192,7 @@ public class FastExpression extends IExpression {
      */
     public static boolean boolExpressionEval(String expression) {
         expression = expression.trim();
-        if (expression.equals("")) {
+        if (expression.isEmpty()) {
             return false;
         }
         // finally, get result
@@ -248,7 +248,7 @@ public class FastExpression extends IExpression {
                 Pair<List<String>, List<String>> s = StringUtil.regexSplit(innerSub, "(?<op>\\|\\||&&)", "op");
                 List<String> values = s.getItem1();
                 List<String> ops = s.getItem2();
-                if (values.size() > 0) {
+                if (!values.isEmpty()) {
                     boolean res = false;
                     // it's look like '(true)'
                     if (ops.isEmpty()) {

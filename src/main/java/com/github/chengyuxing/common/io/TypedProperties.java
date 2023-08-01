@@ -153,7 +153,7 @@ public class TypedProperties extends Properties {
         if (containsKey(key)) {
             return getStream(key, Stream.empty())
                     .map(String::trim)
-                    .filter(item -> !item.equals(""))
+                    .filter(item -> !item.isEmpty())
                     .collect(Collectors.toList());
         }
         return defaultValue;

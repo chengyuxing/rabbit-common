@@ -141,7 +141,7 @@ public class ClassPathResource {
      * @return 文件名
      */
     public String getFileName() {
-        if (path.equals("")) {
+        if (path.isEmpty()) {
             return null;
         }
         int index = path.lastIndexOf("/");
@@ -154,7 +154,7 @@ public class ClassPathResource {
      * @return 文件名后缀
      */
     public String getFilenameExtension() {
-        if (path.equals("")) {
+        if (path.isEmpty()) {
             return null;
         } else {
             int extIndex = path.lastIndexOf(46);
@@ -173,7 +173,7 @@ public class ClassPathResource {
      * @return 资源URL
      */
     public URL getURL() {
-        if (path.equals("")) {
+        if (path.isEmpty()) {
             return null;
         }
         return classLoader != null ? classLoader.getResource(path) : ClassLoader.getSystemResource(path);
