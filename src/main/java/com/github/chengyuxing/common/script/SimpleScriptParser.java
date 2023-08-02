@@ -409,7 +409,7 @@ public class SimpleScriptParser {
                                     forVars.putAll(localForVars);
                                 }
                             } else {
-                                throw new ScriptSyntaxException("#for syntax error of expression '" + expression + "' ");
+                                throw new ScriptSyntaxException("#for syntax error of expression '" + expression + "'");
                             }
                             break;
                         } else {
