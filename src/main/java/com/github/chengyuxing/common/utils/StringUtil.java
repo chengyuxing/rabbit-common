@@ -580,7 +580,7 @@ public class StringUtil {
      * @return 文件后缀
      */
     public static String getFileExtension(String filename) {
-        int dotIdx = filename.indexOf(".");
+        int dotIdx = filename.lastIndexOf(".");
         if (dotIdx != -1) {
             return filename.substring(dotIdx + 1);
         }
