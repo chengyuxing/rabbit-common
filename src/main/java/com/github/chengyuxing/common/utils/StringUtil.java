@@ -574,6 +574,20 @@ public class StringUtil {
     }
 
     /**
+     * 获取文件名后缀
+     *
+     * @param filename 文件名
+     * @return 文件后缀
+     */
+    public static String getFileExtension(String filename) {
+        int dotIdx = filename.indexOf(".");
+        if (dotIdx != -1) {
+            return filename.substring(dotIdx + 1);
+        }
+        return null;
+    }
+
+    /**
      * 获取字节数组对象的大小
      *
      * @param bytes 字节数组
