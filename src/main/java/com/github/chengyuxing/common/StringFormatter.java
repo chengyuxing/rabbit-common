@@ -16,7 +16,7 @@ public class StringFormatter {
     private static final char DEFAULT_HOLDER_PREFIX = '$';
     @SuppressWarnings("UnnecessaryUnicodeEscape")
     private static final char TEMP_HOLDER_PREFIX = '\u0c32';
-    // language=RegExp
+    //language=RegExp
     private final Pattern pattern = Pattern.compile("\\$\\{\\s*(?<key>!?" + Patterns.VAR_KEY_PATTERN + ")\\s*}");
 
     /**
