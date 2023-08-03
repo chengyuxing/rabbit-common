@@ -93,7 +93,7 @@ public class SimpleScriptParser {
     public static final String DONE = TAGS[10];
 
     private int forIndex = 0;
-    private final Map<String, Object> forVars = new HashMap<>();
+    private Map<String, Object> forVars = new HashMap<>();
 
     /**
      * 配置表达式解析器具体实现
@@ -160,7 +160,7 @@ public class SimpleScriptParser {
             return "";
         }
         forIndex = 0;
-        forVars.clear();
+        forVars = new HashMap<>();
         return doParse(content, data == null ? new HashMap<>(0) : data);
     }
 
