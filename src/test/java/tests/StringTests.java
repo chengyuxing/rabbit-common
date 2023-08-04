@@ -362,12 +362,16 @@ public class StringTests {
         rows.add(DataRow.of("a", 5, "b", "x4"));
 
         System.out.println(DataRow.of(rows).toJson());
+        System.out.println(rows.get(0).<Integer>getFirstAs());
+        System.out.println(rows.get(0).<Integer>getAs(0));
+        System.out.println(rows.get(0).<String>getAs("b"));
 
         System.out.println(DataRow.of());
 
         DataRow<String> row = DataRow.of("name", "cyx");
         System.out.println(row);
         System.out.println(row.getBy(0));
+        System.out.println(row.<String>getFirstAs());
 
         System.out.println(new DataRow<>(0));
     }

@@ -210,35 +210,6 @@ public final class DataRow<T> extends LinkedHashMap<String, T> implements MapExt
     }
 
     /**
-     * 根据字段名获取类型
-     *
-     * @param name 字段
-     * @return 如果值存在或不为null返回值类型名称，否则返回null
-     */
-    public Class<?> getType(String name) {
-        Object v = get(name);
-        if (Objects.nonNull(v)) {
-            return v.getClass();
-        }
-        return null;
-    }
-
-    /**
-     * 根据字段名获取类型
-     *
-     * @param index 索引
-     * @return 如果值存在或不为null返回值类型名称，否则返回null
-     * @throws IndexOutOfBoundsException 如果索引超出界限
-     */
-    public Class<?> getType(int index) {
-        Object v = getBy(index);
-        if (Objects.nonNull(v)) {
-            return v.getClass();
-        }
-        return null;
-    }
-
-    /**
      * 获取第一个值
      *
      * @return 值
@@ -248,6 +219,41 @@ public final class DataRow<T> extends LinkedHashMap<String, T> implements MapExt
             return null;
         }
         return this.values().iterator().next();
+    }
+
+    /**
+     * 隐式转换获取第一个值
+     *
+     * @param <R> 结果类型参数
+     * @return 值
+     */
+    @SuppressWarnings("unchecked")
+    public <R> R getFirstAs() {
+        return (R) getFirst();
+    }
+
+    /**
+     * 隐式转换获取一个值
+     *
+     * @param key 键
+     * @param <R> 结果类型参数
+     * @return 值
+     */
+    @SuppressWarnings("unchecked")
+    public <R> R getAs(String key) {
+        return (R) get(key);
+    }
+
+    /**
+     * 隐式转换获取一个值
+     *
+     * @param index 索引
+     * @param <R>   结果类型参数
+     * @return 值
+     */
+    @SuppressWarnings("unchecked")
+    public <R> R getAs(int index) {
+        return (R) getBy(index);
     }
 
     /**
@@ -356,6 +362,35 @@ public final class DataRow<T> extends LinkedHashMap<String, T> implements MapExt
      */
     public Long getLong(int index) {
         return ObjectUtil.toLong(getBy(index));
+    }
+
+    /**
+     * 根据字段名获取类型
+     *
+     * @param name 字段
+     * @return 如果值存在或不为null返回值类型名称，否则返回null
+     */
+    public Class<?> getType(String name) {
+        Object v = get(name);
+        if (Objects.nonNull(v)) {
+            return v.getClass();
+        }
+        return null;
+    }
+
+    /**
+     * 根据字段名获取类型
+     *
+     * @param index 索引
+     * @return 如果值存在或不为null返回值类型名称，否则返回null
+     * @throws IndexOutOfBoundsException 如果索引超出界限
+     */
+    public Class<?> getType(int index) {
+        Object v = getBy(index);
+        if (Objects.nonNull(v)) {
+            return v.getClass();
+        }
+        return null;
     }
 
     /**
