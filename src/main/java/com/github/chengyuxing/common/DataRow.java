@@ -218,15 +218,13 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
     /**
      * 获取第一个值
      *
-     * @param <T> 结果类型参数
      * @return 值
      */
-    @SuppressWarnings("unchecked")
-    public <T> T getFirst() {
+    public Object getFirst() {
         if (isEmpty()) {
             return null;
         }
-        return (T) this.values().iterator().next();
+        return this.values().iterator().next();
     }
 
     /**
@@ -268,10 +266,9 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
      * 根据名字获取可空值
      *
      * @param name 名字
-     * @param <T>  结果类型参数
      * @return 可空值
      */
-    public <T> Optional<T> getOptional(String name) {
+    public Optional<Object> getOptional(String name) {
         return Optional.ofNullable(getAs(name));
     }
 
@@ -279,11 +276,10 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
      * 根据索引获取可空值
      *
      * @param index 索引
-     * @param <T>   结果类型参数
      * @return 可空值
      * @throws IndexOutOfBoundsException 如果索引超出界限
      */
-    public <T> Optional<T> getOptional(int index) {
+    public Optional<Object> getOptional(int index) {
         return Optional.ofNullable(getAs(index));
     }
 
