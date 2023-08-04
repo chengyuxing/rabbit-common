@@ -15,21 +15,6 @@ import java.util.*;
  * 对LinkedHashMap进行一些扩展的数据行对象
  */
 public final class DataRow extends LinkedHashMap<String, Object> implements MapExtends<Object> {
-    /**
-     * 一个空的DataRow（初始化大小为16）
-     */
-    public DataRow() {
-        super();
-    }
-
-    /**
-     * 从一个Map创建一个DataRow
-     *
-     * @param m map
-     */
-    public DataRow(Map<? extends String, Object> m) {
-        super(m);
-    }
 
     /**
      * 一个空的DataRow
@@ -38,28 +23,6 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
      */
     public DataRow(int capacity) {
         super(capacity);
-    }
-
-    /**
-     * 创建一个空的DataRow
-     *
-     * @return 空的DataRow
-     */
-    public static DataRow of() {
-        return new DataRow(0);
-    }
-
-    /**
-     * 从一个键值对创建一个DataRow
-     *
-     * @param key   键
-     * @param value 值
-     * @return DataRow
-     */
-    public static DataRow of(String key, Object value) {
-        DataRow row = new DataRow();
-        row.put(key, value);
-        return row;
     }
 
     /**
@@ -84,7 +47,7 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
     /**
      * 新建一个DataRow
      *
-     * @param keys  一组字段名
+     * @param keys   一组字段名
      * @param values 一组值
      * @return 新实例，初始化小为字段名数组的长度
      */
@@ -122,9 +85,10 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
     public static DataRow ofEntity(Object entity) {
         if (Objects.isNull(entity)) return DataRow.of();
         try {
-            DataRow row = new DataRow();
             Class<?> clazz = entity.getClass();
-            for (Method method : ReflectUtil.getRWMethods(entity.getClass()).getItem1()) {
+            List<Method> methods = ReflectUtil.getRWMethods(entity.getClass()).getItem1();
+            DataRow row = new DataRow(methods.size());
+            for (Method method : methods) {
                 Field classField = ReflectUtil.getGetterField(clazz, method);
                 if (Objects.isNull(classField)) {
                     continue;
