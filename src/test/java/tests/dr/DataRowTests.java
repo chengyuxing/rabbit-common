@@ -47,7 +47,7 @@ public class DataRowTests {
 
     @Test
     public void testIn() {
-        DataRow<Object> dataRow = DataRow.of("x", 10, "y", 20);
+        DataRow dataRow = DataRow.of("x", 10, "y", 20);
         Coord coord = dataRow.toEntity(Coord.class, dataRow.get("x"), dataRow.get("y"));
         System.out.println(coord);
         System.out.println(ObjectUtil.getValue(coord, "x"));

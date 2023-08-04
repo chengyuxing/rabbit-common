@@ -54,11 +54,12 @@ public final class Jackson {
      * @param targetType 目标类型
      * @return 对象
      */
-    public static Object toObject(String json, Class<?> targetType) {
+    @SuppressWarnings("unchecked")
+    public static <T> T toObject(String json, Class<T> targetType) {
         try {
             Object mapper = getObjectMapper();
             Method method = mapper.getClass().getDeclaredMethod("readValue", String.class, Class.class);
-            return method.invoke(mapper, json, targetType);
+            return (T) method.invoke(mapper, json, targetType);
         } catch (ClassNotFoundException | IllegalAccessException | InstantiationException | NoSuchMethodException |
                  InvocationTargetException e) {
             throw new RuntimeException("convert to json error: ", e);

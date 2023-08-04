@@ -10,7 +10,7 @@ import java.util.*;
 public class NewRowTest {
     @Test
     public void test1() throws Exception {
-        DataRow<Object> row = new DataRow<>();
+        DataRow row = new DataRow();
         row.put("a", "cyx");
         row.put("b", "cyx");
         row.put("c", "cyx");
@@ -23,7 +23,7 @@ public class NewRowTest {
         System.out.println(row.containsValue("cyx"));
         System.out.println(row.put("x", "d"));
         System.out.println(Jackson.toJson(row));
-        DataRow<Object> jRow = DataRow.of("{\n" +
+        DataRow jRow = DataRow.of("{\n" +
                 "  \"name\": \"chengyuxing\",\n" +
                 "  \"age\": 28,\n" +
                 "  \"address\": \"昆明市\",\n" +

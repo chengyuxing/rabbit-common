@@ -354,7 +354,7 @@ public class StringTests {
         System.out.println(DataRow.of(new HashMap<>()));
         System.out.println(DataRow.of(new String[]{"name", "age"}, new Object[]{"chengyuxing", 28}));
 
-        List<DataRow<Object>> rows = new ArrayList<>();
+        List<DataRow> rows = new ArrayList<>();
         rows.add(DataRow.of("a", 1, "b", "x"));
         rows.add(DataRow.of("a", 2, "b", "x1"));
         rows.add(DataRow.of("a", 3, "b", "x2"));
@@ -368,11 +368,11 @@ public class StringTests {
 
         System.out.println(DataRow.of());
 
-        DataRow<String> row = DataRow.of("name", "cyx");
+        DataRow row = DataRow.of("name", "cyx");
         System.out.println(row);
-        System.out.println(row.getBy(0));
+        System.out.println(row.<Object>getAs(0));
         System.out.println(row.<String>getFirstAs());
 
-        System.out.println(new DataRow<>(0));
+        System.out.println(new DataRow(0));
     }
 }

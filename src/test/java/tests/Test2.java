@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 
 public class Test2 {
 
-    static List<DataRow<Object>> rows = new ArrayList<>();
+    static List<DataRow> rows = new ArrayList<>();
 
     //    @BeforeClass
     @Test
@@ -171,7 +171,7 @@ public class Test2 {
 
     @Test
     public void sdfg() throws Exception {
-        DataRow<Object> dataRow = DataRow.of("name", "cyx", "age", 27, "address", "kunming");
+        DataRow dataRow = DataRow.of("name", "cyx", "age", 27, "address", "kunming");
 
         LinkedHashMap<String, Object> map = dataRow.reduce(new LinkedHashMap<>(), (acc, name, value) -> {
             acc.put(name, value);
