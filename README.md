@@ -6,7 +6,7 @@
   <dependency>
       <groupId>com.github.chengyuxing</groupId>
       <artifactId>rabbit-common</artifactId>
-      <version>2.5.14</version>
+      <version>2.5.15</version>
   </dependency>
   ```
 

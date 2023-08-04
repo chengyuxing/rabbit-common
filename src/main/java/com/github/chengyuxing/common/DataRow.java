@@ -54,7 +54,7 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
     public static DataRow of(String[] keys, Object[] values) {
         if (keys.length == values.length) {
             if (keys.length == 0) {
-                return of();
+                return new DataRow(0);
             }
             DataRow row = new DataRow(keys.length);
             for (int i = 0; i < keys.length; i++) {
@@ -72,7 +72,7 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
      * @return DataRow
      */
     public static DataRow ofJson(String json) {
-        if (Objects.isNull(json)) return DataRow.of();
+        if (Objects.isNull(json)) return new DataRow(0);
         return Jackson.toObject(json, DataRow.class);
     }
 
@@ -83,7 +83,7 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
      * @return DataRow
      */
     public static DataRow ofEntity(Object entity) {
-        if (Objects.isNull(entity)) return DataRow.of();
+        if (Objects.isNull(entity)) return new DataRow(0);
         try {
             Class<?> clazz = entity.getClass();
             List<Method> methods = ReflectUtil.getRWMethods(entity.getClass()).getItem1();
@@ -109,7 +109,7 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
      * @return DataRow
      */
     public static DataRow ofMap(Map<?, ?> map) {
-        if (Objects.isNull(map)) return DataRow.of();
+        if (Objects.isNull(map)) return new DataRow(0);
         DataRow row = new DataRow(map.size());
         for (Map.Entry<?, ?> e : map.entrySet()) {
             row.put(e.getKey().toString(), e.getValue());
@@ -125,7 +125,7 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
      */
     public static DataRow zip(Collection<? extends Map<String, Object>> rows) {
         if (rows.isEmpty()) {
-            return of();
+            return new DataRow(0);
         }
         boolean first = true;
         DataRow res = null;
