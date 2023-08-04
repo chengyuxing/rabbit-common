@@ -391,6 +391,7 @@ public final class DataRow<T> extends LinkedHashMap<String, T> implements MapExt
      *
      * @param init   初始值
      * @param mapper 映射(初始值，名字，值)
+     * @param <R>    类型参数
      * @return 归并后的结果
      */
     public <R> R reduce(R init, TiFunction<R, String, T, R> mapper) {
@@ -420,6 +421,7 @@ public final class DataRow<T> extends LinkedHashMap<String, T> implements MapExt
      *                              <pre>DataRow row = DataRow.fromPair("x", 2, "y", 5, ...);</pre>
      *                              <pre>row.toEntity(A.class, row.get("x"), row.get("y"));</pre>
      *                              </blockquote>
+     * @param <R>                   结果类型参数
      * @return 实体
      */
     public <R> R toEntity(Class<R> clazz, Object... constructorParameters) {
