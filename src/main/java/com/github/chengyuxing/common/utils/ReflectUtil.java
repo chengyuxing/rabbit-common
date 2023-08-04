@@ -79,7 +79,7 @@ public final class ReflectUtil {
         } else if (mName.startsWith("is")) {
             name = mName.substring(2);
         }
-        if (Objects.nonNull(name) && name.length() > 0) {
+        if (Objects.nonNull(name) && !name.isEmpty()) {
             name = name.substring(0, 1).toLowerCase().concat(name.substring(1));
             return clazz.getDeclaredField(name);
         }
@@ -100,10 +100,10 @@ public final class ReflectUtil {
         for (PropertyDescriptor p : beanInfo.getPropertyDescriptors()) {
             Method w = p.getWriteMethod();
             Method r = p.getReadMethod();
-            if (w != null) {
+            if (Objects.nonNull(w)) {
                 ws.add(w);
             }
-            if (r != null) {
+            if (Objects.nonNull(r)) {
                 rs.add(r);
             }
         }

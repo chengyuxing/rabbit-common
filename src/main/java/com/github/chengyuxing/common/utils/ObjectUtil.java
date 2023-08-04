@@ -54,7 +54,7 @@ public final class ObjectUtil {
      * @throws IllegalArgumentException 如果javaBean字段访问异常
      */
     public static Object getValue(Object value, String key) {
-        if (value == null) {
+        if (Objects.isNull(value)) {
             return null;
         }
         if (ReflectUtil.isBasicType(value)) {
@@ -108,7 +108,7 @@ public final class ObjectUtil {
      * @throws IllegalArgumentException 如果调用目标javaBean错误
      */
     public static Object walkDeepValue(Object obj, String path) {
-        if (obj == null) {
+        if (Objects.isNull(obj)) {
             return null;
         }
         if (!path.startsWith("/")) {
@@ -251,7 +251,7 @@ public final class ObjectUtil {
     @SafeVarargs
     public static <T> T coalesce(T... values) {
         for (T v : values) {
-            if (v != null) {
+            if (Objects.nonNull(v)) {
                 return v;
             }
         }

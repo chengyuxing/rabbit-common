@@ -12,7 +12,7 @@ import java.util.regex.Pattern;
 /**
  * 日期时间工具类
  */
-public class DateTimes {
+public final class DateTimes {
     //language=RegExp
     public static final Pattern DATE_PATTERN = Pattern.compile("(?<y>\\d{4}[-/年])?(?<m>\\d{1,2})[-/月](?<d>\\d{1,2})日?");
     //language=RegExp

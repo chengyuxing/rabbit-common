@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 /**
  * 集合工具类
  */
-public class CollectionUtil {
+public final class CollectionUtil {
     /**
      * map是否忽略大小写包含指定的key
      *

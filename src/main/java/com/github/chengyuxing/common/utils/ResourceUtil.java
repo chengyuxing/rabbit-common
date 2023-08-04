@@ -9,7 +9,7 @@ import java.util.stream.Stream;
 /**
  * 资源工具类
  */
-public class ResourceUtil {
+public final class ResourceUtil {
     /**
      * 递归获取指定目录下的文件
      *

@@ -9,13 +9,14 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Formatter;
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
  * 字符串工具类
  */
-public class StringUtil {
+public final class StringUtil {
     public static final String NUMBER_REGEX = "-?(0|[1-9]\\d*)(\\.\\d+)?";
     public static final String NEW_LINE = "\n";
     public static final String TAB = "\t";
@@ -183,7 +184,7 @@ public class StringUtil {
         }
         boolean again = false;
         for (String s : starts) {
-            if (!s.equals("") && str.startsWith(s)) {
+            if (!s.isEmpty() && str.startsWith(s)) {
                 str = str.substring(s.length());
                 again = true;
             }
@@ -207,7 +208,7 @@ public class StringUtil {
         }
         boolean again = false;
         for (String end : ends) {
-            if (!end.equals("") && str.endsWith(end)) {
+            if (!end.isEmpty() && str.endsWith(end)) {
                 str = str.substring(0, str.length() - end.length());
                 again = true;
             }
@@ -414,7 +415,7 @@ public class StringUtil {
      * @return 是否为空
      */
     public static boolean isEmpty(String str) {
-        return str == null || str.trim().isEmpty();
+        return Objects.isNull(str) || str.trim().isEmpty();
     }
 
     /**
@@ -424,7 +425,7 @@ public class StringUtil {
      * @return 是否是数字
      */
     public static boolean isNumeric(Object numeric) {
-        if (numeric == null) {
+        if (Objects.isNull(numeric)) {
             return false;
         }
         return numeric.toString().matches(NUMBER_REGEX);
