@@ -20,7 +20,7 @@ public class ScriptParserTests {
                     "     #if :id >= 2\n" +
                     "    :_for.id\n" +
                     "     #fi\n" +
-                    " #done", DataRow.fromPair("ids", Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 1 + i, 11, 23, 45, 55, 67)));
+                    " #done", DataRow.of("ids", Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 1 + i, 11, 23, 45, 55, 67)));
             data.add(parser.getForVars());
             if (i == 9999) {
                 System.out.println(sql);

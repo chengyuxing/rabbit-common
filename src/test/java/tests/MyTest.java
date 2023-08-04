@@ -24,7 +24,7 @@ import java.util.stream.Stream;
 public class MyTest {
 
     static Map<String, Object> map = new HashMap<>();
-    static DataRow row = DataRow.empty();
+    static DataRow row = DataRow.of();
 
     @BeforeClass
     public static void init() {
@@ -32,7 +32,7 @@ public class MyTest {
         map.put("b", 2);
         map.put("name", "chengyuxing");
 
-        row = DataRow.fromPair("a", 1,
+        row = DataRow.of("a", 1,
                 "b", 2,
                 "name", "chengyuxing");
     }
@@ -40,24 +40,24 @@ public class MyTest {
     @Test
     public void test2() throws Exception {
         List<DataRow> rows = new ArrayList<>();
-        rows.add(DataRow.fromPair("a", 1, "b", "x"));
-        rows.add(DataRow.fromPair("a", 2, "b", "x1"));
-        rows.add(DataRow.fromPair("a", 3, "b", "x2"));
-        rows.add(DataRow.fromPair("a", 4, "b", "x3"));
-        rows.add(DataRow.fromPair("a", 5, "b", "x4"));
+        rows.add(DataRow.of("a", 1, "b", "x"));
+        rows.add(DataRow.of("a", 2, "b", "x1"));
+        rows.add(DataRow.of("a", 3, "b", "x2"));
+        rows.add(DataRow.of("a", 4, "b", "x3"));
+        rows.add(DataRow.of("a", 5, "b", "x4"));
 
-        System.out.println(DataRow.zip(rows).toJson());
+        System.out.println(DataRow.of(rows).toJson());
     }
 
     @Test
     public void rowTest2() throws Exception {
         System.out.println(row.toJson());
-        System.out.println(DataRow.fromJson("{\"a\":1,\"b\":2,\"name\":\"chengyuxing\"}"));
+        System.out.println(DataRow.of("{\"a\":1,\"b\":2,\"name\":\"chengyuxing\"}"));
     }
 
     @Test
     public void mapTest() throws Exception {
-        System.out.println(DataRow.fromMap(map));
+        System.out.println(DataRow.of(map));
     }
 
     @Test

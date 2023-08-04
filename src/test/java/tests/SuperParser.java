@@ -37,7 +37,7 @@ public class SuperParser extends SimpleScriptParser {
         String content = Files.lines(Paths.get("/Users/chengyuxing/IdeaProjects/rabbit-common/src/test/resources/a.txt"))
                 .collect(Collectors.joining("\n"));
         SimpleScriptParser parser = new SuperParser();
-        String res = parser.parse(content, DataRow.fromPair("id", "-90", "name", "abcdefrgjgh"));
+        String res = parser.parse(content, DataRow.of("id", "-90", "name", "abcdefrgjgh"));
         System.out.println(res);
     }
 }

@@ -17,12 +17,12 @@ public class DataRowTests {
         en.setDt(new Date());
         en.setLdt(LocalDateTime.now());
 
-        System.out.println(DataRow.fromEntity(en).toMap());
+        System.out.println(DataRow.of(en).toMap());
     }
 
     @Test
     public void test2() throws Exception {
-        DataRow dr = DataRow.fromPair("dt", "2021-12-23",
+        DataRow dr = DataRow.of("dt", "2021-12-23",
                 "ldt", LocalDateTime.now(),
                 "id", 12);
         System.out.println(dr);
@@ -34,7 +34,7 @@ public class DataRowTests {
         PGobject pgobj = new PGobject();
         pgobj.setType("jsonb");
         pgobj.setValue("{\"name\":\"cyx\"}");
-        DataRow dr = DataRow.fromPair("pg", pgobj);
+        DataRow dr = DataRow.of("pg", pgobj);
         System.out.println(dr.toEntity(Entity.class));
     }
 
@@ -47,7 +47,7 @@ public class DataRowTests {
 
     @Test
     public void testIn() {
-        DataRow dataRow = DataRow.fromPair("x", 10, "y", 20);
+        DataRow<Object> dataRow = DataRow.of("x", 10, "y", 20);
         Coord coord = dataRow.toEntity(Coord.class, dataRow.get("x"), dataRow.get("y"));
         System.out.println(coord);
         System.out.println(ObjectUtil.getValue(coord, "x"));

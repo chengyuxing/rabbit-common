@@ -20,7 +20,7 @@ public class ReflectTests {
     @Test
     public void r2e() throws Exception {
         int x = 10, y = 18;
-        DataRow row = DataRow.fromPair("x", x, "y", y, "name", "昆明市");
+        DataRow row = DataRow.of("x", x, "y", y, "name", "昆明市");
         System.out.println(row);
         System.out.println(row.toEntity(Coord.class, row.get("x"), row.get("y")));
     }

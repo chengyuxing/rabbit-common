@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 
 public class Test2 {
 
-    static List<DataRow> rows = new ArrayList<>();
+    static List<DataRow<Object>> rows = new ArrayList<>();
 
     //    @BeforeClass
     @Test
@@ -60,7 +60,7 @@ public class Test2 {
 
     @Test
     public void testdd() throws Exception {
-        System.out.println(DataRow.fromPair("a", "2022-12-23", "b", "2022-12-01").toEntity(Now.class));
+        System.out.println(DataRow.of("a", "2022-12-23", "b", "2022-12-01").toEntity(Now.class));
     }
 
     @Test
@@ -134,15 +134,15 @@ public class Test2 {
 
     @Test
     public void concat() throws Exception {
-        DataRow row1 = DataRow.fromPair("a", 1, "b", 2);
-        DataRow row2 = DataRow.fromPair("c", 11, "d", 23);
+        DataRow row1 = DataRow.of("a", 1, "b", 2);
+        DataRow row2 = DataRow.of("c", 11, "d", 23);
 
         System.out.println(row1);
     }
 
     @Test
     public void removeElement() throws Exception {
-        DataRow row = DataRow.fromPair("a", 1, "b", 2, "c", 3, "d", 4, "e", 5);
+        DataRow row = DataRow.of("a", 1, "b", 2, "c", 3, "d", 4, "e", 5);
         System.out.println(row);
         System.out.println(row.remove("b"));
         System.out.println(row.put("c", 109));
@@ -171,7 +171,7 @@ public class Test2 {
 
     @Test
     public void sdfg() throws Exception {
-        DataRow dataRow = DataRow.fromPair("name", "cyx", "age", 27, "address", "kunming");
+        DataRow<Object> dataRow = DataRow.of("name", "cyx", "age", 27, "address", "kunming");
 
         LinkedHashMap<String, Object> map = dataRow.reduce(new LinkedHashMap<>(), (acc, name, value) -> {
             acc.put(name, value);
@@ -183,7 +183,7 @@ public class Test2 {
 
     @Test
     public void testArgs() throws Exception {
-        DataRow dataRow = DataRow.fromPair("id", 2, "name", "cyx", "dt", Instant.now());
+        DataRow dataRow = DataRow.of("id", 2, "name", "cyx", "dt", Instant.now());
         String json = Jackson.toJson(dataRow);
         System.out.println(json);
 

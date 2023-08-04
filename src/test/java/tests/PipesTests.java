@@ -31,16 +31,16 @@ public class PipesTests {
         Map<String, IPipe<?>> pipeMap = new ConcurrentHashMap<>();
         pipeMap.put("is_idcard", new IsIdCard());
         expression.setPipes(pipeMap);
-        System.out.println(expression.calc(DataRow.fromPair("idCard", "53011119930510000X")));
+        System.out.println(expression.calc(DataRow.of("idCard", "53011119930510000X")));
 
         FastExpression expression2 = FastExpression.of(":name | length > 3");
-        System.out.println(expression2.calc(DataRow.fromPair("name", "cyx")));
+        System.out.println(expression2.calc(DataRow.of("name", "cyx")));
     }
 
     @Test
     public void test4s() throws Exception {
         FastExpression exp = FastExpression.of("!(:id >= 0 || :name | length <= 3) && :age<=21");
-        System.out.println(exp.calc(DataRow.fromPair(
+        System.out.println(exp.calc(DataRow.of(
                 "id", 10,
                 "name", "cyx",
                 "age", 13

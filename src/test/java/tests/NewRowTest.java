@@ -10,7 +10,7 @@ import java.util.*;
 public class NewRowTest {
     @Test
     public void test1() throws Exception {
-        DataRow row = new DataRow();
+        DataRow<Object> row = new DataRow<>();
         row.put("a", "cyx");
         row.put("b", "cyx");
         row.put("c", "cyx");
@@ -23,7 +23,7 @@ public class NewRowTest {
         System.out.println(row.containsValue("cyx"));
         System.out.println(row.put("x", "d"));
         System.out.println(Jackson.toJson(row));
-        DataRow jRow = DataRow.fromJson("{\n" +
+        DataRow<Object> jRow = DataRow.of("{\n" +
                 "  \"name\": \"chengyuxing\",\n" +
                 "  \"age\": 28,\n" +
                 "  \"address\": \"昆明市\",\n" +
@@ -51,7 +51,7 @@ public class NewRowTest {
 
     @Test
     public void testEach() throws Exception {
-        DataRow row = DataRow.fromPair("name", "cyx", "age", 28, "address", Arrays.asList("china", "yunnan", "kunming"));
+        DataRow row = DataRow.of("name", "cyx", "age", 28, "address", Arrays.asList("china", "yunnan", "kunming"));
         Map<String, Object> newMap = row.toMap();
         newMap.remove("age");
         System.out.println(row);
@@ -62,7 +62,7 @@ public class NewRowTest {
 
     @Test
     public void testD() throws Exception {
-        DataRow row = DataRow.fromPair("name", null, "age", 28);
+        DataRow row = DataRow.of("name", null, "age", 28);
         row.put("address", "kunming");
         row.put("email", null);
         System.out.println(row.names().remove(1));

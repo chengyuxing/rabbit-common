@@ -14,7 +14,7 @@ import java.util.*;
 /**
  * 对LinkedHashMap进行一些扩展的数据行对象
  */
-public final class DataRow extends LinkedHashMap<String, Object> implements MapExtends<Object> {
+public final class DataRow<T> extends LinkedHashMap<String, T> implements MapExtends<T> {
     /**
      * 一个空的DataRow（初始化大小为16）
      */
@@ -27,7 +27,7 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
      *
      * @param m map
      */
-    public DataRow(Map<? extends String, ?> m) {
+    public DataRow(Map<? extends String, T> m) {
         super(m);
     }
 
@@ -41,10 +41,46 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
     }
 
     /**
-     * @return 一个空的DataRow
+     * 创建一个空的DataRow
+     *
+     * @param <T> 类型参数
+     * @return 空的DataRow
      */
-    public static DataRow empty() {
-        return new DataRow(0);
+    public static <T> DataRow<T> of() {
+        return new DataRow<>(0);
+    }
+
+    /**
+     * 从一个键值对创建一个DataRow
+     *
+     * @param key   键
+     * @param value 值
+     * @param <T>   类型参数
+     * @return DataRow
+     */
+    public static <T> DataRow<T> of(String key, T value) {
+        DataRow<T> row = new DataRow<>();
+        row.put(key, value);
+        return row;
+    }
+
+    /**
+     * 从一组键值对创建一个DataRow
+     *
+     * @param pairs 键值对 k v，k v...
+     * @return DataRow
+     */
+    public static DataRow<Object> of(Object... pairs) {
+        if ((pairs.length & 1) != 0) {
+            throw new IllegalArgumentException("key value are not a pair.");
+        }
+        int capacity = pairs.length >> 1;
+        DataRow<Object> row = new DataRow<>(capacity);
+        for (int i = 0; i < capacity; i++) {
+            int idx = i << 1;
+            row.put(pairs[idx].toString(), pairs[idx + 1]);
+        }
+        return row;
     }
 
     /**
@@ -54,18 +90,99 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
      * @param values 一组值
      * @return 新实例，初始化小为字段名数组的长度
      */
-    public static DataRow of(String[] names, Object[] values) {
+    public static DataRow<Object> of(String[] names, Object[] values) {
         if (names.length == values.length) {
             if (names.length == 0) {
-                return empty();
+                return of();
             }
-            DataRow row = new DataRow(names.length);
+            DataRow<Object> row = new DataRow<>(names.length);
             for (int i = 0; i < names.length; i++) {
                 row.put(names[i], values[i]);
             }
             return row;
         }
         throw new IllegalArgumentException("names and values length not equal!");
+    }
+
+    /**
+     * 从一个json对象字符串创建一个DataRow
+     *
+     * @param json json对象字符串 e.g. {@code {"a":1,"b":2}}
+     * @return DataRow
+     */
+    public static DataRow<Object> of(String json) {
+        if (Objects.isNull(json)) return DataRow.of();
+        //noinspection unchecked
+        return (DataRow<Object>) Jackson.toObject(json, DataRow.class);
+    }
+
+    /**
+     * 从一个标准的javaBean实体转为DataRow类型
+     *
+     * @param entity 实体
+     * @return DataRow
+     */
+    public static DataRow<Object> of(Object entity) {
+        if (Objects.isNull(entity)) return DataRow.of();
+        try {
+            DataRow<Object> row = DataRow.of();
+            Class<?> clazz = entity.getClass();
+            for (Method method : ReflectUtil.getRWMethods(entity.getClass()).getItem1()) {
+                Field classField = ReflectUtil.getGetterField(clazz, method);
+                if (Objects.isNull(classField)) {
+                    continue;
+                }
+                Object value = method.invoke(entity);
+                row.put(classField.getName(), value);
+            }
+            return row;
+        } catch (IllegalAccessException | IntrospectionException | InvocationTargetException | NoSuchFieldException e) {
+            throw new RuntimeException("convert to DataRow error: ", e);
+        }
+    }
+
+    /**
+     * 从map转换到DataRow
+     *
+     * @param map map
+     * @return DataRow
+     */
+    public static DataRow<Object> of(Map<?, ?> map) {
+        if (Objects.isNull(map)) return DataRow.of();
+        DataRow<Object> row = new DataRow<>(map.size());
+        for (Map.Entry<?, ?> e : map.entrySet()) {
+            row.put(e.getKey().toString(), e.getValue());
+        }
+        return row;
+    }
+
+    /**
+     * 组合多个DataRow以创建一个DataRow（数据行转为列）
+     *
+     * @param rows 数据行集合 （为保证正确性，默认以第一行字段为列名，每行字段都必须相同）
+     * @return 一行以列存储形式的数据行
+     */
+    public static DataRow<List<Object>> of(Collection<? extends Map<String, Object>> rows) {
+        if (rows.isEmpty()) {
+            return of();
+        }
+        boolean first = true;
+        DataRow<List<Object>> res = null;
+        Set<String> names = null;
+        for (Map<String, Object> row : rows) {
+            if (first) {
+                res = new DataRow<>(row.size());
+                names = row.keySet();
+                for (String name : names) {
+                    res.put(name, new ArrayList<>());
+                }
+                first = false;
+            }
+            for (String name : names) {
+                res.get(name).add(row.get(name));
+            }
+        }
+        return res;
     }
 
     /**
@@ -84,9 +201,10 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
      * @return 值
      * @throws IndexOutOfBoundsException 如果索引超出界限
      */
-    public Object iget(int index) {
-        Object[] values = values().toArray();
-        Object v = values[index];
+    public T getBy(int index) {
+        //noinspection unchecked
+        T[] values = (T[]) values().toArray();
+        T v = values[index];
         Arrays.fill(values, null);
         return v;
     }
@@ -99,10 +217,10 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
      */
     public Class<?> getType(String name) {
         Object v = get(name);
-        if (v == null) {
-            return null;
+        if (Objects.nonNull(v)) {
+            return v.getClass();
         }
-        return v.getClass();
+        return null;
     }
 
     /**
@@ -113,7 +231,11 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
      * @throws IndexOutOfBoundsException 如果索引超出界限
      */
     public Class<?> getType(int index) {
-        return iget(index).getClass();
+        Object v = getBy(index);
+        if (Objects.nonNull(v)) {
+            return v.getClass();
+        }
+        return null;
     }
 
     /**
@@ -121,67 +243,32 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
      *
      * @return 值
      */
-    public Object getFirst() {
-        return this.entrySet().iterator().next().getValue();
-    }
-
-    /**
-     * 获取第一个值
-     *
-     * @param <T> 类型参数
-     * @return 第一个值
-     */
-    @SuppressWarnings("unchecked")
-    public <T> T getFirstAs() {
-        return (T) getFirst();
-    }
-
-    /**
-     * 根据名字获取值
-     *
-     * @param name 名称
-     * @param <T>  结果类型参数
-     * @return 值
-     */
-    @SuppressWarnings("unchecked")
-    public <T> T getAs(String name) {
-        return (T) get(name);
-    }
-
-    /**
-     * 根据索引获取值
-     *
-     * @param index 索引
-     * @param <T>   结果类型参数
-     * @return 值
-     * @throws IndexOutOfBoundsException 如果索引超出界限
-     */
-    @SuppressWarnings("unchecked")
-    public <T> T getAs(int index) {
-        return (T) iget(index);
+    public T getFirst() {
+        if (isEmpty()) {
+            return null;
+        }
+        return this.values().iterator().next();
     }
 
     /**
      * 根据名字获取可空值
      *
      * @param name 名字
-     * @param <T>  类型参数
      * @return 可空值
      */
-    public <T> Optional<T> getOptional(String name) {
-        return Optional.ofNullable(getAs(name));
+    public Optional<T> getOptional(String name) {
+        return Optional.ofNullable(get(name));
     }
 
     /**
      * 根据索引获取可空值
      *
      * @param index 索引
-     * @param <T>   类型参数
      * @return 可空值
      * @throws IndexOutOfBoundsException 如果索引超出界限
      */
-    public <T> Optional<T> getOptional(int index) {
-        return Optional.ofNullable(getAs(index));
+    public Optional<T> getOptional(int index) {
+        return Optional.ofNullable(getBy(index));
     }
 
     /**
@@ -192,10 +279,8 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
      */
     public String getString(String name) {
         Object v = get(name);
-        if (v == null) {
-            return null;
-        }
-        return v.toString();
+        if (Objects.nonNull(v)) return v.toString();
+        return null;
     }
 
     /**
@@ -206,8 +291,8 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
      * @throws IndexOutOfBoundsException 如果索引超出界限
      */
     public String getString(int index) {
-        Object v = iget(index);
-        return v == null ? null : v.toString();
+        Object v = getBy(index);
+        return Objects.nonNull(v) ? v.toString() : null;
     }
 
     /**
@@ -228,7 +313,7 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
      * @throws IndexOutOfBoundsException 如果索引超出界限
      */
     public Integer getInt(int index) {
-        return ObjectUtil.toInteger(iget(index));
+        return ObjectUtil.toInteger(getBy(index));
     }
 
     /**
@@ -249,7 +334,7 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
      * @throws IndexOutOfBoundsException 如果索引超出界限
      */
     public Double getDouble(int index) {
-        return ObjectUtil.toDouble(iget(index));
+        return ObjectUtil.toDouble(getBy(index));
     }
 
     /**
@@ -270,18 +355,18 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
      * @throws IndexOutOfBoundsException 如果索引超出界限
      */
     public Long getLong(int index) {
-        return ObjectUtil.toLong(iget(index));
+        return ObjectUtil.toLong(getBy(index));
     }
 
     /**
      * 链式添加一个键值对
      *
-     * @param name  键名
+     * @param key   键名
      * @param value 值
      * @return 对象自身
      */
-    public DataRow add(String name, Object value) {
-        put(name, value);
+    public DataRow<T> add(String key, T value) {
+        put(key, value);
         return this;
     }
 
@@ -292,8 +377,8 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
      * @param more 更多字段名
      * @return 新的DataRow
      */
-    public DataRow pick(String name, String... more) {
-        DataRow row = new DataRow(more.length + 1);
+    public DataRow<T> pick(String name, String... more) {
+        DataRow<T> row = new DataRow<>(more.length + 1);
         row.put(name, get(name));
         for (String n : more) {
             row.put(n, get(n));
@@ -306,12 +391,11 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
      *
      * @param init   初始值
      * @param mapper 映射(初始值，名字，值)
-     * @param <T>    结果类型参数
      * @return 归并后的结果
      */
-    public <T> T reduce(T init, TiFunction<T, String, Object, T> mapper) {
-        T acc = init;
-        for (Map.Entry<String, Object> e : entrySet()) {
+    public <R> R reduce(R init, TiFunction<R, String, T, R> mapper) {
+        R acc = init;
+        for (Map.Entry<String, T> e : entrySet()) {
             acc = mapper.apply(acc, e.getKey(), e.getValue());
         }
         return acc;
@@ -322,7 +406,7 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
      *
      * @return map
      */
-    public Map<String, Object> toMap() {
+    public Map<String, T> toMap() {
         return this;
     }
 
@@ -330,7 +414,6 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
      * 转为一个标准的javaBean实体
      *
      * @param clazz                 实体类
-     * @param <T>                   类型参数
      * @param constructorParameters 如果实体类只有一个带参数的构造函数，则指定参数<br>
      *                              e.g.
      *                              <blockquote>
@@ -339,9 +422,9 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
      *                              </blockquote>
      * @return 实体
      */
-    public <T> T toEntity(Class<T> clazz, Object... constructorParameters) {
+    public <R> R toEntity(Class<R> clazz, Object... constructorParameters) {
         try {
-            T entity = ReflectUtil.getInstance(clazz, constructorParameters);
+            R entity = ReflectUtil.getInstance(clazz, constructorParameters);
             if (this.isEmpty()) return entity;
             for (Method method : ReflectUtil.getRWMethods(clazz).getItem2()) {
                 Field classField = ReflectUtil.getSetterField(clazz, method);
@@ -435,110 +518,6 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
     public String toJson() {
         if (this.isEmpty()) return "{}";
         return Jackson.toJson(this);
-    }
-
-    /**
-     * 组合多个DataRow以创建一个DataRow（数据行转为列）
-     *
-     * @param rows 数据行集合 （为保证正确性，默认以第一行字段为列名，每行字段都必须相同）
-     * @return 一行以列存储形式的数据行
-     */
-    @SuppressWarnings({"unchecked"})
-    public static DataRow zip(Collection<DataRow> rows) {
-        if (rows.isEmpty()) {
-            return new DataRow(0);
-        }
-        if (rows.size() == 1) {
-            return rows.iterator().next();
-        }
-        boolean first = true;
-        DataRow res = null;
-        Set<String> names = null;
-        for (DataRow row : rows) {
-            if (first) {
-                res = new DataRow(row.size());
-                names = row.keySet();
-                for (String name : names) {
-                    res.put(name, new ArrayList<>());
-                }
-                first = false;
-            }
-            for (String name : names) {
-                ((ArrayList<Object>) res.getAs(name)).add(row.get(name));
-            }
-        }
-        return res;
-    }
-
-    /**
-     * 从一个标准的javaBean实体转为DataRow类型
-     *
-     * @param entity 实体
-     * @return DataRow
-     */
-    public static DataRow fromEntity(Object entity) {
-        if (Objects.isNull(entity)) return DataRow.empty();
-        try {
-            DataRow row = DataRow.empty();
-            Class<?> clazz = entity.getClass();
-            for (Method method : ReflectUtil.getRWMethods(entity.getClass()).getItem1()) {
-                Field classField = ReflectUtil.getGetterField(clazz, method);
-                if (Objects.isNull(classField)) {
-                    continue;
-                }
-                Object value = method.invoke(entity);
-                row.put(classField.getName(), value);
-            }
-            return row;
-        } catch (IllegalAccessException | IntrospectionException | InvocationTargetException | NoSuchFieldException e) {
-            throw new RuntimeException("convert to DataRow error: ", e);
-        }
-    }
-
-    /**
-     * 从map转换到DataRow
-     *
-     * @param map map
-     * @return DataRow
-     */
-    public static DataRow fromMap(Map<?, ?> map) {
-        if (Objects.isNull(map)) return DataRow.empty();
-        DataRow row = new DataRow(map.size());
-        for (Map.Entry<?, ?> e : map.entrySet()) {
-            row.put(e.getKey().toString(), e.getValue());
-        }
-        return row;
-    }
-
-    /**
-     * 从一组键值对创建一个DataRow
-     *
-     * @param pairs 键值对 k v，k v...
-     * @return DataRow
-     */
-    public static DataRow fromPair(Object... pairs) {
-        if (pairs.length == 0) return DataRow.empty();
-        if ((pairs.length & 1) != 0) {
-            throw new IllegalArgumentException("key value are not a pair.");
-        }
-        int capacity = pairs.length >> 1;
-        DataRow row = new DataRow(capacity);
-        for (int i = 0; i < capacity; i++) {
-            int idx = i << 1;
-            row.put(pairs[idx].toString(), pairs[idx + 1]);
-        }
-        return row;
-    }
-
-    /**
-     * 从一个json对象字符串创建一个DataRow
-     *
-     * @param json json对象字符串 e.g. {@code {"a":1,"b":2}}
-     * @return DataRow
-     */
-    public static DataRow fromJson(String json) {
-        if (Objects.isNull(json)) return DataRow.empty();
-        return (DataRow) Jackson.toObject(json, DataRow.class);
     }
 }
 

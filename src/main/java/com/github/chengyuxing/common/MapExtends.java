@@ -1,9 +1,6 @@
 package com.github.chengyuxing.common;
 
-import com.github.chengyuxing.common.utils.CollectionUtil;
-
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.function.BiPredicate;
 
@@ -14,37 +11,10 @@ import java.util.function.BiPredicate;
  */
 public interface MapExtends<V> extends Map<String, V> {
     /**
-     * 是否忽略大小写包含指定的key
-     *
-     * @param key 需要查找的key
-     * @return 是否包含
-     */
-    default boolean containsKeyIgnoreCase(String key) {
-        return CollectionUtil.containsKeyIgnoreCase(this, key);
-    }
-
-    /**
-     * 忽略大小写获取一个值
-     *
-     * @param key 需要取值的key
-     * @return 值
-     */
-    default V getIgnoreCase(String key) {
-        return CollectionUtil.getValueIgnoreCase(this, key);
-    }
-
-    /**
      * 移除值为null的所有元素
      */
     default void removeIfAbsent() {
-        Iterator<Entry<String, V>> iterator = entrySet().iterator();
-        //为了内部一点性能就不使用函数接口了
-        //noinspection Java8CollectionRemoveIf
-        while (iterator.hasNext()) {
-            if (iterator.next().getValue() == null) {
-                iterator.remove();
-            }
-        }
+        entrySet().removeIf(stringVEntry -> stringVEntry.getValue() == null);
     }
 
     /**
@@ -53,15 +23,7 @@ public interface MapExtends<V> extends Map<String, V> {
      * @param keys 需忽略的键名集合
      */
     default void removeIfAbsentExclude(String... keys) {
-        Iterator<Entry<String, V>> iterator = entrySet().iterator();
-        //为了内部一点性能就不使用函数接口了
-        //noinspection Java8CollectionRemoveIf
-        while (iterator.hasNext()) {
-            Entry<String, V> e = iterator.next();
-            if (e.getValue() == null && !Arrays.asList(keys).contains(e.getKey())) {
-                iterator.remove();
-            }
-        }
+        entrySet().removeIf(e -> e.getValue() == null && !Arrays.asList(keys).contains(e.getKey()));
     }
 
     /**
@@ -70,14 +32,6 @@ public interface MapExtends<V> extends Map<String, V> {
      * @param predicate 条件
      */
     default void removeIf(BiPredicate<String, V> predicate) {
-        Iterator<Map.Entry<String, V>> iterator = entrySet().iterator();
-        //为了内部一点性能就不使用函数接口了
-        //noinspection Java8CollectionRemoveIf
-        while (iterator.hasNext()) {
-            Map.Entry<String, V> next = iterator.next();
-            if (predicate.test(next.getKey(), next.getValue())) {
-                iterator.remove();
-            }
-        }
+        entrySet().removeIf(next -> predicate.test(next.getKey(), next.getValue()));
     }
 }

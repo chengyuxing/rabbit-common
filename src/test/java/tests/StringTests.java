@@ -8,7 +8,6 @@ import com.github.chengyuxing.common.io.TypedProperties;
 import com.github.chengyuxing.common.script.Comparators;
 import com.github.chengyuxing.common.script.IPipe;
 import com.github.chengyuxing.common.script.SimpleScriptParser;
-import com.github.chengyuxing.common.script.impl.FastExpression;
 import com.github.chengyuxing.common.tuple.Pair;
 import com.github.chengyuxing.common.utils.CollectionUtil;
 import com.github.chengyuxing.common.utils.ObjectUtil;
@@ -40,10 +39,10 @@ public class StringTests {
         Map<String, Object> args = new HashMap<>();
         args.put("Table", "test.user");
         args.put("values", Arrays.asList("a", "b", "c"));
-        args.put("VALUES", Arrays.asList(DataRow.fromPair("f", "c,d,f"), DataRow.fromPair("f", "x,v,z")));
+        args.put("VALUES", Arrays.asList(DataRow.of("f", "c,d,f"), DataRow.of("f", "x,v,z")));
         args.put("a", LocalDateTime.now());
         args.put("a.d", "LocalDateTime.now()");
-        args.put("tables", DataRow.fromPair("fields", "id,name,age"));
+        args.put("tables", DataRow.of("fields", "id,name,age"));
 
         String s = new FileResource("file:/Users/chengyuxing/Downloads/bbb.sql").readString(StandardCharsets.UTF_8);
 
@@ -66,10 +65,10 @@ public class StringTests {
         Map<String, Object> args = new HashMap<>();
         args.put("Table", "test.user");
         args.put("values", Arrays.asList("a", "b", "c"));
-        args.put("VALUES", Arrays.asList(DataRow.fromPair("f", "c,d,f"), DataRow.fromPair("f", "x,v,z")));
+        args.put("VALUES", Arrays.asList(DataRow.of("f", "c,d,f"), DataRow.of("f", "x,v,z")));
         args.put("a", LocalDateTime.now());
         args.put("a.d", "LocalDateTime.now()");
-        args.put("tables", DataRow.fromPair("fields", "id,name,age"));
+        args.put("tables", DataRow.of("fields", "id,name,age"));
         String res = new StringFormatter().format(sql, args);
         System.out.println(res);
     }
@@ -77,7 +76,7 @@ public class StringTests {
     @Test
     public void test6() throws Exception {
         String str = "${ user } <> blank && ${ user.name } !~ 'j'";
-        System.out.println(FMT.format(str, DataRow.fromPair("user", ":user", "user.name", ":user.name")));
+        System.out.println(FMT.format(str, DataRow.of("user", ":user", "user.name", ":user.name")));
     }
 
     @Test
@@ -104,7 +103,7 @@ public class StringTests {
     @Test
     public void test2() throws Exception {
         String str = "insert into ${ table } ${fields} id, name, age values (${ values.data.1 }), (${values.data.1})";
-        Object values = DataRow.fromPair("data", Arrays.asList("1,2,3", "4,5,6"));
+        Object values = DataRow.of("data", Arrays.asList("1,2,3", "4,5,6"));
 
     }
 
@@ -128,7 +127,7 @@ public class StringTests {
 
     @Test
     public void testCol() throws Exception {
-        System.out.println(CollectionUtil.hasSameKeyIgnoreCase(DataRow.fromPair("id", "1", "ID", "2")));
+        System.out.println(CollectionUtil.hasSameKeyIgnoreCase(DataRow.of("id", "1", "ID", "2")));
     }
 
     @Test
@@ -284,11 +283,11 @@ public class StringTests {
             }
         };
 
-        DataRow d = DataRow.fromPair(
+        DataRow d = DataRow.of(
                 "c", "blank",
                 "c1", "blank",
                 "c2", "blank",
-                "data", DataRow.fromPair(
+                "data", DataRow.of(
                         "id", 12,
                         "name", "chengyuxing",
                         "age", 30,
@@ -298,7 +297,7 @@ public class StringTests {
                 "list", Arrays.asList(
                         "A",
                         "B",
-                        DataRow.fromPair(
+                        DataRow.of(
                                 "nums",
                                 Arrays.asList("1", "2", "3")),
                         "D",
@@ -316,8 +315,8 @@ public class StringTests {
 
     @Test
     public void testDeepValue() {
-        DataRow r = DataRow.fromPair(
-                "_for", DataRow.fromPair("pair_6_3", Pair.of("name", "chengyuxing"))
+        DataRow r = DataRow.of(
+                "_for", DataRow.of("pair_6_3", Pair.of("name", "chengyuxing"))
         );
         Object value = ObjectUtil.getDeepValue(r, "_for.pair_6_3.item2");
         System.out.println(value);
@@ -325,7 +324,7 @@ public class StringTests {
 
     @Test
     public void testPipe() {
-        DataRow row = DataRow.fromPair(
+        DataRow row = DataRow.of(
                 "id", 12,
                 "name", "chengyuxing",
                 "age", 30,
@@ -342,5 +341,34 @@ public class StringTests {
     @Test
     public void testW() {
         System.out.println("a_b_c".matches("\\w+"));
+    }
+
+    @Test
+    public void rowTest() {
+        System.out.println(DataRow.of("a", 1, "c", 2));
+        System.out.println(DataRow.of("{\n" +
+                "  \"id\": 1,\n" +
+                "  \"name\": \"chengyuxing\"\n" +
+                "}"));
+        System.out.println(DataRow.of(new User()));
+        System.out.println(DataRow.of(new HashMap<>()));
+        System.out.println(DataRow.of(new String[]{"name", "age"}, new Object[]{"chengyuxing", 28}));
+
+        List<DataRow<Object>> rows = new ArrayList<>();
+        rows.add(DataRow.of("a", 1, "b", "x"));
+        rows.add(DataRow.of("a", 2, "b", "x1"));
+        rows.add(DataRow.of("a", 3, "b", "x2"));
+        rows.add(DataRow.of("a", 4, "b", "x3"));
+        rows.add(DataRow.of("a", 5, "b", "x4"));
+
+        System.out.println(DataRow.of(rows).toJson());
+
+        System.out.println(DataRow.of());
+
+        DataRow<String> row = DataRow.of("name", "cyx");
+        System.out.println(row);
+        System.out.println(row.getBy(0));
+
+        System.out.println(new DataRow<>(0));
     }
 }

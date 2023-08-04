@@ -26,7 +26,7 @@ public class ExpTests {
         FastExpression expression = FastExpression.of(":user.id @ '^2\\d*$'");
         Map<String, Object> map = new HashMap<>();
         map.put("id", "2");
-        map.put("user", DataRow.fromPair("id", "22"));
+        map.put("user", DataRow.of("id", "22"));
         boolean res = expression.calc(map);
         System.out.println(res);
     }
@@ -87,7 +87,7 @@ public class ExpTests {
 
     @Test
     public void test5() throws Exception {
-        DataRow row = DataRow.fromPair("a.b", DataRow.fromPair("b", "cyx"));
+        DataRow row = DataRow.of("a.b", DataRow.of("b", "cyx"));
         System.out.println(ObjectUtil.walkDeepValue(row, "/a.b/b"));
     }
 

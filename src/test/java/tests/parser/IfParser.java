@@ -32,7 +32,7 @@ public class IfParser {
                 "    #fi\n" +
                 "    and cc = :cc\n" +
                 "#fi";
-        DataRow dataRow = DataRow.fromPair(
+        DataRow dataRow = DataRow.of(
                 "b", "null",
                 "c", "cyx",
                 "c1", "aaa",

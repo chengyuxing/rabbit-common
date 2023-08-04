@@ -11,7 +11,7 @@ public class MapTests {
 
     @Test
     public void testRow() throws Exception {
-        DataRow row = DataRow.empty();
+        DataRow row = DataRow.of();
         for (int i = 0; i < 10000; i++) {
             row.put("a" + i, i);
         }
@@ -20,9 +20,7 @@ public class MapTests {
 
     @Test
     public void testzz() throws Exception {
-        DataRow row = DataRow.fromPair("Name", "cyx", "age", 27);
-        System.out.println(row.getIgnoreCase("name"));
-        System.out.println(row.containsKeyIgnoreCase("AGE"));
+        DataRow row = DataRow.of("Name", "cyx", "age", 27);
     }
 
     @Test
@@ -33,7 +31,6 @@ public class MapTests {
         map.put("a", 1);
         map.put("b", 2);
         map.put("c", 3);
-        System.out.println(map.getIgnoreCase("B"));
     }
 
     @Test
