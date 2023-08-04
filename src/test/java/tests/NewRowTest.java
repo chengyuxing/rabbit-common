@@ -9,7 +9,7 @@ import java.util.*;
 public class NewRowTest {
     @Test
     public void test1() throws Exception {
-        DataRow row = new DataRow();
+        DataRow row = new DataRow(10);
         row.put("a", "cyx");
         row.put("b", "cyx");
         row.put("c", "cyx");
