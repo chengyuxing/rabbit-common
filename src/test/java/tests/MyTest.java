@@ -9,10 +9,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.beans.IntrospectionException;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.lang.reflect.InvocationTargetException;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -46,18 +44,18 @@ public class MyTest {
         rows.add(DataRow.of("a", 4, "b", "x3"));
         rows.add(DataRow.of("a", 5, "b", "x4"));
 
-        System.out.println(DataRow.of(rows).toJson());
+        System.out.println(DataRow.zip(rows).toJson());
     }
 
     @Test
     public void rowTest2() throws Exception {
         System.out.println(row.toJson());
-        System.out.println(DataRow.of("{\"a\":1,\"b\":2,\"name\":\"chengyuxing\"}"));
+        System.out.println(DataRow.ofJson("{\"a\":1,\"b\":2,\"name\":\"chengyuxing\"}"));
     }
 
     @Test
     public void mapTest() throws Exception {
-        System.out.println(DataRow.of(map));
+        System.out.println(DataRow.ofMap(map));
     }
 
     @Test

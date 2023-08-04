@@ -1,7 +1,6 @@
 package tests.dr;
 
 import com.github.chengyuxing.common.DataRow;
-import com.github.chengyuxing.common.DateTimes;
 import com.github.chengyuxing.common.utils.ObjectUtil;
 import org.junit.Test;
 import org.postgresql.util.PGobject;
@@ -17,7 +16,7 @@ public class DataRowTests {
         en.setDt(new Date());
         en.setLdt(LocalDateTime.now());
 
-        System.out.println(DataRow.of(en).toMap());
+        System.out.println(DataRow.ofEntity(en).toMap());
     }
 
     @Test

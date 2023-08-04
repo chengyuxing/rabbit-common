@@ -41,15 +41,6 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
     }
 
     /**
-     * 一个空的DataRow（初始化大小为16）
-     *
-     * @return 空的DataRow
-     */
-    public static DataRow create() {
-        return new DataRow();
-    }
-
-    /**
      * 创建一个空的DataRow
      *
      * @return 空的DataRow
@@ -74,18 +65,18 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
     /**
      * 从一组键值对创建一个DataRow
      *
-     * @param pairs 键值对 k v，k v...
+     * @param input 键值对 k v，k v...
      * @return DataRow
      */
-    public static DataRow of(Object... pairs) {
-        if ((pairs.length & 1) != 0) {
+    public static DataRow of(Object... input) {
+        if ((input.length & 1) != 0) {
             throw new IllegalArgumentException("key value are not a pair.");
         }
-        int capacity = pairs.length >> 1;
+        int capacity = input.length >> 1;
         DataRow row = new DataRow(capacity);
         for (int i = 0; i < capacity; i++) {
             int idx = i << 1;
-            row.put(pairs[idx].toString(), pairs[idx + 1]);
+            row.put(input[idx].toString(), input[idx + 1]);
         }
         return row;
     }
@@ -93,18 +84,18 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
     /**
      * 新建一个DataRow
      *
-     * @param names  一组字段名
+     * @param keys  一组字段名
      * @param values 一组值
      * @return 新实例，初始化小为字段名数组的长度
      */
-    public static DataRow of(String[] names, Object[] values) {
-        if (names.length == values.length) {
-            if (names.length == 0) {
+    public static DataRow of(String[] keys, Object[] values) {
+        if (keys.length == values.length) {
+            if (keys.length == 0) {
                 return of();
             }
-            DataRow row = new DataRow(names.length);
-            for (int i = 0; i < names.length; i++) {
-                row.put(names[i], values[i]);
+            DataRow row = new DataRow(keys.length);
+            for (int i = 0; i < keys.length; i++) {
+                row.put(keys[i], values[i]);
             }
             return row;
         }
@@ -117,7 +108,7 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
      * @param json json对象字符串 e.g. {@code {"a":1,"b":2}}
      * @return DataRow
      */
-    public static DataRow of(String json) {
+    public static DataRow ofJson(String json) {
         if (Objects.isNull(json)) return DataRow.of();
         return Jackson.toObject(json, DataRow.class);
     }
@@ -128,7 +119,7 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
      * @param entity 实体
      * @return DataRow
      */
-    public static DataRow of(Object entity) {
+    public static DataRow ofEntity(Object entity) {
         if (Objects.isNull(entity)) return DataRow.of();
         try {
             DataRow row = new DataRow();
@@ -153,7 +144,7 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
      * @param map map
      * @return DataRow
      */
-    public static DataRow of(Map<?, ?> map) {
+    public static DataRow ofMap(Map<?, ?> map) {
         if (Objects.isNull(map)) return DataRow.of();
         DataRow row = new DataRow(map.size());
         for (Map.Entry<?, ?> e : map.entrySet()) {
@@ -168,7 +159,7 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
      * @param rows 数据行集合 （为保证正确性，默认以第一行字段为列名，每行字段都必须相同）
      * @return 一行以列存储形式的数据行
      */
-    public static DataRow of(Collection<? extends Map<String, Object>> rows) {
+    public static DataRow zip(Collection<? extends Map<String, Object>> rows) {
         if (rows.isEmpty()) {
             return of();
         }

@@ -2,7 +2,6 @@ package tests;
 
 import com.github.chengyuxing.common.DataRow;
 import com.github.chengyuxing.common.utils.Jackson;
-import com.github.chengyuxing.common.utils.ReflectUtil;
 import org.junit.Test;
 
 import java.util.*;
@@ -23,7 +22,7 @@ public class NewRowTest {
         System.out.println(row.containsValue("cyx"));
         System.out.println(row.put("x", "d"));
         System.out.println(Jackson.toJson(row));
-        DataRow jRow = DataRow.of("{\n" +
+        DataRow jRow = DataRow.ofJson("{\n" +
                 "  \"name\": \"chengyuxing\",\n" +
                 "  \"age\": 28,\n" +
                 "  \"address\": \"昆明市\",\n" +
