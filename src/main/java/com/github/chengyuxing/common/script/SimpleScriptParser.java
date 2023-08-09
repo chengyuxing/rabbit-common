@@ -358,10 +358,7 @@ public class SimpleScriptParser {
                                 String idxName = m.group("index");
                                 String listName = m.group("list");
                                 String pipes = m.group("pipes");
-                                //noinspection DataFlowIssue
-                                String delimiter = Comparators.getString(coalesce(m.group("delimiter"), ", ")
-                                        .replace("\\n", NEW_LINE)
-                                        .replace("\\t", TAB));
+                                String delimiter = Comparators.getString(coalesce(m.group("delimiter"), ", ")) + NEW_LINE;
                                 String open = Comparators.getString(coalesce(m.group("open"), ""));
                                 String close = Comparators.getString(coalesce(m.group("close"), ""));
                                 //noinspection DataFlowIssue
