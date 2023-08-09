@@ -1,7 +1,9 @@
 package tests;
 
 import com.github.chengyuxing.common.DataRow;
+import com.github.chengyuxing.common.script.IPipe;
 import com.github.chengyuxing.common.script.SimpleScriptParser;
+import com.github.chengyuxing.common.KeyValue;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -27,5 +29,16 @@ public class ScriptParserTests {
             }
         }
         System.out.println(data.size());
+    }
+
+    @Test
+    public void test1() {
+        IPipe.Kv kv = new IPipe.Kv();
+        User user = new User();
+        user.setName("cyx");
+        user.setAge(27);
+        user.setAddress("kunming");
+        List<KeyValue> keyValues = kv.transform(user);
+        System.out.println(keyValues);
     }
 }

@@ -38,6 +38,7 @@ public class FastExpression extends IExpression {
         GLOBAL_PIPES.put("upper", new IPipe.Upper());
         GLOBAL_PIPES.put("lower", new IPipe.Lower());
         GLOBAL_PIPES.put("pairs", new IPipe.Map2Pairs());
+        GLOBAL_PIPES.put("kv", new IPipe.Kv());
     }
 
     /**

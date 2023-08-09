@@ -378,7 +378,7 @@ public class SimpleScriptParser {
 
                                 StringJoiner joiner = new StringJoiner(delimiter);
                                 Map<String, Object> localForVars = new HashMap<>();
-                                for (int x = 0; x < iterator.length; x++) {
+                                for (int x = 0, y = iterator.length; x < y; x++) {
                                     Object value = iterator[x];
                                     // 每次都携带者for的迭代项和索引到参数字典中进行计算或为下一层提供参数
                                     Map<String, Object> eachArgs = new HashMap<>(data);
