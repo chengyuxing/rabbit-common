@@ -13,6 +13,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.StringJoiner;
 
 /**
  * 反射工具类
@@ -198,24 +199,48 @@ public final class ReflectUtil {
      * @throws IllegalAccessException    类访问权限异常
      */
     public static <T> T getInstance(Class<T> clazz, Object... constructorParameters) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
-        T entity;
         if (constructorParameters.length > 0) {
-            Class<?>[] classes = new Class[constructorParameters.length];
-            for (int i = 0; i < constructorParameters.length; i++) {
-                classes[i] = constructorParameters[i].getClass();
+            @SuppressWarnings("unchecked") Constructor<T>[] constructors = (Constructor<T>[]) clazz.getDeclaredConstructors();
+            for (Constructor<T> constructor : constructors) {
+                Class<?>[] paramClasses = constructor.getParameterTypes();
+                if (paramClasses.length != constructorParameters.length) {
+                    continue;
+                }
+                boolean match = true;
+                for (int i = 0; i < paramClasses.length; i++) {
+                    Class<?> paramClass = paramClasses[i];
+                    Object value = constructorParameters[i];
+                    if (Objects.isNull(value)) {
+                        continue;
+                    }
+                    Class<?> valueClass = value.getClass();
+                    if (!paramClass.isAssignableFrom(valueClass)) {
+                        match = false;
+                        break;
+                    }
+                }
+                if (!match) {
+                    continue;
+                }
+                if (!constructor.isAccessible()) {
+                    constructor.setAccessible(true);
+                }
+                return constructor.newInstance(constructorParameters);
             }
-            Constructor<T> constructor = clazz.getDeclaredConstructor(classes);
-            if (!constructor.isAccessible()) {
-                constructor.setAccessible(true);
+            StringJoiner sb = new StringJoiner(", ");
+            for (Object param : constructorParameters) {
+                if (Objects.isNull(param)) {
+                    sb.add("null");
+                    continue;
+                }
+                sb.add(param.getClass().getName());
             }
-            entity = constructor.newInstance(constructorParameters);
-        } else {
-            Constructor<T> constructor = clazz.getDeclaredConstructor();
-            if (!constructor.isAccessible()) {
-                constructor.setAccessible(true);
-            }
-            entity = constructor.newInstance();
+            throw new NoSuchMethodException(clazz.getName() + "<init>(" + sb + ")");
         }
-        return entity;
+        Constructor<T> constructor = clazz.getDeclaredConstructor();
+        if (!constructor.isAccessible()) {
+            constructor.setAccessible(true);
+        }
+        return constructor.newInstance();
     }
 }

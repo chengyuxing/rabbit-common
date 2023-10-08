@@ -23,8 +23,8 @@ select * from user where id = 1
 
 update test.user
 set
--- #for pair of :data | pairs delimiter ',\n'
-    ${pair.item1} = :_for.pair.item2
+-- #for item of :data | kv delimiter ', '
+    ${item.key} = :_for.item.value
 -- #done
 where id = :id;
 

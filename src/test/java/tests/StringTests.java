@@ -288,7 +288,6 @@ public class StringTests {
                 "c1", "blank",
                 "c2", "blank",
                 "data", DataRow.of(
-                        "id", 12,
                         "name", "chengyuxing",
                         "age", 30,
                         "address", "昆明市"
@@ -311,6 +310,7 @@ public class StringTests {
 
         Map<String, Object> vars = simpleScriptParser.getForVars();
         System.out.println(vars);
+        System.out.println(ObjectUtil.getDeepValue(vars, "item_6_0.value"));
     }
 
     @Test

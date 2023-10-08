@@ -3,16 +3,15 @@ package tests;
 import com.github.chengyuxing.common.DataRow;
 import com.github.chengyuxing.common.utils.ReflectUtil;
 import org.junit.Test;
-import tests.entity.Coord;
-import tests.entity.Location;
+import tests.entity.*;
 import tests.entity.User;
 
+import java.beans.IntrospectionException;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
+import java.util.*;
 import java.util.stream.Stream;
 
 public class ReflectTests {
@@ -56,6 +55,21 @@ public class ReflectTests {
 //                        System.out.println(pType);
                     }
                 });
+    }
+
+    @Test
+    public void testF() throws IntrospectionException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        Coord coord = ReflectUtil.getInstance(Coord.class, 1, 13, null);
+        System.out.println(coord);
+
+        DataRow row = DataRow.of("a", 1, "b", "cyx");
+        Your your = ReflectUtil.getInstance(Your.class, row);
+        System.out.println(your);
+    }
+
+    @Test
+    public void testD() throws NoSuchMethodException {
+        Your.class.getDeclaredConstructor(HashMap.class);
     }
 
     @Test
