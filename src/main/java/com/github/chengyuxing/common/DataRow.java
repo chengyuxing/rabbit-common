@@ -89,7 +89,12 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
             List<Method> methods = ReflectUtil.getRWMethods(entity.getClass()).getItem1();
             DataRow row = new DataRow(methods.size());
             for (Method method : methods) {
-                Field classField = ReflectUtil.getGetterField(clazz, method);
+                Field classField;
+                try {
+                    classField = ReflectUtil.getGetterField(clazz, method);
+                } catch (NoSuchFieldException e) {
+                    continue;
+                }
                 if (Objects.isNull(classField)) {
                     continue;
                 }
@@ -97,7 +102,7 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
                 row.put(classField.getName(), value);
             }
             return row;
-        } catch (IllegalAccessException | IntrospectionException | InvocationTargetException | NoSuchFieldException e) {
+        } catch (IllegalAccessException | IntrospectionException | InvocationTargetException e) {
             throw new RuntimeException("convert to DataRow error: ", e);
         }
     }
@@ -425,7 +430,12 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
             T entity = ReflectUtil.getInstance(clazz, constructorParameters);
             if (this.isEmpty()) return entity;
             for (Method method : ReflectUtil.getRWMethods(clazz).getItem2()) {
-                Field classField = ReflectUtil.getSetterField(clazz, method);
+                Field classField;
+                try {
+                    classField = ReflectUtil.getSetterField(clazz, method);
+                } catch (NoSuchFieldException e) {
+                    continue;
+                }
                 if (Objects.isNull(classField)) {
                     continue;
                 }
@@ -503,7 +513,7 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
             }
             return entity;
         } catch (NoSuchMethodException | InstantiationException | InvocationTargetException | IntrospectionException |
-                 IllegalAccessException | NoSuchFieldException e) {
+                 IllegalAccessException e) {
             throw new RuntimeException("convert to " + clazz.getTypeName() + " error: ", e);
         }
     }

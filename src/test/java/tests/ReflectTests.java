@@ -59,7 +59,7 @@ public class ReflectTests {
 
     @Test
     public void testF() throws IntrospectionException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
-        Coord coord = ReflectUtil.getInstance(Coord.class, 1, 13, null);
+        Coord coord = ReflectUtil.getInstance(Coord.class, 1, 13);
         System.out.println(coord);
 
         DataRow row = DataRow.of("a", 1, "b", "cyx");
@@ -69,7 +69,8 @@ public class ReflectTests {
 
     @Test
     public void testD() throws NoSuchMethodException {
-        Your.class.getDeclaredConstructor(HashMap.class);
+        DataRow row = DataRow.ofEntity(new My());
+        System.out.println(row);
     }
 
     @Test
