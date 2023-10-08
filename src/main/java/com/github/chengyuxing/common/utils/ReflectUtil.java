@@ -187,12 +187,12 @@ public final class ReflectUtil {
     }
 
     /**
-     * 获取指定类的一个实例
+     * 获取指定类的一个新实例
      *
      * @param clazz                 javaBean实体类
      * @param constructorParameters 构造函数参数
      * @param <T>                   实例类型参数
-     * @return 类的实例
+     * @return 类的新实例
      * @throws NoSuchMethodException     如果类中没有相应的方法
      * @throws InvocationTargetException 调用目标类异常
      * @throws InstantiationException    实例化异常
