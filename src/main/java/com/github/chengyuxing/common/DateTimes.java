@@ -18,7 +18,7 @@ public final class DateTimes {
     //language=RegExp
     public static final Pattern TIME_PATTERN = Pattern.compile("(?<h>\\d{1,2})[:时点](?<m>\\d{1,2})(?<s>[:分]\\d{1,2})?秒?");
     //language=RegExp
-    public static final Pattern UTC_DATE_TIME_PATTERN = Pattern.compile("(?<date>\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,3})?)(?<zone>[zZ]|[+-]\\d{4})?");
+    public static final Pattern UTC_DATE_TIME_PATTERN = Pattern.compile("(?<date>\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,3})?)(?<zone>[zZ]|[+-]\\d{2}:?\\d{2})?");
     //language=RegExp
     public static final Pattern RFC_1123_DATE_TIME_PATTERN = Pattern.compile("(Mon|Tue|Wed|Thu|Fri|Sat|Sun),\\s+\\d{1,2}\\s+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\\s+\\d{4}\\s+\\d{1,2}:\\d{1,2}:\\d{1,2} GMT");
     //language=RegExp
@@ -68,6 +68,17 @@ public final class DateTimes {
      */
     public static DateTimes of(Date date) {
         return new DateTimes(date.toInstant());
+    }
+
+    /**
+     * 时间工具
+     *
+     * @param datetime 时间字符串
+     * @return 时间工具实例
+     */
+    public static DateTimes of(String datetime) {
+        LocalDateTime ldt = toLocalDateTime(datetime);
+        return of(ldt);
     }
 
     /**
@@ -126,44 +137,44 @@ public final class DateTimes {
      *     <li>类似RFC时间格式，例如：Wed Jan 04 18:52:01 CST 2023</li>
      * </ul>
      *
-     * @param s 时间字符串
+     * @param datetime 时间字符串
      * @return 本地日期时间
      */
-    public static LocalDateTime toLocalDateTime(String s) {
-        s = s.trim().replaceAll("\\s+", " ");
-        if (s.matches("\\d{14}")) {
-            return LocalDateTime.parse(s, DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+    public static LocalDateTime toLocalDateTime(String datetime) {
+        datetime = datetime.trim().replaceAll("\\s+", " ");
+        if (datetime.matches("\\d{14}")) {
+            return LocalDateTime.parse(datetime, DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
         }
 
-        if (s.matches("\\d{8}")) {
-            return LocalDateTime.parse(s, DateTimeFormatter.ofPattern("yyyyMMdd"));
+        if (datetime.matches("\\d{8}")) {
+            return LocalDateTime.parse(datetime, DateTimeFormatter.ofPattern("yyyyMMdd"));
         }
 
-        if (s.matches("\\d{13}")) {
-            return Instant.ofEpochMilli(Long.parseLong(s)).atZone(ZoneId.systemDefault()).toLocalDateTime();
+        if (datetime.matches("\\d{13}")) {
+            return Instant.ofEpochMilli(Long.parseLong(datetime)).atZone(ZoneId.systemDefault()).toLocalDateTime();
         }
 
-        if (s.matches("\\d{10}")) {
-            return Instant.ofEpochSecond(Long.parseLong(s)).atZone(ZoneId.systemDefault()).toLocalDateTime();
+        if (datetime.matches("\\d{10}")) {
+            return Instant.ofEpochSecond(Long.parseLong(datetime)).atZone(ZoneId.systemDefault()).toLocalDateTime();
         }
 
-        UTCDate utcDate = createUTCDate(s);
+        UTCDate utcDate = createUTCDate(datetime);
         if (utcDate.isMatch()) {
             return utcDate.toLocalDateTime();
         }
 
-        if (RFC_1123_DATE_TIME_PATTERN.matcher(s).matches()) {
-            return LocalDateTime.parse(s, DateTimeFormatter.RFC_1123_DATE_TIME);
+        if (RFC_1123_DATE_TIME_PATTERN.matcher(datetime).matches()) {
+            return LocalDateTime.parse(datetime, DateTimeFormatter.RFC_1123_DATE_TIME);
         }
 
-        RFCLikeDate rfcLikeDate = createRFCLikeDate(s);
+        RFCLikeDate rfcLikeDate = createRFCLikeDate(datetime);
         if (rfcLikeDate.isMatch()) {
             return rfcLikeDate.toLocalDateTime();
         }
 
         int year;
         int month = 1, day = 1, hour = -1, minus = 0, second = 0;
-        Matcher dateMatcher = DATE_PATTERN.matcher(s);
+        Matcher dateMatcher = DATE_PATTERN.matcher(datetime);
         if (dateMatcher.find()) {
             hour = 0;
             if (dateMatcher.group("y") != null) {
@@ -176,7 +187,7 @@ public final class DateTimes {
         } else {
             year = LocalDateTime.now().getYear();
         }
-        Matcher timeMatcher = TIME_PATTERN.matcher(s);
+        Matcher timeMatcher = TIME_PATTERN.matcher(datetime);
         if (timeMatcher.find()) {
             hour = Integer.parseInt(timeMatcher.group("h"));
             minus = Integer.parseInt(timeMatcher.group("m"));
@@ -187,7 +198,7 @@ public final class DateTimes {
         if (hour != -1) {
             return LocalDateTime.of(year, month, day, hour, minus, second);
         }
-        throw new IllegalArgumentException("un know date time format: " + s);
+        throw new IllegalArgumentException("un know date time format: " + datetime);
     }
 
     /**

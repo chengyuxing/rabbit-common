@@ -10,6 +10,7 @@ import org.junit.Test;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -129,7 +130,13 @@ public class Test2 {
     }
 
     @Test
-    public void testdtM() throws Exception{
+    public void test23() {
+        System.out.println(DateTimes.of("2019-09-26T03:45:36.656-08:00").toString("yyyy-MM-dd hh:mm:ss"));
+        System.out.println(ZoneId.of("+08:00"));
+    }
+
+    @Test
+    public void testdtM() throws Exception {
     }
 
     @Test
