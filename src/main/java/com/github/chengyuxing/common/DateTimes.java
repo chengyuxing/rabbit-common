@@ -18,13 +18,13 @@ public final class DateTimes {
     //language=RegExp
     public static final Pattern TIME_PATTERN = Pattern.compile("(?<h>\\d{1,2})[:时点](?<m>\\d{1,2})(?<s>[:分]\\d{1,2})?秒?");
     //language=RegExp
-    public static final Pattern UTC_DATE_TIME_PATTERN = Pattern.compile("(?<date>\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,3})?)(?<zone>[zZ]|[+-]\\d{2}:?\\d{2})?");
+    public static final Pattern ISO_DATE_TIME_PATTERN = Pattern.compile("(?<date>\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,3})?)(?<zone>[zZ]|([+-](\\d{1,6}|\\d{2}:\\d{2}(:\\d{2})?)))?");
     //language=RegExp
     public static final Pattern RFC_1123_DATE_TIME_PATTERN = Pattern.compile("(Mon|Tue|Wed|Thu|Fri|Sat|Sun),\\s+\\d{1,2}\\s+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\\s+\\d{4}\\s+\\d{1,2}:\\d{1,2}:\\d{1,2} GMT");
     //language=RegExp
     public static final Pattern RFC_CST_DATE_TIME_PATTERN = Pattern.compile("(Mon|Tue|Wed|Thu|Fri|Sat|Sun)\\s+(?<M>Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\\s+(?<d>\\d{1,2})\\s+(?<time>\\d{1,2}:\\d{1,2}:\\d{1,2})\\s+CST\\s+(?<y>\\d{4})");
     //language=RegExp
-    public static final Pattern RFC_GMT_DATE_TIME_PATTERN = Pattern.compile("(Mon|Tue|Wed|Thu|Fri|Sat|Sun)\\s+(?<M>Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\\s+(?<d>\\d{1,2})\\s+(?<y>\\d{4})\\s+(?<time>\\d{1,2}:\\d{1,2}:\\d{1,2})\\s+GMT(?<zone>[+-]\\d{4})");
+    public static final Pattern RFC_GMT_DATE_TIME_PATTERN = Pattern.compile("(Mon|Tue|Wed|Thu|Fri|Sat|Sun)\\s+(?<M>Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\\s+(?<d>\\d{1,2})\\s+(?<y>\\d{4})\\s+(?<time>\\d{1,2}:\\d{1,2}:\\d{1,2})\\s+GMT(?<zone>[zZ]|([+-](\\d{1,6}|\\d{2}:\\d{2}(:\\d{2})?)))");
     public static final Map<String, Integer> Mon = new HashMap<String, Integer>() {{
         put("Jan", 1);
         put("Feb", 2);
@@ -158,16 +158,16 @@ public final class DateTimes {
             return Instant.ofEpochSecond(Long.parseLong(datetime)).atZone(ZoneId.systemDefault()).toLocalDateTime();
         }
 
-        UTCDate utcDate = createUTCDate(datetime);
-        if (utcDate.isMatch()) {
-            return utcDate.toLocalDateTime();
+        ISODateTime isoDateTime = createISODateTime(datetime);
+        if (isoDateTime.isMatch()) {
+            return isoDateTime.toLocalDateTime();
         }
 
         if (RFC_1123_DATE_TIME_PATTERN.matcher(datetime).matches()) {
             return LocalDateTime.parse(datetime, DateTimeFormatter.RFC_1123_DATE_TIME);
         }
 
-        RFCLikeDate rfcLikeDate = createRFCLikeDate(datetime);
+        RFCLikeDate rfcLikeDate = createRFCLikeDateTime(datetime);
         if (rfcLikeDate.isMatch()) {
             return rfcLikeDate.toLocalDateTime();
         }
@@ -198,39 +198,39 @@ public final class DateTimes {
         if (hour != -1) {
             return LocalDateTime.of(year, month, day, hour, minus, second);
         }
-        throw new IllegalArgumentException("un know date time format: " + datetime);
+        throw new IllegalArgumentException("unknown date time format: " + datetime);
     }
 
     /**
-     * UTC格式时间
+     * ISO格式时间
      *
-     * @param stringDate 例如：2019-09-26T03:45:36.656+0800
-     * @return UTC格式时间对象
+     * @param datetime 例如：2019-09-26T03:45:36.656+0800
+     * @return ISO格式日期时间对象
      */
-    public static UTCDate createUTCDate(String stringDate) {
-        return new UTCDate(stringDate);
+    public static ISODateTime createISODateTime(String datetime) {
+        return new ISODateTime(datetime);
     }
 
     /**
      * 近似RFC格式的时间
      *
-     * @param stringDate 例如：Wed Jan 04 2023 17:36:48 GMT+0800
-     * @return RFC格式时间对象
+     * @param datetime 例如：Wed Jan 04 2023 17:36:48 GMT+0800
+     * @return RFC格式日期时间对象
      */
-    public static RFCLikeDate createRFCLikeDate(String stringDate) {
-        return new RFCLikeDate(stringDate);
+    public static RFCLikeDate createRFCLikeDateTime(String datetime) {
+        return new RFCLikeDate(datetime);
     }
 
     /**
      * UTC格式时间
      */
-    public static class UTCDate {
+    public static class ISODateTime {
         private boolean match = false;
         private String date;
         private ZoneId zoneId;
 
-        public UTCDate(String stringDate) {
-            Matcher m = UTC_DATE_TIME_PATTERN.matcher(stringDate.trim());
+        public ISODateTime(String stringDate) {
+            Matcher m = ISO_DATE_TIME_PATTERN.matcher(stringDate.trim());
             if (m.matches()) {
                 match = true;
                 date = m.group("date");
@@ -264,9 +264,8 @@ public final class DateTimes {
 
         @Override
         public String toString() {
-            return "IsoDateConvert{" +
-                    "match=" + match +
-                    ", date='" + date + '\'' +
+            return "ISODateTime{" +
+                    "date='" + date + '\'' +
                     ", zoneId=" + zoneId +
                     '}';
         }
@@ -339,8 +338,7 @@ public final class DateTimes {
         @Override
         public String toString() {
             return "RFCLikeDate{" +
-                    "match=" + match +
-                    ", year=" + year +
+                    "year=" + year +
                     ", month=" + month +
                     ", day=" + day +
                     ", time='" + time + '\'' +
@@ -352,51 +350,51 @@ public final class DateTimes {
     /**
      * 将时间字符串转换为本地日期对象
      *
-     * @param s 时间字符串
+     * @param datetime 时间字符串
      * @return 本地日期
      */
-    public static LocalDate toLocalDate(String s) {
-        return toLocalDateTime(s).toLocalDate();
+    public static LocalDate toLocalDate(String datetime) {
+        return toLocalDateTime(datetime).toLocalDate();
     }
 
     /**
      * 将时间字符串转换为本地时间对象
      *
-     * @param s 时间字符串
+     * @param datetime 时间字符串
      * @return 本地时间
      */
-    public static LocalTime toLocalTime(String s) {
-        return toLocalDateTime(s).toLocalTime();
+    public static LocalTime toLocalTime(String datetime) {
+        return toLocalDateTime(datetime).toLocalTime();
     }
 
     /**
      * 将时间字符串转换为当前日期时间对象
      *
-     * @param s 时间字符串
+     * @param datetime 时间字符串
      * @return 当前日期时间
      */
-    public static Instant toInstant(String s) {
-        return toLocalDateTime(s).atZone(ZoneId.systemDefault()).toInstant();
+    public static Instant toInstant(String datetime) {
+        return toLocalDateTime(datetime).atZone(ZoneId.systemDefault()).toInstant();
     }
 
     /**
      * 将时间字符串转为时间戳（毫秒数）
      *
-     * @param s 时间字符串
+     * @param datetime 时间字符串
      * @return 时间戳
      */
-    public static long toEpochMilli(String s) {
-        return toInstant(s).toEpochMilli();
+    public static long toEpochMilli(String datetime) {
+        return toInstant(datetime).toEpochMilli();
     }
 
     /**
      * 将时间字符串转换为日期对象
      *
-     * @param s 时间字符串
+     * @param datetime 时间字符串
      * @return 日期
      */
-    public static Date toDate(String s) {
-        return new Date(toEpochMilli(s));
+    public static Date toDate(String datetime) {
+        return new Date(toEpochMilli(datetime));
     }
 
     /**

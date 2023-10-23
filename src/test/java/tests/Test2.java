@@ -4,7 +4,6 @@ import com.github.chengyuxing.common.DataRow;
 import com.github.chengyuxing.common.DateTimes;
 import com.github.chengyuxing.common.io.FileResource;
 import com.github.chengyuxing.common.utils.Jackson;
-import com.github.chengyuxing.common.utils.ReflectUtil;
 import com.github.chengyuxing.common.utils.StringUtil;
 import org.junit.Test;
 
@@ -105,11 +104,11 @@ public class Test2 {
 
     @Test
     public void testDt2() throws Exception {
-        System.out.println(DateTimes.createUTCDate("2019-09-26T03:45:36.656Z"));
-        System.out.println(DateTimes.createUTCDate("2019-09-26T03:45:36.656-0800"));
-        System.out.println(DateTimes.createUTCDate("2019-09-25T18:00:14"));
-        System.out.println(DateTimes.createUTCDate("2019-09-25T18:00:14z"));
-        System.out.println(DateTimes.createUTCDate("2019-09-25 18:00:14"));
+        System.out.println(DateTimes.createISODateTime("2019-09-26T03:45:36.656Z"));
+        System.out.println(DateTimes.createISODateTime("2019-09-26T03:45:36.656-0800"));
+        System.out.println(DateTimes.createISODateTime("2019-09-25T18:00:14"));
+        System.out.println(DateTimes.createISODateTime("2019-09-25T18:00:14z"));
+        System.out.println(DateTimes.createISODateTime("2019-09-25 18:00:14"));
 
         System.out.println(LocalDateTime.now());
 
@@ -123,7 +122,7 @@ public class Test2 {
         System.out.println(DateTimes.toLocalDateTime("Wed Jan 04 18:52:01 CST 2023"));
         System.out.println(DateTimes.toLocalDateTime("Wed Jan 04 2023 17:36:48 GMT+0800"));
 
-        System.out.println(DateTimes.createRFCLikeDate("Wed Jan 04 2023 17:36:48 GMT+0800"));
+        System.out.println(DateTimes.createRFCLikeDateTime("Wed Jan 04 2023 17:36:48 GMT+0800"));
 
         System.out.println(new Date());
 
@@ -131,8 +130,10 @@ public class Test2 {
 
     @Test
     public void test23() {
-        System.out.println(DateTimes.of("2019-09-26T03:45:36.656-08:00").toString("yyyy-MM-dd hh:mm:ss"));
-        System.out.println(ZoneId.of("+08:00"));
+        System.out.println(DateTimes.of("2019-09-26"));
+        System.out.println(DateTimes.of("2019-09-26T03:45:36.656-08"));
+        System.out.println(DateTimes.of("2019-09-26T03:45:36.656-080053").toString("yyyy-MM-dd hh:mm:ss"));
+        System.out.println(ZoneId.of("+08:00:54"));
     }
 
     @Test
