@@ -381,9 +381,11 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
      */
     @SuppressWarnings("unchecked")
     public <T> DataRow update(String key, Function<T, Object> updater) {
-        Object oldV = get(key);
-        Object newV = updater.apply((T) oldV);
-        put(key, newV);
+        if (containsKey(key)) {
+            Object oldV = get(key);
+            Object newV = updater.apply((T) oldV);
+            put(key, newV);
+        }
         return this;
     }
 
