@@ -1,9 +1,11 @@
 package tests;
 
 import com.github.chengyuxing.common.DataRow;
+import com.github.chengyuxing.common.DateTimes;
 import com.github.chengyuxing.common.utils.Jackson;
 import org.junit.Test;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 public class NewRowTest {
@@ -46,6 +48,13 @@ public class NewRowTest {
         }));
         System.out.println(jRow.replace("name", "cyx123"));
         System.out.println(jRow);
+    }
+
+    @Test
+    public void testUpd() {
+        DataRow row = DataRow.of("now", LocalDateTime.now(), "age", 28);
+        row.<LocalDateTime>update("now", v -> DateTimes.of(v).toString("yyyy-MM-dd"));
+        System.out.println(row);
     }
 
     @Test

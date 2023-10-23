@@ -10,6 +10,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.time.temporal.Temporal;
 import java.util.*;
+import java.util.function.Function;
 
 /**
  * 对LinkedHashMap进行一些扩展的数据行对象
@@ -368,6 +369,21 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
      */
     public DataRow add(String key, Object value) {
         put(key, value);
+        return this;
+    }
+
+    /**
+     * 更新一个值
+     *
+     * @param key     键名
+     * @param updater 更新器
+     * @return 对象自身
+     */
+    @SuppressWarnings("unchecked")
+    public <T> DataRow update(String key, Function<T, Object> updater) {
+        Object oldV = get(key);
+        Object newV = updater.apply((T) oldV);
+        put(key, newV);
         return this;
     }
 
