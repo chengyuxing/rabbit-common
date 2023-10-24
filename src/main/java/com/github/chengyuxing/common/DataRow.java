@@ -377,16 +377,18 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
      *
      * @param key     键名
      * @param updater 更新器
-     * @return 对象自身
+     * @param <T>     类型参数
+     * @return 是否存在并更新
      */
     @SuppressWarnings("unchecked")
-    public <T> DataRow update(String key, Function<T, Object> updater) {
+    public <T> boolean update(String key, Function<T, Object> updater) {
         if (containsKey(key)) {
             Object oldV = get(key);
             Object newV = updater.apply((T) oldV);
             put(key, newV);
+            return true;
         }
-        return this;
+        return false;
     }
 
     /**
