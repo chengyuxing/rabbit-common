@@ -64,12 +64,12 @@ public final class Jackson {
             return (T) method.invoke(mapper, json, targetType);
         } catch (ClassNotFoundException | IllegalAccessException | InstantiationException | NoSuchMethodException |
                  InvocationTargetException e) {
-            throw new RuntimeException("convert to json error: ", e);
+            throw new RuntimeException("convert to object error: ", e);
         }
     }
 
     /**
-     * json字符串转对象
+     * json字符串转对象集合
      *
      * @param json        json数组
      * @param elementType 元素类型
@@ -86,7 +86,7 @@ public final class Jackson {
             return (List<T>) readValue.invoke(objectReader, json);
         } catch (ClassNotFoundException | IllegalAccessException | InstantiationException | NoSuchMethodException |
                  InvocationTargetException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("convert to objects error: ", e);
         }
     }
 }
