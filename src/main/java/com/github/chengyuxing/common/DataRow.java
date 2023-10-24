@@ -16,6 +16,9 @@ import java.util.function.Function;
  * 对LinkedHashMap进行一些扩展的数据行对象
  */
 public final class DataRow extends LinkedHashMap<String, Object> implements MapExtends<Object> {
+    /**
+     * 一个空的DataRow
+     */
     public DataRow() {
     }
 
