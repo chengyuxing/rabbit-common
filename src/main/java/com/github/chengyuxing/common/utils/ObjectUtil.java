@@ -15,7 +15,20 @@ import java.util.Objects;
 public final class ObjectUtil {
     /**
      * 不限长赋值表达式<br>
-     * 逻辑形如: if(a==b) return v1 else if(a==c) return v2 else if(a==d) return v3 (可选)全部匹配不到的默认值: else return v4
+     * 逻辑形如:
+     * <blockquote>
+     * <pre>
+     *         if(a==b)
+     *            return v1;
+     *         else if(a==c)
+     *            return v2;
+     *         else if(a==d)
+     *            return v3;
+     *         # (可选)全部匹配不到的默认值
+     *         else
+     *            return v4;
+     *     </pre>
+     * </blockquote>
      *
      * @param value  值
      * @param equal  比较值
@@ -43,6 +56,23 @@ public final class ObjectUtil {
             i += 2;
         }
         return res;
+    }
+
+    /**
+     * 从一个数组中返回第一个不为null的值，如果数组长度为0返回null
+     *
+     * @param values 一组值
+     * @param <T>    类型参数
+     * @return 不为null的值或全部为null
+     */
+    @SafeVarargs
+    public static <T> T coalesce(T... values) {
+        for (T v : values) {
+            if (Objects.nonNull(v)) {
+                return v;
+            }
+        }
+        return null;
     }
 
     /**
@@ -239,22 +269,5 @@ public final class ObjectUtil {
             return (Float) obj;
         }
         return Float.parseFloat(obj.toString());
-    }
-
-    /**
-     * 从一个数组中返回第一个不为null的值，如果数组长度为0返回null
-     *
-     * @param values 一组值
-     * @param <T>    类型参数
-     * @return 不为null的值或全部为null
-     */
-    @SafeVarargs
-    public static <T> T coalesce(T... values) {
-        for (T v : values) {
-            if (Objects.nonNull(v)) {
-                return v;
-            }
-        }
-        return null;
     }
 }
