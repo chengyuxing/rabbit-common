@@ -2,6 +2,7 @@ package com.github.chengyuxing.common.utils;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.List;
 
 /**
  * Jackson反射实例工具
@@ -64,6 +65,28 @@ public final class Jackson {
         } catch (ClassNotFoundException | IllegalAccessException | InstantiationException | NoSuchMethodException |
                  InvocationTargetException e) {
             throw new RuntimeException("convert to json error: ", e);
+        }
+    }
+
+    /**
+     * json字符串转对象
+     *
+     * @param json        json数组
+     * @param elementType 元素类型
+     * @param <T>         类型参数
+     * @return 对象集合
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> List<T> toObjects(String json, Class<T> elementType) {
+        try {
+            Object mapper = getObjectMapper();
+            Method readerForListOf = mapper.getClass().getDeclaredMethod("readerForListOf", Class.class);
+            Object objectReader = readerForListOf.invoke(mapper, elementType);
+            Method readValue = objectReader.getClass().getDeclaredMethod("readValue", String.class);
+            return (List<T>) readValue.invoke(objectReader, json);
+        } catch (ClassNotFoundException | IllegalAccessException | InstantiationException | NoSuchMethodException |
+                 InvocationTargetException e) {
+            throw new RuntimeException(e);
         }
     }
 }

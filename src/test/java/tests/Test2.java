@@ -1,5 +1,7 @@
 package tests;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.chengyuxing.common.DataRow;
 import com.github.chengyuxing.common.DateTimes;
 import com.github.chengyuxing.common.io.FileResource;
@@ -210,6 +212,17 @@ public class Test2 {
         map.put("d", 21);
         map.put("e", 34);
         System.out.println(map);
+    }
+
+    @Test
+    public void jacksonTest() throws JsonProcessingException {
+        String json = "[{\"name\":\"cyx\",\"age\":28}]";
+        ObjectMapper mapper = new ObjectMapper();
+        List<User> users = mapper.readerForListOf(User.class)
+                .readValue(json);
+        System.out.println(users);
+        System.out.println(Jackson.toObject(json, List.class));
+        System.out.println(Jackson.toObjects(json, User.class));
     }
 
     public static void len(String... args) {
