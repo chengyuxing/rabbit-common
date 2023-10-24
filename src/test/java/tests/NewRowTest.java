@@ -60,7 +60,7 @@ public class NewRowTest {
     @Test
     public void testEach() throws Exception {
         DataRow row = DataRow.of("name", "cyx", "age", 28, "address", Arrays.asList("china", "yunnan", "kunming"));
-        Map<String, Object> newMap = row.toMap();
+        Map<String, Object> newMap = row;
         newMap.remove("age");
         System.out.println(row);
         System.out.println(newMap);

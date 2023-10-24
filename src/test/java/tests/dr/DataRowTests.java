@@ -16,7 +16,7 @@ public class DataRowTests {
         en.setDt(new Date());
         en.setLdt(LocalDateTime.now());
 
-        System.out.println(DataRow.ofEntity(en).toMap());
+        System.out.println(DataRow.ofEntity(en));
     }
 
     @Test

@@ -88,7 +88,7 @@ public class Test2 {
 
     @Test
     public void speedTest() throws Exception {
-        List<Map<String, Object>> maps = rows.stream().map(DataRow::toMap).collect(Collectors.toList());
+        List<Map<String, Object>> maps = rows.stream().collect(Collectors.toList());
         System.out.println(maps.size());
     }
 
@@ -193,11 +193,14 @@ public class Test2 {
 
     @Test
     public void testArgs() throws Exception {
-        DataRow dataRow = DataRow.of("id", 2, "name", "cyx", "dt", Instant.now());
+        DataRow dataRow = DataRow.of("id", 2, "name", "cyx", "dt", DateTimes.now().toString("yyyy-MM-dd"));
+        System.out.println(dataRow.toJson());
         String json = Jackson.toJson(dataRow);
         System.out.println(json);
 
         System.out.println(Jackson.toObject(json, DataRow.class));
+
+        Map<String, Object> map = DataRow.of("a", 1);
     }
 
     @Test
