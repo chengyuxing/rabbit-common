@@ -2,13 +2,7 @@ package com.github.chengyuxing.common;
 
 import com.github.chengyuxing.common.utils.Jackson;
 import com.github.chengyuxing.common.utils.ObjectUtil;
-import com.github.chengyuxing.common.utils.ReflectUtil;
 
-import java.beans.IntrospectionException;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.time.temporal.Temporal;
 import java.util.*;
 import java.util.function.Function;
 
@@ -20,6 +14,15 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
      * 一个空的DataRow
      */
     public DataRow() {
+    }
+
+    /**
+     * 一个具有初始值的DataRow
+     *
+     * @param map 初始map
+     */
+    public DataRow(Map<String, Object> map) {
+        super(map);
     }
 
     /**
@@ -89,28 +92,7 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
      * @return DataRow
      */
     public static DataRow ofEntity(Object entity) {
-        if (Objects.isNull(entity)) return new DataRow(0);
-        try {
-            Class<?> clazz = entity.getClass();
-            List<Method> methods = ReflectUtil.getRWMethods(entity.getClass()).getItem1();
-            DataRow row = new DataRow(methods.size());
-            for (Method method : methods) {
-                Field classField;
-                try {
-                    classField = ReflectUtil.getGetterField(clazz, method);
-                } catch (NoSuchFieldException e) {
-                    continue;
-                }
-                if (Objects.isNull(classField)) {
-                    continue;
-                }
-                Object value = method.invoke(entity);
-                row.put(classField.getName(), value);
-            }
-            return row;
-        } catch (IllegalAccessException | IntrospectionException | InvocationTargetException e) {
-            throw new RuntimeException("convert to DataRow error: ", e);
-        }
+        return ObjectUtil.entity2map(entity, DataRow::new);
     }
 
     /**
@@ -119,13 +101,9 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
      * @param map map
      * @return DataRow
      */
-    public static DataRow ofMap(Map<?, ?> map) {
+    public static DataRow ofMap(Map<String, Object> map) {
         if (Objects.isNull(map)) return new DataRow(0);
-        DataRow row = new DataRow(map.size());
-        for (Map.Entry<?, ?> e : map.entrySet()) {
-            row.put(e.getKey().toString(), e.getValue());
-        }
-        return row;
+        return new DataRow(map);
     }
 
     /**
@@ -190,7 +168,7 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
         if (isEmpty()) {
             return null;
         }
-        return this.values().iterator().next();
+        return values().iterator().next();
     }
 
     /**
@@ -442,96 +420,16 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
      * @return 实体
      */
     public <T> T toEntity(Class<T> clazz, Object... constructorParameters) {
-        try {
-            T entity = ReflectUtil.getInstance(clazz, constructorParameters);
-            if (this.isEmpty()) return entity;
-            for (Method method : ReflectUtil.getRWMethods(clazz).getItem2()) {
-                Field classField;
-                try {
-                    classField = ReflectUtil.getSetterField(clazz, method);
-                } catch (NoSuchFieldException e) {
-                    continue;
-                }
-                if (Objects.isNull(classField)) {
-                    continue;
-                }
-                String field = classField.getName();
-                Object value = get(field);
-                // dataRow field type
-                Class<?> dft = getType(field);
-                // entity field type
-                Class<?> eft = method.getParameterTypes()[0];
+        return ObjectUtil.map2entity(this, clazz, constructorParameters);
+    }
 
-                if (Objects.isNull(value) || Objects.isNull(dft) || method.getParameterCount() != 1) {
-                    continue;
-                }
-                if (eft.isAssignableFrom(dft)) {
-                    method.invoke(entity, value);
-                    continue;
-                }
-                if (eft == String.class) {
-                    method.invoke(entity, value.toString());
-                    continue;
-                }
-                if (eft == Character.class) {
-                    method.invoke(value.toString().charAt(0));
-                    continue;
-                }
-                if (eft == Integer.class) {
-                    method.invoke(ObjectUtil.toInteger(value));
-                    continue;
-                }
-                if (eft == Long.class) {
-                    method.invoke(ObjectUtil.toLong(value));
-                    continue;
-                }
-                if (eft == Double.class) {
-                    method.invoke(ObjectUtil.toDouble(value));
-                    continue;
-                }
-                if (eft == Float.class) {
-                    method.invoke(ObjectUtil.toFloat(value));
-                    continue;
-                }
-                if (eft == Date.class) {
-                    method.invoke(entity, DateTimes.toDate(value.toString()));
-                    continue;
-                }
-                if (Temporal.class.isAssignableFrom(eft)) {
-                    if (Date.class.isAssignableFrom(dft)) {
-                        method.invoke(entity, ObjectUtil.toTemporal(eft, (Date) value));
-                        continue;
-                    }
-                    if (dft == String.class) {
-                        Date date = DateTimes.toDate(value.toString());
-                        method.invoke(entity, ObjectUtil.toTemporal(eft, date));
-                    }
-                    continue;
-                }
-                // map, collection or java bean.
-                if (Map.class.isAssignableFrom(eft) || Collection.class.isAssignableFrom(eft) || !eft.getTypeName().startsWith("java.")) {
-                    // maybe json string
-                    if (dft == String.class) {
-                        method.invoke(entity, Jackson.toObject(value.toString(), eft));
-                        continue;
-                    }
-                    // object array parsing to collection exclude blob
-                    if (dft != byte[].class && value instanceof Object[]) {
-                        if (List.class.isAssignableFrom(eft)) {
-                            method.invoke(entity, new ArrayList<>(Arrays.asList((Object[]) value)));
-                            continue;
-                        }
-                        if (Set.class.isAssignableFrom(eft)) {
-                            method.invoke(entity, new HashSet<>(Arrays.asList((Object[]) value)));
-                        }
-                    }
-                }
-            }
-            return entity;
-        } catch (NoSuchMethodException | InstantiationException | InvocationTargetException | IntrospectionException |
-                 IllegalAccessException e) {
-            throw new RuntimeException("convert to " + clazz.getTypeName() + " error: ", e);
-        }
+    /**
+     * 转为一个新的map
+     *
+     * @return 新的LinkedHashMap
+     */
+    public Map<String, Object> toMap() {
+        return new LinkedHashMap<>(this);
     }
 
     /**
@@ -542,6 +440,17 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
     public String toJson() {
         if (this.isEmpty()) return "{}";
         return Jackson.toJson(this);
+    }
+
+    /**
+     * 转换DataRow
+     *
+     * @param converter 转换器
+     * @param <T>       类型参数
+     * @return 转换后的实例
+     */
+    public <T> T to(Function<DataRow, T> converter) {
+        return converter.apply(this);
     }
 }
 
