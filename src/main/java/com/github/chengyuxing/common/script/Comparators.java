@@ -9,7 +9,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * 字符串表达式值比较器<br>
+ * <h2>字符串表达式值比较器</h2>
  * <ul>
  *     <li>支持比较的数据类型: {@code null, blank(空白字符串、null、空集合、空数组),true, false, 字符串(''或""), 数字}</li>
  *     <li>支持的比较操作符: {@code >, <, >=, <=, == ,=, !=, <>}</li>
