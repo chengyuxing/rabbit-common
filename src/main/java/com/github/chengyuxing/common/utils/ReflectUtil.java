@@ -105,6 +105,9 @@ public final class ReflectUtil {
                 ws.add(w);
             }
             if (Objects.nonNull(r)) {
+                if (r.getName().equals("getClass")) {
+                    continue;
+                }
                 rs.add(r);
             }
         }
