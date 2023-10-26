@@ -1,13 +1,13 @@
 package com.github.chengyuxing.common.utils;
 
+import java.beans.IntrospectionException;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.time.*;
 import java.time.temporal.Temporal;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
+import java.util.function.Function;
 
 /**
  * 简单基本对象工具类
@@ -269,5 +269,38 @@ public final class ObjectUtil {
             return (Float) obj;
         }
         return Float.parseFloat(obj.toString());
+    }
+
+    /**
+     * 实体转为map
+     *
+     * @param entity     标准java bean 实体
+     * @param mapBuilder map构造器 [实体getter数，Map实现]
+     * @param <T>        类型参数
+     * @return map
+     */
+    public static <T extends Map<String, Object>> T entity2map(Object entity, Function<Integer, T> mapBuilder) {
+        if (Objects.isNull(entity)) return mapBuilder.apply(0);
+        try {
+            Class<?> clazz = entity.getClass();
+            List<Method> getters = ReflectUtil.getRWMethods(entity.getClass()).getItem1();
+            T map = mapBuilder.apply(getters.size());
+            for (Method getter : getters) {
+                Field get;
+                try {
+                    get = ReflectUtil.getGetterField(clazz, getter);
+                } catch (NoSuchFieldException e) {
+                    continue;
+                }
+                if (Objects.isNull(get)) {
+                    continue;
+                }
+                Object value = getter.invoke(entity);
+                map.put(get.getName(), value);
+            }
+            return map;
+        } catch (IllegalAccessException | IntrospectionException | InvocationTargetException e) {
+            throw new RuntimeException("convert to DataRow error.", e);
+        }
     }
 }
