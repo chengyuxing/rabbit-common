@@ -274,10 +274,31 @@ public final class ObjectUtil {
     }
 
     /**
+     * 多组 k-v 结构数据转为map
+     *
+     * @param mapBuilder map构造器 [k-v数量，Map实现]
+     * @param input      多组 k-v 结构数据输入
+     * @param <T>        类型参数
+     * @return map
+     */
+    public static <T extends Map<String, Object>> T pairs2Map(Function<Integer, T> mapBuilder, Object... input) {
+        if ((input.length & 1) != 0) {
+            throw new IllegalArgumentException("key value are not a pair.");
+        }
+        int capacity = input.length >> 1;
+        T map = mapBuilder.apply(capacity);
+        for (int i = 0; i < capacity; i++) {
+            int idx = i << 1;
+            map.put(input[idx].toString(), input[idx + 1]);
+        }
+        return map;
+    }
+
+    /**
      * 实体转为map
      *
      * @param entity     标准java bean 实体
-     * @param mapBuilder map构造器 [实体getter数，Map实现]
+     * @param mapBuilder map构造器 [实体getter数量，Map实现]
      * @param <T>        类型参数
      * @return map
      */

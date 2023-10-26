@@ -41,16 +41,7 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
      * @return DataRow
      */
     public static DataRow of(Object... input) {
-        if ((input.length & 1) != 0) {
-            throw new IllegalArgumentException("key value are not a pair.");
-        }
-        int capacity = input.length >> 1;
-        DataRow row = new DataRow(capacity);
-        for (int i = 0; i < capacity; i++) {
-            int idx = i << 1;
-            row.put(input[idx].toString(), input[idx + 1]);
-        }
-        return row;
+        return ObjectUtil.pairs2Map(DataRow::new, input);
     }
 
     /**
