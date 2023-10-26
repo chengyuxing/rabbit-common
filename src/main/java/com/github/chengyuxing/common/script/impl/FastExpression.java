@@ -129,10 +129,7 @@ public class FastExpression extends IExpression {
      * @param expression 一组布尔值
      * @param args       参数字典
      * @return 运算后的布尔结果
-     * @throws IllegalArgumentException <ul>
-     *                                  <li>如果 {@code require} 为 {@code true}，参数字典中不存在的值进行计算则抛出错误</li>
-     *                                  <li>如果比较运算符不合法</li>
-     *                                  </ul>
+     * @throws IllegalArgumentException 管道语法错误
      * @throws ArithmeticException      如果表达式语法错误
      */
     boolean calc(String expression, Map<String, ?> args) {
