@@ -98,7 +98,7 @@ public class FastExpression extends IExpression {
             return value;
         }
         if (!trimPipes.matches(PIPES_PATTERN)) {
-            throw new IllegalArgumentException("pipes channel syntax error: " + pipes + " at expression -> " + expression);
+            throw new IllegalArgumentException("pipes channel syntax error." + pipes + " at expression -> " + expression);
         }
         String[] pipeArr = trimPipes.substring(1).split("\\|");
         Object res = value;

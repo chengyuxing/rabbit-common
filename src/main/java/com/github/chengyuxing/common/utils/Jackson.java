@@ -44,7 +44,7 @@ public final class Jackson {
             return json.toString();
         } catch (ClassNotFoundException | IllegalAccessException | InstantiationException | NoSuchMethodException |
                  InvocationTargetException e) {
-            throw new RuntimeException("convert to json error: ", e);
+            throw new RuntimeException("convert to json error.", e);
         }
     }
 
@@ -64,7 +64,7 @@ public final class Jackson {
             return (T) method.invoke(mapper, json, targetType);
         } catch (ClassNotFoundException | IllegalAccessException | InstantiationException | NoSuchMethodException |
                  InvocationTargetException e) {
-            throw new RuntimeException("convert to object error: ", e);
+            throw new RuntimeException("convert to object error.", e);
         }
     }
 
@@ -86,7 +86,7 @@ public final class Jackson {
             return (List<T>) readValue.invoke(objectReader, json);
         } catch (ClassNotFoundException | IllegalAccessException | InstantiationException | NoSuchMethodException |
                  InvocationTargetException e) {
-            throw new RuntimeException("convert to objects error: ", e);
+            throw new RuntimeException("convert to objects error.", e);
         }
     }
 }

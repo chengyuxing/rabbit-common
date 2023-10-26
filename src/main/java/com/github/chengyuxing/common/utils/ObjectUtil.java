@@ -1,5 +1,7 @@
 package com.github.chengyuxing.common.utils;
 
+import com.github.chengyuxing.common.DateTimes;
+
 import java.beans.IntrospectionException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -301,6 +303,108 @@ public final class ObjectUtil {
             return map;
         } catch (IllegalAccessException | IntrospectionException | InvocationTargetException e) {
             throw new RuntimeException("convert to map error.", e);
+        }
+    }
+
+    /**
+     * map转为实体
+     *
+     * @param source                map
+     * @param targetType            实体目标类型
+     * @param constructorParameters 构造函数参数
+     * @param <T>                   实体类型参数
+     * @return 实体
+     */
+    public static <T> T map2entity(Map<String, Object> source, Class<T> targetType, Object... constructorParameters) {
+        try {
+            if (Objects.isNull(source)) return null;
+            T entity = ReflectUtil.getInstance(targetType, constructorParameters);
+            if (source.isEmpty()) return entity;
+            for (Method setter : ReflectUtil.getRWMethods(targetType).getItem2()) {
+                Field set;
+                try {
+                    set = ReflectUtil.getSetterField(targetType, setter);
+                } catch (NoSuchFieldException e) {
+                    continue;
+                }
+                if (Objects.isNull(set)) {
+                    continue;
+                }
+                String field = set.getName();
+                Object value = source.get(field);
+                if (Objects.isNull(value) || setter.getParameterCount() != 1) {
+                    continue;
+                }
+                // dataRow field type
+                Class<?> dft = value.getClass();
+                // entity field type
+                Class<?> eft = setter.getParameterTypes()[0];
+                if (eft.isAssignableFrom(dft)) {
+                    setter.invoke(entity, value);
+                    continue;
+                }
+                if (eft == String.class) {
+                    setter.invoke(entity, value.toString());
+                    continue;
+                }
+                if (eft == Character.class) {
+                    setter.invoke(value.toString().charAt(0));
+                    continue;
+                }
+                if (eft == Integer.class) {
+                    setter.invoke(toInteger(value));
+                    continue;
+                }
+                if (eft == Long.class) {
+                    setter.invoke(toLong(value));
+                    continue;
+                }
+                if (eft == Double.class) {
+                    setter.invoke(toDouble(value));
+                    continue;
+                }
+                if (eft == Float.class) {
+                    setter.invoke(toFloat(value));
+                    continue;
+                }
+                if (eft == Date.class) {
+                    setter.invoke(entity, DateTimes.toDate(value.toString()));
+                    continue;
+                }
+                if (Temporal.class.isAssignableFrom(eft)) {
+                    if (Date.class.isAssignableFrom(dft)) {
+                        setter.invoke(entity, toTemporal(eft, (Date) value));
+                        continue;
+                    }
+                    if (dft == String.class) {
+                        Date date = DateTimes.toDate(value.toString());
+                        setter.invoke(entity, toTemporal(eft, date));
+                    }
+                    continue;
+                }
+                // map, collection or java bean.
+                if (Map.class.isAssignableFrom(eft) || Collection.class.isAssignableFrom(eft) || !eft.getTypeName().startsWith("java.")) {
+                    // maybe json string
+                    if (dft == String.class) {
+                        setter.invoke(entity, Jackson.toObject(value.toString(), eft));
+                        continue;
+                    }
+                    // object array parsing to collection exclude blob
+                    if (dft != byte[].class && value instanceof Object[]) {
+                        if (List.class.isAssignableFrom(eft)) {
+                            setter.invoke(entity, new ArrayList<>(Arrays.asList((Object[]) value)));
+                            continue;
+                        }
+                        if (Set.class.isAssignableFrom(eft)) {
+                            setter.invoke(entity, new HashSet<>(Arrays.asList((Object[]) value)));
+                        }
+                    }
+                }
+            }
+            return entity;
+        } catch (NoSuchMethodException | InstantiationException | InvocationTargetException | IntrospectionException |
+                 IllegalAccessException e) {
+            throw new RuntimeException("convert to " + targetType.getTypeName() + " error.", e);
         }
     }
 }

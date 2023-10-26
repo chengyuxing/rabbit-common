@@ -198,7 +198,7 @@ public final class DateTimes {
         if (hour != -1) {
             return LocalDateTime.of(year, month, day, hour, minus, second);
         }
-        throw new IllegalArgumentException("unknown date time format: " + datetime);
+        throw new IllegalArgumentException("unknown date time format." + datetime);
     }
 
     /**
