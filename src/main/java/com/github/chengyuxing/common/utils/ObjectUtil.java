@@ -300,7 +300,7 @@ public final class ObjectUtil {
             }
             return map;
         } catch (IllegalAccessException | IntrospectionException | InvocationTargetException e) {
-            throw new RuntimeException("convert to DataRow error.", e);
+            throw new RuntimeException("convert to map error.", e);
         }
     }
 }
