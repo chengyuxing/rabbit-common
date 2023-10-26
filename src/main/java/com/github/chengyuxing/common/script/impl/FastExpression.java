@@ -22,8 +22,16 @@ import static com.github.chengyuxing.common.script.Patterns.*;
  * 支持的逻辑运算符: {@code &&, ||, !}<br>
  * e.g.
  * <blockquote>
- * <pre>!(:id{@code >=} 0 || :name | {@link IPipe length}{@code <= 3) &&} :age{@code >} 21</pre>
+ * <pre>!(:id{@code >=} 0 || :name | {@link com.github.chengyuxing.common.script.IPipe.Length length}{@code <= 3) &&} :age{@code >} 21</pre>
  * </blockquote>
+ * 内置{@link IPipe 管道}：
+ * <ul>
+ *     <li>{@link com.github.chengyuxing.common.script.IPipe.Length length}  获取字符串长度</li>
+ *     <li>{@link com.github.chengyuxing.common.script.IPipe.Upper upper}  转为大写</li>
+ *     <li>{@link com.github.chengyuxing.common.script.IPipe.Lower lower}  转为小写</li>
+ *     <li>{@link com.github.chengyuxing.common.script.IPipe.Map2Pairs pairs}  Map转为元组集合 [(item1 -&gt; key, item2 -&gt; value), ...]</li>
+ *     <li>{@link com.github.chengyuxing.common.script.IPipe.Kv kv}  对象转为Kv结构集合 [(key, value), ...]</li>
+ * </ul>
  *
  * @see Comparators
  */
