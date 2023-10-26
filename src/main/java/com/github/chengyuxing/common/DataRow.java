@@ -41,7 +41,7 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
      * @return DataRow
      */
     public static DataRow of(Object... input) {
-        return ObjectUtil.pairs2Map(DataRow::new, input);
+        return ObjectUtil.pairs2map(DataRow::new, input);
     }
 
     /**

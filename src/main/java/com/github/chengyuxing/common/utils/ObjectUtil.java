@@ -281,7 +281,7 @@ public final class ObjectUtil {
      * @param <T>        类型参数
      * @return map
      */
-    public static <T extends Map<String, Object>> T pairs2Map(Function<Integer, T> mapBuilder, Object... input) {
+    public static <T extends Map<String, Object>> T pairs2map(Function<Integer, T> mapBuilder, Object... input) {
         if ((input.length & 1) != 0) {
             throw new IllegalArgumentException("key value are not a pair.");
         }
