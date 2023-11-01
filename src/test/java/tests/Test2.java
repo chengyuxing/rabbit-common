@@ -6,8 +6,10 @@ import com.github.chengyuxing.common.DataRow;
 import com.github.chengyuxing.common.DateTimes;
 import com.github.chengyuxing.common.io.FileResource;
 import com.github.chengyuxing.common.utils.Jackson;
+import com.github.chengyuxing.common.utils.ObjectUtil;
 import com.github.chengyuxing.common.utils.StringUtil;
 import org.junit.Test;
+import tests.entity.DateEntity;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -228,7 +230,14 @@ public class Test2 {
         System.out.println(Jackson.toObjects(json, User.class));
     }
 
-    public static void len(String... args) {
-        System.out.println(args.length);
+    @Test
+    public void testDt() {
+        DataRow row = DataRow.of("now", "2022-12-23T09:54:00", "dt", new Date());
+        DateEntity dateEntity = ObjectUtil.map2entity(row, DateEntity.class);
+        System.out.println(dateEntity);
+
+        Instant instant = ObjectUtil.toTemporal(Instant.class, new Date());
+        System.out.println(instant);
     }
+
 }

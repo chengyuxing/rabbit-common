@@ -80,54 +80,54 @@ public final class ObjectUtil {
     /**
      * 获取一个对象或数组的值
      *
-     * @param value 对象
+     * @param obj 对象
      * @param key   键名或索引
      * @return 值
      * @throws IllegalArgumentException 如果javaBean字段访问异常
      */
-    public static Object getValue(Object value, String key) {
-        if (Objects.isNull(value)) {
+    public static Object getValue(Object obj, String key) {
+        if (Objects.isNull(obj)) {
             return null;
         }
-        if (ReflectUtil.isBasicType(value)) {
+        if (ReflectUtil.isBasicType(obj)) {
             return null;
         }
         if (key.matches("\\d+")) {
             int idx = Integer.parseInt(key);
-            if (value instanceof Collection) {
+            if (obj instanceof Collection) {
                 int i = 0;
-                for (Object v : (Collection<?>) value) {
+                for (Object v : (Collection<?>) obj) {
                     if (i++ == idx) {
                         return v;
                     }
                 }
             }
-            if (value instanceof Object[]) {
-                return ((Object[]) value)[idx];
+            if (obj instanceof Object[]) {
+                return ((Object[]) obj)[idx];
             }
         }
-        if (value instanceof Map) {
+        if (obj instanceof Map) {
             //noinspection unchecked
-            Map<String, ?> map = (Map<String, ?>) value;
+            Map<String, ?> map = (Map<String, ?>) obj;
             if (map.containsKey(key)) {
                 return map.get(key);
             }
             return null;
         }
-        Class<?> clazz = value.getClass();
+        Class<?> clazz = obj.getClass();
         Method m = null;
         try {
             m = ReflectUtil.getGetMethod(clazz, key);
             if (!m.isAccessible()) {
                 m.setAccessible(true);
             }
-            return m.invoke(value);
+            return m.invoke(obj);
         } catch (IllegalAccessException | InvocationTargetException e) {
             throw new IllegalArgumentException("Invoke " + clazz.getName() + "#" + m.getName() + " error.", e);
         } catch (NoSuchFieldException e) {
-            throw new IllegalArgumentException("No such field on " + value, e);
+            throw new IllegalArgumentException("No such field on " + obj, e);
         } catch (NoSuchMethodException e) {
-            throw new IllegalArgumentException("No such method on " + value, e);
+            throw new IllegalArgumentException("No such method on " + obj, e);
         }
     }
 
@@ -195,26 +195,48 @@ public final class ObjectUtil {
     /**
      * 将Date转换为java8时间
      *
-     * @param clazz java8时间的实现类
-     * @param date  日期
-     * @param <T>   类型参数
+     * @param clazz  java8时间的实现类
+     * @param date   日期
+     * @param zoneId 时区ID
+     * @param <T>    类型参数
      * @return java8时间类型
      */
     @SuppressWarnings("unchecked")
-    public static <T extends Temporal> T toTemporal(Class<?> clazz, Date date) {
+    public static <T extends Temporal> T toTemporal(Class<T> clazz, Date date, ZoneId zoneId) {
         if (clazz == LocalDateTime.class) {
-            return (T) date.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+            return (T) date.toInstant().atZone(zoneId).toLocalDateTime();
+        }
+        if (clazz == ZonedDateTime.class) {
+            return (T) date.toInstant().atZone(zoneId);
+        }
+        if (clazz == OffsetDateTime.class) {
+            return (T) date.toInstant().atZone(zoneId).toOffsetDateTime();
         }
         if (clazz == LocalDate.class) {
-            return (T) date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+            return (T) date.toInstant().atZone(zoneId).toLocalDate();
         }
         if (clazz == LocalTime.class) {
-            return (T) date.toInstant().atZone(ZoneId.systemDefault()).toLocalTime();
+            return (T) date.toInstant().atZone(zoneId).toLocalTime();
+        }
+        if (clazz == OffsetTime.class) {
+            return (T) date.toInstant().atZone(zoneId).toOffsetDateTime().toOffsetTime();
         }
         if (clazz == Instant.class) {
             return (T) date.toInstant();
         }
         return null;
+    }
+
+    /**
+     * 将Date转换为java8时间
+     *
+     * @param clazz java8时间的实现类
+     * @param date  日期
+     * @param <T>   类型参数
+     * @return java8时间类型
+     */
+    public static <T extends Temporal> T toTemporal(Class<T> clazz, Date date) {
+        return toTemporal(clazz, date, ZoneId.systemDefault());
     }
 
     /**
@@ -393,13 +415,14 @@ public final class ObjectUtil {
                     continue;
                 }
                 if (Temporal.class.isAssignableFrom(eft)) {
+                    @SuppressWarnings("unchecked") Class<? extends Temporal> j8DateTypeClass = (Class<? extends Temporal>) eft;
                     if (Date.class.isAssignableFrom(dft)) {
-                        setter.invoke(entity, toTemporal(eft, (Date) value));
+                        setter.invoke(entity, toTemporal(j8DateTypeClass, (Date) value));
                         continue;
                     }
                     if (dft == String.class) {
                         Date date = DateTimes.toDate(value.toString());
-                        setter.invoke(entity, toTemporal(eft, date));
+                        setter.invoke(entity, toTemporal(j8DateTypeClass, date));
                     }
                     continue;
                 }
