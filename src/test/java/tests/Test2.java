@@ -240,4 +240,13 @@ public class Test2 {
         System.out.println(instant);
     }
 
+    @Test
+    public void testRow() {
+        DataRow row = DataRow.of("now", DateTimes.toLocalDateTime("2022-12-23"), "age", 30);
+        Integer age = row.getAs("0", null, 29);
+        System.out.println(age);
+        System.out.println(row.getFirstAs(LocalDateTime.now()));
+        System.out.println(row.getFirst());
+        System.out.println(row.getInt("age", 100));
+    }
 }

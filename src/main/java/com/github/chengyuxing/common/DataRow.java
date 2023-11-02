@@ -6,6 +6,8 @@ import com.github.chengyuxing.common.utils.ObjectUtil;
 import java.util.*;
 import java.util.function.Function;
 
+import static com.github.chengyuxing.common.utils.ObjectUtil.coalesce;
+
 /**
  * 对LinkedHashMap进行一些扩展的数据行对象
  */
@@ -153,48 +155,55 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
     /**
      * 获取第一个值
      *
-     * @return 值
+     * @param defaults 更多默认值，选定第一个不为null的值
+     * @return 第一个值或null
      */
-    public Object getFirst() {
+    public Object getFirst(Object... defaults) {
         if (isEmpty()) {
-            return null;
+            return coalesce(defaults);
         }
-        return values().iterator().next();
+        Object v = values().iterator().next();
+        return Objects.nonNull(v) ? v : coalesce(defaults);
     }
 
     /**
      * 隐式转换获取第一个值
      *
-     * @param <T> 结果类型参数
-     * @return 值
+     * @param defaults 更多默认值，选定第一个不为null的值
+     * @param <T>      结果类型参数
+     * @return 第一个值或null
      */
     @SuppressWarnings("unchecked")
-    public <T> T getFirstAs() {
-        return (T) getFirst();
+    public <T> T getFirstAs(T... defaults) {
+        return (T) getFirst((Object[]) defaults);
     }
 
     /**
      * 隐式转换获取一个值
      *
-     * @param key 键
-     * @param <T> 结果类型参数
-     * @return 值
+     * @param key      键
+     * @param defaults 更多默认值，选定第一个不为null的值
+     * @param <T>      结果类型参数
+     * @return 值或null
      */
     @SuppressWarnings("unchecked")
-    public <T> T getAs(String key) {
-        return (T) get(key);
+    public <T> T getAs(String key, T... defaults) {
+        T v = (T) get(key);
+        return Objects.nonNull(v) ? v : coalesce(defaults);
     }
 
     /**
      * 隐式转换获取一个值
      *
-     * @param index 索引
-     * @param <T>   结果类型参数
-     * @return 值
+     * @param index    索引
+     * @param defaults 更多默认值，选定第一个不为null的值
+     * @param <T>      结果类型参数
+     * @return 值或null
      */
     @SuppressWarnings("unchecked")
-    public <T> T getAs(int index) {
-        return (T) _getByIndex(index);
+    public <T> T getAs(int index, T... defaults) {
+        T v = (T) _getByIndex(index);
+        return Objects.nonNull(v) ? v : coalesce(defaults);
     }
 
     /**
@@ -221,88 +230,101 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
     /**
      * 根据名字获取一个字符串
      *
-     * @param name 名字
+     * @param name     名字
+     * @param defaults 更多默认值，选定第一个不为null的值
      * @return 字符串或null
      */
-    public String getString(String name) {
+    public String getString(String name, String... defaults) {
         Object v = get(name);
-        if (Objects.nonNull(v)) return v.toString();
-        return null;
+        return Objects.nonNull(v) ? v.toString() : coalesce(defaults);
     }
 
     /**
      * 根据索引获取一个字符串
      *
-     * @param index 索引
+     * @param index    索引
+     * @param defaults 更多默认值，选定第一个不为null的值
      * @return 字符串或null
      * @throws IndexOutOfBoundsException 如果索引超出界限
      */
-    public String getString(int index) {
+    public String getString(int index, String... defaults) {
         Object v = _getByIndex(index);
-        return Objects.nonNull(v) ? v.toString() : null;
+        return Objects.nonNull(v) ? v.toString() : coalesce(defaults);
     }
 
     /**
      * 根据名字获取一个整型
      *
-     * @param name 名字
+     * @param name     名字
+     * @param defaults 更多默认值，选定第一个不为null的值
      * @return 整型或null
      */
-    public Integer getInt(String name) {
-        return ObjectUtil.toInteger(get(name));
+    public Integer getInt(String name, Integer... defaults) {
+        Integer v = ObjectUtil.toInteger(get(name));
+        return Objects.nonNull(v) ? v : coalesce(defaults);
     }
 
     /**
      * 根据索引获取一个整型
      *
-     * @param index 索引
+     * @param index    索引
+     * @param defaults 更多默认值，选定第一个不为null的值
      * @return 整型或null
      * @throws IndexOutOfBoundsException 如果索引超出界限
      */
-    public Integer getInt(int index) {
-        return ObjectUtil.toInteger(_getByIndex(index));
+    public Integer getInt(int index, Integer... defaults) {
+        Integer v = ObjectUtil.toInteger(_getByIndex(index));
+        return Objects.nonNull(v) ? v : coalesce(defaults);
     }
 
     /**
      * 根据索引获取一个双精度类型数组
      *
-     * @param name 键名
+     * @param name     键名
+     * @param defaults 更多默认值，选定第一个不为null的值
      * @return 双精度数字或null
      */
-    public Double getDouble(String name) {
-        return ObjectUtil.toDouble(get(name));
+    public Double getDouble(String name, Double... defaults) {
+        Double v = ObjectUtil.toDouble(get(name));
+        return Objects.nonNull(v) ? v : coalesce(defaults);
     }
 
     /**
      * 根据索引获取一个双精度类型数组
      *
-     * @param index 索引
+     * @param index    索引
+     * @param defaults 更多默认值，选定第一个不为null的值
      * @return 双精度数字或null
      * @throws IndexOutOfBoundsException 如果索引超出界限
      */
-    public Double getDouble(int index) {
-        return ObjectUtil.toDouble(_getByIndex(index));
+    public Double getDouble(int index, Double... defaults) {
+        Double v = ObjectUtil.toDouble(_getByIndex(index));
+        return Objects.nonNull(v) ? v : coalesce(defaults);
     }
 
     /**
      * 获取一个长整型值
      *
-     * @param name 键名
-     * @return 双精度数字
+     * @param name     键名
+     * @param defaults 更多默认值，选定第一个不为null的值
+     * @return 双精度数字或null
      */
-    public Long getLong(String name) {
-        return ObjectUtil.toLong(get(name));
+    public Long getLong(String name, Long... defaults) {
+        Long v = ObjectUtil.toLong(get(name));
+        return Objects.nonNull(v) ? v : coalesce(defaults);
     }
 
     /**
      * 根据索引获取一个长整型值
      *
-     * @param index 索引
-     * @return 双精度数字
+     * @param index    索引
+     * @param defaults 更多默认值，选定第一个不为null的值
+     * @return 双精度数字或null
      * @throws IndexOutOfBoundsException 如果索引超出界限
      */
-    public Long getLong(int index) {
-        return ObjectUtil.toLong(_getByIndex(index));
+    public Long getLong(int index, Long... defaults) {
+        Long v = ObjectUtil.toLong(_getByIndex(index));
+        return Objects.nonNull(v) ? v : coalesce(defaults);
     }
 
     /**
