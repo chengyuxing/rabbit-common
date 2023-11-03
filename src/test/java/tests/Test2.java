@@ -163,13 +163,14 @@ public class Test2 {
     @Test
     public void StrTests() throws Exception {
         System.out.println(StringUtil.startsWithIgnoreCase("Select * from Test.user", "SELECT"));
+        System.out.println(FileResource.getFileExtension("wwww.docx"));
     }
 
     @Test
     public void sss() throws Exception {
         String str = ";;;;;;;;]\n  \t\r   Select * from Test.user;;;\t   ;;";
 //        System.out.println(StringUtil.trimStarts(str, ";", "\n", " ", "]", "\t", "\r"));
-        System.out.println(StringUtil.trim(str, ";", "\n", "\t", "]", " ", "\r"));
+        System.out.println(StringUtil.trim(str, "\n", "\t", "]", ";", " ", "\r"));
     }
 
     @Test

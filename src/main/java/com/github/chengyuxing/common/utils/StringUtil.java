@@ -4,10 +4,7 @@ package com.github.chengyuxing.common.utils;
 import com.github.chengyuxing.common.StringFormatter;
 import com.github.chengyuxing.common.tuple.Pair;
 
-import java.net.URI;
-import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Formatter;
 import java.util.List;
 import java.util.Objects;
 import java.util.regex.Matcher;
@@ -337,7 +334,7 @@ public final class StringUtil {
     }
 
     /**
-     * 忽略大小写判断被查询的字符串是否匹配其中一个目标字符串
+     * 判断被查询的字符串是否匹配其中一个目标字符串
      *
      * @param source  被查询的字符串
      * @param targets 被包含的字符串组
@@ -409,10 +406,10 @@ public final class StringUtil {
     }
 
     /**
-     * 判断字符串是否为空
+     * 判断字符串是否为null或空白
      *
      * @param str 字符串
-     * @return 是否为空
+     * @return 是否为null或空白
      */
     public static boolean isEmpty(String str) {
         return Objects.isNull(str) || str.trim().isEmpty();
@@ -552,56 +549,5 @@ public final class StringUtil {
             source = source.substring(idx + 1);
         }
         return count;
-    }
-
-    /**
-     * 根据路径获取文件名
-     *
-     * @param fullFileName  文件全路径名
-     * @param withExtension 是否包含文件后缀
-     * @return 文件名
-     */
-    public static String getFileName(String fullFileName, boolean withExtension) {
-        String name;
-        if (fullFileName.startsWith("file:")) {
-            name = Paths.get(URI.create(fullFileName)).getFileName().toString();
-        } else {
-            name = Paths.get(fullFileName).getFileName().toString();
-        }
-        if (withExtension || !name.contains(".")) {
-            return name;
-        }
-        return name.substring(0, name.lastIndexOf("."));
-    }
-
-    /**
-     * 获取文件名后缀
-     *
-     * @param filename 文件名
-     * @return 文件后缀
-     */
-    public static String getFileExtension(String filename) {
-        int dotIdx = filename.lastIndexOf(".");
-        if (dotIdx != -1) {
-            return filename.substring(dotIdx + 1);
-        }
-        return null;
-    }
-
-    /**
-     * 获取字节数组对象的大小
-     *
-     * @param bytes 字节数组
-     * @return 文件大小
-     */
-    public static String getSize(byte[] bytes) {
-        String strSize = "0KB";
-        final Formatter fmt = new Formatter();
-        if (bytes.length > 1048576) {
-            strSize = fmt.format("%.2f", bytes.length / 1048576.0) + "MB";
-        } else if (bytes.length > 0) {
-            strSize = fmt.format("%.2f", bytes.length / 1024.0) + "KB";
-        }
-        return strSize;
     }
 }
