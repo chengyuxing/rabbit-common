@@ -458,6 +458,42 @@ public final class StringUtil {
     }
 
     /**
+     * 替换第一个匹配项
+     *
+     * @param str      字符串
+     * @param oldValue 需要被替换的旧值
+     * @param newValue 需要替换的新值
+     * @return 替换后的字符串
+     */
+    public static String replaceFirst(String str, String oldValue, String newValue) {
+        return Pattern.compile(oldValue, Pattern.LITERAL).matcher(str).replaceFirst(newValue);
+    }
+
+    /**
+     * 忽略大小写替换第一个匹配项
+     *
+     * @param str      字符串
+     * @param oldValue 需要被替换的旧值
+     * @param newValue 需要替换的新值
+     * @return 替换后的字符串
+     */
+    public static String replaceFirstIgnoreCase(String str, String oldValue, String newValue) {
+        return Pattern.compile(oldValue, Pattern.LITERAL | Pattern.CASE_INSENSITIVE).matcher(str).replaceFirst(newValue);
+    }
+
+    /**
+     * 忽略大小写替换匹配项
+     *
+     * @param str      字符串
+     * @param oldValue 需要被替换的旧值
+     * @param newValue 需要替换的新值
+     * @return 替换后的字符串
+     */
+    public static String replaceIgnoreCase(String str, String oldValue, String newValue) {
+        return Pattern.compile(oldValue, Pattern.LITERAL | Pattern.CASE_INSENSITIVE).matcher(str).replaceAll(newValue);
+    }
+
+    /**
      * 忽略大小写查询子字符在字符串中串出现的次数
      *
      * @param str    字符串
@@ -473,64 +509,6 @@ public final class StringUtil {
             source = source.substring(idx + 1);
         }
         return count;
-    }
-
-    /**
-     * 替换
-     *
-     * @param str      字符串
-     * @param oldValue 需要被替换的旧值
-     * @param newValue 需要替换的旧值
-     * @return 替换后的字符串
-     */
-    public static String replaceFirst(String str, String oldValue, String newValue) {
-        if (oldValue.equals(newValue)) {
-            return str;
-        }
-        int index = str.indexOf(oldValue);
-        if (index == -1) {
-            return str;
-        }
-        String left = str.substring(0, index);
-        String right = str.substring(index + oldValue.length());
-        return left + newValue + right;
-    }
-
-    /**
-     * 忽略大小写替换
-     *
-     * @param str      字符串
-     * @param oldValue 需要被替换的旧值
-     * @param newValue 需要替换的旧值
-     * @return 替换后的字符串
-     */
-    public static String replaceIgnoreCase(String str, String oldValue, String newValue) {
-        String replacedFirst = replaceFirstIgnoreCase(str, oldValue, newValue);
-        if (str.equals(replacedFirst)) {
-            return replacedFirst;
-        }
-        return replaceIgnoreCase(replacedFirst, oldValue, newValue);
-    }
-
-    /**
-     * 忽略大小写替换第一个匹配项
-     *
-     * @param str      字符串
-     * @param oldValue 需要被替换的旧值
-     * @param newValue 需要替换的旧值
-     * @return 替换后的字符串
-     */
-    public static String replaceFirstIgnoreCase(String str, String oldValue, String newValue) {
-        if (oldValue.equalsIgnoreCase(newValue)) {
-            return str;
-        }
-        int index = indexOfIgnoreCase(str, oldValue);
-        if (index == -1) {
-            return str;
-        }
-        String left = str.substring(0, index);
-        String right = str.substring(index + oldValue.length());
-        return left + newValue + right;
     }
 
     /**

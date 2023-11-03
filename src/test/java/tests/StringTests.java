@@ -212,7 +212,7 @@ public class StringTests {
 
     @Test
     public void test35() {
-        System.out.println(StringUtil.replaceIgnoreCase("abc", "o", "D"));
+        System.out.println(StringUtil.replaceIgnoreCase("abcO", "o", "D"));
     }
 
     public static void inc(AtomicInteger i) {
