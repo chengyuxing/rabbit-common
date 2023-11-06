@@ -27,6 +27,7 @@ public final class ResourceUtil {
     /**
      * Get files by recursive.
      *
+     * @param basePath   root path
      * @param suffix     file suffix
      * @param moreSuffix more file suffix
      * @return Stream
