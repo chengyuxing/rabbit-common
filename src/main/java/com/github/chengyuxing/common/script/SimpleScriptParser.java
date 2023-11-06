@@ -125,6 +125,7 @@ public class SimpleScriptParser {
      * @param body     content in for loop
      * @param args     each for loop args (index and value) which created by for expression
      * @return formatted content
+     * @see #getForVars()
      */
     protected String forLoopBodyFormatter(int forIndex, int varIndex, String varName, String idxName, List<String> body, Map<String, Object> args) {
         return FMT.format(String.join(NEW_LINE, body), args);
@@ -432,9 +433,24 @@ public class SimpleScriptParser {
     }
 
     /**
-     * Get #for temp variable map which saved by expression calc.
+     * Get #for temp variable map which saved by expression calc.<br>
+     * Format: [varName_forAutoIdx_varAutoIdx, var], e.g.
+     * <blockquote>
+     * <pre>
+     * list: ["a", "b", "c"]; forIdx: 0
+     * </pre>
+     * <pre>
+     * #for item of :list
+     *      ...
+     * #done
+     * </pre>
+     * <pre>
+     * vars: {item_0_0: "a", item_0_1: "b", item_0_2: "c"}
+     * </pre>
+     * </blockquote>
      *
      * @return #for temp variable map
+     * @see #forVarKey(String, int, int)
      */
     public Map<String, Object> getForVars() {
         return Collections.unmodifiableMap(forVars);
