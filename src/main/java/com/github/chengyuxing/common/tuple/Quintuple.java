@@ -1,13 +1,13 @@
 package com.github.chengyuxing.common.tuple;
 
 /**
- * 五元组
+ * Quintuple
  *
- * @param <T1> 类型参数1
- * @param <T2> 类型参数2
- * @param <T3> 类型参数3
- * @param <T4> 类型参数4
- * @param <T5> 类型参数5
+ * @param <T1>  item1 type
+ * @param <T2>  item2 type
+ * @param <T3>  item3 type
+ * @param <T4>  item4 type
+ * @param <T5>  item5 type
  */
 public class Quintuple<T1, T2, T3, T4, T5> extends Quadruple<T1, T2, T3, T4> {
     protected final T5 item5;

@@ -5,25 +5,25 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * 值类型化的properties
+ * Typed properties.
  */
 public class TypedProperties extends Properties {
     /**
-     * 获取一个整型
+     * Parse to int and get.
      *
-     * @param key 键名
-     * @return 整型数值
+     * @param key key
+     * @return int value
      */
     public int getInt(String key) {
         return Integer.parseInt(getProperty(key));
     }
 
     /**
-     * 获取一个整型
+     * Parse to int and get.
      *
-     * @param key          键名
-     * @param defaultValue 默认值
-     * @return 整型数值
+     * @param key          key
+     * @param defaultValue default value
+     * @return int value
      */
     public int getInt(String key, int defaultValue) {
         if (containsKey(key)) {
@@ -33,21 +33,21 @@ public class TypedProperties extends Properties {
     }
 
     /**
-     * 获取一个布尔值
+     * Parse to boolean and get.
      *
-     * @param key 键名
-     * @return 布尔数值
+     * @param key key
+     * @return boolean value
      */
     public boolean getBool(String key) {
         return Boolean.parseBoolean(getProperty(key));
     }
 
     /**
-     * 获取一个布尔值
+     * Parse to boolean and get.
      *
-     * @param key          键名
-     * @param defaultValue 默认值
-     * @return 布尔数值
+     * @param key          key
+     * @param defaultValue default value
+     * @return boolean value
      */
     public boolean getBool(String key, boolean defaultValue) {
         if (containsKey(key)) {
@@ -57,21 +57,21 @@ public class TypedProperties extends Properties {
     }
 
     /**
-     * 获取一个长整型
+     * Parse to long and get.
      *
-     * @param key 键名
-     * @return 长整型数值
+     * @param key key
+     * @return long value
      */
     public long getLong(String key) {
         return Long.parseLong(getProperty(key));
     }
 
     /**
-     * 获取一个长整型
+     * Parse to long and get.
      *
-     * @param key          键名
-     * @param defaultValue 默认值
-     * @return 长整型数值
+     * @param key          key
+     * @param defaultValue default value
+     * @return long value
      */
     public long getLong(String key, long defaultValue) {
         if (containsKey(key)) {
@@ -81,21 +81,21 @@ public class TypedProperties extends Properties {
     }
 
     /**
-     * 获取一个双精度型
+     * Parse to double and get.
      *
-     * @param key 键名
-     * @return 双精度数值
+     * @param key key
+     * @return double value
      */
     public double getDouble(String key) {
         return Double.parseDouble(getProperty(key));
     }
 
     /**
-     * 获取一个双精度型
+     * Parse to double and get.
      *
-     * @param key          键名
-     * @param defaultValue 默认值
-     * @return 双精度数值
+     * @param key          key
+     * @param defaultValue default value
+     * @return double value
      */
     public double getDouble(String key, double defaultValue) {
         if (containsKey(key)) {
@@ -105,21 +105,21 @@ public class TypedProperties extends Properties {
     }
 
     /**
-     * 获取一个浮点型
+     * Parse to float and get.
      *
-     * @param key 键名
-     * @return 浮点型数值
+     * @param key key
+     * @return float value
      */
     public float getFloat(String key) {
         return Float.parseFloat(getProperty(key));
     }
 
     /**
-     * 获取一个浮点型
+     * Parse to float and get.
      *
-     * @param key          键名
-     * @param defaultValue 默认值
-     * @return 浮点型数值
+     * @param key          key
+     * @param defaultValue default value
+     * @return float value
      */
     public float getFloat(String key, float defaultValue) {
         if (containsKey(key)) {
@@ -129,11 +129,11 @@ public class TypedProperties extends Properties {
     }
 
     /**
-     * 根据逗号({@code ,})分割获取一个Stream
+     * Parse to stream by comma ({@code ,}) and get.
      *
-     * @param key          键名
-     * @param defaultValue 默认值
-     * @return 一个Stream
+     * @param key          key
+     * @param defaultValue default value
+     * @return Stream
      */
     public Stream<String> getStream(String key, Stream<String> defaultValue) {
         if (containsKey(key)) {
@@ -143,11 +143,11 @@ public class TypedProperties extends Properties {
     }
 
     /**
-     * 根据逗号({@code ,})分割获取一个List，不包含空元素
+     * Parse to list by comma ({@code ,}) and get.
      *
-     * @param key          键名
-     * @param defaultValue 默认值
-     * @return 一个List
+     * @param key          key
+     * @param defaultValue default value
+     * @return List
      */
     public List<String> getList(String key, List<String> defaultValue) {
         if (containsKey(key)) {
@@ -160,11 +160,11 @@ public class TypedProperties extends Properties {
     }
 
     /**
-     * 根据逗号({@code ,})分割获取一个Set，不包含空元素
+     * Parse to set by comma ({@code ,}) and get.
      *
-     * @param key          键名
-     * @param defaultValue 默认值
-     * @return 一个Set
+     * @param key          key
+     * @param defaultValue default value
+     * @return Set
      */
     public Set<String> getSet(String key, Set<String> defaultValue) {
         List<String> list = getList(key, new ArrayList<>());
@@ -175,17 +175,17 @@ public class TypedProperties extends Properties {
     }
 
     /**
-     * 根据键名前缀({@code .})获取一个Map
+     * Parse to map group by key prefix + dot ({@code .}) and get.
      *
-     * @param key          键名前缀 e.g: datasource
+     * @param key          key prefix e.g. datasource
      *                     <blockquote>
      *                     <ul>
      *                     <li>datasource.url=jdbc:... </li>
      *                     <li>datasource.username=...</li>
      *                     </ul>
      *                     </blockquote>
-     * @param defaultValue 默认值
-     * @return 一个Map
+     * @param defaultValue default value
+     * @return Map
      */
     public Map<String, String> getMap(String key, Map<String, String> defaultValue) {
         Map<String, String> map = keySet().stream()

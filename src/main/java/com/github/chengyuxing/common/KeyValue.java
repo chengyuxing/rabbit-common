@@ -1,12 +1,18 @@
 package com.github.chengyuxing.common;
 
 /**
- * key value 结构对象
+ * Key value structured object.
  */
 public final class KeyValue {
     private final String key;
     private final Object value;
 
+    /**
+     * Constructed a KeyValue with initial key and value.
+     *
+     * @param key   key
+     * @param value value
+     */
     public KeyValue(String key, Object value) {
         this.key = key;
         this.value = value;

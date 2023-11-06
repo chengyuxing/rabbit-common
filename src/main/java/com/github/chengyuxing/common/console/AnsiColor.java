@@ -1,14 +1,14 @@
 package com.github.chengyuxing.common.console;
 
 /**
- * Ansi颜色代码类
+ * Ansi color
  */
 @FunctionalInterface
 public interface AnsiColor {
     /**
-     * 代码
+     * code
      *
-     * @return 代码
+     * @return code
      */
     String code();
 }

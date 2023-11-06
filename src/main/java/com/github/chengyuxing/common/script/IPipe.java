@@ -8,16 +8,16 @@ import com.github.chengyuxing.common.utils.ReflectUtil;
 import java.util.*;
 
 /**
- * 值转换管道基础接口
+ * Pipe function interface.
  *
- * @param <T> 目标类型
+ * @param <T> result type
  */
 @FunctionalInterface
 public interface IPipe<T> {
     T transform(Object value);
 
     /**
-     * 获取为字符串长度
+     * String content length.
      */
     class Length implements IPipe<Integer> {
 
@@ -31,7 +31,7 @@ public interface IPipe<T> {
     }
 
     /**
-     * 转为大写
+     * To uppercase.
      */
     class Upper implements IPipe<String> {
 
@@ -42,7 +42,7 @@ public interface IPipe<T> {
     }
 
     /**
-     * 转为小写
+     * To lowercase.
      */
     class Lower implements IPipe<String> {
         @Override
@@ -52,7 +52,7 @@ public interface IPipe<T> {
     }
 
     /**
-     * Map转为元组集合 {@code [(item1 -> key, item2 -> value), ...]}
+     * Map to pair list: {@code [(item1 -> key, item2 -> value), ...]}.
      */
     class Map2Pairs implements IPipe<List<Pair<String, Object>>> {
         @Override
@@ -67,7 +67,7 @@ public interface IPipe<T> {
     }
 
     /**
-     * 对象转为Kv结构List
+     * Object to key-value list: [(key, value), ...].
      */
     class Kv implements IPipe<List<KeyValue>> {
         @Override

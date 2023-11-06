@@ -13,8 +13,7 @@ import java.nio.file.Paths;
 import java.util.Formatter;
 
 /**
- * 文件资源读取辅助工具类<br>
- * e.g. 格式支持ClassPath下相对路径和URI格式
+ * File resource, support classpath resource and local system file e.g.<br>
  * <blockquote>
  * <pre>windows: file:/D:/rabbit.sql</pre>
  * <pre>Linux/Unix: file:/root/rabbit.sql</pre>
@@ -25,9 +24,9 @@ public class FileResource extends ClassPathResource {
     private final String uriOrClasspath;
 
     /**
-     * 构造函数
+     * Constructed a FileResource with file path.
      *
-     * @param path 文件名
+     * @param path file path
      */
     public FileResource(String path) {
         super(path);
@@ -35,19 +34,14 @@ public class FileResource extends ClassPathResource {
     }
 
     /**
-     * 文件名是否以file:开头
+     * Check resource is URI or not.
      *
-     * @return 是否本地文件
+     * @return true if is URI or false
      */
     private boolean isURI() {
         return uriOrClasspath.startsWith("file:");
     }
 
-    /**
-     * 获取文件输入流
-     *
-     * @return 输入流
-     */
     @Override
     public InputStream getInputStream() {
         if (isURI()) {
@@ -60,11 +54,6 @@ public class FileResource extends ClassPathResource {
         return super.getInputStream();
     }
 
-    /**
-     * 获取文件URL
-     *
-     * @return 文件URL
-     */
     @Override
     public URL getURL() {
         if (isURI()) {
@@ -91,10 +80,10 @@ public class FileResource extends ClassPathResource {
     }
 
     /**
-     * 获取文件名后缀
+     * Get file extension.
      *
-     * @param filename 文件名
-     * @return 文件后缀
+     * @param filename file name
+     * @return file extension
      */
     public static String getFileExtension(String filename) {
         int dotIdx = filename.lastIndexOf(".");
@@ -105,11 +94,11 @@ public class FileResource extends ClassPathResource {
     }
 
     /**
-     * 根据路径获取文件名
+     * Get file short name.
      *
-     * @param fullFileName  文件全路径名
-     * @param withExtension 是否包含文件后缀
-     * @return 文件名
+     * @param fullFileName  file name
+     * @param withExtension with extension or not
+     * @return file short name
      */
     public static String getFileName(String fullFileName, boolean withExtension) {
         String name;
@@ -125,10 +114,10 @@ public class FileResource extends ClassPathResource {
     }
 
     /**
-     * 获取字节数组对象的大小
+     * Get string size view of bytes size.
      *
-     * @param bytes 字节数组
-     * @return 文件大小
+     * @param bytes bytes
+     * @return string size view with unit
      */
     public static String getSize(byte[] bytes) {
         String strSize = "0KB";

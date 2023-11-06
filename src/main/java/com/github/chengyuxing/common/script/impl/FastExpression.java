@@ -11,26 +11,25 @@ import com.github.chengyuxing.common.utils.StringUtil;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static com.github.chengyuxing.common.script.Patterns.*;
 
 /**
- * <h2>快速条件表达式解析器</h2>
- * 支持的逻辑运算符: {@code &&, ||, !}<br>
+ * <h2>Fast condition expression parser</h2>
+ * Support logic operator: {@code &&, ||, !}<br>
  * e.g.
  * <blockquote>
  * <pre>!(:id{@code >=} 0 || :name | {@link com.github.chengyuxing.common.script.IPipe.Length length}{@code <= 3) &&} :age{@code >} 21</pre>
  * </blockquote>
- * 内置{@link IPipe 管道}：
+ * Built-in {@link IPipe pipes}：
  * <ul>
- *     <li>{@link com.github.chengyuxing.common.script.IPipe.Length length}  获取字符串长度</li>
- *     <li>{@link com.github.chengyuxing.common.script.IPipe.Upper upper}  转为大写</li>
- *     <li>{@link com.github.chengyuxing.common.script.IPipe.Lower lower}  转为小写</li>
- *     <li>{@link com.github.chengyuxing.common.script.IPipe.Map2Pairs pairs}  Map转为元组集合 [(item1 -&gt; key, item2 -&gt; value), ...]</li>
- *     <li>{@link com.github.chengyuxing.common.script.IPipe.Kv kv}  对象转为Kv结构集合 [(key, value), ...]</li>
+ *     <li>{@link com.github.chengyuxing.common.script.IPipe.Length length}</li>
+ *     <li>{@link com.github.chengyuxing.common.script.IPipe.Upper upper}</li>
+ *     <li>{@link com.github.chengyuxing.common.script.IPipe.Lower lower}</li>
+ *     <li>{@link com.github.chengyuxing.common.script.IPipe.Map2Pairs pairs}</li>
+ *     <li>{@link com.github.chengyuxing.common.script.IPipe.Kv kv}</li>
  * </ul>
  *
  * @see Comparators
@@ -50,23 +49,19 @@ public class FastExpression extends IExpression {
     }
 
     /**
-     * 构造函数
+     * Constructed a FastExpression with initial expression.
      *
-     * @param expression 表达式
+     * @param expression expression
      */
     public FastExpression(String expression) {
         super(expression);
     }
 
     /**
-     * 创建一个表达式实例<br>
-     * e.g.
-     * <blockquote>
-     * {@code !(:id >= 0 || :name <> blank) && :age<=21}
-     * </blockquote>
+     * Constructed a FastExpression with initial expression.<br>
      *
-     * @param expression 表达式
-     * @return 表达式实例
+     * @param expression expression
+     * @return Expression instance
      */
     public static FastExpression of(String expression) {
         return new FastExpression(expression);
@@ -74,14 +69,13 @@ public class FastExpression extends IExpression {
 
     @Override
     public boolean calc(Map<String, ?> args) {
-        Objects.requireNonNull(args, expression + ": args must not be null.");
         return calc(expression, args);
     }
 
     /**
-     * 设置自定义的管道字典
+     * Set custom pipes.
      *
-     * @param pipes 管道字典实现
+     * @param pipes pipes map
      */
     public void setPipes(Map<String, IPipe<?>> pipes) {
         if (pipes == null) {
@@ -93,12 +87,6 @@ public class FastExpression extends IExpression {
         this.customPipes = new HashMap<>(pipes);
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @throws IllegalArgumentException 管道语法错误
-     * @throws PipeNotFoundException    没有找到管道实现
-     */
     @Override
     public Object pipedValue(Object value, String pipes) {
         String trimPipes = pipes.trim();
@@ -124,13 +112,13 @@ public class FastExpression extends IExpression {
     }
 
     /**
-     * 解析计算表达式
+     * Calc expression.
      *
-     * @param expression 一组布尔值
-     * @param args       参数字典
-     * @return 运算后的布尔结果
-     * @throws IllegalArgumentException 管道语法错误
-     * @throws ArithmeticException      如果表达式语法错误
+     * @param expression expression
+     * @param args       args
+     * @return true or false
+     * @throws IllegalArgumentException if pipe syntax error
+     * @throws ArithmeticException      if expression syntax error
      */
     boolean calc(String expression, Map<String, ?> args) {
         Matcher m = CRITERIA_PATTERN.matcher(expression);
@@ -152,12 +140,12 @@ public class FastExpression extends IExpression {
     }
 
     /**
-     * 获取参数值
+     * Get value for compare.
      *
-     * @param name  参数名或字面量值
-     * @param pipes 参数值管道
-     * @param args  参数字典
-     * @return 可用于比较计算的值
+     * @param name  arg name or string literal value
+     * @param pipes pipes
+     * @param args  args
+     * @return value
      */
     protected Object getValue(String name, String pipes, Map<String, ?> args) {
         if (isKey(name)) {
@@ -176,25 +164,25 @@ public class FastExpression extends IExpression {
     }
 
     /**
-     * 传入的是键名还是字面量值
+     * Check compare name is key or string literal value.
      *
-     * @param a 字符串
-     * @return 是否是键名
+     * @param a name
+     * @return true if is key or false
      */
     protected boolean isKey(String a) {
         return a.startsWith(":");
     }
 
     /**
-     * 布尔运算表达式动态解析计算<br>
+     * Boolean expression calc.<br>
      * e.g.
      * <blockquote>
      * {@code (true || false) && !(!(true && false || !!false)) || false}
      * </blockquote>
      *
-     * @param expression 布尔表达式
-     * @return true 或 false
-     * @throws ArithmeticException 如果表达式语法错误
+     * @param expression boolean expression
+     * @return true or false
+     * @throws ArithmeticException if expression syntax error
      */
     public static boolean boolExpressionEval(String expression) {
         expression = expression.trim();
@@ -302,10 +290,10 @@ public class FastExpression extends IExpression {
     }
 
     /**
-     * 字符串类型bool值转换为bool基本数据类型
+     * Parse string literal boolean value to boolean type.
      *
-     * @param bool 字符串类型bool值
-     * @return bool基本数据类型
+     * @param bool string literal boolean value
+     * @return boolean type value
      */
     public static boolean parseBool(String bool) {
         String v = bool.trim();

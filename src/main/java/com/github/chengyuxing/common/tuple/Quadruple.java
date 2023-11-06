@@ -1,12 +1,12 @@
 package com.github.chengyuxing.common.tuple;
 
 /**
- * 四元组
+ * Quadruple
  *
- * @param <T1> 类型参数1
- * @param <T2> 类型参数2
- * @param <T3> 类型参数3
- * @param <T4> 类型参数4
+ * @param <T1> item1 type
+ * @param <T2> item2 type
+ * @param <T3> item3 type
+ * @param <T4> item4 type
  */
 public class Quadruple<T1, T2, T3, T4> extends Triple<T1, T2, T3> {
     protected final T4 item4;

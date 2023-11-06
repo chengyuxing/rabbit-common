@@ -3,7 +3,7 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <description>一个公共类库工具类</description>
+    <description>A common utils lib.</description>
     <groupId>com.github.chengyuxing</groupId>
     <artifactId>rabbit-common</artifactId>
     <version>2.5.27</version>
@@ -109,7 +109,6 @@
                             </execution>
                         </executions>
                     </plugin>
-                    <!--gpg签名插件-->
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>

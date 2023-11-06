@@ -7,61 +7,48 @@ import java.nio.file.Path;
 import java.util.stream.Stream;
 
 /**
- * 资源工具类
+ * Resource util.
  */
 public final class ResourceUtil {
     /**
-     * 递归获取指定目录下的文件
+     * Get files by recursive.
      *
-     * @param path       基本路径
-     * @param depth      深度
-     * @param suffix     文件后缀
-     * @param moreSuffix 更多的后缀
+     * @param path       root path
+     * @param depth      depth
+     * @param suffix     file suffix
+     * @param moreSuffix more file suffix
      * @return Stream
-     * @throws IOException 没有此路径
+     * @throws IOException if path not exists
      */
     public static Stream<Path> getResources(Path path, int depth, String suffix, String... moreSuffix) throws IOException {
         return Files.find(path, depth, (p, attr) -> (StringUtil.endsWithIgnoreCase(p.toString(), suffix) || StringUtil.endsWithsIgnoreCase(p.toString(), moreSuffix)) && !attr.isDirectory());
     }
 
     /**
-     * 递归获取指定目录下的文件深度为5
+     * Get files by recursive.
      *
-     * @param basePath   基本路径
-     * @param suffix     文件后缀
-     * @param moreSuffix 更多的后缀
+     * @param suffix     file suffix
+     * @param moreSuffix more file suffix
      * @return Stream
-     * @throws IOException 没有此路径
+     * @throws IOException if path not exists
      */
     public static Stream<Path> getResources(Path basePath, String suffix, String... moreSuffix) throws IOException {
         return getResources(basePath, 5, suffix, moreSuffix);
     }
 
-    /**
-     * 包名转换为路径
-     *
-     * @param packageName 包名
-     * @return 路径
-     */
     public static String package2path(String packageName) {
         return packageName.replace('.', '/');
     }
 
-    /**
-     * 路径转换为包名
-     *
-     * @param path 路径
-     * @return 包名
-     */
     public static String path2package(String path) {
         return path.replace('/', '.');
     }
 
     /**
-     * 判断是否是一个文件系统协议
+     * Check is file url or not by protocol.
      *
      * @param url url
-     * @return 是否是文件协议
+     * @return true or false
      */
     public static boolean isFileURL(URL url) {
         String protocol = url.getProtocol();
@@ -69,10 +56,10 @@ public final class ResourceUtil {
     }
 
     /**
-     * 判断路径是否是jar压缩包协议
+     * Check is jar url or not by protocol.
      *
      * @param url url
-     * @return 是否是jar压缩包协议
+     * @return true or false
      */
     public static boolean isJarURL(URL url) {
         String protocol = url.getProtocol();

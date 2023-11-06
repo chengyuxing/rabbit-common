@@ -9,49 +9,49 @@ import java.util.function.Function;
 import static com.github.chengyuxing.common.utils.ObjectUtil.coalesce;
 
 /**
- * 对LinkedHashMap进行一些扩展的数据行对象
+ * A useful data type with more feature which extends LinkedHashMap.
  */
 public final class DataRow extends LinkedHashMap<String, Object> implements MapExtends<Object> {
     /**
-     * 一个空的DataRow
+     * Constructed a DataRow
      */
     public DataRow() {
     }
 
     /**
-     * 一个具有初始值的DataRow
+     * Constructed a DataRow with initial map.
      *
-     * @param map 初始map
+     * @param map initial map
      */
     public DataRow(Map<String, Object> map) {
         super(map);
     }
 
     /**
-     * 一个空的DataRow
+     * Constructed a DataRow with initial capacity.
      *
-     * @param capacity 初始容量大小
+     * @param capacity initial capacity
      */
     public DataRow(int capacity) {
         super(capacity);
     }
 
     /**
-     * 从一组键值对创建一个DataRow
+     * Constructed a DataRow from pairs.
      *
-     * @param input 键值对 k v，k v...
-     * @return DataRow
+     * @param input key-value pairs: k v，k v...
+     * @return DataRow instance
      */
     public static DataRow of(Object... input) {
         return ObjectUtil.pairs2map(DataRow::new, input);
     }
 
     /**
-     * 新建一个DataRow
+     * Constructed a DataRow from keys array and values array.
      *
-     * @param keys   一组字段名
-     * @param values 一组值
-     * @return 新实例，初始化小为字段名数组的长度
+     * @param keys   keys array
+     * @param values values array
+     * @return DataRow instance
      */
     public static DataRow of(String[] keys, Object[] values) {
         if (keys.length == values.length) {
@@ -68,10 +68,10 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
     }
 
     /**
-     * 从一个json对象字符串创建一个DataRow
+     * Constructed a DataRow from json.
      *
-     * @param json json对象字符串 e.g. {@code {"a":1,"b":2}}
-     * @return DataRow
+     * @param json json object e.g. {@code {"a":1,"b":2}}
+     * @return DataRow instance
      */
     public static DataRow ofJson(String json) {
         if (Objects.isNull(json)) return new DataRow(0);
@@ -79,20 +79,20 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
     }
 
     /**
-     * 从一个标准的javaBean实体转为DataRow类型
+     * Constructed a DataRow from standard java bean entity.
      *
-     * @param entity 实体
-     * @return DataRow
+     * @param entity entity
+     * @return DataRow instance
      */
     public static DataRow ofEntity(Object entity) {
         return ObjectUtil.entity2map(entity, DataRow::new);
     }
 
     /**
-     * 从map转换到DataRow
+     * Constructed a DataRow from map.
      *
      * @param map map
-     * @return DataRow
+     * @return DataRow instance
      */
     public static DataRow ofMap(Map<String, Object> map) {
         if (Objects.isNull(map)) return new DataRow(0);
@@ -100,10 +100,10 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
     }
 
     /**
-     * 组合多个DataRow以创建一个DataRow（数据行转为列）
+     * Convert collection of map's rows to columns structure.
      *
-     * @param rows 数据行集合 （为保证正确性，默认以第一行字段为列名，每行字段都必须相同）
-     * @return 一行以列存储形式的数据行
+     * @param rows collection of map
+     * @return columns struct data
      */
     public static DataRow zip(Collection<? extends Map<String, Object>> rows) {
         if (rows.isEmpty()) {
@@ -130,20 +130,20 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
     }
 
     /**
-     * 获取字段名集合
+     * Get names.
      *
-     * @return 字段名集合
+     * @return name list
      */
     public List<String> names() {
         return new ArrayList<>(keySet());
     }
 
     /**
-     * 根据索引获取值
+     * Get value by index.
      *
-     * @param index 索引
-     * @return 值
-     * @throws IndexOutOfBoundsException 如果索引超出界限
+     * @param index index
+     * @return value
+     * @throws IndexOutOfBoundsException if index out of range
      */
     private Object _getByIndex(int index) {
         Object[] values = values().toArray();
@@ -153,10 +153,10 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
     }
 
     /**
-     * 获取第一个值
+     * Get first value.
      *
-     * @param defaults 更多默认值，选定第一个不为null的值
-     * @return 第一个值或null
+     * @param defaults default values, detect get first non-null value
+     * @return value or null
      */
     public Object getFirst(Object... defaults) {
         if (isEmpty()) {
@@ -167,11 +167,11 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
     }
 
     /**
-     * 隐式转换获取第一个值
+     * Convert first value and get.
      *
-     * @param defaults 更多默认值，选定第一个不为null的值
-     * @param <T>      结果类型参数
-     * @return 第一个值或null
+     * @param defaults default values, detect get first non-null value
+     * @param <T>      result type
+     * @return value or null
      */
     @SuppressWarnings("unchecked")
     public <T> T getFirstAs(T... defaults) {
@@ -179,26 +179,26 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
     }
 
     /**
-     * 隐式转换获取一个值
+     * Convert value and get by name.
      *
-     * @param key      键
-     * @param defaults 更多默认值，选定第一个不为null的值
-     * @param <T>      结果类型参数
-     * @return 值或null
+     * @param name     key
+     * @param defaults default values, detect get first non-null value
+     * @param <T>      result type
+     * @return value or null
      */
     @SuppressWarnings("unchecked")
-    public <T> T getAs(String key, T... defaults) {
-        T v = (T) get(key);
+    public <T> T getAs(String name, T... defaults) {
+        T v = (T) get(name);
         return Objects.nonNull(v) ? v : coalesce(defaults);
     }
 
     /**
-     * 隐式转换获取一个值
+     * Convert value and get by index.
      *
-     * @param index    索引
-     * @param defaults 更多默认值，选定第一个不为null的值
-     * @param <T>      结果类型参数
-     * @return 值或null
+     * @param index    index
+     * @param defaults default values, detect get first non-null value
+     * @param <T>      result type
+     * @return value or null
      */
     @SuppressWarnings("unchecked")
     public <T> T getAs(int index, T... defaults) {
@@ -207,32 +207,32 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
     }
 
     /**
-     * 根据名字获取可空值
+     * Get optional value by name.
      *
-     * @param name 名字
-     * @return 可空值
+     * @param name key
+     * @return optional value
      */
     public Optional<Object> getOptional(String name) {
         return Optional.ofNullable(getAs(name));
     }
 
     /**
-     * 根据索引获取可空值
+     * Get optional value by index.
      *
-     * @param index 索引
-     * @return 可空值
-     * @throws IndexOutOfBoundsException 如果索引超出界限
+     * @param index index
+     * @return optional value
+     * @throws IndexOutOfBoundsException if index out of range
      */
     public Optional<Object> getOptional(int index) {
         return Optional.ofNullable(getAs(index));
     }
 
     /**
-     * 根据名字获取一个字符串
+     * Get string value by name.
      *
-     * @param name     名字
-     * @param defaults 更多默认值，选定第一个不为null的值
-     * @return 字符串或null
+     * @param name     key
+     * @param defaults default values, detect get first non-null value
+     * @return value or null
      */
     public String getString(String name, String... defaults) {
         Object v = get(name);
@@ -240,12 +240,12 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
     }
 
     /**
-     * 根据索引获取一个字符串
+     * Get string value by index.
      *
-     * @param index    索引
-     * @param defaults 更多默认值，选定第一个不为null的值
-     * @return 字符串或null
-     * @throws IndexOutOfBoundsException 如果索引超出界限
+     * @param index    index
+     * @param defaults default values, detect get first non-null value
+     * @return value or null
+     * @throws IndexOutOfBoundsException if index out of range
      */
     public String getString(int index, String... defaults) {
         Object v = _getByIndex(index);
@@ -253,11 +253,11 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
     }
 
     /**
-     * 根据名字获取一个整型
+     * Get int value by name.
      *
-     * @param name     名字
-     * @param defaults 更多默认值，选定第一个不为null的值
-     * @return 整型或null
+     * @param name     key
+     * @param defaults default values, detect get first non-null value
+     * @return value or null
      */
     public Integer getInt(String name, Integer... defaults) {
         Integer v = ObjectUtil.toInteger(get(name));
@@ -265,12 +265,12 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
     }
 
     /**
-     * 根据索引获取一个整型
+     * Get int value by index.
      *
-     * @param index    索引
-     * @param defaults 更多默认值，选定第一个不为null的值
-     * @return 整型或null
-     * @throws IndexOutOfBoundsException 如果索引超出界限
+     * @param index    index
+     * @param defaults default values, detect get first non-null value
+     * @return value or null
+     * @throws IndexOutOfBoundsException if index out of range
      */
     public Integer getInt(int index, Integer... defaults) {
         Integer v = ObjectUtil.toInteger(_getByIndex(index));
@@ -278,11 +278,11 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
     }
 
     /**
-     * 根据索引获取一个双精度类型数组
+     * Get double value by name.
      *
-     * @param name     键名
-     * @param defaults 更多默认值，选定第一个不为null的值
-     * @return 双精度数字或null
+     * @param name     key
+     * @param defaults default values, detect get first non-null value
+     * @return value or null
      */
     public Double getDouble(String name, Double... defaults) {
         Double v = ObjectUtil.toDouble(get(name));
@@ -290,12 +290,12 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
     }
 
     /**
-     * 根据索引获取一个双精度类型数组
+     * Get double value by index.
      *
-     * @param index    索引
-     * @param defaults 更多默认值，选定第一个不为null的值
-     * @return 双精度数字或null
-     * @throws IndexOutOfBoundsException 如果索引超出界限
+     * @param index    index
+     * @param defaults default values, detect get first non-null value
+     * @return value or null
+     * @throws IndexOutOfBoundsException if index out of range
      */
     public Double getDouble(int index, Double... defaults) {
         Double v = ObjectUtil.toDouble(_getByIndex(index));
@@ -303,11 +303,11 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
     }
 
     /**
-     * 获取一个长整型值
+     * Get long value by name.
      *
-     * @param name     键名
-     * @param defaults 更多默认值，选定第一个不为null的值
-     * @return 双精度数字或null
+     * @param name     key
+     * @param defaults default values, detect get first non-null value
+     * @return value or null
      */
     public Long getLong(String name, Long... defaults) {
         Long v = ObjectUtil.toLong(get(name));
@@ -315,12 +315,12 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
     }
 
     /**
-     * 根据索引获取一个长整型值
+     * Get long value by index.
      *
-     * @param index    索引
-     * @param defaults 更多默认值，选定第一个不为null的值
-     * @return 双精度数字或null
-     * @throws IndexOutOfBoundsException 如果索引超出界限
+     * @param index    index
+     * @param defaults default values, detect get first non-null value
+     * @return value or null
+     * @throws IndexOutOfBoundsException if index out of range
      */
     public Long getLong(int index, Long... defaults) {
         Long v = ObjectUtil.toLong(_getByIndex(index));
@@ -328,10 +328,10 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
     }
 
     /**
-     * 根据字段名获取类型
+     * Get value type class by name.
      *
-     * @param name 字段
-     * @return 如果值存在或不为null返回值类型名称，否则返回null
+     * @param name key
+     * @return type class or null
      */
     public Class<?> getType(String name) {
         Object v = get(name);
@@ -342,11 +342,11 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
     }
 
     /**
-     * 根据字段名获取类型
+     * Get value type class by name.
      *
-     * @param index 索引
-     * @return 如果值存在或不为null返回值类型名称，否则返回null
-     * @throws IndexOutOfBoundsException 如果索引超出界限
+     * @param index index
+     * @return type class or null
+     * @throws IndexOutOfBoundsException if index out of range
      */
     public Class<?> getType(int index) {
         Object v = _getByIndex(index);
@@ -357,11 +357,11 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
     }
 
     /**
-     * 链式添加一个键值对
+     * Add a key-value.
      *
-     * @param key   键名
-     * @param value 值
-     * @return 对象自身
+     * @param key   key
+     * @param value value
+     * @return DataRow
      */
     public DataRow add(String key, Object value) {
         put(key, value);
@@ -369,12 +369,12 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
     }
 
     /**
-     * 更新一个值
+     * Update a value.
      *
-     * @param key     键名
-     * @param updater 更新器
+     * @param key     key
+     * @param updater updater: old value {@code ->} new value
      * @param <T>     类型参数
-     * @return 是否存在并更新
+     * @return true if exists &amp; updated or false
      */
     @SuppressWarnings("unchecked")
     public <T> boolean update(String key, Function<T, Object> updater) {
@@ -388,11 +388,11 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
     }
 
     /**
-     * 挑出一些字段名生成一个新的DataRow
+     * Pick some names to create a new DataRow.
      *
-     * @param name 字段名
-     * @param more 更多字段名
-     * @return 新的DataRow
+     * @param name key
+     * @param more more keys
+     * @return new DataRow instance
      */
     public DataRow pick(String name, String... more) {
         DataRow row = new DataRow(more.length + 1);
@@ -404,12 +404,12 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
     }
 
     /**
-     * 归并操作
+     * Reduce.
      *
-     * @param init   初始值
-     * @param mapper 映射(初始值，名字，值)
-     * @param <T>    类型参数
-     * @return 归并后的结果
+     * @param init   initial accumulator value
+     * @param mapper (accumulator, key, value) {@code ->} accumulator
+     * @param <T>    result type
+     * @return any type result
      */
     public <T> T reduce(T init, TiFunction<T, String, Object, T> mapper) {
         T acc = init;
@@ -420,35 +420,36 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
     }
 
     /**
-     * 转为一个标准的javaBean实体
+     * Convert to standard java bean entity.
      *
-     * @param clazz                 实体类
-     * @param constructorParameters 如果实体类只有一个带参数的构造函数，则指定参数<br>
+     * @param clazz                 entity class
+     * @param constructorParameters constructor's parameters is required if entity class only have
+     *                              1 constructor with parameters
      *                              e.g.
      *                              <blockquote>
-     *                              <pre>DataRow row = DataRow.fromPair("x", 2, "y", 5, ...);</pre>
+     *                              <pre>DataRow row = DataRow.of("x", 2, "y", 5, ...);</pre>
      *                              <pre>row.toEntity(A.class, row.get("x"), row.get("y"));</pre>
      *                              </blockquote>
-     * @param <T>                   结果类型参数
-     * @return 实体
+     * @param <T>                   entity class type
+     * @return entity
      */
     public <T> T toEntity(Class<T> clazz, Object... constructorParameters) {
         return ObjectUtil.map2entity(this, clazz, constructorParameters);
     }
 
     /**
-     * 转为一个新的map
+     * Convert to new LinkedHashMap.
      *
-     * @return 新的LinkedHashMap
+     * @return new LinkedHashMap
      */
     public Map<String, Object> toMap() {
         return new LinkedHashMap<>(this);
     }
 
     /**
-     * 转为一个json字符串
+     * Convert to json.
      *
-     * @return json字符串
+     * @return json
      */
     public String toJson() {
         if (this.isEmpty()) return "{}";
@@ -456,11 +457,11 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
     }
 
     /**
-     * 转换DataRow
+     * Convert to any.
      *
-     * @param converter 转换器
-     * @param <T>       类型参数
-     * @return 转换后的实例
+     * @param converter DataRow {@code ->} any
+     * @param <T>       result type
+     * @return any result
      */
     public <T> T to(Function<DataRow, T> converter) {
         return converter.apply(this);

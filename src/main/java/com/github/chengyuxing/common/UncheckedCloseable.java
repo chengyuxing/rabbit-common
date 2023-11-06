@@ -1,7 +1,7 @@
 package com.github.chengyuxing.common;
 
 /**
- * 未检查异常的可关闭对象接口
+ * Uncheck closeable interface support nest closeable.
  */
 public interface UncheckedCloseable extends Runnable, AutoCloseable {
     @Override
@@ -14,21 +14,21 @@ public interface UncheckedCloseable extends Runnable, AutoCloseable {
     }
 
     /**
-     * 包裹一个可关闭对象
+     * Constructed UncheckedCloseable with initial closeable.
      *
-     * @param closeable 　可关闭对象
-     * @return 可关闭对象
+     * @param closeable 　closeable
+     * @return UncheckedCloseable
      */
     static UncheckedCloseable wrap(AutoCloseable closeable) {
         return closeable::close;
     }
 
     /**
-     * 嵌套可关闭的对象,从嵌套的最内层开始关闭<br>
-     * 通过try-with-resource触发关闭对象，外层最后关闭
+     * Nest a closeable object.<br>
+     * By try-with-resource, close called from the inside out.
      *
-     * @param closeable 可关闭对象
-     * @return 嵌套的可关闭对象函数
+     * @param closeable closeable
+     * @return nested UncheckedCloseable
      */
     default UncheckedCloseable nest(AutoCloseable closeable) {
         return () -> {

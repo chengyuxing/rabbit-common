@@ -1,12 +1,12 @@
 package com.github.chengyuxing.common;
 
 /**
- * 提供3个参数的函数接口
+ * 3 input args function interface.
  *
- * @param <T1> 类型参数1
- * @param <T2> 类型参数2
- * @param <T3> 类型参数3
- * @param <R>  结果类型参数
+ * @param <T1> arg1 type
+ * @param <T2> arg2 type
+ * @param <T3> arg3 type
+ * @param <R>  result type
  */
 @FunctionalInterface
 public interface TiFunction<T1, T2, T3, R> {

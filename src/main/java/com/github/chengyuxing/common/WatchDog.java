@@ -4,36 +4,36 @@ import java.util.Map;
 import java.util.concurrent.*;
 
 /**
- * 看门狗
+ * Simple Watch dog.
  */
 public class WatchDog {
     private final ScheduledExecutorService schedule;
     private final Map<String, ScheduledFuture<?>> futureMap = new ConcurrentHashMap<>();
 
     /**
-     * 构造函数
+     * Constructed WatchDog with max idle.
      *
-     * @param maxIdle 线程池最大空闲
+     * @param maxIdle max idle
      */
     public WatchDog(int maxIdle) {
         this.schedule = Executors.newScheduledThreadPool(maxIdle);
     }
 
     /**
-     * 构造函数（线程池最大空闲默认8）
+     * Constructed WatchDog with default idle 8.
      */
     public WatchDog() {
         this.schedule = Executors.newScheduledThreadPool(8);
     }
 
     /**
-     * 添加一个监听
+     * Add a listener.
      *
-     * @param name     名称
-     * @param runnable 执行方法
-     * @param period   执行周期
-     * @param unit     单位
-     * @return 是否添加成功
+     * @param name     name
+     * @param runnable runnable
+     * @param period   period
+     * @param unit     unit
+     * @return true if added or false
      */
     public boolean addListener(String name, Runnable runnable, int period, TimeUnit unit) {
         if (futureMap.containsKey(name)) {
@@ -45,21 +45,21 @@ public class WatchDog {
     }
 
     /**
-     * 添加一个监听,周期为一秒
+     * Add a listener with default 1 period.
      *
-     * @param name     名称
-     * @param runnable 执行方法
-     * @return 是否添加成功
+     * @param name     name
+     * @param runnable runnable
+     * @return true if added or false
      */
     public boolean addListener(String name, Runnable runnable) {
         return addListener(name, runnable, 1, TimeUnit.SECONDS);
     }
 
     /**
-     * 移除监听
+     * Remove listener.
      *
-     * @param name 名称
-     * @return 如果监听不存在返回false，如果移除成功返回true
+     * @param name name
+     * @return true if exists and removed or false
      */
     public boolean removeListener(String name) {
         if (futureMap.containsKey(name)) {
@@ -74,7 +74,7 @@ public class WatchDog {
     }
 
     /**
-     * 关闭看门狗
+     * Shutdown and cleanup.
      */
     public void shutdown() {
         schedule.shutdown();
@@ -82,11 +82,11 @@ public class WatchDog {
     }
 
     /**
-     * 关闭看门狗
+     * Shutdown and cleanup.
      *
-     * @param timeForWaiting 等待监听完成关闭超时时间
-     * @param unit           单位
-     * @throws InterruptedException 如果线程中止
+     * @param timeForWaiting await terminal time for waiting
+     * @param unit           unit
+     * @throws InterruptedException ex
      */
     public void shutdown(long timeForWaiting, TimeUnit unit) throws InterruptedException {
         //noinspection ResultOfMethodCallIgnored

@@ -1,17 +1,17 @@
 package com.github.chengyuxing.common.tuple;
 
 /**
- * 九元组
+ * Nonuple
  *
- * @param <T1> 类型参数1
- * @param <T2> 类型参数2
- * @param <T3> 类型参数3
- * @param <T4> 类型参数4
- * @param <T5> 类型参数5
- * @param <T6> 类型参数6
- * @param <T7> 类型参数7
- * @param <T8> 类型参数8
- * @param <T9> 类型参数9
+ * @param <T1> item1 type
+ * @param <T2> item2 type
+ * @param <T3> item3 type
+ * @param <T4> item4 type
+ * @param <T5> item5 type
+ * @param <T6> item6 type
+ * @param <T7> item7 type
+ * @param <T8> item8 type
+ * @param <T9> item9 type
  */
 public class Nonuple<T1, T2, T3, T4, T5, T6, T7, T8, T9> extends Octuple<T1, T2, T3, T4, T5, T6, T7, T8> {
     protected final T9 item9;

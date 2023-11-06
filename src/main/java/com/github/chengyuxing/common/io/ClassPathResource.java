@@ -11,16 +11,16 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * 类路径资源读取工具类
+ * Classpath resource.
  */
 public class ClassPathResource {
     private final String path;
     private final ClassLoader classLoader;
 
     /**
-     * 构造函数
+     * Constructed a ClassPathResource with file path.
      *
-     * @param path 路径
+     * @param path file path
      */
     public ClassPathResource(String path) {
         this.path = cleanPath(path);
@@ -28,10 +28,10 @@ public class ClassPathResource {
     }
 
     /**
-     * 清理路径
+     * If path starts with '/', remove it.
      *
-     * @param path 路径
-     * @return 合适的路径
+     * @param path path
+     * @return correct classpath resource path
      */
     private String cleanPath(String path) {
         if (path.startsWith("/")) {
@@ -41,7 +41,7 @@ public class ClassPathResource {
     }
 
     /**
-     * 获取当前资源的路径
+     * Current resource path.
      *
      * @return 路径
      */
@@ -50,9 +50,9 @@ public class ClassPathResource {
     }
 
     /**
-     * 获取当前资源的输入流
+     * Get current resource's input stream.
      *
-     * @return 资源文件输入流
+     * @return current resource's input stream
      */
     public InputStream getInputStream() {
         InputStream in;
@@ -65,30 +65,30 @@ public class ClassPathResource {
     }
 
     /**
-     * 创建一个新的可读字符流
+     * Create a new BufferedReader of current resource.
      *
-     * @param charset 编码
-     * @return 可读字符流
+     * @param charset charset
+     * @return BufferedReader
      */
     public BufferedReader getBufferedReader(Charset charset) {
         return new BufferedReader(new InputStreamReader(getInputStream(), charset));
     }
 
     /**
-     * 流式读取每一行（需要主动关闭流）
+     * Read lines stream.
      *
-     * @param charset 编码
-     * @return 每一行的流对象
+     * @param charset charset
+     * @return lines stream
      */
     public Stream<String> readLines(Charset charset) {
         return getBufferedReader(charset).lines();
     }
 
     /**
-     * 读取为文本
+     * Read string content.
      *
-     * @param charset 编码
-     * @return 文件文本内容
+     * @param charset charset
+     * @return string content
      */
     public String readString(Charset charset) {
         try (Stream<String> lines = readLines(charset)) {
@@ -97,10 +97,10 @@ public class ClassPathResource {
     }
 
     /**
-     * 读取为字节
+     * Read bytes.
      *
-     * @return 文件字节
-     * @throws IOException 如果文件读取失败
+     * @return bytes
+     * @throws IOException if file not exists
      */
     public byte[] readBytes() throws IOException {
         try (BufferedInputStream inputStream = new BufferedInputStream(getInputStream())) {
@@ -112,10 +112,10 @@ public class ClassPathResource {
     }
 
     /**
-     * 写入到输出流
+     * Current resource transfer to another.
      *
-     * @param out 输出流
-     * @throws IOException 如果文件读取失败
+     * @param out output stream
+     * @throws IOException if file not exists
      */
     public void transferTo(OutputStream out) throws IOException {
         try (BufferedInputStream inputStream = new BufferedInputStream(getInputStream())) {
@@ -127,18 +127,18 @@ public class ClassPathResource {
     }
 
     /**
-     * 判断文件是否存在
+     * Check resource exists or not.
      *
-     * @return 文件是否存在
+     * @return true file exists or false
      */
     public boolean exists() {
         return getURL() != null;
     }
 
     /**
-     * 获取文件名
+     * Get short file name.
      *
-     * @return 文件名
+     * @return short file name
      */
     public String getFileName() {
         if (path.isEmpty()) {
@@ -149,9 +149,9 @@ public class ClassPathResource {
     }
 
     /**
-     * 获取文件名后缀
+     * Get file name extension.
      *
-     * @return 文件名后缀
+     * @return file name extension
      */
     public String getFilenameExtension() {
         if (path.isEmpty()) {
@@ -168,9 +168,9 @@ public class ClassPathResource {
     }
 
     /**
-     * 获取当前资源的URL
+     * Get current resource url.
      *
-     * @return 资源URL
+     * @return resource url
      */
     public URL getURL() {
         if (path.isEmpty()) {
@@ -180,11 +180,10 @@ public class ClassPathResource {
     }
 
     /**
-     * 获取当前资源文件最后一个修改时间<br>
-     * 如果是jar内的资源则无法正确获取，返回-1
+     * Get resource last modified datetime.
      *
-     * @return 文件最后一次修改时间
-     * @throws URISyntaxException uri exp
+     * @return resource last modified datetime
+     * @throws URISyntaxException if uri syntax error.
      */
     public long getLastModified() throws URISyntaxException {
         URL url = getURL();
@@ -199,9 +198,9 @@ public class ClassPathResource {
     }
 
     /**
-     * 获取类启动器
+     * Class loader.
      *
-     * @return 类启动器
+     * @return Class loader
      */
     public static ClassLoader getClassLoader() {
         ClassLoader cl = null;

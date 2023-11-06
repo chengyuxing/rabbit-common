@@ -11,30 +11,30 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * 字符串工具类
+ * String util.
  */
 public final class StringUtil {
     public static final String NUMBER_REGEX = "-?(0|[1-9]\\d*)(\\.\\d+)?";
     public static final String NEW_LINE = "\n";
     public static final String TAB = "\t";
     /**
-     * 字符串模版格式化器
+     * String formatter.
      */
     public static final StringFormatter FMT = new StringFormatter();
 
     /**
-     * 根据正则表达式所匹配的分组分割字符串<br>
-     * 例如一个字符串 {@code aaa##bbb%%ddd}<br>
+     * Split content by regex and save the splitters,
+     * e.g. {@code aaa##bbb%%ddd}<br>
      * RegexResult
      * <blockquote>
      * {@code (?<symbol>##|%%)} symbol :   { [ aaa, bbb, ccc] , [ ## , %% ] } <br>
      *
      * </blockquote>
      *
-     * @param s         字符串
-     * @param regex     正则表达式
-     * @param groupName 组名
-     * @return 二元组(分割后的字符串列表, 匹配的分割符号列表)
+     * @param s         string
+     * @param regex     regex
+     * @param groupName regex splitter group name
+     * @return [each parts, splitters]
      */
     public static Pair<List<String>, List<String>> regexSplit(String s, String regex, String groupName) {
         Pattern p = Pattern.compile(regex);
@@ -51,13 +51,6 @@ public final class StringUtil {
         return Pair.of(items, splitSymbols);
     }
 
-    /**
-     * 判断一个字符串的开头是否出现在一组关键字中
-     *
-     * @param str      字符串
-     * @param keywords 一组关键字
-     * @return 是否匹配
-     */
     public static boolean startsWiths(String str, String... keywords) {
         boolean ok = false;
         for (String keyword : keywords) {
@@ -69,13 +62,6 @@ public final class StringUtil {
         return ok;
     }
 
-    /**
-     * 判断一个字符串的开头是否出现在一组关键字中
-     *
-     * @param str      字符串
-     * @param keywords 一组关键字
-     * @return 是否匹配
-     */
     public static boolean endsWiths(String str, String... keywords) {
         boolean ok = false;
         for (String keyword : keywords) {
@@ -87,13 +73,6 @@ public final class StringUtil {
         return ok;
     }
 
-    /**
-     * 忽略大小写判断一个字符串是否以指定的子字符串开头
-     *
-     * @param str    字符串
-     * @param starts 开头子字符串
-     * @return 是否匹配
-     */
     public static boolean startsWithIgnoreCase(String str, String starts) {
         if (starts.length() > str.length()) {
             return false;
@@ -109,13 +88,6 @@ public final class StringUtil {
         return true;
     }
 
-    /**
-     * 忽略大小写判断一个字符串是否以指定的子字符串结尾
-     *
-     * @param str  字符串
-     * @param ends 结尾子字符串
-     * @return 是否匹配
-     */
     public static boolean endsWithIgnoreCase(String str, String ends) {
         if (ends.length() > str.length()) {
             return false;
@@ -132,13 +104,6 @@ public final class StringUtil {
         return true;
     }
 
-    /**
-     * 忽略大小写判断一个字符串的开头是否出现在一组关键字中
-     *
-     * @param str      字符串
-     * @param keywords 一组关键字
-     * @return 是否匹配
-     */
     public static boolean startsWithsIgnoreCase(String str, String... keywords) {
         boolean ok = false;
         for (String keyword : keywords) {
@@ -150,13 +115,6 @@ public final class StringUtil {
         return ok;
     }
 
-    /**
-     * 忽略大小写判断一个字符串的结尾是否出现在一组关键字中
-     *
-     * @param str      字符串
-     * @param keywords 一组关键字
-     * @return 是否匹配
-     */
     public static boolean endsWithsIgnoreCase(String str, String... keywords) {
         boolean ok = false;
         for (String keyword : keywords) {
@@ -168,13 +126,6 @@ public final class StringUtil {
         return ok;
     }
 
-    /**
-     * 截断以一组关键字起始的指定字符串开头
-     *
-     * @param str    字符串
-     * @param starts 开头中起始字符串所出现的一组关键字
-     * @return 截断后的字符串
-     */
     public static String trimStarts(String str, String... starts) {
         if (starts.length < 1) {
             return str;
@@ -192,13 +143,6 @@ public final class StringUtil {
         return str;
     }
 
-    /**
-     * 截断以一组关键字起始的指定字符串结尾
-     *
-     * @param str  字符串
-     * @param ends 结尾中起始字符串所出现的一组关键字
-     * @return 截断后的字符串
-     */
     public static String trimEnds(String str, String... ends) {
         if (ends.length < 1) {
             return str;
@@ -216,24 +160,10 @@ public final class StringUtil {
         return str;
     }
 
-    /**
-     * 截断以一组关键字起始的指定字符串头和尾
-     *
-     * @param str      字符串
-     * @param keywords 开头和结尾中起始字符串所出现的一组关键字
-     * @return 截断后的字符串
-     */
     public static String trim(String str, String... keywords) {
         return trimStarts(trimEnds(str, keywords), keywords);
     }
 
-    /**
-     * 忽略大小写获取子字符串在指定字符串中的索引
-     *
-     * @param source 被查询的字符串
-     * @param target 要查询的字符串
-     * @return 索引
-     */
     public static int indexOfIgnoreCase(String source, String target) {
         char[] sourceChars = source.toCharArray();
         char[] targetChars = target.toCharArray();
@@ -265,24 +195,10 @@ public final class StringUtil {
         return -1;
     }
 
-    /**
-     * 忽略大小写判断被查询的字符串是否包含目标字符串
-     *
-     * @param source 被查询的字符串
-     * @param target 被包含的字符串
-     * @return 是否包含
-     */
     public static boolean containsIgnoreCase(String source, String target) {
         return indexOfIgnoreCase(source, target) > -1;
     }
 
-    /**
-     * 忽略大小写判断被查询的字符串是否包含其中一个目标字符串
-     *
-     * @param source  被查询的字符串
-     * @param targets 被包含的字符串组
-     * @return 是否包含任意一个
-     */
     public static boolean containsAnyIgnoreCase(String source, String... targets) {
         if (targets.length < 1) {
             return false;
@@ -295,13 +211,6 @@ public final class StringUtil {
         return false;
     }
 
-    /**
-     * 判断被查询的字符串是否包含其中一个目标字符串
-     *
-     * @param source  被查询的字符串
-     * @param targets 被包含的字符串组
-     * @return 是否包含任意一个
-     */
     public static boolean containsAny(String source, String... targets) {
         if (targets.length < 1) {
             return false;
@@ -314,13 +223,6 @@ public final class StringUtil {
         return false;
     }
 
-    /**
-     * 忽略大小写判断被查询的字符串是否匹配其中一个目标字符串
-     *
-     * @param source  被查询的字符串
-     * @param targets 被包含的字符串组
-     * @return 是否包含任意一个
-     */
     public static boolean equalsAnyIgnoreCase(String source, String... targets) {
         if (targets.length < 1) {
             return false;
@@ -333,13 +235,6 @@ public final class StringUtil {
         return false;
     }
 
-    /**
-     * 判断被查询的字符串是否匹配其中一个目标字符串
-     *
-     * @param source  被查询的字符串
-     * @param targets 被包含的字符串组
-     * @return 是否包含任意一个
-     */
     public static boolean equalsAny(String source, String... targets) {
         if (targets.length < 1) {
             return false;
@@ -352,13 +247,6 @@ public final class StringUtil {
         return false;
     }
 
-    /**
-     * 忽略大小写判断被查询的字符串是否包含全部目标字符串
-     *
-     * @param source  被查询的字符串
-     * @param targets 被包含的字符串组
-     * @return 是否包含全部
-     */
     public static boolean containsAllIgnoreCase(String source, String... targets) {
         if (targets.length < 1) {
             return false;
@@ -371,13 +259,6 @@ public final class StringUtil {
         return true;
     }
 
-    /**
-     * 判断被查询的字符串是否包含全部目标字符串
-     *
-     * @param source  被查询的字符串
-     * @param targets 被包含的字符串组
-     * @return 是否包含全部
-     */
     public static boolean containsAll(String source, String... targets) {
         if (targets.length < 1) {
             return false;
@@ -390,14 +271,6 @@ public final class StringUtil {
         return true;
     }
 
-
-    /**
-     * 忽略大小写判断两个字符是否相等
-     *
-     * @param a 被比较字符
-     * @param b 待比较字符
-     * @return 是否相等
-     */
     public static boolean charEqualIgnoreCase(char a, char b) {
         if (((a >= 65 && a <= 90) || (a >= 97 && a <= 122)) && ((b >= 65 && b <= 90) || (b >= 97 && b <= 122)) && a != b) {
             return Math.abs(a - b) == 32;
@@ -406,20 +279,20 @@ public final class StringUtil {
     }
 
     /**
-     * 判断字符串是否为null或空白
+     * Check str is null or trimmed str has length or not.
      *
-     * @param str 字符串
-     * @return 是否为null或空白
+     * @param str string
+     * @return true or false
      */
     public static boolean isEmpty(String str) {
         return Objects.isNull(str) || str.trim().isEmpty();
     }
 
     /**
-     * 判断是否是数字
+     * Check string literal value is numeric or not.
      *
-     * @param numeric 字符串数字
-     * @return 是否是数字
+     * @param numeric string literal value
+     * @return true or false
      */
     public static boolean isNumeric(Object numeric) {
         if (Objects.isNull(numeric)) {
@@ -428,14 +301,6 @@ public final class StringUtil {
         return numeric.toString().matches(NUMBER_REGEX);
     }
 
-    /**
-     * 从一个指定索引开始查找一段字符串内容直到不为空白字符
-     *
-     * @param text    内容
-     * @param index   起始索引
-     * @param reverse 是否反向查找
-     * @return 不为空白字符的索引，如果为-1，说明第一个字符是空白，如果为字符串的长度，则说明最后一个字符也是空白
-     */
     public static int searchIndexUntilNotBlank(String text, int index, boolean reverse) {
         if (reverse) {
             while (index-- > 0) {
@@ -457,49 +322,18 @@ public final class StringUtil {
         }
     }
 
-    /**
-     * 替换第一个匹配项
-     *
-     * @param str      字符串
-     * @param oldValue 需要被替换的旧值
-     * @param newValue 需要替换的新值
-     * @return 替换后的字符串
-     */
     public static String replaceFirst(String str, String oldValue, String newValue) {
         return Pattern.compile(oldValue, Pattern.LITERAL).matcher(str).replaceFirst(newValue);
     }
 
-    /**
-     * 忽略大小写替换第一个匹配项
-     *
-     * @param str      字符串
-     * @param oldValue 需要被替换的旧值
-     * @param newValue 需要替换的新值
-     * @return 替换后的字符串
-     */
     public static String replaceFirstIgnoreCase(String str, String oldValue, String newValue) {
         return Pattern.compile(oldValue, Pattern.LITERAL | Pattern.CASE_INSENSITIVE).matcher(str).replaceFirst(newValue);
     }
 
-    /**
-     * 忽略大小写替换匹配项
-     *
-     * @param str      字符串
-     * @param oldValue 需要被替换的旧值
-     * @param newValue 需要替换的新值
-     * @return 替换后的字符串
-     */
     public static String replaceIgnoreCase(String str, String oldValue, String newValue) {
         return Pattern.compile(oldValue, Pattern.LITERAL | Pattern.CASE_INSENSITIVE).matcher(str).replaceAll(newValue);
     }
 
-    /**
-     * 忽略大小写查询子字符在字符串中串出现的次数
-     *
-     * @param str    字符串
-     * @param substr 子字符串
-     * @return 出现次数
-     */
     public static int countOfContainsIgnoreCase(final String str, final String substr) {
         String source = str;
         int count = 0;
@@ -511,13 +345,6 @@ public final class StringUtil {
         return count;
     }
 
-    /**
-     * 查询子字符在字符串中串出现的次数
-     *
-     * @param str    字符串
-     * @param substr 子字符串
-     * @return 出现次数
-     */
     public static int countOfContains(final String str, final String substr) {
         String source = str;
         int count = 0;

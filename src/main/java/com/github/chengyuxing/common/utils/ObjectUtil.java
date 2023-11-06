@@ -12,31 +12,31 @@ import java.util.*;
 import java.util.function.Function;
 
 /**
- * 简单基本对象工具类
+ * Object util.
  */
 public final class ObjectUtil {
     /**
-     * 不限长赋值表达式<br>
-     * 逻辑形如:
+     * Decode values,
+     * logic following:
      * <blockquote>
      * <pre>
-     *         if(a==b)
+     *         if(a == b)
      *            return v1;
-     *         else if(a==c)
+     *         else if(a == c)
      *            return v2;
-     *         else if(a==d)
+     *         else if(a == d)
      *            return v3;
-     *         # (可选)全部匹配不到的默认值
+     *         # optional default value.
      *         else
      *            return v4;
      *     </pre>
      * </blockquote>
      *
-     * @param value  值
-     * @param equal  比较值
-     * @param result 结果
-     * @param more   更多
-     * @return 结果
+     * @param value  value
+     * @param equal  compare target value
+     * @param result equal result
+     * @param more   more above.
+     * @return result
      */
     public static Object decode(Object value, Object equal, Object result, Object... more) {
         Object[] objs = new Object[more.length + 2];
@@ -61,11 +61,11 @@ public final class ObjectUtil {
     }
 
     /**
-     * 从一个数组中返回第一个不为null的值，如果数组长度为0返回null
+     * Get a value until not null.
      *
-     * @param values 一组值
-     * @param <T>    类型参数
-     * @return 不为null的值或全部为null
+     * @param values values
+     * @param <T>    value type
+     * @return value or null
      */
     @SafeVarargs
     public static <T> T coalesce(T... values) {
@@ -78,12 +78,12 @@ public final class ObjectUtil {
     }
 
     /**
-     * 获取一个对象或数组的值
+     * Get value of object.
      *
-     * @param obj 对象
-     * @param key   键名或索引
-     * @return 值
-     * @throws IllegalArgumentException 如果javaBean字段访问异常
+     * @param obj object or array
+     * @param key key or index
+     * @return value
+     * @throws IllegalArgumentException if java bean access error
      */
     public static Object getValue(Object obj, String key) {
         if (Objects.isNull(obj)) {
@@ -132,12 +132,12 @@ public final class ObjectUtil {
     }
 
     /**
-     * 获取一个嵌套对象的值
+     * Get value of nested object.
      *
-     * @param obj  深层嵌套的对象
-     * @param path 路径表达式（{@code /a/b/0/name}）
-     * @return 值
-     * @throws IllegalArgumentException 如果调用目标javaBean错误
+     * @param obj  nested object.
+     * @param path path expression（{@code /a/b/0/name}）
+     * @return value
+     * @throws IllegalArgumentException if java bean access error
      */
     public static Object walkDeepValue(Object obj, String path) {
         if (Objects.isNull(obj)) {
@@ -156,11 +156,11 @@ public final class ObjectUtil {
     }
 
     /**
-     * 获取一个嵌套对象的值
+     * Get value of nested object.
      *
-     * @param obj            深层嵌套的对象
-     * @param propertyChains 对象属性路径（{@code user.name}）
-     * @return 值
+     * @param obj            nested object
+     * @param propertyChains property chains（{@code user.name}）
+     * @return value
      */
     public static Object getDeepValue(Object obj, String propertyChains) {
         if (propertyChains.contains(".")) {
@@ -171,10 +171,10 @@ public final class ObjectUtil {
     }
 
     /**
-     * 将单个对象转换为对象数组
+     * Convert collection to array.
      *
-     * @param obj 基本类型或集合或数组
-     * @return 对象数组
+     * @param obj boxed type array or collection
+     * @return object array
      */
     @SuppressWarnings("unchecked")
     public static Object[] toArray(Object obj) {
@@ -193,13 +193,13 @@ public final class ObjectUtil {
     }
 
     /**
-     * 将Date转换为java8时间
+     * Convert date to java8 temporal.
      *
-     * @param clazz  java8时间的实现类
-     * @param date   日期
-     * @param zoneId 时区ID
-     * @param <T>    类型参数
-     * @return java8时间类型
+     * @param clazz  java8 temporal implementation
+     * @param date   date
+     * @param zoneId zone id
+     * @param <T>    result type
+     * @return java8 temporal implementation
      */
     @SuppressWarnings("unchecked")
     public static <T extends Temporal> T toTemporal(Class<T> clazz, Date date, ZoneId zoneId) {
@@ -228,23 +228,17 @@ public final class ObjectUtil {
     }
 
     /**
-     * 将Date转换为java8时间
+     * Convert date to java8 temporal.
      *
-     * @param clazz java8时间的实现类
-     * @param date  日期
-     * @param <T>   类型参数
-     * @return java8时间类型
+     * @param clazz java8 temporal implementation
+     * @param date  date
+     * @param <T>   result type
+     * @return java8 temporal implementation
      */
     public static <T extends Temporal> T toTemporal(Class<T> clazz, Date date) {
         return toTemporal(clazz, date, ZoneId.systemDefault());
     }
 
-    /**
-     * 转换为整型
-     *
-     * @param obj 值
-     * @return 整型
-     */
     public static Integer toInteger(Object obj) {
         if (Objects.isNull(obj)) return null;
         if (obj instanceof Integer) {
@@ -253,12 +247,6 @@ public final class ObjectUtil {
         return Integer.parseInt(obj.toString());
     }
 
-    /**
-     * 转换为长整型
-     *
-     * @param obj 值
-     * @return 长整型
-     */
     public static Long toLong(Object obj) {
         if (Objects.isNull(obj)) return null;
         if (obj instanceof Long) {
@@ -267,12 +255,6 @@ public final class ObjectUtil {
         return Long.parseLong(obj.toString());
     }
 
-    /**
-     * 转换为双精度型
-     *
-     * @param obj 值
-     * @return 双精度型
-     */
     public static Double toDouble(Object obj) {
         if (Objects.isNull(obj)) return null;
         if (obj instanceof Double) {
@@ -281,12 +263,6 @@ public final class ObjectUtil {
         return Double.parseDouble(obj.toString());
     }
 
-    /**
-     * 转换为浮点型
-     *
-     * @param obj 值
-     * @return 浮点型
-     */
     public static Float toFloat(Object obj) {
         if (Objects.isNull(obj)) return null;
         if (obj instanceof Float) {
@@ -296,11 +272,11 @@ public final class ObjectUtil {
     }
 
     /**
-     * 多组 k-v 结构数据转为map
+     * Multi key-value pairs convert to map.
      *
-     * @param mapBuilder map构造器 [k-v数量，Map实现]
-     * @param input      多组 k-v 结构数据输入
-     * @param <T>        类型参数
+     * @param mapBuilder (key-value count) {@code ->} (new Map instance)
+     * @param input      multi key-value pairs data
+     * @param <T>        result type
      * @return map
      */
     public static <T extends Map<String, Object>> T pairs2map(Function<Integer, T> mapBuilder, Object... input) {
@@ -317,11 +293,11 @@ public final class ObjectUtil {
     }
 
     /**
-     * 实体转为map
+     * Entity convert to map.
      *
-     * @param entity     标准java bean 实体
-     * @param mapBuilder map构造器 [实体getter数量，Map实现]
-     * @param <T>        类型参数
+     * @param entity     standard java bean entity
+     * @param mapBuilder (key-value count) {@code ->} (new Map instance)
+     * @param <T>        result type
      * @return map
      */
     public static <T extends Map<String, Object>> T entity2map(Object entity, Function<Integer, T> mapBuilder) {
@@ -350,13 +326,13 @@ public final class ObjectUtil {
     }
 
     /**
-     * map转为实体
+     * Map convert to entity.
      *
      * @param source                map
-     * @param targetType            实体目标类型
-     * @param constructorParameters 构造函数参数
-     * @param <T>                   实体类型参数
-     * @return 实体
+     * @param targetType            entity class
+     * @param constructorParameters constructor parameters
+     * @param <T>                   entity type
+     * @return entity
      */
     public static <T> T map2entity(Map<String, Object> source, Class<T> targetType, Object... constructorParameters) {
         try {

@@ -10,7 +10,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * 字符串格式化器
+ * String template formatter.
  */
 public class StringFormatter {
     private static final char DEFAULT_HOLDER_PREFIX = '$';
@@ -20,17 +20,17 @@ public class StringFormatter {
     private final Pattern pattern = Pattern.compile("\\$\\{\\s*(?<key>!?" + Patterns.VAR_KEY_PATTERN + ")\\s*}");
 
     /**
-     * 格式化字符串模版
+     * Format string template with variable map.
      * e.g.
      * <blockquote>
-     * <pre>字符串：select ${ fields } from test.user where ${  cnd} and id in (${!idArr}) or id = ${!idArr.1}</pre>
-     * <pre>参数：{fields: "id, name", cnd: "name = 'cyx'", idArr: ["a", "b", "c"]}</pre>
-     * <pre>结果：select id, name from test.user where name = 'cyx' and id in ('a', 'b', 'c') or id = 'b'</pre>
+     * <pre>template: select ${ fields } from test.user where ${  cnd} and id in (${!idArr}) or id = ${!idArr.1}</pre>
+     * <pre>variables: {fields: "id, name", cnd: "name = 'cyx'", idArr: ["a", "b", "c"]}</pre>
+     * <pre>result: select id, name from test.user where name = 'cyx' and id in ('a', 'b', 'c') or id = 'b'</pre>
      * </blockquote>
      *
-     * @param template 字符串模版
-     * @param data     数据
-     * @return 格式化后的字符串
+     * @param template string template
+     * @param data     variables
+     * @return formatted string template
      */
     public String format(final String template, final Map<String, ?> data) {
         if (Objects.isNull(template)) {
@@ -49,11 +49,11 @@ public class StringFormatter {
     }
 
     /**
-     * 递归格式化字符串模版
+     * Do format string template with variable map.
      *
-     * @param template 字符串模版
-     * @param data     数据
-     * @return 格式化后的字符串
+     * @param template string template
+     * @param data     variables
+     * @return formatted string template
      */
     protected String doFormat(final String template, final Map<String, ?> data) {
         String copy = template;
@@ -68,7 +68,7 @@ public class StringFormatter {
                 key = key.substring(1);
             }
             // e.g. user.cats.1
-            // 字符串中有键路径，但参数中没有此路径键，才默认是键路径表达式，否分，默认args有名为此路径的键
+            // template var key contains dot but data not contains this key, then be key-path otherwise normal key.
             boolean isKeyPath = key.contains(".") && !data.containsKey(key);
             String dataKey = isKeyPath ? key.substring(0, key.indexOf(".")) : key;
             if (!data.containsKey(dataKey)) {
@@ -95,11 +95,11 @@ public class StringFormatter {
     }
 
     /**
-     * 解析值为替换占位符的字符串
+     * Parse object value to string literal value.
      *
-     * @param value     占位符对应的数据值
-     * @param isSpecial 占位符键名是否有特殊前缀
-     * @return 替换的字符串
+     * @param value     value
+     * @param isSpecial key name starts with '{@code !}' or not
+     * @return string literal value
      */
     protected String parseValue(Object value, boolean isSpecial) {
         if (value == null) {
@@ -120,9 +120,9 @@ public class StringFormatter {
     }
 
     /**
-     * 字符串模版正则
+     * Get string template variable pattern.
      *
-     * @return 字符串模版正则
+     * @return string template variable pattern
      */
     public Pattern getPattern() {
         return pattern;

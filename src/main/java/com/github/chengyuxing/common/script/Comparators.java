@@ -1,5 +1,6 @@
 package com.github.chengyuxing.common.script;
 
+import com.github.chengyuxing.common.utils.ObjectUtil;
 import com.github.chengyuxing.common.utils.StringUtil;
 
 import java.util.Collection;
@@ -9,23 +10,22 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * <h2>字符串表达式值比较器</h2>
+ * <h2>String literal value comparator</h2>
  * <ul>
- *     <li>支持比较的数据类型: {@code null, blank(空白字符串、null、空集合、空数组),true, false, 字符串(''或""), 数字}</li>
- *     <li>支持的比较操作符: {@code >, <, >=, <=, == ,=, !=, <>}</li>
- *     <li>正则：{@code ~ (包含), !~ (不包含)}</li>
- *     <li>正则：{@code @ (匹配), !@ (不匹配)}</li>
+ *     <li>support value type: {@code null, blank(empty string、null、empty collection、empty array),true, false, string('' or ""), number};</li>
+ *     <li>support compare operator: {@code >, <, >=, <=, == ,=, !=, <>};</li>
+ *     <li>support regex operator: {@code ~(contains), !~(not contains)}, {@code @(match), !@(not match)};</li>
  * </ul>
  */
 public class Comparators {
     /**
-     * 比较
+     * Compare two object.
      *
-     * @param a  值
-     * @param op 运算符
-     * @param b  被比较的值
-     * @return 比较结果
-     * @throws UnsupportedOperationException 如果比较操作符不在预设中
+     * @param a  a
+     * @param op operator
+     * @param b  b
+     * @return true or false
+     * @throws UnsupportedOperationException if operator not exists
      */
     public static boolean compare(Object a, String op, Object b) {
         switch (op) {
@@ -54,14 +54,14 @@ public class Comparators {
     }
 
     /**
-     * 对比数字类型
+     * Compare two number.
      *
-     * @param a  值
-     * @param op 运算符
-     * @param b  被比较的值
-     * @return 比较结果
-     * @throws UnsupportedOperationException 如果比较操作符不在预设中
-     * @throws IllegalArgumentException      如果比较数字类型无效
+     * @param a  a
+     * @param op operator
+     * @param b  b
+     * @return true or false
+     * @throws UnsupportedOperationException if operator not exists
+     * @throws IllegalArgumentException      if a or b not a number
      */
     public static boolean compareNumber(Object a, String op, Object b) {
         if (isBlank(a) && isBlank(b)) {
@@ -93,12 +93,12 @@ public class Comparators {
     }
 
     /**
-     * 验证内容是否满足正则表达式
+     * Regex result is true or false.
      *
-     * @param content   内容
-     * @param regex     正则表达式
-     * @param fullMatch 如果为 {@code true} 则进行匹配，否则进行查找
-     * @return 是否通过验证
+     * @param content   content
+     * @param regex     regex
+     * @param fullMatch true: {@link Matcher#matches()}, false: {@link Matcher#find()}
+     * @return true or false
      */
     public static boolean regexPass(Object content, Object regex, boolean fullMatch) {
         if (isString(content) && isString(regex)) {
@@ -113,11 +113,11 @@ public class Comparators {
     }
 
     /**
-     * 比较是否相等
+     * Compare equals.
      *
-     * @param a 值
-     * @param b 被比较值
-     * @return 是否相等
+     * @param a a
+     * @param b b
+     * @return true if equals or false
      */
     public static boolean equals(Object a, Object b) {
         if (isBlank(a) && isBlank(b)) {
@@ -139,10 +139,10 @@ public class Comparators {
     }
 
     /**
-     * 将值转换为便于比较的类型
+     * Convert value to boxed.
      *
-     * @param a 值
-     * @return 可进行比较的值
+     * @param a value
+     * @return boxed value
      */
     public static Object valueOf(Object a) {
         if (a == null) {
@@ -173,10 +173,10 @@ public class Comparators {
     }
 
     /**
-     * 排除引号获取字符串
+     * Exclude quotes and get.
      *
-     * @param value 字符串
-     * @return 排除引号后的字符串
+     * @param value string value
+     * @return value without outer quotes
      */
     public static String getString(Object value) {
         if (value == null) {
@@ -190,23 +190,17 @@ public class Comparators {
     }
 
     /**
-     * 获取数字值
+     * Convert to double and get.
      *
-     * @param value 可转数字的值
-     * @return 数字值
+     * @param value string literal number value
+     * @return double value
      */
     public static Double getNumber(Object value) {
-        if (value == null) {
-            return null;
-        }
-        if (value instanceof Double) {
-            return (Double) value;
-        }
-        return Double.parseDouble(value.toString());
+        return ObjectUtil.toDouble(value);
     }
 
     /**
-     * 数据值类型
+     * Boxed keyword value type.
      */
     public enum ValueType {
         NULL("null"), BLANK("blank"), FALSE("false"), TRUE("true");

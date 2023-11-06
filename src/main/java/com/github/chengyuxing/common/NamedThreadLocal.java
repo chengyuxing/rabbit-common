@@ -1,17 +1,17 @@
 package com.github.chengyuxing.common;
 
 /**
- * 命名的线程变量
+ * Named thread local object.
  *
- * @param <T> 类型参数
+ * @param <T> element type
  */
 public class NamedThreadLocal<T> extends ThreadLocal<T> {
     private final String name;
 
     /**
-     * 构造函数
+     * Constructed a NamedThreadLocal with name.
      *
-     * @param name 名称
+     * @param name name
      */
     public NamedThreadLocal(String name) {
         this.name = name;

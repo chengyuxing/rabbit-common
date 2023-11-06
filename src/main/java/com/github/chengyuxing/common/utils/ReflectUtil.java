@@ -16,16 +16,10 @@ import java.util.Objects;
 import java.util.StringJoiner;
 
 /**
- * 反射工具类
+ * Reflect util.
  */
 public final class ReflectUtil {
-    /**
-     * 初始化get方法
-     *
-     * @param field 字段
-     * @param type  返回类型
-     * @return get方法
-     */
+
     public static String initGetMethod(String field, Class<?> type) {
         String prefix = "get";
         if (type == boolean.class || type == Boolean.class)
@@ -33,23 +27,17 @@ public final class ReflectUtil {
         return prefix + field.substring(0, 1).toUpperCase().concat(field.substring(1));
     }
 
-    /**
-     * 初始化set方法
-     *
-     * @param field 字段
-     * @return set方法
-     */
     public static String initSetMethod(String field) {
         return "set" + field.substring(0, 1).toUpperCase().concat(field.substring(1));
     }
 
     /**
-     * 根据方法获取字段名
+     * Get setter field.
      *
      * @param clazz  class
      * @param method setter
-     * @return 字段名
-     * @throws NoSuchFieldException 如果没有此字段
+     * @return field
+     * @throws NoSuchFieldException if field not exists
      */
     public static Field getSetterField(Class<?> clazz, Method method) throws NoSuchFieldException {
         String mName = method.getName();
@@ -62,12 +50,12 @@ public final class ReflectUtil {
     }
 
     /**
-     * 根据方法获取字段名
+     * Get getter field.
      *
      * @param clazz  class
      * @param method getter
-     * @return 字段名
-     * @throws NoSuchFieldException 如果没有此字段
+     * @return field
+     * @throws NoSuchFieldException if field not exists
      */
     public static Field getGetterField(Class<?> clazz, Method method) throws NoSuchFieldException {
         String mName = method.getName();
@@ -88,10 +76,10 @@ public final class ReflectUtil {
     }
 
     /**
-     * 获取标准javaBean的所有读/写方法(getter,setter)
+     * Get standard java bean all getters and setters.
      *
-     * @param clazz 类
-     * @return 类的get和set方法组
+     * @param clazz class
+     * @return pair of getters and setters
      * @throws IntrospectionException ex
      */
     public static Pair<List<Method>, List<Method>> getRWMethods(Class<?> clazz) throws IntrospectionException {
@@ -115,12 +103,12 @@ public final class ReflectUtil {
     }
 
     /**
-     * 获取实体类指定字段的getter
+     * Get getter method.
      *
-     * @param clazz 实体类
-     * @param field 字段名
-     * @return getter方法
-     * @throws NoSuchMethodException 如果没有此字段的方法
+     * @param clazz class
+     * @param field field
+     * @return getter
+     * @throws NoSuchMethodException if method not exists
      */
     public static Method getGetMethod(Class<?> clazz, Field field) throws NoSuchMethodException {
         String methodName = initGetMethod(field.getName(), field.getType());
@@ -128,13 +116,13 @@ public final class ReflectUtil {
     }
 
     /**
-     * 获取实体类指定字段的getter
+     * Get getter method.
      *
-     * @param clazz 实体类
-     * @param field 字段名
-     * @return getter方法
-     * @throws NoSuchFieldException  如果没有此字段
-     * @throws NoSuchMethodException 如果没有此字段的方法
+     * @param clazz class
+     * @param field field name
+     * @return getter
+     * @throws NoSuchFieldException  if field not exists
+     * @throws NoSuchMethodException if method not exists
      */
     public static Method getGetMethod(Class<?> clazz, String field) throws NoSuchFieldException, NoSuchMethodException {
         Field f = clazz.getDeclaredField(field);
@@ -142,12 +130,12 @@ public final class ReflectUtil {
     }
 
     /**
-     * 获取实体类指定字段的setter
+     * Get setter method.
      *
-     * @param clazz 实体类
-     * @param field 字段名
-     * @return setter方法
-     * @throws NoSuchMethodException 如果没有此字段的方法
+     * @param clazz class
+     * @param field field
+     * @return setter
+     * @throws NoSuchMethodException if method not exists
      */
     public static Method getSetMethod(Class<?> clazz, Field field) throws NoSuchMethodException {
         String methodName = initSetMethod(field.getName());
@@ -155,13 +143,13 @@ public final class ReflectUtil {
     }
 
     /**
-     * 获取实体类指定字段的setter
+     * Get setter method.
      *
-     * @param clazz 实体类
-     * @param field 字段名
-     * @return setter方法
-     * @throws NoSuchFieldException  如果没有此字段
-     * @throws NoSuchMethodException 如果没有此字段的方法
+     * @param clazz class
+     * @param field field name
+     * @return setter
+     * @throws NoSuchFieldException  if field not exists
+     * @throws NoSuchMethodException if method not exists
      */
     public static Method getSetMethod(Class<?> clazz, String field) throws NoSuchFieldException, NoSuchMethodException {
         Field f = clazz.getDeclaredField(field);
@@ -169,10 +157,10 @@ public final class ReflectUtil {
     }
 
     /**
-     * 判断对象是否是java的基本数据类型(包括包装类型)
+     * Check is java basic data type(includes boxed type) or not.
      *
-     * @param value 对象
-     * @return 是否是java的基本数据类型
+     * @param value value
+     * @return true or false
      */
     public static boolean isBasicType(Object value) {
         if (value.getClass().isPrimitive()) {
@@ -190,16 +178,16 @@ public final class ReflectUtil {
     }
 
     /**
-     * 获取指定类的一个新实例
+     * Get new instance of class.
      *
-     * @param clazz                 javaBean实体类
-     * @param constructorParameters 构造函数参数
-     * @param <T>                   实例类型参数
-     * @return 类的新实例
-     * @throws NoSuchMethodException     如果类中没有相应的方法
-     * @throws InvocationTargetException 调用目标类异常
-     * @throws InstantiationException    实例化异常
-     * @throws IllegalAccessException    类访问权限异常
+     * @param clazz                 standard java bean class
+     * @param constructorParameters constructor parameters
+     * @param <T>                   java bean type
+     * @return new instance
+     * @throws NoSuchMethodException     if method not exists
+     * @throws InvocationTargetException if invoke error
+     * @throws InstantiationException    if construct error.
+     * @throws IllegalAccessException    if access error.
      */
     public static <T> T getInstance(Class<T> clazz, Object... constructorParameters) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         if (constructorParameters.length > 0) {

@@ -10,7 +10,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * 日期时间工具类
+ * Datetime util.
  */
 public final class DateTimes {
     //language=RegExp
@@ -42,39 +42,39 @@ public final class DateTimes {
     private final Temporal temporal;
 
     /**
-     * 构造函数
+     * Constructed a DateTimes with temporal.
      *
-     * @param temporal 时间
+     * @param temporal temporal
      */
     DateTimes(Temporal temporal) {
         this.temporal = temporal;
     }
 
     /**
-     * 时间工具
+     * Constructed a DateTimes with temporal.
      *
-     * @param temporal 时间
-     * @return 时间工具实例
+     * @param temporal temporal
+     * @return DateTimes instance
      */
     public static DateTimes of(Temporal temporal) {
         return new DateTimes(temporal);
     }
 
     /**
-     * 时间工具
+     * Constructed a DateTimes with date.
      *
-     * @param date 时间
-     * @return 时间工具实例
+     * @param date date
+     * @return DateTimes instance
      */
     public static DateTimes of(Date date) {
         return new DateTimes(date.toInstant());
     }
 
     /**
-     * 时间工具
+     * Constructed a DateTimes with string datetime.
      *
-     * @param datetime 时间字符串
-     * @return 时间工具实例
+     * @param datetime string datetime
+     * @return DateTimes instance
      */
     public static DateTimes of(String datetime) {
         LocalDateTime ldt = toLocalDateTime(datetime);
@@ -82,10 +82,10 @@ public final class DateTimes {
     }
 
     /**
-     * 格式化输出输出时间
+     * Format to string datetime.
      *
-     * @param format 格式
-     * @return 格式化的时间字符串
+     * @param format format
+     * @return string datetime
      */
     public String toString(String format) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format.trim());
@@ -122,23 +122,23 @@ public final class DateTimes {
     }
 
     /**
-     * 将时间字符串转换为本地日期时间对象<br>
-     * 支持的时间格式：
+     * Convert string to local datetime object.<br>
+     * formats：
      * <ul>
-     *     <li>13位时间戳</li>
-     *     <li>10位时间戳</li>
+     *     <li>13 bit timestamp</li>
+     *     <li>10 bit timestamp</li>
      *     <li>yyyyMMddHHmmss</li>
      *     <li>yyyyMMdd</li>
      *     <li>yyyy[-/年]MM[-/月]dd[日]</li>
      *     <li>yyyy[-/年]MM[-/月]dd[日] HH[:时点]mm[:分]ss[秒]</li>
-     *     <li>ISO时间格式，例如：2019-09-26T03:45:36.656+0800</li>
-     *     <li>RFC_1123时间格式，例如：Wed, 04 Jan 2023 09:36:48 GMT</li>
-     *     <li>类似RFC时间格式，例如：Wed Jan 04 2023 17:36:48 GMT+0800</li>
-     *     <li>类似RFC时间格式，例如：Wed Jan 04 18:52:01 CST 2023</li>
+     *     <li>ISO, e.g. 2019-09-26T03:45:36.656+0800</li>
+     *     <li>RFC_1123, e.g. Wed, 04 Jan 2023 09:36:48 GMT</li>
+     *     <li>RFC-like, e.g. Wed Jan 04 2023 17:36:48 GMT+0800</li>
+     *     <li>RFC-like, e.g. Wed Jan 04 18:52:01 CST 2023</li>
      * </ul>
      *
-     * @param datetime 时间字符串
-     * @return 本地日期时间
+     * @param datetime string datetime
+     * @return LocalDateTime
      */
     public static LocalDateTime toLocalDateTime(String datetime) {
         datetime = datetime.trim().replaceAll("\\s+", " ");
@@ -202,27 +202,27 @@ public final class DateTimes {
     }
 
     /**
-     * ISO格式时间
+     * Create ISO datetime object.
      *
-     * @param datetime 例如：2019-09-26T03:45:36.656+0800
-     * @return ISO格式日期时间对象
+     * @param datetime e.g. 2019-09-26T03:45:36.656+0800
+     * @return ISO datetime object
      */
     public static ISODateTime createISODateTime(String datetime) {
         return new ISODateTime(datetime);
     }
 
     /**
-     * 近似RFC格式的时间
+     * Create RFC-like datetime object.
      *
-     * @param datetime 例如：Wed Jan 04 2023 17:36:48 GMT+0800
-     * @return RFC格式日期时间对象
+     * @param datetime e.g. Wed Jan 04 2023 17:36:48 GMT+0800
+     * @return RFC-like datetime object
      */
     public static RFCLikeDate createRFCLikeDateTime(String datetime) {
         return new RFCLikeDate(datetime);
     }
 
     /**
-     * UTC格式时间
+     * UTC datetime.
      */
     public static class ISODateTime {
         private boolean match = false;
@@ -272,7 +272,7 @@ public final class DateTimes {
     }
 
     /**
-     * 近似RFC格式的时间
+     * RFC-like date.
      */
     public static class RFCLikeDate {
         private boolean match = false;
@@ -348,57 +348,57 @@ public final class DateTimes {
     }
 
     /**
-     * 将时间字符串转换为本地日期对象
+     * Convert string to local date object.
      *
-     * @param datetime 时间字符串
-     * @return 本地日期
+     * @param datetime string datetime
+     * @return local date
      */
     public static LocalDate toLocalDate(String datetime) {
         return toLocalDateTime(datetime).toLocalDate();
     }
 
     /**
-     * 将时间字符串转换为本地时间对象
+     * Convert string to local time object.
      *
-     * @param datetime 时间字符串
-     * @return 本地时间
+     * @param datetime string datetime
+     * @return local time
      */
     public static LocalTime toLocalTime(String datetime) {
         return toLocalDateTime(datetime).toLocalTime();
     }
 
     /**
-     * 将时间字符串转换为当前日期时间对象
+     * Convert string to instant object.
      *
-     * @param datetime 时间字符串
-     * @return 当前日期时间
+     * @param datetime string datetime
+     * @return instant
      */
     public static Instant toInstant(String datetime) {
         return toLocalDateTime(datetime).atZone(ZoneId.systemDefault()).toInstant();
     }
 
     /**
-     * 将时间字符串转为时间戳（毫秒数）
+     * Convert string to timestamp.
      *
-     * @param datetime 时间字符串
-     * @return 时间戳
+     * @param datetime string datetime
+     * @return timestamp
      */
     public static long toEpochMilli(String datetime) {
         return toInstant(datetime).toEpochMilli();
     }
 
     /**
-     * 将时间字符串转换为日期对象
+     * Convert string to date object.
      *
-     * @param datetime 时间字符串
-     * @return 日期
+     * @param datetime string datetime
+     * @return date
      */
     public static Date toDate(String datetime) {
         return new Date(toEpochMilli(datetime));
     }
 
     /**
-     * 获取当前时间
+     * Get now of local datetime.
      *
      * @return 当前时间
      */
@@ -407,9 +407,9 @@ public final class DateTimes {
     }
 
     /**
-     * 获取当前时间戳
+     * Get current timestamp.
      *
-     * @return 当前时间戳
+     * @return timestamp
      */
     public static long currentTimestamp() {
         return Instant.now().toEpochMilli();

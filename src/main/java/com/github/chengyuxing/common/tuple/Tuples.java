@@ -1,7 +1,7 @@
 package com.github.chengyuxing.common.tuple;
 
 /**
- * 元组
+ * Tuples util.
  */
 public final class Tuples {
     public static <T1, T2> Pair<T1, T2> pair(T1 item1, T2 item2) {

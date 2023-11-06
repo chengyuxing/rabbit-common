@@ -12,8 +12,8 @@ import static com.github.chengyuxing.common.utils.ObjectUtil.*;
 import static com.github.chengyuxing.common.utils.StringUtil.*;
 
 /**
- * <h2>简单脚本解析器</h2>
- * <p>if语句块</p>
+ * <h2>Simple script parser</h2>
+ * <p>if statement</p>
  * <blockquote>
  * <pre>
  * #if {@linkplain FastExpression expression}
@@ -23,7 +23,7 @@ import static com.github.chengyuxing.common.utils.StringUtil.*;
  * #fi
  * </pre>
  * </blockquote>
- * <p>choose语句块</p>
+ * <p>choose statement</p>
  * <blockquote>
  * <pre>
  * #choose
@@ -40,7 +40,7 @@ import static com.github.chengyuxing.common.utils.StringUtil.*;
  * #end
  * </pre>
  * </blockquote>
- * <p>switch语句块</p>
+ * <p>switch statement</p>
  * <blockquote>
  * <pre>
  * #switch :key [| {@linkplain IPipe pipe1} | {@linkplain IPipe pipeN} | ...]
@@ -57,7 +57,7 @@ import static com.github.chengyuxing.common.utils.StringUtil.*;
  * #end
  * </pre>
  * </blockquote>
- * <p>for语句块</p>
+ * <p>for statement</p>
  * <blockquote>
  * <pre>
  * #for item[,idx] of :list [| {@link IPipe pipe1} | pipeN | ... ] [delimiter ','] [open ''] [close '']
@@ -96,45 +96,45 @@ public class SimpleScriptParser {
     private Map<String, Object> forVars = new HashMap<>();
 
     /**
-     * 配置表达式解析器具体实现
+     * Configure expression parser implementation.
      *
-     * @param expression 当前解析过程中的表达式
-     * @return 包含当前表达式的解析器
+     * @param expression expression
+     * @return expression parser implementation
      */
     protected IExpression expression(String expression) {
         return FastExpression.of(expression);
     }
 
     /**
-     * <code>#for</code> 循环体的模版内容格式化器，用于格式化自定义在循环体内的模版，例如：
+     * <code>#for</code> loop body content formatter, format custom template variable and args resolve, e.g.
      * <blockquote>
      * <pre>
-     *     参数：<code>users: [{name:'cyx', name:'json'}]</code>
+     *     args: <code>users: [{name:'cyx', name:'json'}]</code>
      *
-     *     #for user of :users delimiter ' and '
+     *     #for user,idx of :users delimiter ' and '
      *        '${user.name}'
      *     #done
      * </pre>
-     * 结果：<pre>'cyx' and 'json'</pre>
+     * result: <pre>'cyx' and 'json'</pre>
      * </blockquote>
      *
-     * @param forIndex 每个for循环语句的序号
-     * @param varIndex for变量的序号
-     * @param varName  for变量名
-     * @param idxName  for变量序号名
-     * @param body     for循环里的内容主体
-     * @param args     用户参数和for循环每次迭代的参数（序号和值）
-     * @return 格式化后的内容
+     * @param forIndex each for loop auto index
+     * @param varIndex for var auto index
+     * @param varName  for var name,  e.g. {@code <user>}
+     * @param idxName  for index name,  e.g. {@code <idx>}
+     * @param body     content in for loop
+     * @param args     each for loop args (index and value) which created by for expression
+     * @return formatted content
      */
     protected String forLoopBodyFormatter(int forIndex, int varIndex, String varName, String idxName, List<String> body, Map<String, Object> args) {
         return FMT.format(String.join(NEW_LINE, body), args);
     }
 
     /**
-     * 格式化表达式用以寻找前缀匹配 {@code #} 的表达式
+     * Trim each line for search prefix {@code #} to detect expression.
      *
-     * @param line 当前解析的内容行
-     * @return 满足匹配表达式格式的字符串
+     * @param line current line
+     * @return expression or normal line
      * @see #IF
      */
     protected String trimExpression(String line) {
@@ -146,13 +146,11 @@ public class SimpleScriptParser {
     }
 
     /**
-     * 解析内容
+     * Parse content with scripts.
      *
-     * @param content 内容
-     * @param data    逻辑表达式参数字典
-     * @return 解析后的内容
-     * @throws IllegalArgumentException 如果 {@code checkArgsKey} 为 {@code true} 并且 {@code args} 中不存在表达式所需要的key
-     * @throws NullPointerException     如果 {@code args} 为null
+     * @param content content
+     * @param data    data of expression
+     * @return parsed content
      * @see IExpression
      */
     public String parse(String content, Map<String, ?> data) {
@@ -165,13 +163,11 @@ public class SimpleScriptParser {
     }
 
     /**
-     * 递归执行解析内容
+     * Parse content with scripts.
      *
-     * @param content 内容
-     * @param data    逻辑表达式参数字典
-     * @return 解析后的内容
-     * @throws IllegalArgumentException 如果 {@code checkArgsKey} 为 {@code true} 并且 {@code args} 中不存在表达式所需要的key
-     * @throws NullPointerException     如果 {@code args} 为null
+     * @param content content
+     * @param data    data of expression
+     * @return parsed content
      * @see IExpression
      */
     protected String doParse(String content, Map<String, ?> data) {
@@ -191,7 +187,7 @@ public class SimpleScriptParser {
             String expression = trimExpression(currentLine);
             int ifCount = 0;
             int forCount = 0;
-            // 处理if表达式块
+            // if block
             if (startsWithIgnoreCase(expression, IF)) {
                 ifCount++;
                 StringJoiner buffer = new StringJoiner(NEW_LINE);
@@ -206,30 +202,28 @@ public class SimpleScriptParser {
                         if (ifCount < 0) {
                             throw new ScriptSyntaxException("can not find pair of '#if...#fi' block at line " + i);
                         }
-                        // 说明此处已经达到了嵌套fi的末尾
+                        // it means at the end of if block.
                         if (ifCount == 0) {
-                            // 此处计算外层if逻辑表达式，逻辑同程序语言的if逻辑
                             boolean res = expression(expression.substring(3)).calc(data);
-                            // 如果外层判断为真，如果内层还有if或其他标签块，则进入内层继续处理
-                            // 否则就认为是原始逻辑判断需要保留片段
+                            // if true do recursion to parse inside.
                             if (res) {
                                 output.add(doParse(buffer.toString(), data));
                             }
                             break;
                         } else {
-                            // 说明此处没有达到外层fi，内层fi后面还有外层的内容需要保留
+                            // this line means it's content need to hold.
                             // e.g.
                             // #if
                             // ...
                             //      #if
                             //      ...
                             //      #fi
-                            //      and t.a = :a    --此处为需要保留的地方
+                            //      and t.a = :a    --need to hold
                             // #fi
                             buffer.add(line);
                         }
                     } else {
-                        // 非if表达式的部分需要保留
+                        // normal line need to hold.
                         buffer.add(line);
                     }
                 }
@@ -237,7 +231,7 @@ public class SimpleScriptParser {
                     throw new ScriptSyntaxException("can not find pair of '#if...#fi' block at line " + i);
                 }
             } else if (startsWithIgnoreCase(expression, CHOOSE)) {
-                // 处理choose表达式块
+                // choose block
                 while (++i < j) {
                     String line = lines[i];
                     String trimLine = trimExpression(line);
@@ -246,21 +240,20 @@ public class SimpleScriptParser {
                         if (startsWithIgnoreCase(trimLine, WHEN)) {
                             res = expression(trimLine.substring(5)).calc(data);
                         }
-                        // choose表达式块效果类似于程序语言的switch块，从前往后，只要满足一个分支，就跳出整个choose块
-                        // 如果有default分支，前面所有when都不满足的情况下，就会直接选择default分支的内容作为结果保留
+                        // if first case or default case passed.
                         if (res || startsWithIgnoreCase(trimLine, DEFAULT)) {
                             StringJoiner buffer = new StringJoiner(NEW_LINE);
-                            // 移动游标直到此分支的break之前都是符合判断结果保留下来
+                            // increment index and hold all lines until at break.
                             while (++i < j && !startsWithIgnoreCase(trimExpression(lines[i]), BREAK)) {
                                 if (startsWithsIgnoreCase(trimExpression(lines[i]), WHEN, DEFAULT)) {
                                     throw new ScriptSyntaxException("#when missing '#break' tag of expression '" + trimLine + "'");
                                 }
                                 buffer.add(lines[i]);
                             }
-                            // when...break块中还可以嵌套
+                            // do recursive to parse when...break block.
                             output.add(doParse(buffer.toString(), data));
-                            // 到此处说明已经将满足条件的分支的内容保留下来
-                            // 在接下来的分支都直接略过，移动游标直到end结束标签，就跳出整个choose块
+                            // finish the when...block parse.
+                            // break choose block.
                             //noinspection StatementWithEmptyBody
                             while (++i < j && !startsWithIgnoreCase(trimExpression(lines[i]), END)) ;
                             if (i == j) {
@@ -268,7 +261,7 @@ public class SimpleScriptParser {
                             }
                             break;
                         } else {
-                            // 如果此分支when语句表达式不满足条件，就移动游标到当前分支break结束，进入下一个when分支
+                            // if not pass, move to next case.
                             while (++i < j && !startsWithIgnoreCase(trimExpression(lines[i]), BREAK)) {
                                 if (startsWithsIgnoreCase(trimExpression(lines[i]), WHEN, DEFAULT)) {
                                     throw new ScriptSyntaxException("#choose missing '#break' tag of expression '" + trimLine + "'");
@@ -276,14 +269,14 @@ public class SimpleScriptParser {
                             }
                         }
                     } else if (startsWithIgnoreCase(trimLine, END)) {
-                        //在语句块为空的情况下，遇到end结尾，就跳出整个choose块
+                        // break choose block until at end.
                         break;
                     } else {
                         output.add(line);
                     }
                 }
             } else if (startsWithIgnoreCase(expression, SWITCH)) {
-                // 处理switch表达式块，逻辑等同于choose表达式块
+                // switch block logic like choose block.
                 Matcher m = SWITCH_PATTERN.matcher(expression.substring(7));
                 String name = null;
                 String pipes = null;
@@ -314,7 +307,6 @@ public class SimpleScriptParser {
                                 }
                                 buffer.add(lines[i]);
                             }
-                            // case...break块中还可以嵌套
                             output.add(doParse(buffer.toString(), data));
                             //noinspection StatementWithEmptyBody
                             while (++i < j && !startsWithIgnoreCase(trimExpression(lines[i]), END)) ;
@@ -336,7 +328,7 @@ public class SimpleScriptParser {
                     }
                 }
             } else if (startsWithIgnoreCase(expression, FOR)) {
-                // for表达式处理逻辑
+                // for expression block
                 // item[,idx] of :list [| pipe1 | pipe2 | ... ] [delimiter ','] [open ''] [close '']
                 forCount++;
                 List<String> buffer = new ArrayList<>();
@@ -380,9 +372,9 @@ public class SimpleScriptParser {
                                 Map<String, Object> localForVars = new HashMap<>();
                                 for (int x = 0, y = iterator.length; x < y; x++) {
                                     Object value = iterator[x];
-                                    // 每次都携带者for的迭代项和索引到参数字典中进行计算或为下一层提供参数
+                                    // create #for each temp args (name and index) for next inside expression block.
                                     Map<String, Object> eachArgs = new HashMap<>(data);
-                                    // for循环迭代的变量保存下来提供给用户
+                                    // temp args save to local #for variable map for user.
                                     if (itemName != null) {
                                         localForVars.put(forVarKey(itemName, forIndex, x), value);
                                         eachArgs.put(itemName, value);
@@ -393,7 +385,7 @@ public class SimpleScriptParser {
                                     }
 
                                     String formatted = forLoopBodyFormatter(forIndex, x, itemName, idxName, buffer, eachArgs);
-                                    // 继续嵌套以解析其他标签语句
+                                    // keep do recursive to parse another inside expression.
                                     String parsed = doParse(formatted, eachArgs);
                                     if (!parsed.trim().isEmpty()) {
                                         joiner.add(parsed);
@@ -420,7 +412,7 @@ public class SimpleScriptParser {
                     throw new ScriptSyntaxException("can not find pair of '#for...#done' block at line " + i);
                 }
             } else {
-                // 没有表达式的行，说明是需要保留的部分
+                // non-expression line need to hold.
                 output.add(currentLine);
             }
         }
@@ -428,21 +420,21 @@ public class SimpleScriptParser {
     }
 
     /**
-     * for表达式变量的key名
+     * Build #for var key.
      *
-     * @param name   变量名
-     * @param forIdx for序号
-     * @param varIdx 变量序号
-     * @return 变量key名
+     * @param name   var name
+     * @param forIdx for auto index
+     * @param varIdx var auto index
+     * @return unique for var key
      */
     protected String forVarKey(String name, int forIdx, int varIdx) {
         return name + "_" + forIdx + "_" + varIdx;
     }
 
     /**
-     * 获取for表达式执行过程中产生的临时变量
+     * Get #for temp variable map which saved by expression calc.
      *
-     * @return for表达式变量字典
+     * @return #for temp variable map
      */
     public Map<String, Object> getForVars() {
         return Collections.unmodifiableMap(forVars);

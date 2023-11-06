@@ -1,7 +1,7 @@
 package com.github.chengyuxing.common.console;
 
 /**
- * 控制台打印帮助类
+ * Console printer.
  */
 public class Printer {
     public static String colorful(String str, AnsiColor color) {

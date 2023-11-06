@@ -1,10 +1,10 @@
 package com.github.chengyuxing.common.tuple;
 
 /**
- * 二元组
+ * Pair
  *
- * @param <T1> 类型参数1
- * @param <T2> 类型参数2
+ * @param <T1> item1 type
+ * @param <T2> item2 type
  */
 public class Pair<T1, T2> {
     protected final T1 item1;

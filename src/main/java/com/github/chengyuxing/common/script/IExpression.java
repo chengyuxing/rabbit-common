@@ -3,7 +3,7 @@ package com.github.chengyuxing.common.script;
 import java.util.Map;
 
 /**
- * 抽象bool表达式通用接口
+ * Abstract expression parser interface.
  */
 public abstract class IExpression {
 
@@ -14,21 +14,20 @@ public abstract class IExpression {
     }
 
     /**
-     * 通过传入一个参数字典来获取解析表达式后进行逻辑运算的结果
+     * Calc expression.
      *
-     * @param args    参数字典
-     * @return 逻辑运算的结果
-     * @throws IllegalArgumentException 如果 {@code require} 为 {@code true}，参数字典中不存在的值进行计算则抛出错误
-     * @throws ArithmeticException      如果表达式语法错误
+     * @param args args
+     * @return true or false
+     * @throws ArithmeticException if expression syntax error.
      */
     public abstract boolean calc(Map<String, ?> args);
 
     /**
-     * 通过一系列管道来处理值
+     * Get value passed by pipes.
      *
-     * @param value 值
-     * @param pipes 管道 e.g.  <code>| {@link IPipe upper} | {@link IPipe length} | ...</code>
-     * @return 经过管道处理后的值
+     * @param value value
+     * @param pipes pipes e.g.  <code>| {@link IPipe upper} | {@link IPipe length} | ...</code>
+     * @return passed value
      */
     public Object pipedValue(Object value, String pipes) {
         return value;

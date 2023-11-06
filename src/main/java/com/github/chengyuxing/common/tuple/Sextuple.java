@@ -1,14 +1,14 @@
 package com.github.chengyuxing.common.tuple;
 
 /**
- * 六元组
+ * Sextuple
  *
- * @param <T1> 类型参数1
- * @param <T2> 类型参数2
- * @param <T3> 类型参数3
- * @param <T4> 类型参数4
- * @param <T5> 类型参数5
- * @param <T6> 类型参数6
+ * @param <T1> item1 type
+ * @param <T2> item2 type
+ * @param <T3> item3 type
+ * @param <T4> item4 type
+ * @param <T5> item5 type
+ * @param <T6> item6 type
  */
 public class Sextuple<T1, T2, T3, T4, T5, T6> extends Quintuple<T1, T2, T3, T4, T5> {
     protected final T6 item6;

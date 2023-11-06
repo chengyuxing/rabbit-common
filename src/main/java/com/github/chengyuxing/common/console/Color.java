@@ -1,7 +1,7 @@
 package com.github.chengyuxing.common.console;
 
 /**
- * 支持Ansi的系统终端颜色
+ * Ansi color enums.
  */
 public enum Color implements AnsiColor {
     DARK_RED("31"),

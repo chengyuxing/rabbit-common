@@ -5,31 +5,31 @@ import java.util.Map;
 import java.util.function.BiPredicate;
 
 /**
- * 对map接口进行一些扩张方法
+ * Map interface extends support some useful method.
  *
- * @param <V> 值类型参数
+ * @param <V> value type
  */
 public interface MapExtends<V> extends Map<String, V> {
     /**
-     * 移除值为null的所有元素
+     * Remove elements which value is null.
      */
     default void removeIfAbsent() {
         entrySet().removeIf(stringVEntry -> stringVEntry.getValue() == null);
     }
 
     /**
-     * 移除值为null且不包含在指定keys中的所有元素
+     * Remove elements which value is null but excludes special keys.
      *
-     * @param keys 需忽略的键名集合
+     * @param keys excluded keys
      */
     default void removeIfAbsentExclude(String... keys) {
         entrySet().removeIf(e -> e.getValue() == null && !Arrays.asList(keys).contains(e.getKey()));
     }
 
     /**
-     * 根据条件移除元素
+     * Remove element by predicate.
      *
-     * @param predicate 条件
+     * @param predicate predicate
      */
     default void removeIf(BiPredicate<String, V> predicate) {
         entrySet().removeIf(next -> predicate.test(next.getKey(), next.getValue()));

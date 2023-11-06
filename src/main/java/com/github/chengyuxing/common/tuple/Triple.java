@@ -1,11 +1,11 @@
 package com.github.chengyuxing.common.tuple;
 
 /**
- * 三元组
+ * Triple
  *
- * @param <T1> 类型参数1
- * @param <T2> 类型参数2
- * @param <T3> 类型参数3
+ * @param <T1> item1 type
+ * @param <T2> item2 type
+ * @param <T3> item3 type
  */
 public class Triple<T1, T2, T3> extends Pair<T1, T2> {
     protected final T3 item3;
