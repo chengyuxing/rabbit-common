@@ -14,7 +14,7 @@ public interface UncheckedCloseable extends Runnable, AutoCloseable {
     }
 
     /**
-     * Constructed a new UncheckedCloseable with initial closeable.
+     * Returns a new UncheckedCloseable with initial closeable.
      *
      * @param closeable 　closeable
      * @return UncheckedCloseable

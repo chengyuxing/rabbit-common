@@ -18,7 +18,7 @@ public class ClassPathResource {
     private final ClassLoader classLoader;
 
     /**
-     * Constructed a new ClassPathResource with file path.
+     * Constructs a new ClassPathResource with file path.
      *
      * @param path file path
      */

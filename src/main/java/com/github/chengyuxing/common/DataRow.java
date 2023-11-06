@@ -13,13 +13,13 @@ import static com.github.chengyuxing.common.utils.ObjectUtil.coalesce;
  */
 public final class DataRow extends LinkedHashMap<String, Object> implements MapExtends<Object> {
     /**
-     * Constructed a new DataRow
+     * Constructs a new empty DataRow.
      */
     public DataRow() {
     }
 
     /**
-     * Constructed a new DataRow with initial map.
+     * Constructs a new DataRow with initial map.
      *
      * @param map initial map
      */
@@ -28,7 +28,7 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
     }
 
     /**
-     * Constructed a new DataRow with initial capacity.
+     * Constructs a new DataRow with initial capacity.
      *
      * @param capacity initial capacity
      */
@@ -37,7 +37,7 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
     }
 
     /**
-     * Constructed a new DataRow from pairs.
+     * Returns a new DataRow from pairs.
      *
      * @param input key-value pairs: k v，k v...
      * @return DataRow instance
@@ -47,7 +47,7 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
     }
 
     /**
-     * Constructed a new DataRow from keys array and values array.
+     * Returns a new DataRow from keys array and values array.
      *
      * @param keys   keys array
      * @param values values array
@@ -68,7 +68,7 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
     }
 
     /**
-     * Constructed a new DataRow from json.
+     * Returns a new DataRow from json.
      *
      * @param json json object e.g. {@code {"a":1,"b":2}}
      * @return DataRow instance
@@ -79,7 +79,7 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
     }
 
     /**
-     * Constructed a new DataRow from standard java bean entity.
+     * Returns a new DataRow from standard java bean entity.
      *
      * @param entity entity
      * @return DataRow instance
@@ -89,7 +89,7 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
     }
 
     /**
-     * Constructed a new DataRow from map.
+     * Returns a new DataRow from map.
      *
      * @param map map
      * @return DataRow instance
