@@ -42,7 +42,7 @@ public final class DateTimes {
     private final Temporal temporal;
 
     /**
-     * Constructed a DateTimes with temporal.
+     * Constructed a new DateTimes with temporal.
      *
      * @param temporal temporal
      */
@@ -51,7 +51,7 @@ public final class DateTimes {
     }
 
     /**
-     * Constructed a DateTimes with temporal.
+     * Constructed a new DateTimes with temporal.
      *
      * @param temporal temporal
      * @return DateTimes instance
@@ -61,7 +61,7 @@ public final class DateTimes {
     }
 
     /**
-     * Constructed a DateTimes with date.
+     * Constructed a new DateTimes with date.
      *
      * @param date date
      * @return DateTimes instance
@@ -71,7 +71,7 @@ public final class DateTimes {
     }
 
     /**
-     * Constructed a DateTimes with string datetime.
+     * Constructed a new DateTimes with string datetime.
      *
      * @param datetime string datetime
      * @return DateTimes instance

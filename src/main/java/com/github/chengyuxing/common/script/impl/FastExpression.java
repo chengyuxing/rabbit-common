@@ -49,7 +49,7 @@ public class FastExpression extends IExpression {
     }
 
     /**
-     * Constructed a FastExpression with initial expression.
+     * Constructed a new FastExpression with initial expression.
      *
      * @param expression expression
      */
@@ -58,7 +58,7 @@ public class FastExpression extends IExpression {
     }
 
     /**
-     * Constructed a FastExpression with initial expression.<br>
+     * Constructed a new FastExpression with initial expression.<br>
      *
      * @param expression expression
      * @return Expression instance

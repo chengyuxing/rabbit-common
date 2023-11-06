@@ -8,7 +8,7 @@ public final class KeyValue {
     private final Object value;
 
     /**
-     * Constructed a KeyValue with initial key and value.
+     * Constructed a new KeyValue with initial key and value.
      *
      * @param key   key
      * @param value value

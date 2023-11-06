@@ -24,7 +24,7 @@ public class FileResource extends ClassPathResource {
     private final String uriOrClasspath;
 
     /**
-     * Constructed a FileResource with file path.
+     * Constructed a new FileResource with file path.
      *
      * @param path file path
      */

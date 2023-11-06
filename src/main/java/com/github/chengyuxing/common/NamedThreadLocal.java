@@ -9,7 +9,7 @@ public class NamedThreadLocal<T> extends ThreadLocal<T> {
     private final String name;
 
     /**
-     * Constructed a NamedThreadLocal with name.
+     * Constructed a new NamedThreadLocal with name.
      *
      * @param name name
      */

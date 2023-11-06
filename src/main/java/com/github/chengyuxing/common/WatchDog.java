@@ -11,7 +11,7 @@ public class WatchDog {
     private final Map<String, ScheduledFuture<?>> futureMap = new ConcurrentHashMap<>();
 
     /**
-     * Constructed WatchDog with max idle.
+     * Constructed a new WatchDog with max idle.
      *
      * @param maxIdle max idle
      */
@@ -20,7 +20,7 @@ public class WatchDog {
     }
 
     /**
-     * Constructed WatchDog with default idle 8.
+     * Constructed a new WatchDog with default idle 8.
      */
     public WatchDog() {
         this.schedule = Executors.newScheduledThreadPool(8);
