@@ -77,9 +77,9 @@ public class StringFormatter {
                 try {
                     String value;
                     if (isKeyPath) {
-                        value = parseValue(ObjectUtil.getDeepValue(data, key), isSpecial);
+                        value = parseValue(key, ObjectUtil.getDeepValue(data, key), isSpecial);
                     } else {
-                        value = parseValue(data.get(key), isSpecial);
+                        value = parseValue(key, data.get(key), isSpecial);
                     }
                     copy = copy.replace(holder, value);
                 } catch (Exception e) {
@@ -97,11 +97,12 @@ public class StringFormatter {
     /**
      * Parse object value to string literal value.
      *
+     * @param key       key
      * @param value     value
      * @param isSpecial key name starts with '{@code !}' or not
      * @return string literal value
      */
-    protected String parseValue(Object value, boolean isSpecial) {
+    protected String parseValue(String key, Object value, boolean isSpecial) {
         if (value == null) {
             return "";
         }
