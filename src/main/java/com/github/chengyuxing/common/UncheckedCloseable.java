@@ -1,7 +1,7 @@
 package com.github.chengyuxing.common;
 
 /**
- * Uncheck closeable interface support nest closeable.
+ * Unchecked closeable interface support nest closeable.
  */
 public interface UncheckedCloseable extends Runnable, AutoCloseable {
     @Override
