@@ -3,6 +3,7 @@ package com.github.chengyuxing.common;
 import com.github.chengyuxing.common.utils.Jackson;
 import com.github.chengyuxing.common.utils.ObjectUtil;
 
+import java.time.temporal.Temporal;
 import java.util.*;
 import java.util.function.Function;
 
@@ -12,6 +13,19 @@ import static com.github.chengyuxing.common.utils.ObjectUtil.coalesce;
  * A useful data type with more feature which extends LinkedHashMap.
  */
 public final class DataRow extends LinkedHashMap<String, Object> implements MapExtends<Object> {
+    /**
+     * JSON date/java8-date type format(yyyy-MM-dd HH:mm:ss)
+     */
+    public static final Function<Object, Object> JSON_DATE_FORMAT = v -> {
+        if (v instanceof Temporal) {
+            return DateTimes.of((Temporal) v).toString("yyyy-MM-dd HH:mm:ss");
+        }
+        if (v instanceof Date) {
+            return DateTimes.of((Date) v).toString("yyyy-MM-dd HH:mm:ss");
+        }
+        return v;
+    };
+
     /**
      * Constructs a new empty DataRow.
      */
@@ -449,11 +463,29 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
     /**
      * Convert to json.
      *
+     * @param valueFormatter value formatter
+     * @return json
+     * @see #JSON_DATE_FORMAT
+     */
+    public String toJson(Function<Object, Object> valueFormatter) {
+        if (this.isEmpty()) return "{}";
+        if (Objects.isNull(valueFormatter)) {
+            return Jackson.toJson(this);
+        }
+        DataRow newRow = reduce(new DataRow(size()), (acc, k, v) -> {
+            acc.put(k, valueFormatter.apply(v));
+            return acc;
+        });
+        return Jackson.toJson(newRow);
+    }
+
+    /**
+     * Convert to json.
+     *
      * @return json
      */
     public String toJson() {
-        if (this.isEmpty()) return "{}";
-        return Jackson.toJson(this);
+        return toJson(null);
     }
 
     /**
