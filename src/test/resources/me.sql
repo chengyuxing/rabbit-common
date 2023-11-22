@@ -36,3 +36,21 @@ id = 1
     -- #fi
 -- #done
 ;
+
+select * from test.user where
+-- #if :id != blank
+    id = :id
+-- #or
+    id = 10
+-- #fi
+;
+
+select * from test.user where
+-- #if :id != blank
+    id = :id
+-- #or :id > 10
+    id = 10
+-- #or
+    id = 1
+-- #fi
+;

@@ -1,6 +1,8 @@
 package tests;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.chengyuxing.common.DataRow;
+import com.github.chengyuxing.common.DateTimes;
 import com.github.chengyuxing.common.StringFormatter;
 import com.github.chengyuxing.common.io.ClassPathResource;
 import com.github.chengyuxing.common.io.FileResource;
@@ -22,6 +24,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.Temporal;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
@@ -308,7 +311,7 @@ public class StringTests {
         String res = simpleScriptParser.parse(s, d);
         System.out.println(res);
 
-        Map<String, Object> vars = simpleScriptParser.getForVars();
+        Map<String, Object> vars = simpleScriptParser.getForContextVars();
         System.out.println(vars);
         System.out.println(ObjectUtil.getDeepValue(vars, "item_6_0.value"));
     }
@@ -374,5 +377,11 @@ public class StringTests {
         System.out.println(row.<String>getFirstAs());
 
         System.out.println(new DataRow(0));
+    }
+
+    @Test
+    public void testJackson() {
+        DataRow row = DataRow.of("now", LocalDateTime.now(), "current", new Date());
+        System.out.println(row.toJson(DataRow.JSON_DATE_FORMAT));
     }
 }
