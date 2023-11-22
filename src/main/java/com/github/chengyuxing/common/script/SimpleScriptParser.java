@@ -93,7 +93,7 @@ public class SimpleScriptParser {
     public static final String DONE = TAGS[10];
 
     private int forIndex = 0;
-    private Map<String, Object> forVars = new HashMap<>();
+    private Map<String, Object> forContextVars = new HashMap<>();
 
     /**
      * Configure expression parser implementation.
@@ -120,12 +120,12 @@ public class SimpleScriptParser {
      *
      * @param forIndex each for loop auto index
      * @param varIndex for var auto index
-     * @param varName  for var name,  e.g. {@code <user>}
-     * @param idxName  for index name,  e.g. {@code <idx>}
+     * @param varName  for context var name,  e.g. {@code <user>}
+     * @param idxName  for context index name,  e.g. {@code <idx>}
      * @param body     content in for loop
      * @param args     each for loop args (index and value) which created by for expression
      * @return formatted content
-     * @see #getForVars()
+     * @see #getForContextVars()
      */
     protected String forLoopBodyFormatter(int forIndex, int varIndex, String varName, String idxName, List<String> body, Map<String, Object> args) {
         return FMT.format(String.join(NEW_LINE, body), args);
@@ -159,7 +159,7 @@ public class SimpleScriptParser {
             return "";
         }
         forIndex = 0;
-        forVars = new HashMap<>();
+        forContextVars = new HashMap<>();
         return doParse(content, data == null ? new HashMap<>(0) : data);
     }
 
@@ -186,25 +186,25 @@ public class SimpleScriptParser {
                 continue;
             }
             String expression = trimExpression(currentLine);
-            int ifCount = 0;
-            int forCount = 0;
+            int ifDepth = 0;
+            int forDepth = 0;
             // if block
             if (startsWithIgnoreCase(expression, IF)) {
-                ifCount++;
+                ifDepth++;
                 StringJoiner buffer = new StringJoiner(NEW_LINE);
                 while (++i < j) {
                     String line = lines[i];
                     String trimLine = trimExpression(line);
                     if (startsWithIgnoreCase(trimLine, IF)) {
                         buffer.add(line);
-                        ifCount++;
+                        ifDepth++;
                     } else if (startsWithIgnoreCase(trimLine, FI)) {
-                        ifCount--;
-                        if (ifCount < 0) {
+                        ifDepth--;
+                        if (ifDepth < 0) {
                             throw new ScriptSyntaxException("can not find pair of '#if...#fi' block at line " + i);
                         }
                         // it means at the end of if block.
-                        if (ifCount == 0) {
+                        if (ifDepth == 0) {
                             boolean res = expression(expression.substring(3)).calc(data);
                             // if true do recursion to parse inside.
                             if (res) {
@@ -228,7 +228,7 @@ public class SimpleScriptParser {
                         buffer.add(line);
                     }
                 }
-                if (ifCount != 0) {
+                if (ifDepth != 0) {
                     throw new ScriptSyntaxException("can not find pair of '#if...#fi' block at line " + i);
                 }
             } else if (startsWithIgnoreCase(expression, CHOOSE)) {
@@ -331,20 +331,20 @@ public class SimpleScriptParser {
             } else if (startsWithIgnoreCase(expression, FOR)) {
                 // for expression block
                 // item[,idx] of :list [| pipe1 | pipe2 | ... ] [delimiter ','] [open ''] [close '']
-                forCount++;
+                forDepth++;
                 List<String> buffer = new ArrayList<>();
                 while (++i < j) {
                     String line = lines[i];
                     String trimLine = trimExpression(line);
                     if (startsWithIgnoreCase(trimLine, FOR)) {
                         buffer.add(line);
-                        forCount++;
+                        forDepth++;
                     } else if (startsWithIgnoreCase(trimLine, DONE)) {
-                        forCount--;
-                        if (forCount < 0) {
+                        forDepth--;
+                        if (forDepth < 0) {
                             throw new ScriptSyntaxException("can not find pair of '#for...#done' block at line " + i);
                         }
-                        if (forCount == 0) {
+                        if (forDepth == 0) {
                             Matcher m = FOR_PATTERN.matcher(expression.substring(4).trim());
                             if (m.find()) {
                                 String itemName = m.group("item");
@@ -396,7 +396,7 @@ public class SimpleScriptParser {
                                 String forBody = joiner.toString();
                                 if (!forBody.trim().isEmpty()) {
                                     output.add(open + forBody + close);
-                                    forVars.putAll(localForVars);
+                                    forContextVars.putAll(localForVars);
                                 }
                             } else {
                                 throw new ScriptSyntaxException("#for syntax error of expression '" + expression + "'");
@@ -409,7 +409,7 @@ public class SimpleScriptParser {
                         buffer.add(line);
                     }
                 }
-                if (forCount != 0) {
+                if (forDepth != 0) {
                     throw new ScriptSyntaxException("can not find pair of '#for...#done' block at line " + i);
                 }
             } else {
@@ -423,7 +423,7 @@ public class SimpleScriptParser {
     /**
      * Build #for var key.
      *
-     * @param name   var name
+     * @param name   for context var name
      * @param forIdx for auto index
      * @param varIdx var auto index
      * @return unique for var key
@@ -433,7 +433,7 @@ public class SimpleScriptParser {
     }
 
     /**
-     * Get #for temp variable map which saved by expression calc.<br>
+     * Get #for context variable map which saved by expression calc.<br>
      * Format: [varName_forAutoIdx_varAutoIdx, var], e.g.
      * <blockquote>
      * <pre>
@@ -449,10 +449,10 @@ public class SimpleScriptParser {
      * </pre>
      * </blockquote>
      *
-     * @return #for temp variable map
+     * @return #for context variable map
      * @see #forVarKey(String, int, int)
      */
-    public Map<String, Object> getForVars() {
-        return Collections.unmodifiableMap(forVars);
+    public Map<String, Object> getForContextVars() {
+        return Collections.unmodifiableMap(forContextVars);
     }
 }
