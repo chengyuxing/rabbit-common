@@ -3,7 +3,6 @@ package com.github.chengyuxing.common;
 import com.github.chengyuxing.common.utils.Jackson;
 import com.github.chengyuxing.common.utils.ObjectUtil;
 
-import java.time.temporal.Temporal;
 import java.util.*;
 import java.util.function.Function;
 
@@ -13,19 +12,6 @@ import static com.github.chengyuxing.common.utils.ObjectUtil.coalesce;
  * A useful data type with more feature which extends LinkedHashMap.
  */
 public final class DataRow extends LinkedHashMap<String, Object> implements MapExtends<Object> {
-    /**
-     * JSON date/java8-date type format(yyyy-MM-dd HH:mm:ss)
-     */
-    public static final Function<Object, Object> JSON_DATE_FORMAT = v -> {
-        if (v instanceof Temporal) {
-            return DateTimes.of((Temporal) v).toString("yyyy-MM-dd HH:mm:ss");
-        }
-        if (v instanceof Date) {
-            return DateTimes.of((Date) v).toString("yyyy-MM-dd HH:mm:ss");
-        }
-        return v;
-    };
-
     /**
      * Constructs a new empty DataRow.
      */
@@ -188,7 +174,8 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
      * @return value or null
      */
     @SuppressWarnings("unchecked")
-    public <T> T getFirstAs(T... defaults) {
+    @SafeVarargs
+    public final <T> T getFirstAs(T... defaults) {
         return (T) getFirst((Object[]) defaults);
     }
 
@@ -201,7 +188,8 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
      * @return value or null
      */
     @SuppressWarnings("unchecked")
-    public <T> T getAs(String name, T... defaults) {
+    @SafeVarargs
+    public final <T> T getAs(String name, T... defaults) {
         T v = (T) get(name);
         return Objects.nonNull(v) ? v : coalesce(defaults);
     }
@@ -215,7 +203,8 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
      * @return value or null
      */
     @SuppressWarnings("unchecked")
-    public <T> T getAs(int index, T... defaults) {
+    @SafeVarargs
+    public final <T> T getAs(int index, T... defaults) {
         T v = (T) _getByIndex(index);
         return Objects.nonNull(v) ? v : coalesce(defaults);
     }
@@ -390,7 +379,7 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
      * @param <T>     类型参数
      * @return true if exists &amp; updated or false
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "UnusedReturnValue"})
     public <T> boolean update(String key, Function<T, Object> updater) {
         if (containsKey(key)) {
             Object oldV = get(key);
@@ -465,7 +454,8 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
      *
      * @param valueFormatter value formatter
      * @return json
-     * @see #JSON_DATE_FORMAT
+     * @see DateTimes#NORMAL_DATE_FORMATTER
+     * @see DateTimes#dateFormatter(String)
      */
     public String toJson(Function<Object, Object> valueFormatter) {
         if (this.isEmpty()) return "{}";

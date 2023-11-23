@@ -6,6 +6,7 @@ import java.time.temporal.Temporal;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -414,4 +415,27 @@ public final class DateTimes {
     public static long currentTimestamp() {
         return Instant.now().toEpochMilli();
     }
+
+    /**
+     * JSON {@link Date date}/{@link Temporal java8-date} type formatter.
+     *
+     * @param format date format
+     * @return formatted string date
+     */
+    public static Function<Object, Object> dateFormatter(String format) {
+        return v -> {
+            if (v instanceof Temporal) {
+                return of((Temporal) v).toString(format);
+            }
+            if (v instanceof Date) {
+                return of((Date) v).toString(format);
+            }
+            return v;
+        };
+    }
+
+    /**
+     * JSON {@link Date date}/{@link Temporal java8-date} type formatter(yyyy-MM-dd HH:mm:ss).
+     */
+    public static final Function<Object, Object> NORMAL_DATE_FORMATTER = dateFormatter("yyyy-MM-dd HH:mm:ss");
 }

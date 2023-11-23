@@ -382,6 +382,6 @@ public class StringTests {
     @Test
     public void testJackson() {
         DataRow row = DataRow.of("now", LocalDateTime.now(), "current", new Date());
-        System.out.println(row.toJson(DataRow.JSON_DATE_FORMAT));
+        System.out.println(row.toJson(DateTimes.dateFormatter("yyyy/MM/dd")));
     }
 }
