@@ -376,7 +376,7 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
      *
      * @param key     key
      * @param updater updater: old value {@code ->} new value
-     * @param <T>     类型参数
+     * @param <T>     old value type
      * @return true if exists &amp; updated or false
      */
     @SuppressWarnings({"unchecked", "UnusedReturnValue"})
