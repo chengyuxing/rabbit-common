@@ -92,7 +92,7 @@ public class MyTest {
 
     @Test
     public void pairTest() throws Exception {
-        Quintuple<Integer, Integer, Integer, Integer, String> quintuple = Tuples.quintuple(1, 2, 3, 4, "jackson");
+        Quintuple<Integer, Integer, Integer, Integer, String> quintuple = Tuples.of(1, 2, 3, 4, "jackson");
         System.out.println(quintuple.getItem5());
     }
 
