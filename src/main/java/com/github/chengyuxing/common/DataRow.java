@@ -1,6 +1,5 @@
 package com.github.chengyuxing.common;
 
-import com.github.chengyuxing.common.utils.Jackson;
 import com.github.chengyuxing.common.utils.ObjectUtil;
 
 import java.util.*;
@@ -16,15 +15,6 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
      * Constructs a new empty DataRow.
      */
     public DataRow() {
-    }
-
-    /**
-     * Constructs a new DataRow with initial map.
-     *
-     * @param map initial map
-     */
-    public DataRow(Map<String, Object> map) {
-        super(map);
     }
 
     /**
@@ -68,17 +58,6 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
     }
 
     /**
-     * Returns a new DataRow from json.
-     *
-     * @param json json object e.g. {@code {"a":1,"b":2}}
-     * @return DataRow instance
-     */
-    public static DataRow ofJson(String json) {
-        if (Objects.isNull(json)) return new DataRow(0);
-        return Jackson.toObject(json, DataRow.class);
-    }
-
-    /**
      * Returns a new DataRow from standard java bean entity.
      *
      * @param entity entity
@@ -86,17 +65,6 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
      */
     public static DataRow ofEntity(Object entity) {
         return ObjectUtil.entity2map(entity, DataRow::new);
-    }
-
-    /**
-     * Returns a new DataRow from map.
-     *
-     * @param map map
-     * @return DataRow instance
-     */
-    public static DataRow ofMap(Map<String, Object> map) {
-        if (Objects.isNull(map)) return new DataRow(0);
-        return new DataRow(map);
     }
 
     /**
@@ -438,55 +406,6 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
      */
     public <T> T toEntity(Class<T> clazz, Object... constructorParameters) {
         return ObjectUtil.map2entity(this, clazz, constructorParameters);
-    }
-
-    /**
-     * Convert to new LinkedHashMap.
-     *
-     * @return new LinkedHashMap
-     */
-    public Map<String, Object> toMap() {
-        return new LinkedHashMap<>(this);
-    }
-
-    /**
-     * Convert to json.
-     *
-     * @param valueFormatter value formatter
-     * @return json
-     * @see DateTimes#NORMAL_DATE_FORMATTER
-     * @see DateTimes#dateFormatter(String)
-     */
-    public String toJson(Function<Object, Object> valueFormatter) {
-        if (this.isEmpty()) return "{}";
-        if (Objects.isNull(valueFormatter)) {
-            return Jackson.toJson(this);
-        }
-        DataRow newRow = reduce(new DataRow(size()), (acc, k, v) -> {
-            acc.put(k, valueFormatter.apply(v));
-            return acc;
-        });
-        return Jackson.toJson(newRow);
-    }
-
-    /**
-     * Convert to json.
-     *
-     * @return json
-     */
-    public String toJson() {
-        return toJson(null);
-    }
-
-    /**
-     * Convert to any.
-     *
-     * @param converter DataRow {@code ->} any
-     * @param <T>       result type
-     * @return any result
-     */
-    public <T> T to(Function<DataRow, T> converter) {
-        return converter.apply(this);
     }
 }
 
