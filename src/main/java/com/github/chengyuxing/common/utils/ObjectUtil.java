@@ -402,13 +402,8 @@ public final class ObjectUtil {
                     }
                     continue;
                 }
-                // map, collection or java bean.
-                if (Map.class.isAssignableFrom(eft) || Collection.class.isAssignableFrom(eft) || !eft.getTypeName().startsWith("java.")) {
-                    // maybe json string
-                    if (dft == String.class) {
-                        setter.invoke(entity, Jackson.toObject(value.toString(), eft));
-                        continue;
-                    }
+                // array to collection
+                if (Collection.class.isAssignableFrom(eft)) {
                     // object array parsing to collection exclude blob
                     if (dft != byte[].class && value instanceof Object[]) {
                         if (List.class.isAssignableFrom(eft)) {
