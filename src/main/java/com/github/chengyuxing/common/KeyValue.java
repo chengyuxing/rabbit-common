@@ -25,4 +25,12 @@ public final class KeyValue {
     public Object getValue() {
         return value;
     }
+
+    @Override
+    public String toString() {
+        return '{' +
+                "key=" + key +
+                ", value=" + value +
+                '}';
+    }
 }

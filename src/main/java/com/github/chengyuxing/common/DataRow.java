@@ -407,5 +407,18 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
     public <T> T toEntity(Class<T> clazz, Object... constructorParameters) {
         return ObjectUtil.map2entity(this, clazz, constructorParameters);
     }
+
+    /**
+     * Convert each entry to key value list.
+     *
+     * @return key value list
+     */
+    public List<KeyValue> toKeyValue() {
+        List<KeyValue> kvs = new ArrayList<>(size());
+        for (Map.Entry<String, Object> e : entrySet()) {
+            kvs.add(new KeyValue(e.getKey(), e.getValue()));
+        }
+        return kvs;
+    }
 }
 
