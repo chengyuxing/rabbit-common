@@ -6,11 +6,14 @@ import java.util.List;
 
 /**
  * Jackson util.
+ *
+ * @deprecated use '{@code com.fasterxml.jackson.databind.ObjectMapper}' instead for more custom configuration.
  */
+@Deprecated
 public final class Jackson {
     private static Object objectMapper;
 
-    public static Object getObjectMapper() throws ClassNotFoundException, IllegalAccessException, InstantiationException {
+    public static Object getObjectMapper() throws ClassNotFoundException, IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
         // it's not necessary use sync block
         if (objectMapper == null) {
             Class<?> jacksonClass = Class.forName("com.fasterxml.jackson.databind.ObjectMapper");

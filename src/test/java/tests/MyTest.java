@@ -44,13 +44,10 @@ public class MyTest {
         rows.add(DataRow.of("a", 4, "b", "x3"));
         rows.add(DataRow.of("a", 5, "b", "x4"));
 
-        System.out.println(DataRow.zip(rows).toJson());
     }
 
     @Test
     public void rowTest2() throws Exception {
-        System.out.println(row.toJson());
-        System.out.println(DataRow.ofJson("{\"a\":1,\"b\":2,\"name\":\"chengyuxing\"}"));
     }
 
     @Test

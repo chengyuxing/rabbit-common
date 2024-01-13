@@ -349,12 +349,8 @@ public class StringTests {
     @Test
     public void rowTest() {
         System.out.println(DataRow.of("a", 1, "c", 2));
-        System.out.println(DataRow.ofJson("{\n" +
-                "  \"id\": 1,\n" +
-                "  \"name\": \"chengyuxing\"\n" +
-                "}"));
         System.out.println(DataRow.ofEntity(new User()));
-        System.out.println(DataRow.ofMap(new HashMap<>()));
+//        System.out.println(DataRow.ofMap(new HashMap<>()));
         System.out.println(DataRow.of(new String[]{"name", "age"}, new Object[]{"chengyuxing", 28}));
 
         List<DataRow> rows = new ArrayList<>();
@@ -364,7 +360,6 @@ public class StringTests {
         rows.add(DataRow.of("a", 4, "b", "x3"));
         rows.add(DataRow.of("a", 5, "b", "x4"));
 
-        System.out.println(DataRow.zip(rows).toJson());
         System.out.println(rows.get(0).<Integer>getFirstAs());
         System.out.println(rows.get(0).<Integer>getAs(0));
         System.out.println(rows.get(0).<String>getAs("b"));
@@ -382,6 +377,5 @@ public class StringTests {
     @Test
     public void testJackson() {
         DataRow row = DataRow.of("now", LocalDateTime.now(), "current", new Date());
-        System.out.println(row.toJson(DateTimes.dateFormatter("yyyy/MM/dd")));
     }
 }

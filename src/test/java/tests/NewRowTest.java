@@ -24,30 +24,6 @@ public class NewRowTest {
         System.out.println(row.containsValue("cyx"));
         System.out.println(row.put("x", "d"));
         System.out.println(Jackson.toJson(row));
-        DataRow jRow = DataRow.ofJson("{\n" +
-                "  \"name\": \"chengyuxing\",\n" +
-                "  \"age\": 28,\n" +
-                "  \"address\": \"昆明市\",\n" +
-                "  \"animals\": [\n" +
-                "    \"dog\",\n" +
-                "    \"cat\",\n" +
-                "    \"tiger\"\n" +
-                "  ]\n" +
-                "}");
-        System.out.println(jRow);
-        System.out.println(jRow.size());
-        System.out.println(jRow.getString("address"));
-
-        System.out.println(jRow.reduce(new ArrayList<>(), (acc, k, v) -> {
-            if (v instanceof List) {
-                ((List<?>) v).forEach(item -> acc.add(k + ":" + item));
-            } else {
-                acc.add(k + ":" + v);
-            }
-            return acc;
-        }));
-        System.out.println(jRow.replace("name", "cyx123"));
-        System.out.println(jRow);
     }
 
     @Test

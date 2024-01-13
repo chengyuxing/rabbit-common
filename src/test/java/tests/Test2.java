@@ -1,7 +1,11 @@
 package tests;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import com.github.chengyuxing.common.DataRow;
 import com.github.chengyuxing.common.DateTimes;
 import com.github.chengyuxing.common.io.FileResource;
@@ -14,6 +18,7 @@ import tests.entity.DateEntity;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -197,13 +202,34 @@ public class Test2 {
     @Test
     public void testArgs() throws Exception {
         DataRow dataRow = DataRow.of("id", 2, "name", "cyx", "dt", DateTimes.now().toString("yyyy-MM-dd"));
-        System.out.println(dataRow.toJson());
         String json = Jackson.toJson(dataRow);
         System.out.println(json);
 
         System.out.println(Jackson.toObject(json, DataRow.class));
 
         Map<String, Object> map = DataRow.of("a", 1);
+    }
+
+    @Test
+    public void testLocalDateJson() {
+        JavaTimeModule module = new JavaTimeModule();
+        LocalDateTimeDeserializer dateTimeDeserializer = new LocalDateTimeDeserializer(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        LocalDateTimeSerializer dateTimeSerializer = new LocalDateTimeSerializer(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        module.addDeserializer(LocalDateTime.class, dateTimeDeserializer);
+        module.addSerializer(LocalDateTime.class, dateTimeSerializer);
+
+        System.out.println(Jackson.toJson(DataRow.of("now", LocalDateTime.now())));
+    }
+
+    @Test
+    public void testVarArgs() {
+        a(new JavaTimeModule());
+    }
+
+    public static void a(Module... modules) {
+        System.out.println(modules.getClass().getName());
+        Module[] modules1 = new Module[]{new JavaTimeModule()};
+        System.out.println(modules1.getClass().getName());
     }
 
     @Test
