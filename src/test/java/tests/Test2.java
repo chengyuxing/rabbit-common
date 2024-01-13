@@ -69,7 +69,9 @@ public class Test2 {
 
     @Test
     public void testdd() throws Exception {
-        System.out.println(DataRow.of("a", "2022-12-23", "b", "2022-12-01").toEntity(Now.class));
+        DataRow row = DataRow.of("a", "2022-12-23", "b", "2022-12-01");
+        System.out.println(row.toEntity(Now.class));
+        System.out.println(row.toKeyValue());
     }
 
     @Test
