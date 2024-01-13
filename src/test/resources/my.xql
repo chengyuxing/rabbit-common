@@ -1,5 +1,12 @@
-/*Create by chengyuxing at 2023/4/12 20:22*/
-/*
-* typing "xql" keyword to get suggestions,
-* e.g: "xql:new" will be create a sql fragment.
-*/
+select *
+from test.user
+where
+ #if :id != blank
+    id = :id
+ #fi
+ #if :name != blank
+  and name = :name
+ #fi
+ #if :age > 10
+  and age = :age
+ #fi

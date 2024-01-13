@@ -8,12 +8,12 @@ select * from user where id = 1
    -- #fi
 --#fi
 
--- #for item of :list delimiter ' and\n '
+-- #for item of :list delimiter ' and '
         -- #if :item == 'B'
             message = :_for.item
         --#fi
         -- bbbbbb
-        -- #for num,idx of :item.nums delimiter ' or\n ' open '(' close ')'
+        -- #for num,idx of :item.nums delimiter ' or ' open '(' close ')'
             --#if :num <> blank
             age = :_for.num and id = :_for.idx
             --#fi
@@ -30,7 +30,7 @@ where id = :id;
 
 select * from test.user where
 id = 1
--- #for id of :ids delimiter ', \n' open " or i''d in (" close ')'
+-- #for id of :ids delimiter ', ' open " or i''d in (" close ')'
     -- #if :id >= 5
     :_for.id
     -- #fi
@@ -40,7 +40,7 @@ id = 1
 select * from test.user where
 -- #if :id != blank
     id = :id
--- #or
+-- #else
     id = 10
 -- #fi
 ;
@@ -48,9 +48,14 @@ select * from test.user where
 select * from test.user where
 -- #if :id != blank
     id = :id
--- #or :id > 10
+    -- #if :id == 90
+        or id = 90
+    -- #else
+        or id = 80
+    -- #fi
+-- #elsif :id > 10
     id = 10
--- #or
+-- #else
     id = 1
 -- #fi
 ;
