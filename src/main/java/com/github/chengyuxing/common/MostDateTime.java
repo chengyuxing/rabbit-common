@@ -6,14 +6,13 @@ import java.time.temporal.Temporal;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
  * Datetime util.
  */
-public final class DateTimes {
+public final class MostDateTime {
     //language=RegExp
     public static final Pattern DATE_PATTERN = Pattern.compile("(?<y>\\d{4}[-/年])?(?<m>\\d{1,2})[-/月](?<d>\\d{1,2})日?");
     //language=RegExp
@@ -43,43 +42,53 @@ public final class DateTimes {
     private final Temporal temporal;
 
     /**
-     * Constructs a new DateTimes with temporal.
+     * Constructs a new MostDateTime with temporal.
      *
      * @param temporal temporal
      */
-    DateTimes(Temporal temporal) {
+    MostDateTime(Temporal temporal) {
         this.temporal = temporal;
     }
 
     /**
-     * Returns a new DateTimes with temporal.
+     * Returns a new MostDateTime with temporal.
      *
      * @param temporal temporal
-     * @return DateTimes instance
+     * @return MostDateTime instance
      */
-    public static DateTimes of(Temporal temporal) {
-        return new DateTimes(temporal);
+    public static MostDateTime of(Temporal temporal) {
+        return new MostDateTime(temporal);
     }
 
     /**
-     * Returns a new DateTimes with date.
+     * Returns a new MostDateTime with date.
      *
      * @param date date
-     * @return DateTimes instance
+     * @return MostDateTime instance
      */
-    public static DateTimes of(Date date) {
-        return new DateTimes(date.toInstant());
+    public static MostDateTime of(Date date) {
+        return new MostDateTime(date.toInstant());
     }
 
     /**
-     * Returns a new DateTimes with string datetime.
+     * Returns a new MostDateTime with string datetime.
      *
      * @param datetime string datetime
-     * @return DateTimes instance
+     * @return MostDateTime instance
      */
-    public static DateTimes of(String datetime) {
+    public static MostDateTime of(String datetime) {
         LocalDateTime ldt = toLocalDateTime(datetime);
         return of(ldt);
+    }
+
+    /**
+     * Returns a new MostDateTime with timestamp.
+     *
+     * @param date timestamp
+     * @return MostDateTime instance
+     */
+    public static MostDateTime of(long date) {
+        return of(new Date(date));
     }
 
     /**
@@ -403,7 +412,7 @@ public final class DateTimes {
      *
      * @return 当前时间
      */
-    public static DateTimes now() {
+    public static MostDateTime now() {
         return of(LocalDateTime.now());
     }
 
@@ -415,27 +424,4 @@ public final class DateTimes {
     public static long currentTimestamp() {
         return Instant.now().toEpochMilli();
     }
-
-    /**
-     * JSON {@link Date date}/{@link Temporal java8-date} type formatter.
-     *
-     * @param format date format
-     * @return formatted string date
-     */
-    public static Function<Object, Object> dateFormatter(String format) {
-        return v -> {
-            if (v instanceof Temporal) {
-                return of((Temporal) v).toString(format);
-            }
-            if (v instanceof Date) {
-                return of((Date) v).toString(format);
-            }
-            return v;
-        };
-    }
-
-    /**
-     * JSON {@link Date date}/{@link Temporal java8-date} type formatter(yyyy-MM-dd HH:mm:ss).
-     */
-    public static final Function<Object, Object> NORMAL_DATE_FORMATTER = dateFormatter("yyyy-MM-dd HH:mm:ss");
 }

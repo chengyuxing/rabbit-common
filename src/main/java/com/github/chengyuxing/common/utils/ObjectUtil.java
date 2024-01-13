@@ -1,6 +1,6 @@
 package com.github.chengyuxing.common.utils;
 
-import com.github.chengyuxing.common.DateTimes;
+import com.github.chengyuxing.common.MostDateTime;
 
 import java.beans.IntrospectionException;
 import java.lang.reflect.Field;
@@ -387,7 +387,7 @@ public final class ObjectUtil {
                     continue;
                 }
                 if (eft == Date.class) {
-                    setter.invoke(entity, DateTimes.toDate(value.toString()));
+                    setter.invoke(entity, MostDateTime.toDate(value.toString()));
                     continue;
                 }
                 if (Temporal.class.isAssignableFrom(eft)) {
@@ -397,7 +397,7 @@ public final class ObjectUtil {
                         continue;
                     }
                     if (dft == String.class) {
-                        Date date = DateTimes.toDate(value.toString());
+                        Date date = MostDateTime.toDate(value.toString());
                         setter.invoke(entity, toTemporal(j8DateTypeClass, date));
                     }
                     continue;

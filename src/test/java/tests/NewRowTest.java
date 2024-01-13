@@ -1,7 +1,7 @@
 package tests;
 
 import com.github.chengyuxing.common.DataRow;
-import com.github.chengyuxing.common.DateTimes;
+import com.github.chengyuxing.common.MostDateTime;
 import com.github.chengyuxing.common.utils.Jackson;
 import org.junit.Test;
 
@@ -29,7 +29,7 @@ public class NewRowTest {
     @Test
     public void testUpd() {
         DataRow row = DataRow.of("now", LocalDateTime.now(), "age", 28);
-        row.<LocalDateTime>update("now", v -> DateTimes.of(v).toString("yyyy-MM-dd"));
+        row.<LocalDateTime>update("now", v -> MostDateTime.of(v).toString("yyyy-MM-dd"));
         System.out.println(row);
     }
 

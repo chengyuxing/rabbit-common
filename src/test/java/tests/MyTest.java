@@ -52,7 +52,6 @@ public class MyTest {
 
     @Test
     public void mapTest() throws Exception {
-        System.out.println(DataRow.ofMap(map));
     }
 
     @Test
