@@ -32,4 +32,22 @@ public class Octuple<T1, T2, T3, T4, T5, T6, T7, T8> extends Septuple<T1, T2, T3
     public String toString() {
         return "(" + item1 + ", " + item2 + ", " + item3 + ", " + item4 + ", " + item5 + ", " + item6 + ", " + item7 + ", " + item8 + ")";
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Octuple)) return false;
+        if (!super.equals(o)) return false;
+
+        Octuple<?, ?, ?, ?, ?, ?, ?, ?> octuple = (Octuple<?, ?, ?, ?, ?, ?, ?, ?>) o;
+
+        return getItem8() != null ? getItem8().equals(octuple.getItem8()) : octuple.getItem8() == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + (getItem8() != null ? getItem8().hashCode() : 0);
+        return result;
+    }
 }

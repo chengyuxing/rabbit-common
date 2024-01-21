@@ -30,4 +30,22 @@ public class Sextuple<T1, T2, T3, T4, T5, T6> extends Quintuple<T1, T2, T3, T4, 
     public String toString() {
         return "(" + item1 + ", " + item2 + ", " + item3 + ", " + item4 + ", " + item5 + ", " + item6 + ")";
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Sextuple)) return false;
+        if (!super.equals(o)) return false;
+
+        Sextuple<?, ?, ?, ?, ?, ?> sextuple = (Sextuple<?, ?, ?, ?, ?, ?>) o;
+
+        return getItem6() != null ? getItem6().equals(sextuple.getItem6()) : sextuple.getItem6() == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + (getItem6() != null ? getItem6().hashCode() : 0);
+        return result;
+    }
 }

@@ -2,7 +2,10 @@ package tests;
 
 import com.github.chengyuxing.common.DataRow;
 import com.github.chengyuxing.common.ImmutableList;
+import com.github.chengyuxing.common.KeyValue;
+import com.github.chengyuxing.common.tuple.Pair;
 import com.github.chengyuxing.common.tuple.Quintuple;
+import com.github.chengyuxing.common.tuple.Triple;
 import com.github.chengyuxing.common.tuple.Tuples;
 import com.github.chengyuxing.common.utils.ObjectUtil;
 import org.junit.BeforeClass;
@@ -13,10 +16,7 @@ import java.io.FileOutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Stream;
 
 public class MyTest {
@@ -52,6 +52,23 @@ public class MyTest {
 
     @Test
     public void mapTest() throws Exception {
+//        DataRow row1 = DataRow.of("a", "chengyuxing", "b", "29");
+//        DataRow row2 = DataRow.of("a", "chengyuxing", "b", "29");
+//        System.out.println(Objects.equals(row1, row2));
+//        System.out.println(row1.hashCode() + ":" + row2.hashCode());
+//        KeyValue a = new KeyValue("name", "cyx");
+//        KeyValue b = new KeyValue("name", "cyx");
+//        System.out.println(Objects.equals(a, b));
+//        System.out.println(a.hashCode() + ":" + b.hashCode());
+//        Pair pair1 = Pair.of("a", "b");
+//        Pair pair2 = Pair.of("a", "b");
+//        System.out.println(pair2.equals(pair1));
+//        System.out.println(pair2.hashCode() + ":" + pair1.hashCode());
+
+        Triple triple1 = Triple.of("a", "b", "c");
+        Triple triple2 = Triple.of("aa", "sb", "c");
+        System.out.println(triple1.equals(triple2));
+        System.out.println(triple1.hashCode() + ":" + triple2.hashCode());
     }
 
     @Test

@@ -29,4 +29,22 @@ public class Quintuple<T1, T2, T3, T4, T5> extends Quadruple<T1, T2, T3, T4> {
     public String toString() {
         return "(" + item1 + ", " + item2 + ", " + item3 + ", " + item4 + ", " + item5 + ")";
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Quintuple)) return false;
+        if (!super.equals(o)) return false;
+
+        Quintuple<?, ?, ?, ?, ?> quintuple = (Quintuple<?, ?, ?, ?, ?>) o;
+
+        return getItem5() != null ? getItem5().equals(quintuple.getItem5()) : quintuple.getItem5() == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + (getItem5() != null ? getItem5().hashCode() : 0);
+        return result;
+    }
 }

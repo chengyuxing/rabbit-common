@@ -33,4 +33,22 @@ public final class KeyValue {
                 ", value=" + value +
                 '}';
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof KeyValue)) return false;
+
+        KeyValue keyValue = (KeyValue) o;
+
+        if (getKey() != null ? !getKey().equals(keyValue.getKey()) : keyValue.getKey() != null) return false;
+        return getValue() != null ? getValue().equals(keyValue.getValue()) : keyValue.getValue() == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = getKey() != null ? getKey().hashCode() : 0;
+        result = 31 * result + (getValue() != null ? getValue().hashCode() : 0);
+        return result;
+    }
 }

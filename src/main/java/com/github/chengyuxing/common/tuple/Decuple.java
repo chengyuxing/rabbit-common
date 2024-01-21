@@ -34,4 +34,22 @@ public class Decuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> extends Nonuple<T1
     public String toString() {
         return "(" + item1 + ", " + item2 + ", " + item3 + ", " + item4 + ", " + item5 + ", " + item6 + ", " + item7 + ", " + item8 + ", " + item9 + ", " + item10 + ")";
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Decuple)) return false;
+        if (!super.equals(o)) return false;
+
+        Decuple<?, ?, ?, ?, ?, ?, ?, ?, ?, ?> decuple = (Decuple<?, ?, ?, ?, ?, ?, ?, ?, ?, ?>) o;
+
+        return getItem10() != null ? getItem10().equals(decuple.getItem10()) : decuple.getItem10() == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + (getItem10() != null ? getItem10().hashCode() : 0);
+        return result;
+    }
 }

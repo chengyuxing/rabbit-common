@@ -31,4 +31,22 @@ public class Septuple<T1, T2, T3, T4, T5, T6, T7> extends Sextuple<T1, T2, T3, T
     public String toString() {
         return "(" + item1 + ", " + item2 + ", " + item3 + ", " + item4 + ", " + item5 + ", " + item6 + ", " + item7 + ")";
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Septuple)) return false;
+        if (!super.equals(o)) return false;
+
+        Septuple<?, ?, ?, ?, ?, ?, ?> septuple = (Septuple<?, ?, ?, ?, ?, ?, ?>) o;
+
+        return getItem7() != null ? getItem7().equals(septuple.getItem7()) : septuple.getItem7() == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + (getItem7() != null ? getItem7().hashCode() : 0);
+        return result;
+    }
 }

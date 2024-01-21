@@ -28,6 +28,24 @@ public class Pair<T1, T2> {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Pair)) return false;
+
+        Pair<?, ?> pair = (Pair<?, ?>) o;
+
+        if (getItem1() != null ? !getItem1().equals(pair.getItem1()) : pair.getItem1() != null) return false;
+        return getItem2() != null ? getItem2().equals(pair.getItem2()) : pair.getItem2() == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = getItem1() != null ? getItem1().hashCode() : 0;
+        result = 31 * result + (getItem2() != null ? getItem2().hashCode() : 0);
+        return result;
+    }
+
+    @Override
     public String toString() {
         return "(" + item1 + ", " + item2 + ")";
     }
