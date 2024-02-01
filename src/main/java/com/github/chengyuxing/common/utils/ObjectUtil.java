@@ -367,23 +367,23 @@ public final class ObjectUtil {
                     continue;
                 }
                 if (eft == Character.class) {
-                    setter.invoke(value.toString().charAt(0));
+                    setter.invoke(entity, value.toString().charAt(0));
                     continue;
                 }
                 if (eft == Integer.class) {
-                    setter.invoke(toInteger(value));
+                    setter.invoke(entity, toInteger(value));
                     continue;
                 }
                 if (eft == Long.class) {
-                    setter.invoke(toLong(value));
+                    setter.invoke(entity, toLong(value));
                     continue;
                 }
                 if (eft == Double.class) {
-                    setter.invoke(toDouble(value));
+                    setter.invoke(entity, toDouble(value));
                     continue;
                 }
                 if (eft == Float.class) {
-                    setter.invoke(toFloat(value));
+                    setter.invoke(entity, toFloat(value));
                     continue;
                 }
                 if (eft == Date.class) {
