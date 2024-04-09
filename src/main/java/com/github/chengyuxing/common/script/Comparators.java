@@ -16,7 +16,7 @@ import java.util.regex.Pattern;
  * </pre></blockquote>
  * <p>support compare operator: </p>
  * <blockquote><pre>
- *     >, <, >=, <=, == ,=, !=, <>
+ *     &gt;, &lt;, &gt;=, &lt;=, == ,=, !=, &lt;&gt;
  * </pre></blockquote>
  * <p>support regex operator: </p>
  * <blockquote><pre>

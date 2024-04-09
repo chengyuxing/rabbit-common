@@ -18,7 +18,7 @@ import static com.github.chengyuxing.common.script.Patterns.*;
 
 /**
  * <h2>Fast condition expression parser</h2>
- * <p>Support logic operator: {@code &&, ||, !}, e.g.</p>
+ * <p>Support logic operator: {@code &amp;&amp;, ||, !}, e.g.</p>
  * <blockquote><pre>!(:id &gt;= 0 || :name | {@link com.github.chengyuxing.common.script.IPipe.Length length} &lt;= 3) &amp;&amp; :age &gt; 21
  * </pre></blockquote>
  * Built-in {@link IPipe pipes}：
@@ -173,7 +173,7 @@ public class FastExpression extends IExpression {
 
     /**
      * Boolean expression calc, e.g.
-     * <blockquote><pre> (true || false) && !(!(true && false || !!false)) || false
+     * <blockquote><pre> (true || false) &amp;&amp; !(!(true &amp;&amp; false || !!false)) || false
      * </pre></blockquote>
      *
      * @param expression boolean expression
