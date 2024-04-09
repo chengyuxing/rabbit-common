@@ -2,7 +2,10 @@ package com.github.chengyuxing.common;
 
 import java.time.*;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoField;
 import java.time.temporal.Temporal;
+import java.time.temporal.TemporalField;
+import java.time.temporal.TemporalUnit;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -39,15 +42,47 @@ public final class MostDateTime {
         put("Nov", 11);
         put("Dec", 12);
     }};
-    private final Temporal temporal;
+    private final LocalDateTime dateTime;
 
     /**
      * Constructs a new MostDateTime with temporal.
      *
-     * @param temporal temporal
+     * @param dateTime dateTime
      */
-    MostDateTime(Temporal temporal) {
-        this.temporal = temporal;
+    MostDateTime(LocalDateTime dateTime) {
+        this.dateTime = dateTime;
+    }
+
+    /**
+     * Returns a new MostDateTime with temporal.
+     *
+     * @param temporal temporal
+     * @param zoneId   zoneId
+     * @return MostDateTime instance
+     */
+    public static MostDateTime of(Temporal temporal, ZoneId zoneId) {
+        if (temporal instanceof LocalDateTime) {
+            return new MostDateTime((LocalDateTime) temporal);
+        }
+        if (temporal instanceof LocalDate) {
+            return new MostDateTime(((LocalDate) temporal).atStartOfDay());
+        }
+        if (temporal instanceof OffsetDateTime) {
+            return new MostDateTime(((OffsetDateTime) temporal).toLocalDateTime());
+        }
+        if (temporal instanceof ZonedDateTime) {
+            return new MostDateTime(((ZonedDateTime) temporal).toLocalDateTime());
+        }
+        if (temporal instanceof LocalTime) {
+            return new MostDateTime(((LocalTime) temporal).atDate(LocalDate.now()));
+        }
+        if (temporal instanceof OffsetTime) {
+            return new MostDateTime(((OffsetTime) temporal).atDate(LocalDate.now()).toLocalDateTime());
+        }
+        if (temporal instanceof Instant) {
+            return new MostDateTime(((Instant) temporal).atZone(zoneId).toLocalDateTime());
+        }
+        throw new IllegalArgumentException("Unsupported temporal type: " + temporal.getClass());
     }
 
     /**
@@ -57,7 +92,18 @@ public final class MostDateTime {
      * @return MostDateTime instance
      */
     public static MostDateTime of(Temporal temporal) {
-        return new MostDateTime(temporal);
+        return of(temporal, ZoneId.systemDefault());
+    }
+
+    /**
+     * Returns a new MostDateTime with date.
+     *
+     * @param date   date
+     * @param zoneId zoneId
+     * @return MostDateTime instance
+     */
+    public static MostDateTime of(Date date, ZoneId zoneId) {
+        return new MostDateTime(date.toInstant().atZone(zoneId).toLocalDateTime());
     }
 
     /**
@@ -67,7 +113,7 @@ public final class MostDateTime {
      * @return MostDateTime instance
      */
     public static MostDateTime of(Date date) {
-        return new MostDateTime(date.toInstant());
+        return of(date, ZoneId.systemDefault());
     }
 
     /**
@@ -92,43 +138,121 @@ public final class MostDateTime {
     }
 
     /**
+     * Minus the amount of current datetime temporal unit.
+     *
+     * @param amount the amount of the specified unit to subtract, may be negative
+     * @param unit   the unit of the amount to subtract, not null
+     * @return a new MostDateTime
+     * @see java.time.temporal.ChronoUnit ChronoUnit
+     */
+    public MostDateTime minus(long amount, TemporalUnit unit) {
+        return of(dateTime.minus(amount, unit));
+    }
+
+    /**
+     * Plus the amount of current datetime temporal unit.
+     *
+     * @param amount the amount of the specified unit to add, may be negative
+     * @param unit   the unit of the amount to add, not null
+     * @return a new MostDateTime
+     * @see java.time.temporal.ChronoUnit ChronoUnit
+     */
+    public MostDateTime plus(long amount, TemporalUnit unit) {
+        return of(dateTime.plus(amount, unit));
+    }
+
+    /**
+     * Gets the value of the specified field.
+     *
+     * @param field datetime part field name, not null
+     * @return the value of the field
+     * @see ChronoField
+     */
+    public int get(TemporalField field) {
+        return dateTime.get(field);
+    }
+
+    /**
+     * Convert to Instant.
+     *
+     * @param zoneId zoneId
+     * @return a new Instant
+     */
+    public Instant toInstant(ZoneId zoneId) {
+        return dateTime.atZone(zoneId).toInstant();
+    }
+
+    /**
+     * Convert to Instant.
+     *
+     * @return a new Instant
+     */
+    public Instant toInstant() {
+        return toInstant(ZoneId.systemDefault());
+    }
+
+    /**
+     * Convert to Date.
+     *
+     * @param zoneId zoneId
+     * @return a new Date
+     */
+    public Date toDate(ZoneId zoneId) {
+        return new Date(toInstant(zoneId).toEpochMilli());
+    }
+
+    /**
+     * Convert to Date.
+     *
+     * @return a new Date
+     */
+    public Date toDate() {
+        return toDate(ZoneId.systemDefault());
+    }
+
+    /**
+     * Convert to LocalDateTime.
+     *
+     * @return a new LocalDateTime
+     */
+    public LocalDateTime toLocalDateTime() {
+        return dateTime;
+    }
+
+    /**
+     * Convert to LocalDate.
+     *
+     * @return a new LocalDate
+     */
+    public LocalDate toLocalDate() {
+        return dateTime.toLocalDate();
+    }
+
+    /**
+     * Convert to LocalTime.
+     *
+     * @return a new LocalTime
+     */
+    public LocalTime toLocalTime() {
+        return dateTime.toLocalTime();
+    }
+
+    /**
      * Format to string datetime.
      *
      * @param format format
      * @return string datetime
      */
     public String toString(String format) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format.trim());
-        if (temporal instanceof LocalTime) {
-            return ((LocalTime) temporal).format(formatter);
-        }
-        if (temporal instanceof LocalDateTime) {
-            return ((LocalDateTime) temporal).format(formatter);
-        }
-        if (temporal instanceof LocalDate) {
-            return ((LocalDate) temporal).format(formatter);
-        }
-        if (temporal instanceof Instant) {
-            return ((Instant) temporal).atZone(ZoneId.systemDefault()).format(formatter);
-        }
-        if (temporal instanceof ZonedDateTime) {
-            return ((ZonedDateTime) temporal).toLocalDateTime().format(formatter);
-        }
-        if (temporal instanceof OffsetDateTime) {
-            return ((OffsetDateTime) temporal).toLocalDateTime().format(formatter);
-        }
-        if (temporal instanceof OffsetTime) {
-            return ((OffsetTime) temporal).toLocalTime().format(formatter);
-        }
-        throw new UnsupportedOperationException("type " + temporal.getClass().getTypeName() + "is not support currently.");
+        return dateTime.format(DateTimeFormatter.ofPattern(format.trim()));
     }
 
     @Override
     public String toString() {
-        if (temporal == null) {
+        if (dateTime == null) {
             return "";
         }
-        return this.temporal.toString();
+        return this.dateTime.toString();
     }
 
     /**
@@ -381,10 +505,32 @@ public final class MostDateTime {
      * Convert string to instant object.
      *
      * @param datetime string datetime
+     * @param zoneId   zoneId
+     * @return instant
+     */
+    public static Instant toInstant(String datetime, ZoneId zoneId) {
+        return toLocalDateTime(datetime).atZone(zoneId).toInstant();
+    }
+
+    /**
+     * Convert string to instant object.
+     *
+     * @param datetime string datetime
      * @return instant
      */
     public static Instant toInstant(String datetime) {
-        return toLocalDateTime(datetime).atZone(ZoneId.systemDefault()).toInstant();
+        return toInstant(datetime, ZoneId.systemDefault());
+    }
+
+    /**
+     * Convert string to timestamp.
+     *
+     * @param datetime string datetime
+     * @param zoneId   zoneId
+     * @return timestamp
+     */
+    public static long toEpochMilli(String datetime, ZoneId zoneId) {
+        return toInstant(datetime, zoneId).toEpochMilli();
     }
 
     /**
@@ -395,6 +541,17 @@ public final class MostDateTime {
      */
     public static long toEpochMilli(String datetime) {
         return toInstant(datetime).toEpochMilli();
+    }
+
+    /**
+     * Convert string to date object.
+     *
+     * @param datetime string datetime
+     * @param zoneId   zoneId
+     * @return date
+     */
+    public static Date toDate(String datetime, ZoneId zoneId) {
+        return new Date(toEpochMilli(datetime, zoneId));
     }
 
     /**
