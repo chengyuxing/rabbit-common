@@ -19,6 +19,8 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoField;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -119,7 +121,9 @@ public class Test2 {
         System.out.println(MostDateTime.createISODateTime("2019-09-26T03:45:36.656-0800"));
         System.out.println(MostDateTime.createISODateTime("2019-09-25T18:00:14"));
         System.out.println(MostDateTime.createISODateTime("2019-09-25T18:00:14z"));
+        System.out.println(111);
         System.out.println(MostDateTime.createISODateTime("2019-09-25 18:00:14"));
+        System.out.println(222);
 
         System.out.println(LocalDateTime.now());
 
@@ -145,6 +149,18 @@ public class Test2 {
         System.out.println(MostDateTime.of("2019-09-26T03:45:36.656-08"));
         System.out.println(MostDateTime.of("2019-09-26T03:45:36.656-080053").toString("yyyy-MM-dd hh:mm:ss"));
         System.out.println(ZoneId.of("+08:00:54"));
+    }
+
+    @Test
+    public void testMostDateTime() throws Exception {
+        MostDateTime mostDateTime = MostDateTime.now();
+        MostDateTime another = mostDateTime.plus(3, ChronoUnit.MINUTES);
+        System.out.println(mostDateTime);
+        System.out.println(another);
+        System.out.println(another.get(ChronoField.MONTH_OF_YEAR));
+        System.out.println(another.toDate());
+        System.out.println(another.toInstant());
+        System.out.println(another.toLocalDateTime());
     }
 
     @Test
