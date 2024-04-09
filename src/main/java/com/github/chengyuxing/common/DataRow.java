@@ -343,11 +343,11 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
      * Update a value.
      *
      * @param key     key
-     * @param updater updater: old value {@code ->} new value
+     * @param updater updater: old value -&gt; new value
      * @param <T>     old value type
      * @return true if exists &amp; updated or false
      */
-    @SuppressWarnings({"unchecked", "UnusedReturnValue"})
+    @SuppressWarnings({"UnusedReturnValue", "unchecked"})
     public <T> boolean update(String key, Function<T, Object> updater) {
         if (containsKey(key)) {
             Object oldV = get(key);
@@ -378,7 +378,7 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
      * Reduce.
      *
      * @param init   initial accumulator value
-     * @param mapper (accumulator, key, value) {@code ->} accumulator
+     * @param mapper (accumulator, key, value) -&gt; accumulator
      * @param <T>    result type
      * @return any type result
      */
@@ -394,9 +394,9 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
      * Convert to standard java bean entity.
      *
      * @param clazz                 entity class
-     * @param constructorParameters constructor's parameters is required if entity class only have
+     * @param constructorParameters <p>constructor's parameters is required if entity class only have
      *                              1 constructor with parameters
-     *                              e.g.
+     *                              e.g.</p>
      *                              <blockquote>
      *                              <pre>DataRow row = DataRow.of("x", 2, "y", 5, ...);</pre>
      *                              <pre>row.toEntity(A.class, row.get("x"), row.get("y"));</pre>

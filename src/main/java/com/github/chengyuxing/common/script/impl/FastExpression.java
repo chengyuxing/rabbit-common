@@ -18,11 +18,9 @@ import static com.github.chengyuxing.common.script.Patterns.*;
 
 /**
  * <h2>Fast condition expression parser</h2>
- * Support logic operator: {@code &&, ||, !}<br>
- * e.g.
- * <blockquote>
- * <pre>!(:id{@code >=} 0 || :name | {@link com.github.chengyuxing.common.script.IPipe.Length length}{@code <= 3) &&} :age{@code >} 21</pre>
- * </blockquote>
+ * <p>Support logic operator: {@code &&, ||, !}, e.g.</p>
+ * <blockquote><pre>!(:id &gt;= 0 || :name | {@link com.github.chengyuxing.common.script.IPipe.Length length} &lt;= 3) &amp;&amp; :age &gt; 21
+ * </pre></blockquote>
  * Built-in {@link IPipe pipes}：
  * <ul>
  *     <li>{@link com.github.chengyuxing.common.script.IPipe.Length length}</li>
@@ -58,7 +56,7 @@ public class FastExpression extends IExpression {
     }
 
     /**
-     * Returns a new FastExpression with initial expression.<br>
+     * Returns a new FastExpression with initial expression.
      *
      * @param expression expression
      * @return Expression instance
@@ -174,11 +172,9 @@ public class FastExpression extends IExpression {
     }
 
     /**
-     * Boolean expression calc.<br>
-     * e.g.
-     * <blockquote>
-     * {@code (true || false) && !(!(true && false || !!false)) || false}
-     * </blockquote>
+     * Boolean expression calc, e.g.
+     * <blockquote><pre> (true || false) && !(!(true && false || !!false)) || false
+     * </pre></blockquote>
      *
      * @param expression boolean expression
      * @return true or false

@@ -13,12 +13,12 @@ import java.nio.file.Paths;
 import java.util.Formatter;
 
 /**
- * File resource, support classpath resource and local system file e.g.<br>
- * <blockquote>
- * <pre>windows: file:/D:/rabbit.sql</pre>
- * <pre>Linux/Unix: file:/root/rabbit.sql</pre>
- * <pre>ClassPath: sql/rabbit.sql</pre>
- * </blockquote>
+ * File resource, support classpath resource and local system file e.g.
+ * <ul>
+ * <li>Windows: {@code file:/D:/rabbit.sql}</li>
+ * <li>Linux/Unix: {@code file:/root/rabbit.sql}</li>
+ * <li>ClassPath: {@code sql/rabbit.sql}</li>
+ * </ul>
  */
 public class FileResource extends ClassPathResource {
     private final String uriOrClasspath;

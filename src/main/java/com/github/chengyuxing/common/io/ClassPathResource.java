@@ -28,7 +28,7 @@ public class ClassPathResource {
     }
 
     /**
-     * If path starts with '/', remove it.
+     * If path starts with '{@code /}', remove it.
      *
      * @param path path
      * @return correct classpath resource path

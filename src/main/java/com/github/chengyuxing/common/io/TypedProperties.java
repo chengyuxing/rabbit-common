@@ -180,8 +180,8 @@ public class TypedProperties extends Properties {
      * @param key          key prefix e.g. datasource
      *                     <blockquote>
      *                     <ul>
-     *                     <li>datasource.url=jdbc:... </li>
-     *                     <li>datasource.username=...</li>
+     *                     <li>{@code datasource.url=jdbc:... }</li>
+     *                     <li>{@code datasource.username=...}</li>
      *                     </ul>
      *                     </blockquote>
      * @param defaultValue default value

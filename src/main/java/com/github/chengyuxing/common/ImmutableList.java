@@ -33,7 +33,7 @@ public final class ImmutableList<T> {
      * Reduce.
      *
      * @param init   initial value
-     * @param action (accumulator, current value, current index) {@code ->} accumulator
+     * @param action (accumulator, current value, current index) -&gt; accumulator
      * @param <R>    result type
      * @return any
      */
@@ -49,7 +49,7 @@ public final class ImmutableList<T> {
      * Reduce.
      *
      * @param init   initial value
-     * @param action (accumulator, current value) {@code ->} accumulator
+     * @param action (accumulator, current value) -&gt; accumulator
      * @param <R>    result type
      * @return any
      */

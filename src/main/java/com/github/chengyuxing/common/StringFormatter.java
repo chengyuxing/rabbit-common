@@ -21,11 +21,27 @@ public class StringFormatter {
 
     /**
      * Format string template with variable map.
-     * e.g.
+     * <p>e.g. template: </p>
      * <blockquote>
-     * <pre>template: select ${ fields } from test.user where ${  cnd} and id in (${!idArr}) or id = ${!idArr.1}</pre>
-     * <pre>variables: {fields: "id, name", cnd: "name = 'cyx'", idArr: ["a", "b", "c"]}</pre>
-     * <pre>result: select id, name from test.user where name = 'cyx' and id in ('a', 'b', 'c') or id = 'b'</pre>
+     * <pre>select ${ fields } from test.user
+     * where ${  cnd}
+     * and id in (${!idArr})
+     * or id = ${!idArr.1}</pre>
+     * </blockquote>
+     * <p>variables: </p>
+     * <blockquote>
+     * <pre>{
+     * fields: "id, name",
+     * cnd: "name = 'cyx'",
+     * idArr: ["a", "b", "c"]
+     * }</pre>
+     * </blockquote>
+     * <p>result: </p>
+     * <blockquote>
+     * <pre>select id, name from test.user
+     * where name = 'cyx'
+     * and id in ('a', 'b', 'c')
+     * or id = 'b'</pre>
      * </blockquote>
      *
      * @param template string template

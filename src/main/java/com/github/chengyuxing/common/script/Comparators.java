@@ -11,11 +11,20 @@ import java.util.regex.Pattern;
 
 /**
  * <h2>String literal value comparator</h2>
- * <ul>
- *     <li>support value type: {@code null, blank(empty string、null、empty collection、empty array),true, false, string('' or ""), number};</li>
- *     <li>support compare operator: {@code >, <, >=, <=, == ,=, !=, <>};</li>
- *     <li>support regex operator: {@code ~(contains), !~(not contains)}, {@code @(match), !@(not match)};</li>
- * </ul>
+ * <p>support value type: </p>
+ * <blockquote><pre>null, blank('empty string'、null、'empty collection'、'empty array'), true, false, string('' or ""), number
+ * </pre></blockquote>
+ * <p>support compare operator: </p>
+ * <blockquote><pre>
+ *     >, <, >=, <=, == ,=, !=, <>
+ * </pre></blockquote>
+ * <p>support regex operator: </p>
+ * <blockquote><pre>
+ * ~ (contains),
+ * !~ (not contains)
+ * {@code @} (match)
+ * !@ (not match)
+ * </pre></blockquote>
  */
 public class Comparators {
     /**

@@ -13,17 +13,17 @@ import static com.github.chengyuxing.common.utils.StringUtil.*;
 
 /**
  * <h2>Simple script parser</h2>
- * <p>if statement</p>
+ * <p>if statement:</p>
  * <blockquote>
  * <pre>
- * #if {@linkplain FastExpression expression}
- *      #if {@linkplain FastExpression expression}
+ * #if {@linkplain FastExpression expression1}
+ *      #if {@linkplain FastExpression expression2}
  *      ...
  *      #fi
  * #fi
  * </pre>
  * </blockquote>
- * <p>choose statement</p>
+ * <p>choose statement:</p>
  * <blockquote>
  * <pre>
  * #choose
@@ -60,7 +60,7 @@ import static com.github.chengyuxing.common.utils.StringUtil.*;
  * <p>for statement</p>
  * <blockquote>
  * <pre>
- * #for item[,idx] of :list [| {@link IPipe pipe1} | pipeN | ... ] [delimiter ','] [open ''] [close '']
+ * #for item[,idx] of :list [| {@linkplain IPipe pipe1} | pipeN | ... ] [delimiter ','] [open ''] [close '']
  *     ...
  * #done
  * </pre>
@@ -107,15 +107,27 @@ public class SimpleScriptParser {
 
     /**
      * <code>#for</code> loop body content formatter, format custom template variable and args resolve, e.g.
+     * <p>args:</p>
      * <blockquote>
      * <pre>
-     *     args: <code>users: [{name:'cyx', name:'json'}]</code>
-     *
-     *     #for user,idx of :users delimiter ' and '
-     *        '${user.name}'
-     *     #done
+     * {
+     *   users: [
+     *     {name: 'cyx', name: 'json'}
+     *   ]
+     * }
      * </pre>
-     * result: <pre>'cyx' and 'json'</pre>
+     * </blockquote>
+     * <p>for expression:</p>
+     * <blockquote>
+     * <pre>
+     * #for user,idx of :users delimiter ' and '
+     *    '${user.name}'
+     * #done
+     * </pre>
+     * </blockquote>
+     * <p>result:</p>
+     * <blockquote>
+     * <pre>'cyx' and 'json'</pre>
      * </blockquote>
      *
      * @param forIndex each for loop auto index
@@ -421,7 +433,7 @@ public class SimpleScriptParser {
     }
 
     /**
-     * Build #for var key.
+     * Build {@code #for} var key.
      *
      * @param name   for context var name
      * @param forIdx for auto index
@@ -433,8 +445,8 @@ public class SimpleScriptParser {
     }
 
     /**
-     * Get #for context variable map which saved by expression calc.<br>
-     * Format: [varName_forAutoIdx_varAutoIdx, var], e.g.
+     * Get {@code #for} context variable map which saved by expression calc.<br>
+     * Format: {@code (varName_forAutoIdx_varAutoIdx: var)}, e.g.
      * <blockquote>
      * <pre>
      * list: ["a", "b", "c"]; forIdx: 0
@@ -449,7 +461,7 @@ public class SimpleScriptParser {
      * </pre>
      * </blockquote>
      *
-     * @return #for context variable map
+     * @return {@code #for} context variable map
      * @see #forVarKey(String, int, int)
      */
     public Map<String, Object> getForContextVars() {
