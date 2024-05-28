@@ -372,6 +372,12 @@ public class StringTests {
     }
 
     @Test
+    public void testR() {
+        Pattern p = Pattern.compile("Z|GMT", Pattern.CASE_INSENSITIVE);
+        System.out.println(p.matcher("gmt").matches());
+    }
+
+    @Test
     public void testJackson() {
         DataRow row = DataRow.of("now", LocalDateTime.now(), "current", new Date());
     }

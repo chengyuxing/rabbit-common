@@ -21,13 +21,13 @@ public final class MostDateTime {
     //language=RegExp
     public static final Pattern TIME_PATTERN = Pattern.compile("(?<h>\\d{1,2})[:时点](?<m>\\d{1,2})(?<s>[:分]\\d{1,2})?秒?");
     //language=RegExp
-    public static final Pattern ISO_DATE_TIME_PATTERN = Pattern.compile("(?<date>\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,3})?)(?<zone>[zZ]|([+-](\\d{1,6}|\\d{2}:\\d{2}(:\\d{2})?)))?");
+    public static final Pattern ISO_DATE_TIME_PATTERN = Pattern.compile("(?<date>\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,3})?)(?<zone>Z|GMT|UTC|UT|([+-](\\d{1,6}|\\d{2}:\\d{2}(:\\d{2})?)))?", Pattern.CASE_INSENSITIVE);
     //language=RegExp
-    public static final Pattern RFC_1123_DATE_TIME_PATTERN = Pattern.compile("(Mon|Tue|Wed|Thu|Fri|Sat|Sun),\\s+\\d{1,2}\\s+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\\s+\\d{4}\\s+\\d{1,2}:\\d{1,2}:\\d{1,2} GMT");
+    public static final Pattern RFC_1123_DATE_TIME_PATTERN = Pattern.compile("(Mon|Tue|Wed|Thu|Fri|Sat|Sun),\\s+\\d{1,2}\\s+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\\s+\\d{4}\\s+\\d{1,2}:\\d{1,2}:\\d{1,2}\\s+GMT", Pattern.CASE_INSENSITIVE);
     //language=RegExp
-    public static final Pattern RFC_CST_DATE_TIME_PATTERN = Pattern.compile("(Mon|Tue|Wed|Thu|Fri|Sat|Sun)\\s+(?<M>Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\\s+(?<d>\\d{1,2})\\s+(?<time>\\d{1,2}:\\d{1,2}:\\d{1,2})\\s+CST\\s+(?<y>\\d{4})");
+    public static final Pattern RFC_CST_DATE_TIME_PATTERN = Pattern.compile("(Mon|Tue|Wed|Thu|Fri|Sat|Sun)\\s+(?<M>Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\\s+(?<d>\\d{1,2})\\s+(?<time>\\d{1,2}:\\d{1,2}:\\d{1,2})\\s+CST\\s+(?<y>\\d{4})", Pattern.CASE_INSENSITIVE);
     //language=RegExp
-    public static final Pattern RFC_GMT_DATE_TIME_PATTERN = Pattern.compile("(Mon|Tue|Wed|Thu|Fri|Sat|Sun)\\s+(?<M>Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\\s+(?<d>\\d{1,2})\\s+(?<y>\\d{4})\\s+(?<time>\\d{1,2}:\\d{1,2}:\\d{1,2})\\s+GMT(?<zone>[zZ]|([+-](\\d{1,6}|\\d{2}:\\d{2}(:\\d{2})?)))");
+    public static final Pattern RFC_GMT_DATE_TIME_PATTERN = Pattern.compile("(Mon|Tue|Wed|Thu|Fri|Sat|Sun)\\s+(?<M>Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\\s+(?<d>\\d{1,2})\\s+(?<y>\\d{4})\\s+(?<time>\\d{1,2}:\\d{1,2}:\\d{1,2})\\s+GMT(?<zone>Z|GMT|UTC|UT|([+-](\\d{1,6}|\\d{2}:\\d{2}(:\\d{2})?)))", Pattern.CASE_INSENSITIVE);
     public static final Map<String, Integer> Mon = new HashMap<String, Integer>() {{
         put("Jan", 1);
         put("Feb", 2);
@@ -373,10 +373,7 @@ public final class MostDateTime {
                     zoneId = ZoneId.systemDefault();
                     return;
                 }
-                if ("z".equals(zone)) {
-                    zone = "Z";
-                }
-                zoneId = ZoneId.of(zone);
+                zoneId = ZoneId.of(zone.toUpperCase());
             }
         }
 
@@ -435,7 +432,7 @@ public final class MostDateTime {
                 month = Mon.get(rfcGMTm.group("M"));
                 day = Integer.parseInt(rfcGMTm.group("d"));
                 time = rfcGMTm.group("time");
-                zoneId = ZoneId.of(rfcGMTm.group("zone"));
+                zoneId = ZoneId.of(rfcGMTm.group("zone").toUpperCase());
             }
         }
 
