@@ -119,16 +119,26 @@ public class FileResource extends ClassPathResource {
      * @param bytes bytes
      * @return string size view with unit
      */
-    public static String getSize(byte[] bytes) {
-        String strSize = "0KB";
+    public static String formatFileSize(byte[] bytes) {
+        return formatFileSize(bytes.length);
+    }
+
+    /**
+     * Get string size view of bytes size.
+     *
+     * @param bytes bytes length
+     * @return string size view with unit
+     */
+    public static String formatFileSize(long bytes) {
+        String size = "0 KB";
         final Formatter fmt = new Formatter();
-        if (bytes.length > 1073741824) {
-            strSize = fmt.format("%.2f", bytes.length / 1073741824.0) + "GB";
-        } else if (bytes.length > 1048576) {
-            strSize = fmt.format("%.2f", bytes.length / 1048576.0) + "MB";
-        } else if (bytes.length > 0) {
-            strSize = fmt.format("%.2f", bytes.length / 1024.0) + "KB";
+        if (bytes > 1073741824) {
+            size = fmt.format("%.2f", bytes / 1073741824.0) + " GB";
+        } else if (bytes > 1048576) {
+            size = fmt.format("%.2f", bytes / 1048576.0) + " MB";
+        } else if (bytes > 0) {
+            size = fmt.format("%.2f", bytes / 1024.0) + " KB";
         }
-        return strSize;
+        return size;
     }
 }
