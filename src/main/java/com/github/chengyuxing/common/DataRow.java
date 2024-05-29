@@ -130,8 +130,7 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
      * Get value by index.
      *
      * @param index index
-     * @return value
-     * @throws IndexOutOfBoundsException if index out of range
+     * @return value or null
      */
     private Object _getByIndex(int index) {
         if (index < 0 || index >= size()) {
@@ -216,7 +215,6 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
      *
      * @param index index
      * @return optional value
-     * @throws IndexOutOfBoundsException if index out of range
      */
     public Optional<Object> getOptional(int index) {
         return Optional.ofNullable(getAs(index));
@@ -240,7 +238,6 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
      * @param index    index
      * @param defaults default values, detect get first non-null value
      * @return value or null
-     * @throws IndexOutOfBoundsException if index out of range
      */
     public String getString(int index, String... defaults) {
         Object v = _getByIndex(index);
@@ -265,7 +262,6 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
      * @param index    index
      * @param defaults default values, detect get first non-null value
      * @return value or null
-     * @throws IndexOutOfBoundsException if index out of range
      */
     public Integer getInt(int index, Integer... defaults) {
         Integer v = ObjectUtil.toInteger(_getByIndex(index));
@@ -290,7 +286,6 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
      * @param index    index
      * @param defaults default values, detect get first non-null value
      * @return value or null
-     * @throws IndexOutOfBoundsException if index out of range
      */
     public Double getDouble(int index, Double... defaults) {
         Double v = ObjectUtil.toDouble(_getByIndex(index));
@@ -315,7 +310,6 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
      * @param index    index
      * @param defaults default values, detect get first non-null value
      * @return value or null
-     * @throws IndexOutOfBoundsException if index out of range
      */
     public Long getLong(int index, Long... defaults) {
         Long v = ObjectUtil.toLong(_getByIndex(index));
@@ -341,7 +335,6 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
      *
      * @param index index
      * @return type class or null
-     * @throws IndexOutOfBoundsException if index out of range
      */
     public Class<?> getType(int index) {
         Object v = _getByIndex(index);
