@@ -27,6 +27,15 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
     }
 
     /**
+     * Constructs a new DataRow with map.
+     *
+     * @param map map
+     */
+    public DataRow(Map<String, Object> map) {
+        super(map);
+    }
+
+    /**
      * Returns a new DataRow from pairs.
      *
      * @param input key-value pairs: k v，k v...
@@ -62,9 +71,20 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
      *
      * @param entity entity
      * @return DataRow instance
+     * @see com.github.chengyuxing.common.anno.Alias @Alias
      */
     public static DataRow ofEntity(Object entity) {
         return ObjectUtil.entity2map(entity, DataRow::new);
+    }
+
+    /**
+     * Returns a new DataRow from map.
+     *
+     * @param map map
+     * @return DataRow instance
+     */
+    public static DataRow ofMap(Map<String, Object> map) {
+        return new DataRow(map);
     }
 
     /**
@@ -114,10 +134,14 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
      * @throws IndexOutOfBoundsException if index out of range
      */
     private Object _getByIndex(int index) {
-        Object[] values = values().toArray();
-        Object v = values[index];
-        Arrays.fill(values, null);
-        return v;
+        if (index < 0 || index >= size()) {
+            return null;
+        }
+        Iterator<Map.Entry<String, Object>> it = entrySet().iterator();
+        for (int i = 0; i < index; i++) {
+            it.next();
+        }
+        return it.next().getValue();
     }
 
     /**
@@ -403,6 +427,7 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
      *                              </blockquote>
      * @param <T>                   entity class type
      * @return entity
+     * @see com.github.chengyuxing.common.anno.Alias @Alias
      */
     public <T> T toEntity(Class<T> clazz, Object... constructorParameters) {
         return ObjectUtil.map2entity(this, clazz, constructorParameters);

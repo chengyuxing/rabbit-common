@@ -69,8 +69,14 @@ public class ReflectTests {
 
     @Test
     public void testD() throws NoSuchMethodException {
-        DataRow row = DataRow.ofEntity(new My());
+        My my = new My();
+        my.setAge(20);
+        my.setName(100);
+        DataRow row = DataRow.ofEntity(my);
         System.out.println(row);
+
+        My my1 = row.toEntity(My.class);
+        System.out.println(my1);
     }
 
     @Test

@@ -1,6 +1,7 @@
 package com.github.chengyuxing.common.utils;
 
 import com.github.chengyuxing.common.MostDateTime;
+import com.github.chengyuxing.common.anno.Alias;
 
 import java.beans.IntrospectionException;
 import java.lang.reflect.Field;
@@ -299,6 +300,7 @@ public final class ObjectUtil {
      * @param mapBuilder (key-value count) {@code ->} (new Map instance)
      * @param <T>        result type
      * @return map
+     * @see Alias @Alias
      */
     public static <T extends Map<String, Object>> T entity2map(Object entity, Function<Integer, T> mapBuilder) {
         if (Objects.isNull(entity)) return mapBuilder.apply(0);
@@ -317,7 +319,11 @@ public final class ObjectUtil {
                     continue;
                 }
                 Object value = getter.invoke(entity);
-                map.put(get.getName(), value);
+                String getName = get.getName();
+                if (get.isAnnotationPresent(Alias.class)) {
+                    getName = get.getDeclaredAnnotation(Alias.class).value();
+                }
+                map.put(getName, value);
             }
             return map;
         } catch (IllegalAccessException | IntrospectionException | InvocationTargetException e) {
@@ -333,6 +339,7 @@ public final class ObjectUtil {
      * @param constructorParameters constructor parameters
      * @param <T>                   entity type
      * @return entity
+     * @see Alias @Alias
      */
     public static <T> T map2entity(Map<String, Object> source, Class<T> targetType, Object... constructorParameters) {
         try {
@@ -349,8 +356,11 @@ public final class ObjectUtil {
                 if (Objects.isNull(set)) {
                     continue;
                 }
-                String field = set.getName();
-                Object value = source.get(field);
+                String setName = set.getName();
+                if (set.isAnnotationPresent(Alias.class)) {
+                    setName = set.getDeclaredAnnotation(Alias.class).value();
+                }
+                Object value = source.get(setName);
                 if (Objects.isNull(value) || setter.getParameterCount() != 1) {
                     continue;
                 }

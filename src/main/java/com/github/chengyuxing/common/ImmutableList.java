@@ -127,11 +127,7 @@ public final class ImmutableList<T> {
     }
 
     public ImmutableList<T> slice(int start, int end) {
-        List<T> result = new ArrayList<>();
-        for (int i = start; i < end; i++) {
-            result.add(elements.get(i));
-        }
-        return of(result);
+        return of(elements.subList(start, end));
     }
 
     public ImmutableList<T> concat(ImmutableList<T> that) {

@@ -37,10 +37,10 @@ public class NewRowTest {
     public void testEach() throws Exception {
         DataRow row = DataRow.of("name", "cyx", "age", 28, "address", Arrays.asList("china", "yunnan", "kunming"));
         Map<String, Object> newMap = row;
-        newMap.remove("age");
+//        newMap.remove("age");
         System.out.println(row);
         System.out.println(newMap);
-        System.out.println(row.getString(0));
+        System.out.println(row.getString(2));
         System.out.println(row);
     }
 
@@ -52,5 +52,12 @@ public class NewRowTest {
         System.out.println(row.names().remove(1));
         System.out.println(row);
 //        System.out.println(row.removeIfAbsent());
+    }
+
+    @Test
+    public void test3() {
+        String json = "{\"name\":\"cyx\"}";
+        DataRow row = Jackson.toObject(json, DataRow.class);
+        System.out.println(row);
     }
 }

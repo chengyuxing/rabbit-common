@@ -1,26 +1,35 @@
 package tests.entity;
 
+import com.github.chengyuxing.common.anno.Alias;
+
+@Alias("test.users")
 public class My {
-    private Integer a;
-    private Integer b;
+    @Alias("xm")
+    private Integer name;
+    @Alias("nl")
+    private Integer age;
 
-    public boolean isOk() {
-        return a + b > 0;
+    @Override
+    public String toString() {
+        return "My{" +
+                "name=" + name +
+                ", age=" + age +
+                '}';
     }
 
-    public Integer getA() {
-        return a;
+    public Integer getName() {
+        return name;
     }
 
-    public void setA(Integer a) {
-        this.a = a;
+    public void setName(Integer name) {
+        this.name = name;
     }
 
-    public Integer getB() {
-        return b;
+    public Integer getAge() {
+        return age;
     }
 
-    public void setB(Integer b) {
-        this.b = b;
+    public void setAge(Integer age) {
+        this.age = age;
     }
 }
