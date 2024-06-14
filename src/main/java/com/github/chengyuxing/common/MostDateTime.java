@@ -121,9 +121,22 @@ public final class MostDateTime {
      *
      * @param datetime string datetime
      * @return MostDateTime instance
+     * @see #toLocalDateTime(String)
      */
     public static MostDateTime of(String datetime) {
         LocalDateTime ldt = toLocalDateTime(datetime);
+        return of(ldt);
+    }
+
+    /**
+     * Returns a new MostDateTime with string datetime and specific pattern.
+     *
+     * @param datetime string datetime
+     * @param pattern  datetime pattern
+     * @return MostDateTime instance
+     */
+    public static MostDateTime of(String datetime, String pattern) {
+        LocalDateTime ldt = LocalDateTime.parse(datetime, DateTimeFormatter.ofPattern(pattern));
         return of(ldt);
     }
 
@@ -170,6 +183,16 @@ public final class MostDateTime {
      */
     public int get(TemporalField field) {
         return dateTime.get(field);
+    }
+
+    /**
+     * Compares this date-time to another date-time.
+     *
+     * @param other the other date-time to compare to, not null
+     * @return the comparator value, negative if less, positive if greater
+     */
+    public int compareTo(MostDateTime other) {
+        return dateTime.compareTo(other.dateTime);
     }
 
     /**
