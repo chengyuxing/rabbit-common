@@ -153,7 +153,7 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
         if (isEmpty()) {
             return coalesce(defaults);
         }
-        Object v = values().iterator().next();
+        Object v = _getByIndex(0);
         return Objects.nonNull(v) ? v : coalesce(defaults);
     }
 
