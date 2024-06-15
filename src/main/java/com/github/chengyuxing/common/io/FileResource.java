@@ -1,36 +1,58 @@
 package com.github.chengyuxing.common.io;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-import java.io.UncheckedIOException;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URL;
+import com.github.chengyuxing.common.DataRow;
+
+import java.io.*;
+import java.net.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Formatter;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Objects;
 
 /**
- * File resource, support classpath resource and local system file e.g.
+ * File resource, support classpath and uri e.g.
  * <ul>
- * <li>Windows: {@code file:/D:/rabbit.sql}</li>
- * <li>Linux/Unix: {@code file:/root/rabbit.sql}</li>
  * <li>ClassPath: {@code sql/rabbit.sql}</li>
+ * <li>Local File System:
+ * <ul>
+ *     <li>Windows: {@code file:/D:/rabbit.sql}</li>
+ *     <li>Linux/Unix: {@code file:/root/rabbit.sql}</li>
+ * </ul>
+ * </li>
+ * <li>HTTP(S): {@code http(s)://host/rabbit.sql}</li>
+ * <li>FTP: {@code ftp://username:password@ftp.example.com/path/rabbit.sql}</li>
  * </ul>
  */
 public class FileResource extends ClassPathResource {
-    private final String uriOrClasspath;
+    //language=regexp
+    private final static String SCHEMAS_PATTERN = "(file|http|https|ftp)://.+";
+    private final DataRow properties = new DataRow();
 
     /**
      * Constructs a new FileResource with file path.
      *
      * @param path file path
+     * @see FileResource
      */
     public FileResource(String path) {
         super(path);
-        uriOrClasspath = path.trim();
+    }
+
+    /**
+     * Constructs a new FileResource with file path.
+     *
+     * @param path       file path
+     * @param properties properties e.g. http(s) request property {@code headers}:{@link Map}
+     * @see FileResource
+     */
+    public FileResource(String path, Map<String, Object> properties) {
+        super(path);
+        if (Objects.nonNull(properties)) {
+            this.properties.putAll(properties);
+        }
     }
 
     /**
@@ -39,15 +61,47 @@ public class FileResource extends ClassPathResource {
      * @return true if is URI or false
      */
     private boolean isURI() {
-        return uriOrClasspath.startsWith("file:");
+        return path.matches(SCHEMAS_PATTERN) || path.startsWith("file:");
     }
 
     @Override
     public InputStream getInputStream() {
         if (isURI()) {
             try {
-                return new FileInputStream(getURL().getFile());
-            } catch (FileNotFoundException e) {
+                String schema = uriSchema(path);
+                switch (schema) {
+                    case "file":
+                        return Files.newInputStream(Paths.get(getURL().getFile()));
+                    case "http":
+                    case "https":
+                        HttpURLConnection httpCon = (HttpURLConnection) getURL().openConnection();
+                        httpCon.setRequestMethod("GET");
+                        if (properties.containsKey("connectTimeout")) {
+                            httpCon.setConnectTimeout(properties.getInt("connectTimeout", 5000));
+                        }
+                        if (properties.containsKey("readTimeout")) {
+                            httpCon.setReadTimeout(properties.getInt("readTimeout", 5000));
+                        }
+                        if (properties.containsKey("headers")) {
+                            Map<String, Object> headers = properties.getAs("headers", new LinkedHashMap<>());
+                            for (Map.Entry<String, Object> e : headers.entrySet()) {
+                                httpCon.setRequestProperty(e.getKey(), e.getValue().toString());
+                            }
+                        }
+                        return httpCon.getInputStream();
+                    case "ftp":
+                        URLConnection ftpCon = getURL().openConnection();
+                        if (properties.containsKey("connectTimeout")) {
+                            ftpCon.setConnectTimeout(properties.getInt("connectTimeout", 5000));
+                        }
+                        if (properties.containsKey("readTimeout")) {
+                            ftpCon.setReadTimeout(properties.getInt("readTimeout", 5000));
+                        }
+                        return ftpCon.getInputStream();
+                    default:
+                        throw new UnsupportedOperationException("unknown schema");
+                }
+            } catch (IOException e) {
                 throw new UncheckedIOException(e);
             }
         }
@@ -58,12 +112,21 @@ public class FileResource extends ClassPathResource {
     public URL getURL() {
         if (isURI()) {
             try {
-                URI uri = URI.create(uriOrClasspath);
-                Path p = Paths.get(uri);
-                if (!Files.isDirectory(p) && Files.exists(p)) {
-                    return uri.toURL();
+                String schema = uriSchema(path);
+                switch (schema) {
+                    case "file":
+                        URI uri = URI.create(path);
+                        Path p = Paths.get(uri);
+                        if (!Files.isDirectory(p) && Files.exists(p)) {
+                            return uri.toURL();
+                        }
+                    case "http":
+                    case "https":
+                    case "ftp":
+                        return new URL(path);
+                    default:
+                        throw new UnsupportedOperationException("unknown schema");
                 }
-                return null;
             } catch (MalformedURLException e) {
                 throw new RuntimeException(e);
             }
@@ -77,6 +140,37 @@ public class FileResource extends ClassPathResource {
             return getURL().getFile();
         }
         return super.getPath();
+    }
+
+    @Override
+    public String getFilenameExtension() {
+        if (isURI()) {
+            String schema = uriSchema(path);
+            if (schema.startsWith("http")) {
+                String fullFileName = path;
+                int hashIdx = fullFileName.indexOf('#');
+                if (hashIdx != -1) {
+                    fullFileName = fullFileName.substring(0, hashIdx);
+                }
+                int qIdx = fullFileName.indexOf('?');
+                if (qIdx != -1) {
+                    fullFileName = fullFileName.substring(0, qIdx);
+                }
+                return getFileExtension(fullFileName);
+            }
+        }
+        return super.getFilenameExtension();
+    }
+
+    @Override
+    public String getFileName() {
+        if (isURI()) {
+            String schema = uriSchema(path);
+            if (schema.startsWith("http")) {
+                return getFileName(path, true);
+            }
+        }
+        return super.getFileName();
     }
 
     /**
@@ -102,8 +196,29 @@ public class FileResource extends ClassPathResource {
      */
     public static String getFileName(String fullFileName, boolean withExtension) {
         String name;
-        if (fullFileName.startsWith("file:")) {
-            name = Paths.get(URI.create(fullFileName)).getFileName().toString();
+        if (fullFileName.matches(SCHEMAS_PATTERN) || fullFileName.startsWith("file:")) {
+            String schema = uriSchema(fullFileName);
+            switch (schema) {
+                case "file":
+                    name = Paths.get(URI.create(fullFileName)).getFileName().toString();
+                    break;
+                case "http":
+                case "https":
+                case "ftp":
+                    int hashIdx = fullFileName.indexOf('#');
+                    if (hashIdx != -1) {
+                        fullFileName = fullFileName.substring(0, hashIdx);
+                    }
+                    int qIdx = fullFileName.indexOf('?');
+                    if (qIdx != -1) {
+                        fullFileName = fullFileName.substring(0, qIdx);
+                    }
+                    int pIdx = fullFileName.lastIndexOf('/');
+                    name = fullFileName.substring(pIdx + 1);
+                    break;
+                default:
+                    throw new UnsupportedOperationException("unknown schema");
+            }
         } else {
             name = Paths.get(fullFileName).getFileName().toString();
         }
@@ -111,6 +226,16 @@ public class FileResource extends ClassPathResource {
             return name;
         }
         return name.substring(0, name.lastIndexOf("."));
+    }
+
+    /**
+     * Get uri schema.
+     *
+     * @param uri uri
+     * @return schema
+     */
+    public static String uriSchema(String uri) {
+        return uri.substring(0, uri.indexOf(':'));
     }
 
     /**

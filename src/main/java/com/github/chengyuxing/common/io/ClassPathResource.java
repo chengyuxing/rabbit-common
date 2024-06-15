@@ -5,6 +5,10 @@ import com.github.chengyuxing.common.utils.ResourceUtil;
 import java.io.*;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
+import java.nio.channels.WritableByteChannel;
 import java.nio.charset.Charset;
 import java.nio.file.Paths;
 import java.util.stream.Collectors;
@@ -14,7 +18,7 @@ import java.util.stream.Stream;
  * Classpath resource.
  */
 public class ClassPathResource {
-    private final String path;
+    protected final String path;
     private final ClassLoader classLoader;
 
     /**
@@ -103,11 +107,9 @@ public class ClassPathResource {
      * @throws IOException if file not exists
      */
     public byte[] readBytes() throws IOException {
-        try (BufferedInputStream inputStream = new BufferedInputStream(getInputStream())) {
-            byte[] bytes = new byte[inputStream.available()];
-            //noinspection ResultOfMethodCallIgnored
-            inputStream.read(bytes);
-            return bytes;
+        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            transferTo(out);
+            return out.toByteArray();
         }
     }
 
@@ -118,10 +120,15 @@ public class ClassPathResource {
      * @throws IOException if file not exists
      */
     public void transferTo(OutputStream out) throws IOException {
-        try (BufferedInputStream inputStream = new BufferedInputStream(getInputStream())) {
-            byte[] buffer = new byte[4096];
-            while (inputStream.read(buffer) != -1) {
-                out.write(buffer);
+        try (ReadableByteChannel inChannel = Channels.newChannel(getInputStream());
+             WritableByteChannel outChannel = Channels.newChannel(out)) {
+            ByteBuffer buffer = ByteBuffer.allocate(8192);
+            while (inChannel.read(buffer) != -1) {
+                buffer.flip();
+                while (buffer.hasRemaining()) {
+                    outChannel.write(buffer);
+                }
+                buffer.clear();
             }
         }
     }

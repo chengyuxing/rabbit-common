@@ -15,6 +15,9 @@ import com.github.chengyuxing.common.utils.StringUtil;
 import org.junit.Test;
 import tests.entity.DateEntity;
 
+import java.io.*;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -150,6 +153,30 @@ public class Test2 {
         System.out.println(MostDateTime.of("2019-09-26T03:45:36.656-08"));
         System.out.println(MostDateTime.of("2019-09-26T03:45:36.656-080053").toString("yyyy-MM-dd hh:mm:ss"));
         System.out.println(ZoneId.of("+08:00:54"));
+    }
+
+    @Test
+    public void testUrl() throws MalformedURLException {
+        URL url = new URL("https://github.com/chengyuxing/sqlc/releases/download/2.1.2/sqlc-v2.1.2.tar.gz");
+        System.out.println(url.getFile());
+        try (BufferedInputStream in = new BufferedInputStream(url.openStream());
+             ByteArrayOutputStream arr = new ByteArrayOutputStream();
+             BufferedOutputStream out = new BufferedOutputStream(arr)) {
+            int i;
+            while ((i = in.read()) != -1) {
+                out.write(i);
+            }
+            byte[] bytes = arr.toByteArray();
+            System.out.println(FileResource.formatFileSize(bytes));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
+    public void test24() {
+        System.out.println(MostDateTime.of("2022.12.13_11.55.15", "yyyy.MM.dd_HH.mm.ss"));
+        System.out.println(MostDateTime.now().compareTo(MostDateTime.of("2025/12/13 11:55:15")));
     }
 
     @Test

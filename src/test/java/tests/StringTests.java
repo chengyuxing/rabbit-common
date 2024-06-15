@@ -15,6 +15,7 @@ import com.github.chengyuxing.common.utils.StringUtil;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -139,7 +140,7 @@ public class StringTests {
 
     @Test
     public void test3w() throws URISyntaxException, IOException {
-        FileResource resource = new FileResource("file:/Users/chengyuxing/Downloads/flatlaf-demo-3.0.jar");
+        FileResource resource = new FileResource("file:///Users/chengyuxing/Downloads/rabbit-sql-plugin-2.3.1-signed.zip");
         System.out.println(resource.exists());
         System.out.println(resource.getFileName());
         System.out.println(resource.getFilenameExtension());
@@ -147,6 +148,29 @@ public class StringTests {
         System.out.println(resource.getURL());
         System.out.println(resource.getLastModified());
         System.out.println(resource.getInputStream().available());
+        System.out.println("--------");
+        FileResource httpR = new FileResource("https://github.com/chengyuxing/sqlc/releases/download/2.1.2/sqlc-v2.1.2.tar.gz?id=13&dt=2021-12-12",
+                DataRow.of(
+                        "headers", DataRow.of("token", "abc"),
+                        "connectTimeout", 0));
+        System.out.println(httpR.exists());
+        System.out.println(httpR.getFileName());
+        System.out.println(httpR.getFilenameExtension());
+        System.out.println(httpR.getPath());
+        System.out.println(httpR.getURL());
+        System.out.println(httpR.getLastModified());
+        System.out.println(FileResource.formatFileSize(httpR.readBytes()));
+        System.out.println("----");
+        String s = new FileResource("https://github.com/chengyuxing/sqlc/raw/master/README.md").readString(StandardCharsets.UTF_8);
+        System.out.println(s);
+    }
+
+    @Test
+    public void testBaseHeader() {
+        String headers = "Authorization:password;token:wksksalwooa";
+        String base64 = Base64.getMimeEncoder().encodeToString(headers.getBytes(StandardCharsets.UTF_8));
+        System.out.println(base64);
+        System.out.println(new String(Base64.getMimeDecoder().decode(base64)));
     }
 
     @Test
@@ -221,9 +245,7 @@ public class StringTests {
 
     @Test
     public void test112() throws IOException {
-        FileResource resource = new FileResource("file:/Users/chengyuxing/Downloads/zulu8.68.0.21-ca-jdk8.0.362-macosx_aarch64.tar.gz");
-//        System.out.println(resource.readString());
-//        System.out.println(resource.readBytes().length);
+        FileResource resource = new FileResource("file:/Users/chengyuxing/Downloads/jdk-17_linux-aarch64_bin.tar.gz");
         resource.transferTo(Files.newOutputStream(Paths.get("/Users/chengyuxing/Downloads/bbb.tar.gz")));
     }
 
