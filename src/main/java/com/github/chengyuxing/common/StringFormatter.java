@@ -119,8 +119,9 @@ public class StringFormatter {
     /**
      * Do format string template with variable map.
      *
-     * @param template string template
-     * @param data     variables
+     * @param template       string template
+     * @param data           variables
+     * @param valueFormatter value formatter
      * @return formatted string template
      */
     protected String doFormat(final String template, final Map<String, ?> data, BiFunction<Object, Boolean, String> valueFormatter) {
