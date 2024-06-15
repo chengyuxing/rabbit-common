@@ -120,6 +120,7 @@ public class FileResource extends ClassPathResource {
                         if (!Files.isDirectory(p) && Files.exists(p)) {
                             return uri.toURL();
                         }
+                        return null;
                     case "http":
                     case "https":
                     case "ftp":
