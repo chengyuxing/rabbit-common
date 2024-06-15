@@ -2,7 +2,6 @@ package tests;
 
 import com.github.chengyuxing.common.DataRow;
 import com.github.chengyuxing.common.MostDateTime;
-import com.github.chengyuxing.common.utils.Jackson;
 import org.junit.Test;
 
 import java.time.LocalDateTime;
@@ -23,7 +22,7 @@ public class NewRowTest {
         System.out.println(row);
         System.out.println(row.containsValue("cyx"));
         System.out.println(row.put("x", "d"));
-        System.out.println(Jackson.toJson(row));
+//        System.out.println(Jackson.toJson(row));
     }
 
     @Test
@@ -57,7 +56,7 @@ public class NewRowTest {
     @Test
     public void test3() {
         String json = "{\"name\":\"cyx\"}";
-        DataRow row = Jackson.toObject(json, DataRow.class);
-        System.out.println(row);
+//        DataRow row = Jackson.toObject(json, DataRow.class);
+//        System.out.println(row);
     }
 }

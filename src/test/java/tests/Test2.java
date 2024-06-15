@@ -9,7 +9,6 @@ import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import com.github.chengyuxing.common.DataRow;
 import com.github.chengyuxing.common.MostDateTime;
 import com.github.chengyuxing.common.io.FileResource;
-import com.github.chengyuxing.common.utils.Jackson;
 import com.github.chengyuxing.common.utils.ObjectUtil;
 import com.github.chengyuxing.common.utils.StringUtil;
 import org.junit.Test;
@@ -248,10 +247,10 @@ public class Test2 {
     @Test
     public void testArgs() throws Exception {
         DataRow dataRow = DataRow.of("id", 2, "name", "cyx", "dt", MostDateTime.now().toString("yyyy-MM-dd"));
-        String json = Jackson.toJson(dataRow);
-        System.out.println(json);
-
-        System.out.println(Jackson.toObject(json, DataRow.class));
+//        String json = Jackson.toJson(dataRow);
+//        System.out.println(json);
+//
+//        System.out.println(Jackson.toObject(json, DataRow.class));
 
         Map<String, Object> map = DataRow.of("a", 1);
     }
@@ -264,7 +263,7 @@ public class Test2 {
         module.addDeserializer(LocalDateTime.class, dateTimeDeserializer);
         module.addSerializer(LocalDateTime.class, dateTimeSerializer);
 
-        System.out.println(Jackson.toJson(DataRow.of("now", LocalDateTime.now())));
+//        System.out.println(Jackson.toJson(DataRow.of("now", LocalDateTime.now())));
     }
 
     @Test
@@ -299,8 +298,8 @@ public class Test2 {
         List<User> users = mapper.readerForListOf(User.class)
                 .readValue(json);
         System.out.println(users);
-        System.out.println(Jackson.toObject(json, List.class));
-        System.out.println(Jackson.toObjects(json, User.class));
+//        System.out.println(Jackson.toObject(json, List.class));
+//        System.out.println(Jackson.toObjects(json, User.class));
     }
 
     @Test
