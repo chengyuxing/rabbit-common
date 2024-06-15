@@ -147,15 +147,7 @@ public class FileResource extends ClassPathResource {
         if (isURI()) {
             String schema = uriSchema(path);
             if (schema.startsWith("http")) {
-                String fullFileName = path;
-                int hashIdx = fullFileName.indexOf('#');
-                if (hashIdx != -1) {
-                    fullFileName = fullFileName.substring(0, hashIdx);
-                }
-                int qIdx = fullFileName.indexOf('?');
-                if (qIdx != -1) {
-                    fullFileName = fullFileName.substring(0, qIdx);
-                }
+                String fullFileName = cleanHttpUri(path);
                 return getFileExtension(fullFileName);
             }
         }
@@ -205,14 +197,7 @@ public class FileResource extends ClassPathResource {
                 case "http":
                 case "https":
                 case "ftp":
-                    int hashIdx = fullFileName.indexOf('#');
-                    if (hashIdx != -1) {
-                        fullFileName = fullFileName.substring(0, hashIdx);
-                    }
-                    int qIdx = fullFileName.indexOf('?');
-                    if (qIdx != -1) {
-                        fullFileName = fullFileName.substring(0, qIdx);
-                    }
+                    fullFileName = cleanHttpUri(fullFileName);
                     int pIdx = fullFileName.lastIndexOf('/');
                     name = fullFileName.substring(pIdx + 1);
                     break;
@@ -226,16 +211,6 @@ public class FileResource extends ClassPathResource {
             return name;
         }
         return name.substring(0, name.lastIndexOf("."));
-    }
-
-    /**
-     * Get uri schema.
-     *
-     * @param uri uri
-     * @return schema
-     */
-    public static String uriSchema(String uri) {
-        return uri.substring(0, uri.indexOf(':'));
     }
 
     /**
@@ -265,5 +240,34 @@ public class FileResource extends ClassPathResource {
             size = fmt.format("%.2f", bytes / 1024.0) + " KB";
         }
         return size;
+    }
+
+    /**
+     * Remove # and ? parts.
+     *
+     * @param uri http uri
+     * @return http uri
+     */
+    private static String cleanHttpUri(String uri) {
+        String fullFileName = uri;
+        int hashIdx = fullFileName.indexOf('#');
+        if (hashIdx != -1) {
+            fullFileName = fullFileName.substring(0, hashIdx);
+        }
+        int qIdx = fullFileName.indexOf('?');
+        if (qIdx != -1) {
+            fullFileName = fullFileName.substring(0, qIdx);
+        }
+        return fullFileName;
+    }
+
+    /**
+     * Get uri schema.
+     *
+     * @param uri uri
+     * @return schema
+     */
+    private static String uriSchema(String uri) {
+        return uri.substring(0, uri.indexOf(':'));
     }
 }
