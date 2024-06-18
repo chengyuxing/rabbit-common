@@ -71,7 +71,8 @@ public class FileResource extends ClassPathResource {
                 String schema = uriSchema(path);
                 switch (schema) {
                     case "file":
-                        return Files.newInputStream(Paths.get(getURL().getFile()));
+                        //noinspection IOStreamConstructor
+                        return new FileInputStream(getURL().getFile());
                     case "http":
                     case "https":
                         HttpURLConnection httpCon = (HttpURLConnection) getURL().openConnection();
