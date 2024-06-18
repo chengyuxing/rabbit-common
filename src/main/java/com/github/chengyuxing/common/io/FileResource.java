@@ -60,7 +60,7 @@ public class FileResource extends ClassPathResource {
      *
      * @return true if is URI or false
      */
-    private boolean isURI() {
+    protected boolean isURI() {
         return path.matches(SCHEMAS_PATTERN) || path.startsWith("file:");
     }
 
