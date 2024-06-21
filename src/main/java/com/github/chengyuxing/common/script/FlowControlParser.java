@@ -1,5 +1,6 @@
 package com.github.chengyuxing.common.script;
 
+import com.github.chengyuxing.common.script.exception.ScriptSyntaxException;
 import com.github.chengyuxing.common.script.expression.IExpression;
 import com.github.chengyuxing.common.script.expression.impl.FastExpression;
 
@@ -34,7 +35,7 @@ public class FlowControlParser {
         if (currentToken.getType() == type) {
             advance();
         } else {
-            throw new RuntimeException("Unexpected token: " + currentToken + ", expected: " + type);
+            throw new ScriptSyntaxException("Unexpected token: " + currentToken + ", expected: " + type);
         }
     }
 
@@ -134,7 +135,7 @@ public class FlowControlParser {
                 if (currentToken.getType() == TokenType.NEWLINE) {
                     advance();
                 } else {
-                    throw new RuntimeException("Unexpected token in switch statement: " + currentToken);
+                    throw new ScriptSyntaxException("Unexpected token in switch statement: " + currentToken);
                 }
             }
         }
@@ -178,7 +179,7 @@ public class FlowControlParser {
                 if (currentToken.getType() == TokenType.NEWLINE) {
                     advance();
                 } else {
-                    throw new RuntimeException("Unexpected token in choose statement: " + currentToken);
+                    throw new ScriptSyntaxException("Unexpected token in choose statement: " + currentToken);
                 }
             }
         }
@@ -236,7 +237,7 @@ public class FlowControlParser {
             }
             return result.toString().trim();
         } else {
-            throw new RuntimeException("Variable " + listVariable + " is not a list.");
+            throw new ScriptSyntaxException("Variable " + listVariable + " is not a list.");
         }
     }
 
