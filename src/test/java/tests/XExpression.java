@@ -1,7 +1,6 @@
 package tests;
 
-import com.github.chengyuxing.common.script.IExpression;
-import com.github.chengyuxing.common.script.IPipe;
+import com.github.chengyuxing.common.script.expression.IExpression;
 
 import java.util.Map;
 

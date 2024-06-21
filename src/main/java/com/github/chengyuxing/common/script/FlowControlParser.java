@@ -1,20 +1,20 @@
-package com.github.chengyuxing.common.script.language;
+package com.github.chengyuxing.common.script;
 
-import com.github.chengyuxing.common.script.IExpression;
-import com.github.chengyuxing.common.script.impl.FastExpression;
+import com.github.chengyuxing.common.script.expression.IExpression;
+import com.github.chengyuxing.common.script.expression.impl.FastExpression;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
 
-public class Parser {
+public class FlowControlParser {
     private final List<Token> tokens;
     private int currentTokenIndex;
     private Token currentToken;
     private final Map<String, Object> context;
 
-    public Parser(List<Token> tokens, Map<String, Object> context) {
+    public FlowControlParser(List<Token> tokens, Map<String, Object> context) {
         this.tokens = tokens;
         this.context = context;
         this.currentTokenIndex = 0;
@@ -228,7 +228,7 @@ public class Parser {
             StringJoiner result = new StringJoiner('\n' + delimiter + '\n', open, close);
             for (Object item : (List<?>) listObject) {
                 context.put(itemVariable, item);
-                Parser parser = new Parser(new IdentifierLexer(forContent).tokenize(), context);
+                FlowControlParser parser = new FlowControlParser(new FlowControlLexer(forContent).tokenize(), context);
                 String forContentResult = parser.parse();
                 if (!forContentResult.trim().isEmpty()) {
                     result.add(forContentResult);

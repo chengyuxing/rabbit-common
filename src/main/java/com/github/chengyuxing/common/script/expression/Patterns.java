@@ -1,4 +1,4 @@
-package com.github.chengyuxing.common.script;
+package com.github.chengyuxing.common.script.expression;
 
 public final class Patterns {
     //language=RegExp

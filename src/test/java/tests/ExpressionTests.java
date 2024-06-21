@@ -2,7 +2,7 @@ package tests;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
-import com.github.chengyuxing.common.script.impl.FastExpression;
+import com.github.chengyuxing.common.script.expression.impl.FastExpression;
 
 import java.util.HashMap;
 import java.util.Map;

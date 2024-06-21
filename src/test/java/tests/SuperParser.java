@@ -1,11 +1,10 @@
 package tests;
 
 import com.github.chengyuxing.common.DataRow;
-import com.github.chengyuxing.common.script.IExpression;
-import com.github.chengyuxing.common.script.IPipe;
+import com.github.chengyuxing.common.script.expression.IExpression;
+import com.github.chengyuxing.common.script.expression.IPipe;
 import com.github.chengyuxing.common.script.SimpleScriptParser;
-import com.github.chengyuxing.common.script.impl.FastExpression;
-import com.github.chengyuxing.common.utils.StringUtil;
+import com.github.chengyuxing.common.script.expression.impl.FastExpression;
 
 import java.io.IOException;
 import java.nio.file.Files;

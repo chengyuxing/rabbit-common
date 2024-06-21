@@ -2,7 +2,7 @@ package tests.parser;
 
 import com.github.chengyuxing.common.DataRow;
 import com.github.chengyuxing.common.script.exception.ScriptSyntaxException;
-import com.github.chengyuxing.common.script.impl.FastExpression;
+import com.github.chengyuxing.common.script.expression.impl.FastExpression;
 import org.junit.Test;
 
 import java.util.*;

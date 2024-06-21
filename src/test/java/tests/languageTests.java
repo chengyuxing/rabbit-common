@@ -1,8 +1,7 @@
 package tests;
 
 import com.github.chengyuxing.common.io.FileResource;
-import com.github.chengyuxing.common.script.SimpleScriptParser;
-import com.github.chengyuxing.common.script.language.*;
+import com.github.chengyuxing.common.script.*;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -33,12 +32,12 @@ public class languageTests {
 
     @Test
     public void test1() {
-        Lexer lexer = new Lexer(input);
+        FlowControlLexer lexer = new FlowControlLexer(input);
         List<Token> tokens = lexer.tokenize();
 
-        tokens.forEach(System.out::println);
+//        tokens.forEach(System.out::println);
 
-        Parser parser = new Parser(tokens, context);
+        FlowControlParser parser = new FlowControlParser(tokens, context);
         String result = parser.parse();
         System.out.println("--------------");
         System.out.println(result);

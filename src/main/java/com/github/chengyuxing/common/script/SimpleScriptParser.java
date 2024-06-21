@@ -1,13 +1,16 @@
 package com.github.chengyuxing.common.script;
 
 import com.github.chengyuxing.common.script.exception.ScriptSyntaxException;
-import com.github.chengyuxing.common.script.impl.FastExpression;
+import com.github.chengyuxing.common.script.expression.Comparators;
+import com.github.chengyuxing.common.script.expression.IExpression;
+import com.github.chengyuxing.common.script.expression.impl.FastExpression;
+import com.github.chengyuxing.common.script.expression.IPipe;
 
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.github.chengyuxing.common.script.Patterns.*;
+import static com.github.chengyuxing.common.script.expression.Patterns.*;
 import static com.github.chengyuxing.common.utils.ObjectUtil.*;
 import static com.github.chengyuxing.common.utils.StringUtil.*;
 

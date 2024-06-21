@@ -1,8 +1,8 @@
-package com.github.chengyuxing.common.script.impl;
+package com.github.chengyuxing.common.script.expression.impl;
 
-import com.github.chengyuxing.common.script.Comparators;
-import com.github.chengyuxing.common.script.IExpression;
-import com.github.chengyuxing.common.script.IPipe;
+import com.github.chengyuxing.common.script.expression.Comparators;
+import com.github.chengyuxing.common.script.expression.IExpression;
+import com.github.chengyuxing.common.script.expression.IPipe;
 import com.github.chengyuxing.common.script.exception.PipeNotFoundException;
 import com.github.chengyuxing.common.tuple.Pair;
 import com.github.chengyuxing.common.utils.ObjectUtil;
@@ -14,20 +14,20 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.github.chengyuxing.common.script.Patterns.*;
+import static com.github.chengyuxing.common.script.expression.Patterns.*;
 
 /**
  * <h2>Fast condition expression parser</h2>
  * <p>Support logic operator: {@code &amp;&amp;, ||, !}, e.g.</p>
- * <blockquote><pre>!(:id &gt;= 0 || :name | {@link com.github.chengyuxing.common.script.IPipe.Length length} &lt;= 3) &amp;&amp; :age &gt; 21
+ * <blockquote><pre>!(:id &gt;= 0 || :name | {@link IPipe.Length length} &lt;= 3) &amp;&amp; :age &gt; 21
  * </pre></blockquote>
  * Built-in {@link IPipe pipes}：
  * <ul>
- *     <li>{@link com.github.chengyuxing.common.script.IPipe.Length length}</li>
- *     <li>{@link com.github.chengyuxing.common.script.IPipe.Upper upper}</li>
- *     <li>{@link com.github.chengyuxing.common.script.IPipe.Lower lower}</li>
- *     <li>{@link com.github.chengyuxing.common.script.IPipe.Map2Pairs pairs}</li>
- *     <li>{@link com.github.chengyuxing.common.script.IPipe.Kv kv}</li>
+ *     <li>{@link IPipe.Length length}</li>
+ *     <li>{@link IPipe.Upper upper}</li>
+ *     <li>{@link IPipe.Lower lower}</li>
+ *     <li>{@link IPipe.Map2Pairs pairs}</li>
+ *     <li>{@link IPipe.Kv kv}</li>
  * </ul>
  *
  * @see Comparators

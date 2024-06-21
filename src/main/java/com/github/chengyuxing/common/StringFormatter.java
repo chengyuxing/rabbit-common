@@ -1,6 +1,6 @@
 package com.github.chengyuxing.common;
 
-import com.github.chengyuxing.common.script.Patterns;
+import com.github.chengyuxing.common.script.expression.Patterns;
 import com.github.chengyuxing.common.utils.ObjectUtil;
 
 import java.util.Map;

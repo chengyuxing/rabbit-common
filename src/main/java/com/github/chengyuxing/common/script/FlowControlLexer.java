@@ -1,14 +1,14 @@
-package com.github.chengyuxing.common.script.language;
+package com.github.chengyuxing.common.script;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class Lexer {
+public class FlowControlLexer {
     private final String[] lines;
     private int position;
     private final int length;
 
-    public Lexer(String input) {
+    public FlowControlLexer(String input) {
         this.lines = input.split("\n");
         this.length = this.lines.length;
         this.position = 0;

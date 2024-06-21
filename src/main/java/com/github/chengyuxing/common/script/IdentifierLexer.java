@@ -1,6 +1,6 @@
-package com.github.chengyuxing.common.script.language;
+package com.github.chengyuxing.common.script;
 
-import com.github.chengyuxing.common.script.Patterns;
+import com.github.chengyuxing.common.script.expression.Patterns;
 import com.github.chengyuxing.common.utils.StringUtil;
 
 import java.util.ArrayList;

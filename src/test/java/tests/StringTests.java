@@ -5,8 +5,8 @@ import com.github.chengyuxing.common.StringFormatter;
 import com.github.chengyuxing.common.io.ClassPathResource;
 import com.github.chengyuxing.common.io.FileResource;
 import com.github.chengyuxing.common.io.TypedProperties;
-import com.github.chengyuxing.common.script.Comparators;
-import com.github.chengyuxing.common.script.IPipe;
+import com.github.chengyuxing.common.script.expression.Comparators;
+import com.github.chengyuxing.common.script.expression.IPipe;
 import com.github.chengyuxing.common.script.SimpleScriptParser;
 import com.github.chengyuxing.common.tuple.Pair;
 import com.github.chengyuxing.common.utils.CollectionUtil;
@@ -15,7 +15,6 @@ import com.github.chengyuxing.common.utils.StringUtil;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -28,7 +27,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.github.chengyuxing.common.script.Patterns.PIPES_PATTERN;
+import static com.github.chengyuxing.common.script.expression.Patterns.PIPES_PATTERN;
 import static com.github.chengyuxing.common.utils.StringUtil.FMT;
 import static com.github.chengyuxing.common.utils.StringUtil.NEW_LINE;
 

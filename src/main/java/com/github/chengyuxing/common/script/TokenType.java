@@ -1,4 +1,4 @@
-package com.github.chengyuxing.common.script.language;
+package com.github.chengyuxing.common.script;
 
 public enum TokenType {
     // Keywords

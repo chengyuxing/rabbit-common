@@ -1,7 +1,7 @@
 package tests;
 
 import com.github.chengyuxing.common.DataRow;
-import com.github.chengyuxing.common.script.IPipe;
+import com.github.chengyuxing.common.script.expression.IPipe;
 import com.github.chengyuxing.common.script.SimpleScriptParser;
 import com.github.chengyuxing.common.KeyValue;
 import org.junit.Test;

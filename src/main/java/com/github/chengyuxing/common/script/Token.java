@@ -1,4 +1,4 @@
-package com.github.chengyuxing.common.script.language;
+package com.github.chengyuxing.common.script;
 
 public final class Token {
     private final TokenType type;
