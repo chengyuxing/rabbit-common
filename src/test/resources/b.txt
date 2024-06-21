@@ -1,0 +1,34 @@
+select * from test.user
+where id = 1 or id in
+
+#for item of :list delimiter 'or' open '(' close ')'
+    #if :item == 'a'
+        name = :name
+    #else
+        name = 'jack'
+    #fi
+#done
+
+#if :age >= 28
+   and age = 28
+#fi
+
+#switch :lx
+    #case 'a'
+        a
+    #break
+    #case 'b'
+        b
+    #break
+#end
+
+#choose
+    #when :age > 28
+        my age is 28
+    #break
+
+    #when :age < 15
+        I'm a child!
+    #break
+#end
+order by id desc
