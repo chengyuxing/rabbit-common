@@ -3,11 +3,12 @@ package com.github.chengyuxing.common.script.language;
 public enum TokenType {
     // Keywords
     IF, ELSE, ENDIF,
-    SWITCH, CASE, DEFAULT, BREAK, END,
+    SWITCH, CASE,
     CHOOSE, WHEN,
-    FOR, ENDFOR, OF, DELIMITER, OPEN, CLOSE,
+    DEFAULT, BREAK, END,
+    FOR, END_FOR, FOR_OF, FOR_DELIMITER, FOR_OPEN, FOR_CLOSE,
 
     // Other tokens
-    IDENTIFIER, STRING, NUMBER, NAMED_PARAMETER,
+    IDENTIFIER, STRING, NUMBER, VARIABLE_NAME,
     NEWLINE, EOF, UNKNOWN, PLAIN_TEXT
 }

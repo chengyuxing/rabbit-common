@@ -8,35 +8,37 @@ import org.junit.Test;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class languageTests {
 
     static String input;
-    static Context context = new Context();
+    static Map<String, Object> context = new HashMap<>();
 
     @BeforeClass
     public static void init() {
         input = new FileResource("b.txt").readString(StandardCharsets.UTF_8);
-        context.setVariable("list", Arrays.asList("a", "b", "a"));
-        context.setVariable("age", 12);
-        context.setVariable("lx", 'a');
+        context.put("list", Arrays.asList("a", "b", "a"));
+        context.put("age", 12);
+        context.put("lx", 'a');
     }
 
     @Test
     public void testTokens() {
-        Lexer lexer2 = new Lexer(input);
+        IdentifierLexer lexer2 = new IdentifierLexer(input);
         lexer2.tokenize().forEach(System.out::println);
     }
 
     @Test
     public void test1() {
-        IdentifierLexer lexer = new IdentifierLexer(input);
+        Lexer lexer = new Lexer(input);
         List<Token> tokens = lexer.tokenize();
 
         tokens.forEach(System.out::println);
 
-        Parser parser = new Parser(tokens, context.getVariables());
+        Parser parser = new Parser(tokens, context);
         String result = parser.parse();
         System.out.println("--------------");
         System.out.println(result);
@@ -45,7 +47,7 @@ public class languageTests {
     @Test
     public void test2() {
         SimpleScriptParser simpleScriptParser = new SimpleScriptParser();
-        String res = simpleScriptParser.parse(input, context.getVariables());
+        String res = simpleScriptParser.parse(input, context);
         System.out.println(res);
     }
 }

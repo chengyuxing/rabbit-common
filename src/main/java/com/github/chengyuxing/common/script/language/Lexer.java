@@ -42,8 +42,9 @@ public class Lexer {
             } else {
                 tokens.add(new Token(TokenType.PLAIN_TEXT, current));
             }
+            tokens.add(new Token(TokenType.NEWLINE, "\n"));
         }
-        tokens.add(new Token(TokenType.EOF, "\0"));
+        tokens.add(new Token(TokenType.EOF, ""));
         return tokens;
     }
 }

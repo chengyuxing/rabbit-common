@@ -1,5 +1,8 @@
 package com.github.chengyuxing.common.script.language;
 
+import com.github.chengyuxing.common.script.Patterns;
+import com.github.chengyuxing.common.utils.StringUtil;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
@@ -16,7 +19,7 @@ public class IdentifierLexer {
     }
 
     private char currentChar() {
-        return position < length ? input.charAt(position) : '\0';
+        return position < length ? input.charAt(position) : '\n';
     }
 
     private void advance() {
@@ -43,9 +46,7 @@ public class IdentifierLexer {
         while (position < length) {
             skipWhitespace();
             char current = currentChar();
-            if (current == '\0') {
-                break;
-            } else if (current == '\n') {
+            if (current == '\n') {
                 tokens.add(new Token(TokenType.NEWLINE, "\n"));
                 advance();
             } else if (current == '#') {
@@ -86,7 +87,7 @@ public class IdentifierLexer {
                         tokens.add(new Token(TokenType.FOR, "#for"));
                         break;
                     case "done":
-                        tokens.add(new Token(TokenType.ENDFOR, "#done"));
+                        tokens.add(new Token(TokenType.END_FOR, "#done"));
                         break;
                     default:
                         tokens.add(new Token(TokenType.UNKNOWN, '#' + keyword));
@@ -97,27 +98,26 @@ public class IdentifierLexer {
                 String str = readWhile(c -> c != '\'');
                 advance();
                 tokens.add(new Token(TokenType.STRING, str));
-            } else if (Character.isDigit(current)) {
-                String number = readWhile(Character::isDigit);
-                tokens.add(new Token(TokenType.NUMBER, number));
             } else {
-                String identifier = readWhile(c -> !Character.isWhitespace(c) && c != '\n' && c != '\0');
+                String identifier = readWhile(c -> !Character.isWhitespace(c) && c != '\n');
                 switch (identifier.toLowerCase()) {
                     case "of":
-                        tokens.add(new Token(TokenType.OF, "of"));
+                        tokens.add(new Token(TokenType.FOR_OF, "of"));
                         break;
                     case "delimiter":
-                        tokens.add(new Token(TokenType.DELIMITER, "delimiter"));
+                        tokens.add(new Token(TokenType.FOR_DELIMITER, "delimiter"));
                         break;
                     case "open":
-                        tokens.add(new Token(TokenType.OPEN, "open"));
+                        tokens.add(new Token(TokenType.FOR_OPEN, "open"));
                         break;
                     case "close":
-                        tokens.add(new Token(TokenType.CLOSE, "close"));
+                        tokens.add(new Token(TokenType.FOR_CLOSE, "close"));
                         break;
                     default:
-                        if (identifier.startsWith(":") && !identifier.startsWith("::")) {
-                            tokens.add(new Token(TokenType.NAMED_PARAMETER, identifier));
+                        if (identifier.matches(":" + Patterns.VAR_KEY_PATTERN)) {
+                            tokens.add(new Token(TokenType.VARIABLE_NAME, identifier));
+                        } else if (StringUtil.isNumeric(identifier)) {
+                            tokens.add(new Token(TokenType.NUMBER, identifier));
                         } else {
                             tokens.add(new Token(TokenType.IDENTIFIER, identifier));
                         }
@@ -125,7 +125,6 @@ public class IdentifierLexer {
                 }
             }
         }
-        tokens.add(new Token(TokenType.EOF, ""));
         return tokens;
     }
 }

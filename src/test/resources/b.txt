@@ -9,7 +9,7 @@ where id = 1 or id in
     #fi
 #done
 
-#if :age >= 28
+#if :age >= 3.1415
    and age = 28
 #fi
 

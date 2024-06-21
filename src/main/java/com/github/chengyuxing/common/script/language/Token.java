@@ -1,6 +1,6 @@
 package com.github.chengyuxing.common.script.language;
 
-public class Token {
+public final class Token {
     private final TokenType type;
     private final String value;
 

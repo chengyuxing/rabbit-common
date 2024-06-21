@@ -54,7 +54,7 @@ public class Parser {
 
     private String parseForBlock() {
         StringBuilder condition = new StringBuilder();
-        while (currentToken.getType() != TokenType.ENDFOR) {
+        while (currentToken.getType() != TokenType.END_FOR) {
             condition.append(currentToken.getValue()).append(" ");
             advance();
         }
@@ -80,7 +80,7 @@ public class Parser {
         StringBuilder content = new StringBuilder();
         while (currentToken.getType() != TokenType.ELSE &&
                 currentToken.getType() != TokenType.ENDIF &&
-                currentToken.getType() != TokenType.ENDFOR &&
+                currentToken.getType() != TokenType.END_FOR &&
                 currentToken.getType() != TokenType.BREAK &&
                 currentToken.getType() != TokenType.END &&
                 currentToken.getType() != TokenType.EOF) {
@@ -107,7 +107,7 @@ public class Parser {
     private String parseSwitchStatement() {
         eat(TokenType.SWITCH);
         String variable = currentToken.getValue();
-        eat(TokenType.NAMED_PARAMETER);
+        eat(TokenType.VARIABLE_NAME);
         eat(TokenType.NEWLINE);
 
         Map<String, String> caseContentMap = new HashMap<>();
@@ -197,24 +197,24 @@ public class Parser {
         String itemVariable = currentToken.getValue();
         eat(TokenType.IDENTIFIER);
 
-        eat(TokenType.OF);
+        eat(TokenType.FOR_OF);
         String listVariable = currentToken.getValue();
-        eat(TokenType.NAMED_PARAMETER);
+        eat(TokenType.VARIABLE_NAME);
 
         String delimiter = ", ";
-        if (currentToken.getType() == TokenType.DELIMITER) {
+        if (currentToken.getType() == TokenType.FOR_DELIMITER) {
             advance();
             delimiter = currentToken.getValue();
             advance();
         }
         String open = "";
-        if (currentToken.getType() == TokenType.OPEN) {
+        if (currentToken.getType() == TokenType.FOR_OPEN) {
             advance();
             open = currentToken.getValue();
             advance();
         }
         String close = "";
-        if (currentToken.getType() == TokenType.CLOSE) {
+        if (currentToken.getType() == TokenType.FOR_CLOSE) {
             advance();
             close = currentToken.getValue();
             advance();
@@ -222,7 +222,7 @@ public class Parser {
 
         eat(TokenType.NEWLINE);
         String forContent = parseForBlock();
-        eat(TokenType.ENDFOR);
+        eat(TokenType.END_FOR);
         Object listObject = context.get(listVariable.substring(1));
         if (listObject instanceof List) {
             StringJoiner result = new StringJoiner('\n' + delimiter + '\n', open, close);
