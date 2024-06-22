@@ -377,7 +377,7 @@ public class StringTests {
 
         List<Token> tokens = lexer.tokenize();
 
-        FlowControlParser parser = new FlowControlParser(tokens, d) {
+        FlowControlParser parser = new FlowControlParser() {
             public static final String FOR_VARS_KEY = "_for";
             public static final String VAR_PREFIX = FOR_VARS_KEY + ".";
 
@@ -392,7 +392,7 @@ public class StringTests {
             }
         };
 
-        String res = parser.parse();
+        String res = parser.parse(s, d);
         System.out.println(res);
 
         Map<String, Object> vars = parser.getForContextVars();

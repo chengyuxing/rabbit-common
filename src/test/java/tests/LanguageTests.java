@@ -36,7 +36,7 @@ public class LanguageTests {
         FlowControlLexer lexer = new FlowControlLexer(input);
         List<Token> tokens = lexer.tokenize();
 
-        FlowControlParser parser = new FlowControlParser(tokens, context) {
+        FlowControlParser parser = new FlowControlParser() {
             public static final String FOR_VARS_KEY = "_for";
             public static final String VAR_PREFIX = FOR_VARS_KEY + ".";
 
@@ -50,7 +50,7 @@ public class LanguageTests {
                 return formatted;
             }
         };
-        String result = parser.parse();
+        String result = parser.parse(input, context);
         System.out.println("--------------");
         System.out.println(result);
         System.out.println(parser.getForContextVars());

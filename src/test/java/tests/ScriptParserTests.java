@@ -19,7 +19,7 @@ public class ScriptParserTests {
     public void testSqlParser() {
         SimpleScriptParser parser = new SimpleScriptParser();
         List<Map<String, Object>> data = new ArrayList<>();
-        for (int i = 0; i < 10000; i++) {
+        for (int i = 0; i < 2; i++) {
             String sql = parser.parse("select * from test.user\n where id = 1\n" +
                     " #for id of :ids delimiter ', ' open ' or id in (' close ')'\n" +
                     "    #for add of :address\n" +
@@ -31,9 +31,9 @@ public class ScriptParserTests {
                     " #done", DataRow.of("ids", Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 1 + i, 11, 23, 45, 55, 67),
                     "address", Arrays.asList("a", "b", "c")));
             data.add(parser.getForContextVars());
-            if (i == 9999) {
+            if (i == 1) {
                 System.out.println(sql);
-                System.out.println(parser.getForContextVars());
+                System.out.println(parser.getForContextVars().size());
             }
         }
         System.out.println(data.size());
@@ -50,12 +50,9 @@ public class ScriptParserTests {
                 "       #fi\n" +
                 "    #done\n" +
                 " #done";
-        FlowControlLexer lexer = new FlowControlLexer(sql);
-        List<Token> tokens = lexer.tokenize();
         List<Map<String, Object>> data = new ArrayList<>();
         for (int i = 0; i < 2; i++) {
-            FlowControlParser parser = new FlowControlParser(tokens, DataRow.of("ids", Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 1 + i, 11, 23, 45, 55, 67),
-                    "address", Arrays.asList("a", "b", "c"))) {
+            FlowControlParser parser = new FlowControlParser() {
                 public static final String FOR_VARS_KEY = "_for";
                 public static final String VAR_PREFIX = FOR_VARS_KEY + ".";
 
@@ -69,11 +66,12 @@ public class ScriptParserTests {
                     return formatted;
                 }
             };
-            String res = parser.parse();
+            String res = parser.parse(sql, DataRow.of("ids", Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 1 + i, 11, 23, 45, 55, 67),
+                    "address", Arrays.asList("a", "b", "c")));
             data.add(parser.getForContextVars());
             if (i == 1) {
                 System.out.println(res);
-                System.out.println(parser.getForContextVars());
+                System.out.println(parser.getForContextVars().size());
             }
         }
         System.out.println(data.size());

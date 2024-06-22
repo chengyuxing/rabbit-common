@@ -76,24 +76,18 @@ public class SimpleScriptParser {
     public static final Pattern FOR_PATTERN = Pattern.compile("(?<item>\\w+)(\\s*,\\s*(?<index>\\w+))?\\s+of\\s+:(?<list>" + VAR_KEY_PATTERN + ")(?<pipes>" + PIPES_PATTERN + ")?(\\s+delimiter\\s+(?<delimiter>" + STRING_PATTERN + "))?(\\s+open\\s+(?<open>" + STRING_PATTERN + "))?(\\s+close\\s+(?<close>" + STRING_PATTERN + "))?");
     //language=RegExp
     public static final Pattern SWITCH_PATTERN = Pattern.compile(":(?<name>" + VAR_KEY_PATTERN + ")\\s*(?<pipes>" + PIPES_PATTERN + ")?");
-    public static final String[] TAGS = new String[]{
-            "#if", "#fi",
-            "#choose", "#when",
-            "#switch", "#case",
-            "#default", "#break",
-            "#end",
-            "#for", "#done"};
-    public static final String IF = TAGS[0];
-    public static final String FI = TAGS[1];
-    public static final String CHOOSE = TAGS[2];
-    public static final String WHEN = TAGS[3];
-    public static final String SWITCH = TAGS[4];
-    public static final String CASE = TAGS[5];
-    public static final String DEFAULT = TAGS[6];
-    public static final String BREAK = TAGS[7];
-    public static final String END = TAGS[8];
-    public static final String FOR = TAGS[9];
-    public static final String DONE = TAGS[10];
+    public static final String[] TAGS = FlowControlLexer.KEYWORDS;
+    public static final String IF = FlowControlLexer.IF;
+    public static final String FI = FlowControlLexer.FI;
+    public static final String CHOOSE = FlowControlLexer.CHOOSE;
+    public static final String WHEN = FlowControlLexer.WHEN;
+    public static final String SWITCH = FlowControlLexer.SWITCH;
+    public static final String CASE = FlowControlLexer.CASE;
+    public static final String DEFAULT = FlowControlLexer.DEFAULT;
+    public static final String BREAK = FlowControlLexer.BREAK;
+    public static final String END = FlowControlLexer.END;
+    public static final String FOR = FlowControlLexer.FOR;
+    public static final String DONE = FlowControlLexer.DONE;
 
     private int forIndex = 0;
     private Map<String, Object> forContextVars = new HashMap<>();
