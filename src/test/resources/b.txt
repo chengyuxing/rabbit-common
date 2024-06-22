@@ -1,11 +1,11 @@
 select * from test.user
-where id = 1 or id in
+    where id = 1 or id in
 
-#for item of :list delimiter 'or' open '(' close ')'
-    #if :item == 'a'
+#for item of :user.names delimiter 'or' open '(' close ')'
+    #if :item | upper == 'A'
         name = :name
     #else
-        name = 'jack'
+        name = :_for.item
     #fi
 #done
 
@@ -13,8 +13,8 @@ where id = 1 or id in
    and age = 28
 #fi
 
-#switch :lx
-    #case 'a'
+#switch :lx | upper
+    #case 'A'
         a
     #break
     #case 'b'
@@ -30,6 +30,9 @@ where id = 1 or id in
     #when :age < 15
         I'm a child
         and i am 13 years old!
+        and i am 13 years old!
+        and i am 13 years old!
     #break
 #end
+
 order by id desc

@@ -1,17 +1,18 @@
 package tests;
 
+import com.github.chengyuxing.common.DataRow;
 import com.github.chengyuxing.common.io.FileResource;
 import com.github.chengyuxing.common.script.*;
+import com.github.chengyuxing.common.utils.StringUtil;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-public class languageTests {
+import static com.github.chengyuxing.common.utils.StringUtil.NEW_LINE;
+
+public class LanguageTests {
 
     static String input;
     static Map<String, Object> context = new HashMap<>();
@@ -19,7 +20,7 @@ public class languageTests {
     @BeforeClass
     public static void init() {
         input = new FileResource("b.txt").readString(StandardCharsets.UTF_8);
-        context.put("list", Arrays.asList("a", "b", "a"));
+        context.put("user", DataRow.of("names", Arrays.asList("a", "b", "A", "e", "f")));
         context.put("age", 12);
         context.put("lx", 'a');
     }
@@ -35,12 +36,24 @@ public class languageTests {
         FlowControlLexer lexer = new FlowControlLexer(input);
         List<Token> tokens = lexer.tokenize();
 
-//        tokens.forEach(System.out::println);
+        FlowControlParser parser = new FlowControlParser(tokens, context) {
+            public static final String FOR_VARS_KEY = "_for";
+            public static final String VAR_PREFIX = FOR_VARS_KEY + ".";
 
-        FlowControlParser parser = new FlowControlParser(tokens, context);
+            @Override
+            protected String forLoopBodyFormatter(int forIndex, int varIndex, String varName, String body, Map<String, Object> args) {
+                String formatted = StringUtil.FMT.format(String.join(NEW_LINE, body), args);
+                if (Objects.nonNull(varName)) {
+                    String varParam = VAR_PREFIX + forVarKey(varName, forIndex, varIndex);
+                    formatted = formatted.replace(VAR_PREFIX + varName, varParam);
+                }
+                return formatted;
+            }
+        };
         String result = parser.parse();
         System.out.println("--------------");
         System.out.println(result);
+        System.out.println(parser.getForContextVars());
     }
 
     @Test

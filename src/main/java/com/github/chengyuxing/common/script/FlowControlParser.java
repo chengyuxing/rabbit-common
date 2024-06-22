@@ -2,24 +2,151 @@ package com.github.chengyuxing.common.script;
 
 import com.github.chengyuxing.common.script.exception.ScriptSyntaxException;
 import com.github.chengyuxing.common.script.expression.IExpression;
+import com.github.chengyuxing.common.script.expression.IPipe;
 import com.github.chengyuxing.common.script.expression.impl.FastExpression;
+import com.github.chengyuxing.common.utils.ObjectUtil;
+import com.github.chengyuxing.common.utils.StringUtil;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
 
+/**
+ * <h2>Flow-Control parser</h2>
+ * <p>if statement:</p>
+ * <blockquote>
+ * <pre>
+ * #if {@linkplain FastExpression expression1}
+ *      #if {@linkplain FastExpression expression2}
+ *      ...
+ *      #fi
+ *      #if {@linkplain FastExpression expression2}
+ *      ...
+ *      #else
+ *      ...
+ *      #fi
+ * #fi
+ * </pre>
+ * </blockquote>
+ * <p>choose statement:</p>
+ * <blockquote>
+ * <pre>
+ * #choose
+ *      #when {@linkplain FastExpression expression1}
+ *      ...
+ *      #break
+ *      #when {@linkplain FastExpression expression2}
+ *      ...
+ *      #break
+ *      ...
+ *      #default
+ *      ...
+ *      #break
+ * #end
+ * </pre>
+ * </blockquote>
+ * <p>switch statement</p>
+ * <blockquote>
+ * <pre>
+ * #switch :key [| {@linkplain IPipe pipe1} | {@linkplain IPipe pipeN} | ...]
+ *      #case var1
+ *      ...
+ *      #break
+ *      #case var2
+ *      ...
+ *      #break
+ *      ...
+ *      #default
+ *      ...
+ *      #break
+ * #end
+ * </pre>
+ * </blockquote>
+ * <p>for statement</p>
+ * <blockquote>
+ * <pre>
+ * #for item of :list [delimiter ', '] [open ''] [close '']
+ *     ...
+ * #done
+ * </pre>
+ * </blockquote>
+ *
+ * @see FastExpression
+ */
 public class FlowControlParser {
     private final List<Token> tokens;
     private int currentTokenIndex;
     private Token currentToken;
     private final Map<String, Object> context;
 
+    private int forIndex = 0;
+    private Map<String, Object> forContextVars = new HashMap<>();
+
     public FlowControlParser(List<Token> tokens, Map<String, Object> context) {
         this.tokens = tokens;
         this.context = context;
         this.currentTokenIndex = 0;
         this.currentToken = tokens.get(currentTokenIndex);
+    }
+
+    /**
+     * Configure expression parser implementation.
+     *
+     * @param expression expression
+     * @return expression parser implementation
+     */
+    protected IExpression expression(String expression) {
+        return FastExpression.of(expression);
+    }
+
+    /**
+     * Build {@code #for} var key.
+     *
+     * @param name   for context var name
+     * @param forIdx for auto index
+     * @param varIdx var auto index
+     * @return unique for var key
+     */
+    protected String forVarKey(String name, int forIdx, int varIdx) {
+        return name + "_" + forIdx + "_" + varIdx;
+    }
+
+    /**
+     * <code>#for</code> loop body content formatter, format custom template variable and args resolve, e.g.
+     * <p>args:</p>
+     * <blockquote>
+     * <pre>
+     * {
+     *   users: [
+     *     {name: 'cyx', name: 'json'}
+     *   ]
+     * }
+     * </pre>
+     * </blockquote>
+     * <p>for expression:</p>
+     * <blockquote>
+     * <pre>
+     * #for user,idx of :users delimiter ' and '
+     *    '${user.name}'
+     * #done
+     * </pre>
+     * </blockquote>
+     * <p>result:</p>
+     * <blockquote>
+     * <pre>'cyx' and 'json'</pre>
+     * </blockquote>
+     *
+     * @param forIndex each for loop auto index
+     * @param varIndex for var auto index
+     * @param varName  for context var name,  e.g. {@code <user>}
+     * @param body     content in for loop
+     * @param context  each for loop context args (index and value) which created by for expression
+     * @return formatted content
+     * @see #getForContextVars()
+     */
+    protected String forLoopBodyFormatter(int forIndex, int varIndex, String varName, String body, Map<String, Object> context) {
+        return StringUtil.FMT.format(body, context);
     }
 
     private void advance() {
@@ -40,54 +167,55 @@ public class FlowControlParser {
     }
 
     private boolean evaluateCondition(String condition) {
-        IExpression expression = FastExpression.of(condition);
-        return expression.calc(context);
+        return expression(condition).calc(context);
     }
 
     private String parseCondition() {
-        StringBuilder condition = new StringBuilder();
+        StringJoiner condition = new StringJoiner(" ");
         while (currentToken.getType() != TokenType.NEWLINE && currentToken.getType() != TokenType.EOF) {
-            condition.append(currentToken.getValue()).append(" ");
+            condition.add(currentToken.getValue());
             advance();
         }
         return condition.toString().trim();
     }
 
     private String parseForBlock() {
-        StringBuilder condition = new StringBuilder();
+        StringJoiner condition = new StringJoiner(" ");
         while (currentToken.getType() != TokenType.END_FOR) {
-            condition.append(currentToken.getValue()).append(" ");
+            condition.add(currentToken.getValue());
             advance();
         }
         return condition.toString().trim();
     }
 
-    private void doParseStatement(StringBuilder result) {
+    private String doParseStatement() {
+        String result;
         if (currentToken.getType() == TokenType.IF) {
-            result.append(parseIfStatement()).append(" ");
+            result = parseIfStatement();
         } else if (currentToken.getType() == TokenType.SWITCH) {
-            result.append(parseSwitchStatement()).append(" ");
+            result = parseSwitchStatement();
         } else if (currentToken.getType() == TokenType.CHOOSE) {
-            result.append(parseChooseStatement()).append(" ");
+            result = parseChooseStatement();
         } else if (currentToken.getType() == TokenType.FOR) {
-            result.append(parseForStatement()).append(" ");
+            result = parseForStatement();
         } else {
-            result.append(currentToken.getValue()).append(" ");
+            result = currentToken.getValue();
             advance();
         }
+        return result;
     }
 
     private String parseContent() {
-        StringBuilder content = new StringBuilder();
+        StringJoiner content = new StringJoiner(" ");
         while (currentToken.getType() != TokenType.ELSE &&
                 currentToken.getType() != TokenType.ENDIF &&
                 currentToken.getType() != TokenType.END_FOR &&
                 currentToken.getType() != TokenType.BREAK &&
                 currentToken.getType() != TokenType.END &&
                 currentToken.getType() != TokenType.EOF) {
-            doParseStatement(content);
+            content.add(doParseStatement());
         }
-        return content.toString().trim();
+        return content.toString();
     }
 
     private String parseIfStatement() {
@@ -107,8 +235,7 @@ public class FlowControlParser {
 
     private String parseSwitchStatement() {
         eat(TokenType.SWITCH);
-        String variable = currentToken.getValue();
-        eat(TokenType.VARIABLE_NAME);
+        String variable = parseCondition();
         eat(TokenType.NEWLINE);
 
         Map<String, String> caseContentMap = new HashMap<>();
@@ -141,7 +268,21 @@ public class FlowControlParser {
         }
         eat(TokenType.END);
 
-        Object variableValue = context.get(variable.substring(1));
+        String variableName = variable.substring(1);
+        String pipes = "";
+
+        int pipeIdx = variableName.indexOf('|');
+        if (pipeIdx != -1) {
+            pipes = variableName.substring(pipeIdx);
+            variableName = variableName.substring(0, pipeIdx).trim();
+        }
+
+        Object variableValue = context.get(variableName);
+
+        if (!pipes.trim().isEmpty()) {
+            variableValue = expression("empty").pipedValue(variableValue, pipes);
+        }
+
         if (variableValue != null) {
             String content = caseContentMap.get(variableValue.toString());
             if (content != null) {
@@ -224,27 +365,79 @@ public class FlowControlParser {
         eat(TokenType.NEWLINE);
         String forContent = parseForBlock();
         eat(TokenType.END_FOR);
-        Object listObject = context.get(listVariable.substring(1));
-        if (listObject instanceof List) {
-            StringJoiner result = new StringJoiner('\n' + delimiter + '\n', open, close);
-            for (Object item : (List<?>) listObject) {
-                context.put(itemVariable, item);
-                FlowControlParser parser = new FlowControlParser(new FlowControlLexer(forContent).tokenize(), context);
-                String forContentResult = parser.parse();
-                if (!forContentResult.trim().isEmpty()) {
-                    result.add(forContentResult);
-                }
-            }
-            return result.toString().trim();
-        } else {
-            throw new ScriptSyntaxException("Variable " + listVariable + " is not a list.");
+
+        String listName = listVariable.substring(1);
+        String pipes = "";
+        int pipeIdx = listName.indexOf('|');
+        if (pipeIdx != -1) {
+            pipes = listName.substring(pipeIdx);
+            listName = listName.substring(0, pipeIdx);
         }
+
+        Object listObject = ObjectUtil.getDeepValue(context, listName);
+
+        if (!pipes.trim().isEmpty()) {
+            listObject = expression("empty").pipedValue(listObject, pipes);
+        }
+
+        Object[] iterator = ObjectUtil.toArray(listObject);
+
+        StringJoiner result = new StringJoiner('\n' + delimiter + '\n', open, close);
+        for (int i = 0, j = iterator.length; i < j; i++) {
+            Object item = iterator[i];
+            Map<String, Object> eachContext = new HashMap<>(context);
+            eachContext.put(itemVariable, item);
+            forContextVars.put(forVarKey(itemVariable, forIndex, i), item);
+            String formattedForContent = forLoopBodyFormatter(forIndex, i, itemVariable, forContent, eachContext);
+            FlowControlParser parser = new FlowControlParser(new FlowControlLexer(formattedForContent).tokenize(), eachContext);
+            String forContentResult = parser.parse();
+            if (!forContentResult.trim().isEmpty()) {
+                result.add(forContentResult);
+            }
+        }
+        forIndex++;
+        return result.toString();
     }
 
+    /**
+     * Get {@code #for} context variable map which saved by expression calc.<br>
+     * Format: {@code (varName_forAutoIdx_varAutoIdx: var)}, e.g.
+     * <blockquote>
+     * <pre>
+     * list: ["a", "b", "c"]; forIdx: 0
+     * </pre>
+     * <pre>
+     * #for item of :list
+     *      ...
+     * #done
+     * </pre>
+     * <pre>
+     * vars: {item_0_0: "a", item_0_1: "b", item_0_2: "c"}
+     * </pre>
+     * </blockquote>
+     *
+     * @return {@code #for} context variable map
+     * @see #forVarKey(String, int, int)
+     */
+    public Map<String, Object> getForContextVars() {
+        return forContextVars;
+    }
+
+    /**
+     * Parse content with scripts.
+     *
+     * @return parsed content
+     * @see IExpression
+     */
     public String parse() {
+        if (tokens.isEmpty()) {
+            return "";
+        }
+        forIndex = 0;
+        forContextVars = new HashMap<>();
         StringBuilder result = new StringBuilder();
         while (currentToken.getType() != TokenType.EOF) {
-            doParseStatement(result);
+            result.append(doParseStatement());
         }
         return result.toString().trim();
     }

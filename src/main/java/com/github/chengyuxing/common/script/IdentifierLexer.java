@@ -1,6 +1,5 @@
 package com.github.chengyuxing.common.script;
 
-import com.github.chengyuxing.common.script.expression.Patterns;
 import com.github.chengyuxing.common.utils.StringUtil;
 
 import java.util.ArrayList;
@@ -54,40 +53,40 @@ public class IdentifierLexer {
                 String keyword = readWhile(Character::isAlphabetic);
                 switch (keyword.toLowerCase()) {
                     case "if":
-                        tokens.add(new Token(TokenType.IF, "#if"));
+                        tokens.add(new Token(TokenType.IF, FlowControlLexer.IF));
                         break;
                     case "else":
-                        tokens.add(new Token(TokenType.ELSE, "#else"));
+                        tokens.add(new Token(TokenType.ELSE, FlowControlLexer.ELSE));
                         break;
                     case "fi":
-                        tokens.add(new Token(TokenType.ENDIF, "#fi"));
+                        tokens.add(new Token(TokenType.ENDIF, FlowControlLexer.FI));
                         break;
                     case "end":
-                        tokens.add(new Token(TokenType.END, "#end"));
+                        tokens.add(new Token(TokenType.END, FlowControlLexer.END));
                         break;
                     case "switch":
-                        tokens.add(new Token(TokenType.SWITCH, "#switch"));
+                        tokens.add(new Token(TokenType.SWITCH, FlowControlLexer.SWITCH));
                         break;
                     case "case":
-                        tokens.add(new Token(TokenType.CASE, "#case"));
+                        tokens.add(new Token(TokenType.CASE, FlowControlLexer.CASE));
                         break;
                     case "default":
-                        tokens.add(new Token(TokenType.DEFAULT, "#default"));
+                        tokens.add(new Token(TokenType.DEFAULT, FlowControlLexer.DEFAULT));
                         break;
                     case "break":
-                        tokens.add(new Token(TokenType.BREAK, "#break"));
+                        tokens.add(new Token(TokenType.BREAK, FlowControlLexer.BREAK));
                         break;
                     case "choose":
-                        tokens.add(new Token(TokenType.CHOOSE, "#choose"));
+                        tokens.add(new Token(TokenType.CHOOSE, FlowControlLexer.CHOOSE));
                         break;
                     case "when":
-                        tokens.add(new Token(TokenType.WHEN, "#when"));
+                        tokens.add(new Token(TokenType.WHEN, FlowControlLexer.WHEN));
                         break;
                     case "for":
-                        tokens.add(new Token(TokenType.FOR, "#for"));
+                        tokens.add(new Token(TokenType.FOR, FlowControlLexer.FOR));
                         break;
                     case "done":
-                        tokens.add(new Token(TokenType.END_FOR, "#done"));
+                        tokens.add(new Token(TokenType.END_FOR, FlowControlLexer.DONE));
                         break;
                     default:
                         tokens.add(new Token(TokenType.UNKNOWN, '#' + keyword));
@@ -96,6 +95,11 @@ public class IdentifierLexer {
             } else if (current == '\'') {
                 advance();
                 String str = readWhile(c -> c != '\'');
+                advance();
+                tokens.add(new Token(TokenType.STRING, str));
+            } else if (current == '"') {
+                advance();
+                String str = readWhile(c -> c != '"');
                 advance();
                 tokens.add(new Token(TokenType.STRING, str));
             } else {
@@ -114,7 +118,7 @@ public class IdentifierLexer {
                         tokens.add(new Token(TokenType.FOR_CLOSE, "close"));
                         break;
                     default:
-                        if (identifier.matches(":" + Patterns.VAR_KEY_PATTERN)) {
+                        if (identifier.charAt(0) == ':') {
                             tokens.add(new Token(TokenType.VARIABLE_NAME, identifier));
                         } else if (StringUtil.isNumeric(identifier)) {
                             tokens.add(new Token(TokenType.NUMBER, identifier));

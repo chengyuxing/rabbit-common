@@ -3,7 +3,27 @@ package com.github.chengyuxing.common.script;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Flow-Control lexer
+ */
 public class FlowControlLexer {
+    public static final String IF = "#if";
+    public static final String ELSE = "#else";
+    public static final String FI = "#fi";
+    public static final String CHOOSE = "#choose";
+    public static final String WHEN = "#when";
+    public static final String SWITCH = "#switch";
+    public static final String CASE = "#case";
+    public static final String DEFAULT = "#default";
+    public static final String BREAK = "#break";
+    public static final String END = "#end";
+    public static final String FOR = "#for";
+    public static final String DONE = "#done";
+
+    public static final String[] KEYWORDS = new String[]{
+            IF, ELSE, FI, CHOOSE, WHEN, SWITCH, CASE, DEFAULT, BREAK, END, FOR, DONE
+    };
+
     private final String[] lines;
     private int position;
     private final int length;
@@ -12,6 +32,21 @@ public class FlowControlLexer {
         this.lines = input.split("\n");
         this.length = this.lines.length;
         this.position = 0;
+    }
+
+    /**
+     * Trim each line for search prefix {@code #} to detect expression.
+     *
+     * @param line current line
+     * @return expression or normal line
+     * @see #IF
+     */
+    protected String trimExpression(String line) {
+        String tl = line.trim();
+        if (tl.startsWith("#")) {
+            return tl;
+        }
+        return line;
     }
 
     private String currentLine() {
@@ -36,7 +71,9 @@ public class FlowControlLexer {
             advance();
             if (current.equals("\0")) {
                 break;
-            } else if (current.trim().startsWith("#")) {
+            }
+            current = trimExpression(current);
+            if (current.startsWith("#")) {
                 IdentifierLexer lexer = new IdentifierLexer(current);
                 tokens.addAll(lexer.tokenize());
             } else {
