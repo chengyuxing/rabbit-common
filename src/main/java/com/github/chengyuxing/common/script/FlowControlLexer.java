@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Flow-Control lexer
+ * <h2>Flow-Control lexer</h2>
  */
 public class FlowControlLexer {
     public static final String IF = "#if";

@@ -6,6 +6,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
+/**
+ * <h2>Identifier Lexer</h2>
+ */
 public class IdentifierLexer {
     private final String input;
     private int position;

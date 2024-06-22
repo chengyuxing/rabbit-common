@@ -22,7 +22,7 @@ import java.util.StringJoiner;
  *      #if {@linkplain FastExpression expression2}
  *      ...
  *      #fi
- *      #if {@linkplain FastExpression expression2}
+ *      #if {@linkplain FastExpression expression3}
  *      ...
  *      #else
  *      ...
@@ -333,7 +333,7 @@ public class FlowControlParser {
                 variableName = variableName.substring(0, pipeIdx).trim();
             }
 
-            Object variableValue = context.get(variableName);
+            Object variableValue = ObjectUtil.getDeepValue(context, variableName);
 
             if (!pipes.trim().isEmpty()) {
                 variableValue = expression("empty").pipedValue(variableValue, pipes);
@@ -428,18 +428,8 @@ public class FlowControlParser {
             eat(TokenType.END_FOR);
 
             String listName = listVariable.substring(1);
-            String pipes = "";
-            int pipeIdx = listName.indexOf('|');
-            if (pipeIdx != -1) {
-                pipes = listName.substring(pipeIdx);
-                listName = listName.substring(0, pipeIdx);
-            }
 
             Object listObject = ObjectUtil.getDeepValue(context, listName);
-
-            if (!pipes.trim().isEmpty()) {
-                listObject = expression("empty").pipedValue(listObject, pipes);
-            }
 
             Object[] iterator = ObjectUtil.toArray(listObject);
 
