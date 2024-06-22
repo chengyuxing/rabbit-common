@@ -1,0 +1,10 @@
+#for item of :list delimiter ' and '
+#if :item == 'B'
+message = :_for.item
+        #fi
+        #for num, idx of :item.nums delimiter ' or' open '(' close ')'
+            #if :num <> blank
+            age = :_for.num and id = :_for.idx
+            #fi
+        #done
+#done

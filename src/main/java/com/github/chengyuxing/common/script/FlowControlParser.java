@@ -6,12 +6,16 @@ import com.github.chengyuxing.common.script.expression.IExpression;
 import com.github.chengyuxing.common.script.expression.IPipe;
 import com.github.chengyuxing.common.script.expression.impl.FastExpression;
 import com.github.chengyuxing.common.utils.ObjectUtil;
-import com.github.chengyuxing.common.utils.StringUtil;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
+import java.util.regex.Matcher;
+
+import static com.github.chengyuxing.common.utils.ObjectUtil.coalesce;
+import static com.github.chengyuxing.common.utils.StringUtil.NEW_LINE;
+import static com.github.chengyuxing.common.utils.StringUtil.isEmpty;
 
 /**
  * <h2>Flow-Control parser</h2>
@@ -67,7 +71,7 @@ import java.util.StringJoiner;
  * <p>for statement</p>
  * <blockquote>
  * <pre>
- * #for item of :list [delimiter ', '] [open ''] [close '']
+ * #for item[,idx] of :list [| {@linkplain IPipe pipe1} | pipeN | ... ] [delimiter ','] [open ''] [close '']
  *     ...
  * #done
  * </pre>
@@ -75,115 +79,21 @@ import java.util.StringJoiner;
  *
  * @see FastExpression
  */
-public class FlowControlParser {
+public class FlowControlParser extends AbstractParser {
     private int forIndex = 0;
-    private Map<String, Object> forContextVars = new HashMap<>();
 
-    /**
-     * Parse content with scripts.
-     *
-     * @return parsed content
-     * @see IExpression
-     */
+    @Override
     public String parse(String input, Map<String, Object> context) {
         forIndex = 0;
         forContextVars = new HashMap<>();
-        List<Token> tokens = lexer(input).tokenize();
-        Parser parser = new Parser(tokens, context);
+        FlowControlLexer lexer = new FlowControlLexer(input) {
+            @Override
+            protected String trimExpression(String line) {
+                return FlowControlParser.this.trimExpression(line);
+            }
+        };
+        Parser parser = new Parser(lexer.tokenize(), context);
         return parser.doParse();
-    }
-
-    /**
-     * Get {@code #for} context variable map which saved by expression calc.<br>
-     * Format: {@code (varName_forAutoIdx_varAutoIdx: var)}, e.g.
-     * <blockquote>
-     * <pre>
-     * list: ["a", "b", "c"]; forIdx: 0
-     * </pre>
-     * <pre>
-     * #for item of :list
-     *      ...
-     * #done
-     * </pre>
-     * <pre>
-     * vars: {item_0_0: "a", item_0_1: "b", item_0_2: "c"}
-     * </pre>
-     * </blockquote>
-     *
-     * @return {@code #for} context variable map
-     * @see #forVarKey(String, int, int)
-     */
-    public Map<String, Object> getForContextVars() {
-        return forContextVars;
-    }
-
-    /**
-     * Lexer.
-     *
-     * @param input input
-     * @return new Lexer instance
-     */
-    protected FlowControlLexer lexer(String input) {
-        return new FlowControlLexer(input);
-    }
-
-    /**
-     * Configure expression parser implementation.
-     *
-     * @param expression expression
-     * @return expression parser implementation
-     */
-    protected IExpression expression(String expression) {
-        return FastExpression.of(expression);
-    }
-
-    /**
-     * Build {@code #for} var key.
-     *
-     * @param name   for context var name
-     * @param forIdx for auto index
-     * @param varIdx var auto index
-     * @return unique for var key
-     */
-    protected String forVarKey(String name, int forIdx, int varIdx) {
-        return name + "_" + forIdx + "_" + varIdx;
-    }
-
-    /**
-     * <code>#for</code> loop body content formatter, format custom template variable and args resolve, e.g.
-     * <p>args:</p>
-     * <blockquote>
-     * <pre>
-     * {
-     *   users: [
-     *     {name: 'cyx', name: 'json'}
-     *   ]
-     * }
-     * </pre>
-     * </blockquote>
-     * <p>for expression:</p>
-     * <blockquote>
-     * <pre>
-     * #for user,idx of :users delimiter ' and '
-     *    '${user.name}'
-     * #done
-     * </pre>
-     * </blockquote>
-     * <p>result:</p>
-     * <blockquote>
-     * <pre>'cyx' and 'json'</pre>
-     * </blockquote>
-     *
-     * @param forIndex each for loop auto index
-     * @param varIndex for var auto index
-     * @param varName  for context var name,  e.g. {@code <user>}
-     * @param body     content in for loop
-     * @param context  each for loop context args (index and value) which created by for expression
-     * @return formatted content
-     * @see #getForContextVars()
-     */
-    protected String forLoopBodyFormatter(int forIndex, int varIndex, String varName, String body, Map<String, Object> context) {
-        return StringUtil.FMT.format(body, context);
     }
 
     final class Parser {
@@ -232,7 +142,7 @@ public class FlowControlParser {
         private String parseForBlock() {
             StringJoiner condition = new StringJoiner(" ");
             int forDepth = 0;
-            while (currentToken.getType() != TokenType.END_FOR || forDepth != 0) {
+            while ((currentToken.getType() != TokenType.END_FOR || forDepth != 0) && currentToken.getType() != TokenType.EOF) {
                 if (currentToken.getType() == TokenType.FOR) {
                     forDepth++;
                 } else if (currentToken.getType() == TokenType.END_FOR) {
@@ -391,67 +301,71 @@ public class FlowControlParser {
 
         private String parseForStatement() {
             eat(TokenType.FOR);
-            String itemVariable = currentToken.getValue();
-            eat(TokenType.IDENTIFIER);
-
-            eat(TokenType.FOR_OF);
-            String listVariable = currentToken.getValue();
-            eat(TokenType.VARIABLE_NAME);
-
-            String delimiter = ", ";
-            if (currentToken.getType() == TokenType.FOR_DELIMITER) {
-                advance();
-                delimiter = Comparators.getString(currentToken.getValue());
-                advance();
-            }
-            String open = "";
-            if (currentToken.getType() == TokenType.FOR_OPEN) {
-                advance();
-                open = Comparators.getString(currentToken.getValue());
-                if (!open.isEmpty()) {
-                    open = open + '\n';
-                }
-                advance();
-            }
-            String close = "";
-            if (currentToken.getType() == TokenType.FOR_CLOSE) {
-                advance();
-                close = Comparators.getString(currentToken.getValue());
-                if (!close.isEmpty()) {
-                    close = '\n' + close;
-                }
-                advance();
-            }
-
+            String forCondition = parseCondition();
             eat(TokenType.NEWLINE);
             String forContent = parseForBlock();
             eat(TokenType.END_FOR);
-
-            String listName = listVariable.substring(1);
-
-            Object listObject = ObjectUtil.getDeepValue(context, listName);
-
-            Object[] iterator = ObjectUtil.toArray(listObject);
-
-            StringJoiner result = new StringJoiner(delimiter + '\n', open, close);
-            for (int i = 0, j = iterator.length; i < j; i++) {
-                Object item = iterator[i];
-
-                Map<String, Object> childContext = new HashMap<>(context);
-                childContext.put(itemVariable, item);
-
-                String formattedForContent = forLoopBodyFormatter(forIndex, i, itemVariable, forContent, childContext);
-
-                Parser parser = new Parser(lexer(formattedForContent).tokenize(), childContext);
-                String forContentResult = parser.doParse();
-
-                if (!forContentResult.trim().isEmpty()) {
-                    forContextVars.put(forVarKey(itemVariable, forIndex, i), item);
-                    result.add(forContentResult);
+            Matcher m = FOR_PATTERN.matcher(forCondition);
+            if (m.find()) {
+                String itemName = m.group("item");
+                String idxName = m.group("index");
+                String listName = m.group("list");
+                String pipes = m.group("pipes");
+                String delimiter = Comparators.getString(coalesce(m.group("delimiter"), ", ")) + NEW_LINE;
+                String open = Comparators.getString(coalesce(m.group("open"), ""));
+                String close = Comparators.getString(coalesce(m.group("close"), ""));
+                //noinspection DataFlowIssue
+                if (!open.isEmpty()) {
+                    open = open + NEW_LINE;
                 }
+                //noinspection DataFlowIssue
+                if (!close.isEmpty()) {
+                    close = NEW_LINE + close;
+                }
+
+                Object listObject = ObjectUtil.getDeepValue(context, listName);
+                if (!isEmpty(pipes)) {
+                    listObject = expression("empty").pipedValue(listObject, pipes);
+                }
+                Object[] iterator = ObjectUtil.toArray(listObject);
+
+                StringJoiner result = new StringJoiner(delimiter);
+                Map<String, Object> localForVars = new HashMap<>();
+                for (int i = 0, j = iterator.length; i < j; i++) {
+                    Object item = iterator[i];
+
+                    Map<String, Object> childContext = new HashMap<>(context);
+
+                    if (itemName != null) {
+                        localForVars.put(forVarKey(itemName, forIndex, i), item);
+                        childContext.put(itemName, item);
+                    }
+                    if (idxName != null) {
+                        localForVars.put(forVarKey(idxName, forIndex, i), i);
+                        childContext.put(idxName, i);
+                    }
+
+                    String formattedForContent = forLoopBodyFormatter(forIndex, i, itemName, idxName, forContent, childContext);
+
+                    FlowControlLexer forLoopContentLexer = new FlowControlLexer(formattedForContent);
+                    List<Token> forLoopTokens = forLoopContentLexer.tokenize();
+                    Parser parser = new Parser(forLoopTokens, childContext);
+                    String forContentResult = parser.doParse();
+
+                    if (!forContentResult.trim().isEmpty()) {
+                        result.add(forContentResult);
+                    }
+                }
+                forIndex++;
+                String resultFor = result.toString().trim();
+                if (resultFor.isEmpty()) {
+                    return resultFor;
+                }
+                forContextVars.putAll(localForVars);
+                return open + resultFor + close;
+            } else {
+                throw new ScriptSyntaxException("#for syntax error of expression '" + forCondition + "'");
             }
-            forIndex++;
-            return result.toString();
         }
 
         /**

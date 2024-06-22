@@ -13,9 +13,9 @@ select * from user where id = 1
             message = :_for.item
         --#fi
         -- bbbbbb
-        -- #for num of :item.nums delimiter ' or ' open '(' close ')'
+        -- #for num,idx of :item.nums delimiter ' or ' open '(' close ')'
             --#if :num <> blank
-            age = :_for.num and id = :_for.num
+            age = :_for.num and id = :_for.idx
             --#fi
         -- #done
 -- #done

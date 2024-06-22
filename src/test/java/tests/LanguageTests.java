@@ -16,6 +16,25 @@ public class LanguageTests {
 
     static String input;
     static Map<String, Object> context = new HashMap<>();
+    static DataRow d = DataRow.of(
+            "c", "blank",
+            "c1", "blank",
+            "c2", "blank",
+            "data", DataRow.of(
+                    "name", "chengyuxing",
+                    "age", 30,
+                    "address", "昆明市"
+            ),
+            "ids", Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8),
+            "list", Arrays.asList(
+                    "A",
+                    "B",
+                    DataRow.of(
+                            "nums",
+                            Arrays.asList("1", "2", "3")),
+                    "D",
+                    "E")
+    );
 
     @BeforeClass
     public static void init() {
@@ -33,19 +52,20 @@ public class LanguageTests {
 
     @Test
     public void test1() {
-        FlowControlLexer lexer = new FlowControlLexer(input);
-        List<Token> tokens = lexer.tokenize();
-
         FlowControlParser parser = new FlowControlParser() {
             public static final String FOR_VARS_KEY = "_for";
             public static final String VAR_PREFIX = FOR_VARS_KEY + ".";
 
             @Override
-            protected String forLoopBodyFormatter(int forIndex, int varIndex, String varName, String body, Map<String, Object> args) {
+            protected String forLoopBodyFormatter(int forIndex, int varIndex, String varName, String idxName, String body, Map<String, Object> args) {
                 String formatted = StringUtil.FMT.format(String.join(NEW_LINE, body), args);
                 if (Objects.nonNull(varName)) {
                     String varParam = VAR_PREFIX + forVarKey(varName, forIndex, varIndex);
                     formatted = formatted.replace(VAR_PREFIX + varName, varParam);
+                }
+                if (Objects.nonNull(idxName)) {
+                    String idxParam = VAR_PREFIX + forVarKey(idxName, forIndex, varIndex);
+                    formatted = formatted.replace(VAR_PREFIX + idxName, idxParam);
                 }
                 return formatted;
             }
@@ -59,7 +79,8 @@ public class LanguageTests {
     @Test
     public void test2() {
         SimpleScriptParser simpleScriptParser = new SimpleScriptParser();
-        String res = simpleScriptParser.parse(input, context);
+        String res = simpleScriptParser.parse(input, d);
         System.out.println(res);
+        System.out.println(simpleScriptParser.getForContextVars());
     }
 }

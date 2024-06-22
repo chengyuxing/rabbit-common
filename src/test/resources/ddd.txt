@@ -1,0 +1,48 @@
+Token{type=FOR, value='#for'}
+Token{type=IDENTIFIER, value='item'}
+Token{type=FOR_OF, value='of'}
+Token{type=VARIABLE_NAME, value=':list'}
+Token{type=FOR_DELIMITER, value='delimiter'}
+Token{type=STRING, value='' and ''}
+Token{type=NEWLINE, value='
+'}
+Token{type=IF, value='#if'}
+Token{type=VARIABLE_NAME, value=':item'}
+Token{type=IDENTIFIER, value='=='}
+Token{type=STRING, value=''B''}
+Token{type=NEWLINE, value='
+'}
+Token{type=PLAIN_TEXT, value='message = :_for.item
+'}
+Token{type=ENDIF, value='#fi'}
+Token{type=NEWLINE, value='
+'}
+Token{type=FOR, value='#for'}
+Token{type=IDENTIFIER, value='num'}
+Token{type=FOR_OF, value='of'}
+Token{type=VARIABLE_NAME, value=':item.nums'}
+Token{type=FOR_DELIMITER, value='delimiter'}
+Token{type=STRING, value='' or ''}
+Token{type=FOR_OPEN, value='open'}
+Token{type=STRING, value=''(''}
+Token{type=FOR_CLOSE, value='close'}
+Token{type=STRING, value='')''}
+Token{type=NEWLINE, value='
+'}
+Token{type=IF, value='#if'}
+Token{type=VARIABLE_NAME, value=':num'}
+Token{type=IDENTIFIER, value='<>'}
+Token{type=IDENTIFIER, value='blank'}
+Token{type=NEWLINE, value='
+'}
+Token{type=PLAIN_TEXT, value='            age = :_for.num and id = :_for.num
+'}
+Token{type=ENDIF, value='#fi'}
+Token{type=NEWLINE, value='
+'}
+Token{type=END_FOR, value='#done'}
+Token{type=NEWLINE, value='
+'}
+Token{type=END_FOR, value='#done'}
+Token{type=NEWLINE, value='
+'}

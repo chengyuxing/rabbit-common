@@ -289,11 +289,11 @@ public class StringTests {
             }
 
             @Override
-            protected String forLoopBodyFormatter(int forIndex, int varIndex, String varName, String idxName, List<String> body, Map<String, Object> args) {
-                body.removeIf(l -> {
-                    String tl = l.trim();
-                    return tl.startsWith("--") && !tl.substring(2).trim().startsWith("#");
-                });
+            protected String forLoopBodyFormatter(int forIndex, int varIndex, String varName, String idxName, String body, Map<String, Object> args) {
+//                body.removeIf(l -> {
+//                    String tl = l.trim();
+//                    return tl.startsWith("--") && !tl.substring(2).trim().startsWith("#");
+//                });
                 String formatted = FMT.format(String.join(NEW_LINE, body), args);
                 if (varName != null) {
                     String varParam = "_for." + forVarKey(varName, forIndex, varIndex);
@@ -341,20 +341,6 @@ public class StringTests {
     public void testLexer() {
         String s = new FileResource("me.sql").readString(StandardCharsets.UTF_8);
 
-        FlowControlLexer lexer = new FlowControlLexer(s) {
-            @Override
-            protected String trimExpression(String line) {
-                String tl = line.trim();
-                if (tl.startsWith("--")) {
-                    String s = tl.substring(2).trim();
-                    if (s.startsWith("#")) {
-                        return s;
-                    }
-                }
-                return line;
-            }
-        };
-
         DataRow d = DataRow.of(
                 "c", "blank",
                 "c1", "blank",
@@ -375,18 +361,32 @@ public class StringTests {
                         "E")
         );
 
-        List<Token> tokens = lexer.tokenize();
-
         FlowControlParser parser = new FlowControlParser() {
             public static final String FOR_VARS_KEY = "_for";
             public static final String VAR_PREFIX = FOR_VARS_KEY + ".";
 
             @Override
-            protected String forLoopBodyFormatter(int forIndex, int varIndex, String varName, String body, Map<String, Object> args) {
-                String formatted = StringUtil.FMT.format(String.join(NEW_LINE, body), args);
+            protected String trimExpression(String line) {
+                String tl = line.trim();
+                if (tl.startsWith("--")) {
+                    String ss = tl.substring(2).trim();
+                    if (ss.startsWith("#")) {
+                        return ss;
+                    }
+                }
+                return line;
+            }
+
+            @Override
+            protected String forLoopBodyFormatter(int forIndex, int varIndex, String varName, String idxName, String body, Map<String, Object> args) {
+                String formatted = StringUtil.FMT.format(body, args);
                 if (Objects.nonNull(varName)) {
                     String varParam = VAR_PREFIX + forVarKey(varName, forIndex, varIndex);
                     formatted = formatted.replace(VAR_PREFIX + varName, varParam);
+                }
+                if (Objects.nonNull(idxName)) {
+                    String idxParam = VAR_PREFIX + forVarKey(idxName, forIndex, varIndex);
+                    formatted = formatted.replace(VAR_PREFIX + idxName, idxParam);
                 }
                 return formatted;
             }

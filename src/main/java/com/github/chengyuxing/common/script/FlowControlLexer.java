@@ -73,7 +73,7 @@ public class FlowControlLexer {
                 break;
             }
             current = trimExpression(current);
-            if (current.startsWith("#")) {
+            if (current.contains("#")) {
                 IdentifierLexer lexer = new IdentifierLexer(current);
                 tokens.addAll(lexer.tokenize());
             } else {

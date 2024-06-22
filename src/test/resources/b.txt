@@ -5,24 +5,33 @@ select * from test.user
     #if :item @ '\w+'
         name = ${item}
     #else
-        name = :_for.item
+        #if :item ~ '\.'
+        name = :_for.item and alias is ${item}
+        #fi
     #fi
     #for item of :user.names delimiter 'or' open '(' close ')'
         @@@@@@${item}@@@@@@
     #done
 #done
 
-#if :age >= 3.1415 && :age <100
+#if :age >= 3.1415 && :age <100 then
    and age = 28
 #fi
 
 #switch :lx | upper
+
+
     #case 'A'
         a
     #break
+
+
+
     #case 'b'
         b
     #break
+
+
 #end
 
 #choose
@@ -30,7 +39,7 @@ select * from test.user
         my age is 28
     #break
 
-    #when :age < 15
+    #default
         I'm a child
         and i am 13 years old!
         and i am 13 years old!

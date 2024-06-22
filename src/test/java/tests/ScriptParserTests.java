@@ -19,7 +19,7 @@ public class ScriptParserTests {
     public void testSqlParser() {
         SimpleScriptParser parser = new SimpleScriptParser();
         List<Map<String, Object>> data = new ArrayList<>();
-        for (int i = 0; i < 2; i++) {
+        for (int i = 0; i < 200; i++) {
             String sql = parser.parse("select * from test.user\n where id = 1\n" +
                     " #for id of :ids delimiter ', ' open ' or id in (' close ')'\n" +
                     "    #for add of :address\n" +
@@ -51,17 +51,21 @@ public class ScriptParserTests {
                 "    #done\n" +
                 " #done";
         List<Map<String, Object>> data = new ArrayList<>();
-        for (int i = 0; i < 2; i++) {
+        for (int i = 0; i < 200; i++) {
             FlowControlParser parser = new FlowControlParser() {
                 public static final String FOR_VARS_KEY = "_for";
                 public static final String VAR_PREFIX = FOR_VARS_KEY + ".";
 
                 @Override
-                protected String forLoopBodyFormatter(int forIndex, int varIndex, String varName, String body, Map<String, Object> args) {
+                protected String forLoopBodyFormatter(int forIndex, int varIndex, String varName, String idxName, String body, Map<String, Object> args) {
                     String formatted = StringUtil.FMT.format(String.join(NEW_LINE, body), args);
                     if (Objects.nonNull(varName)) {
                         String varParam = VAR_PREFIX + forVarKey(varName, forIndex, varIndex);
                         formatted = formatted.replace(VAR_PREFIX + varName, varParam);
+                    }
+                    if (Objects.nonNull(idxName)) {
+                        String idxParam = VAR_PREFIX + forVarKey(idxName, forIndex, varIndex);
+                        formatted = formatted.replace(VAR_PREFIX + idxName, idxParam);
                     }
                     return formatted;
                 }

@@ -10,6 +10,7 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.github.chengyuxing.common.script.FlowControlLexer.*;
 import static com.github.chengyuxing.common.script.expression.Patterns.*;
 import static com.github.chengyuxing.common.utils.ObjectUtil.*;
 import static com.github.chengyuxing.common.utils.StringUtil.*;
@@ -71,105 +72,27 @@ import static com.github.chengyuxing.common.utils.StringUtil.*;
  *
  * @see FastExpression
  */
-public class SimpleScriptParser {
-    //language=RegExp
-    public static final Pattern FOR_PATTERN = Pattern.compile("(?<item>\\w+)(\\s*,\\s*(?<index>\\w+))?\\s+of\\s+:(?<list>" + VAR_KEY_PATTERN + ")(?<pipes>" + PIPES_PATTERN + ")?(\\s+delimiter\\s+(?<delimiter>" + STRING_PATTERN + "))?(\\s+open\\s+(?<open>" + STRING_PATTERN + "))?(\\s+close\\s+(?<close>" + STRING_PATTERN + "))?");
+public class SimpleScriptParser extends AbstractParser {
     //language=RegExp
     public static final Pattern SWITCH_PATTERN = Pattern.compile(":(?<name>" + VAR_KEY_PATTERN + ")\\s*(?<pipes>" + PIPES_PATTERN + ")?");
-    public static final String[] TAGS = FlowControlLexer.KEYWORDS;
-    public static final String IF = FlowControlLexer.IF;
-    public static final String FI = FlowControlLexer.FI;
-    public static final String CHOOSE = FlowControlLexer.CHOOSE;
-    public static final String WHEN = FlowControlLexer.WHEN;
-    public static final String SWITCH = FlowControlLexer.SWITCH;
-    public static final String CASE = FlowControlLexer.CASE;
-    public static final String DEFAULT = FlowControlLexer.DEFAULT;
-    public static final String BREAK = FlowControlLexer.BREAK;
-    public static final String END = FlowControlLexer.END;
-    public static final String FOR = FlowControlLexer.FOR;
-    public static final String DONE = FlowControlLexer.DONE;
 
     private int forIndex = 0;
-    private Map<String, Object> forContextVars = new HashMap<>();
-
-    /**
-     * Configure expression parser implementation.
-     *
-     * @param expression expression
-     * @return expression parser implementation
-     */
-    protected IExpression expression(String expression) {
-        return FastExpression.of(expression);
-    }
-
-    /**
-     * <code>#for</code> loop body content formatter, format custom template variable and args resolve, e.g.
-     * <p>args:</p>
-     * <blockquote>
-     * <pre>
-     * {
-     *   users: [
-     *     {name: 'cyx', name: 'json'}
-     *   ]
-     * }
-     * </pre>
-     * </blockquote>
-     * <p>for expression:</p>
-     * <blockquote>
-     * <pre>
-     * #for user,idx of :users delimiter ' and '
-     *    '${user.name}'
-     * #done
-     * </pre>
-     * </blockquote>
-     * <p>result:</p>
-     * <blockquote>
-     * <pre>'cyx' and 'json'</pre>
-     * </blockquote>
-     *
-     * @param forIndex each for loop auto index
-     * @param varIndex for var auto index
-     * @param varName  for context var name,  e.g. {@code <user>}
-     * @param idxName  for context index name,  e.g. {@code <idx>}
-     * @param body     content in for loop
-     * @param args     each for loop args (index and value) which created by for expression
-     * @return formatted content
-     * @see #getForContextVars()
-     */
-    protected String forLoopBodyFormatter(int forIndex, int varIndex, String varName, String idxName, List<String> body, Map<String, Object> args) {
-        return FMT.format(String.join(NEW_LINE, body), args);
-    }
-
-    /**
-     * Trim each line for search prefix {@code #} to detect expression.
-     *
-     * @param line current line
-     * @return expression or normal line
-     * @see #IF
-     */
-    protected String trimExpression(String line) {
-        String tl = line.trim();
-        if (tl.startsWith("#")) {
-            return tl;
-        }
-        return line;
-    }
 
     /**
      * Parse content with scripts.
      *
      * @param content content
-     * @param data    data of expression
+     * @param context data of expression
      * @return parsed content
      * @see IExpression
      */
-    public String parse(String content, Map<String, ?> data) {
+    public String parse(String content, Map<String, Object> context) {
         if (Objects.isNull(content)) {
             return "";
         }
         forIndex = 0;
         forContextVars = new HashMap<>();
-        return doParse(content, data == null ? new HashMap<>(0) : data);
+        return doParse(content, context == null ? new HashMap<>(0) : context);
     }
 
     /**
@@ -184,7 +107,7 @@ public class SimpleScriptParser {
         if (content.trim().isEmpty()) {
             return content;
         }
-        if (!containsAnyIgnoreCase(content, TAGS)) {
+        if (!containsAnyIgnoreCase(content, KEYWORDS)) {
             return content;
         }
         String[] lines = content.split(NEW_LINE);
@@ -341,7 +264,7 @@ public class SimpleScriptParser {
                 // for expression block
                 // item[,idx] of :list [| pipe1 | pipe2 | ... ] [delimiter ','] [open ''] [close '']
                 forDepth++;
-                List<String> buffer = new ArrayList<>();
+                StringJoiner buffer = new StringJoiner(NEW_LINE);
                 while (++i < j) {
                     String line = lines[i];
                     String trimLine = trimExpression(line);
@@ -394,7 +317,7 @@ public class SimpleScriptParser {
                                         eachArgs.put(idxName, x);
                                     }
 
-                                    String formatted = forLoopBodyFormatter(forIndex, x, itemName, idxName, buffer, eachArgs);
+                                    String formatted = forLoopBodyFormatter(forIndex, x, itemName, idxName, buffer.toString(), eachArgs);
                                     // keep do recursive to parse another inside expression.
                                     String parsed = doParse(formatted, eachArgs);
                                     if (!parsed.trim().isEmpty()) {
@@ -427,41 +350,5 @@ public class SimpleScriptParser {
             }
         }
         return output.toString();
-    }
-
-    /**
-     * Build {@code #for} var key.
-     *
-     * @param name   for context var name
-     * @param forIdx for auto index
-     * @param varIdx var auto index
-     * @return unique for var key
-     */
-    protected String forVarKey(String name, int forIdx, int varIdx) {
-        return name + "_" + forIdx + "_" + varIdx;
-    }
-
-    /**
-     * Get {@code #for} context variable map which saved by expression calc.<br>
-     * Format: {@code (varName_forAutoIdx_varAutoIdx: var)}, e.g.
-     * <blockquote>
-     * <pre>
-     * list: ["a", "b", "c"]; forIdx: 0
-     * </pre>
-     * <pre>
-     * #for item of :list
-     *      ...
-     * #done
-     * </pre>
-     * <pre>
-     * vars: {item_0_0: "a", item_0_1: "b", item_0_2: "c"}
-     * </pre>
-     * </blockquote>
-     *
-     * @return {@code #for} context variable map
-     * @see #forVarKey(String, int, int)
-     */
-    public Map<String, Object> getForContextVars() {
-        return Collections.unmodifiableMap(forContextVars);
     }
 }
