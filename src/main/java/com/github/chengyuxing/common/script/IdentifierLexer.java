@@ -129,6 +129,7 @@ public class IdentifierLexer {
                 }
             }
         }
+        tokens.add(new Token(TokenType.NEWLINE, "\n"));
         return tokens;
     }
 }

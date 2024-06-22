@@ -5,6 +5,9 @@ import com.github.chengyuxing.common.StringFormatter;
 import com.github.chengyuxing.common.io.ClassPathResource;
 import com.github.chengyuxing.common.io.FileResource;
 import com.github.chengyuxing.common.io.TypedProperties;
+import com.github.chengyuxing.common.script.FlowControlLexer;
+import com.github.chengyuxing.common.script.FlowControlParser;
+import com.github.chengyuxing.common.script.Token;
 import com.github.chengyuxing.common.script.expression.Comparators;
 import com.github.chengyuxing.common.script.expression.IPipe;
 import com.github.chengyuxing.common.script.SimpleScriptParser;
@@ -330,6 +333,69 @@ public class StringTests {
         System.out.println(res);
 
         Map<String, Object> vars = simpleScriptParser.getForContextVars();
+        System.out.println(vars);
+        System.out.println(ObjectUtil.getDeepValue(vars, "item_6_0.value"));
+    }
+
+    @Test
+    public void testLexer() {
+        String s = new FileResource("me.sql").readString(StandardCharsets.UTF_8);
+
+        FlowControlLexer lexer = new FlowControlLexer(s) {
+            @Override
+            protected String trimExpression(String line) {
+                String tl = line.trim();
+                if (tl.startsWith("--")) {
+                    String s = tl.substring(2).trim();
+                    if (s.startsWith("#")) {
+                        return s;
+                    }
+                }
+                return line;
+            }
+        };
+
+        DataRow d = DataRow.of(
+                "c", "blank",
+                "c1", "blank",
+                "c2", "blank",
+                "data", DataRow.of(
+                        "name", "chengyuxing",
+                        "age", 30,
+                        "address", "昆明市"
+                ),
+                "ids", Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8),
+                "list", Arrays.asList(
+                        "A",
+                        "B",
+                        DataRow.of(
+                                "nums",
+                                Arrays.asList("1", "2", "3")),
+                        "D",
+                        "E")
+        );
+
+        List<Token> tokens = lexer.tokenize();
+
+        FlowControlParser parser = new FlowControlParser(tokens, d) {
+            public static final String FOR_VARS_KEY = "_for";
+            public static final String VAR_PREFIX = FOR_VARS_KEY + ".";
+
+            @Override
+            protected String forLoopBodyFormatter(int forIndex, int varIndex, String varName, String body, Map<String, Object> args) {
+                String formatted = StringUtil.FMT.format(String.join(NEW_LINE, body), args);
+                if (Objects.nonNull(varName)) {
+                    String varParam = VAR_PREFIX + forVarKey(varName, forIndex, varIndex);
+                    formatted = formatted.replace(VAR_PREFIX + varName, varParam);
+                }
+                return formatted;
+            }
+        };
+
+        String res = parser.parse();
+        System.out.println(res);
+
+        Map<String, Object> vars = parser.getForContextVars();
         System.out.println(vars);
         System.out.println(ObjectUtil.getDeepValue(vars, "item_6_0.value"));
     }

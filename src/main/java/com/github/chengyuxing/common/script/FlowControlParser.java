@@ -82,7 +82,7 @@ public class FlowControlParser {
     private final Map<String, Object> context;
 
     private int forIndex = 0;
-    private Map<String, Object> forContextVars = new HashMap<>();
+    private final Map<String, Object> forContextVars = new HashMap<>();
 
     public FlowControlParser(List<Token> tokens, Map<String, Object> context) {
         this.tokens = tokens;
@@ -182,7 +182,13 @@ public class FlowControlParser {
 
     private String parseForBlock() {
         StringJoiner condition = new StringJoiner(" ");
-        while (currentToken.getType() != TokenType.END_FOR) {
+        int forDepth = 0;
+        while (currentToken.getType() != TokenType.END_FOR || forDepth != 0) {
+            if (currentToken.getType() == TokenType.FOR) {
+                forDepth++;
+            } else if (currentToken.getType() == TokenType.END_FOR) {
+                forDepth--;
+            }
             condition.add(currentToken.getValue());
             advance();
         }
@@ -353,12 +359,18 @@ public class FlowControlParser {
         if (currentToken.getType() == TokenType.FOR_OPEN) {
             advance();
             open = Comparators.getString(currentToken.getValue());
+            if (!open.isEmpty()) {
+                open = open + '\n';
+            }
             advance();
         }
         String close = "";
         if (currentToken.getType() == TokenType.FOR_CLOSE) {
             advance();
             close = Comparators.getString(currentToken.getValue());
+            if (!close.isEmpty()) {
+                close = '\n' + close;
+            }
             advance();
         }
 
@@ -382,7 +394,7 @@ public class FlowControlParser {
 
         Object[] iterator = ObjectUtil.toArray(listObject);
 
-        StringJoiner result = new StringJoiner('\n' + delimiter + '\n', open, close);
+        StringJoiner result = new StringJoiner(delimiter + '\n', open, close);
         for (int i = 0, j = iterator.length; i < j; i++) {
             Object item = iterator[i];
             Map<String, Object> eachContext = new HashMap<>(context);
@@ -391,6 +403,7 @@ public class FlowControlParser {
             String formattedForContent = forLoopBodyFormatter(forIndex, i, itemVariable, forContent, eachContext);
             FlowControlParser parser = new FlowControlParser(new FlowControlLexer(formattedForContent).tokenize(), eachContext);
             String forContentResult = parser.parse();
+
             if (!forContentResult.trim().isEmpty()) {
                 result.add(forContentResult);
             }
@@ -433,8 +446,6 @@ public class FlowControlParser {
         if (tokens.isEmpty()) {
             return "";
         }
-        forIndex = 0;
-        forContextVars = new HashMap<>();
         StringBuilder result = new StringBuilder();
         while (currentToken.getType() != TokenType.EOF) {
             result.append(doParseStatement());

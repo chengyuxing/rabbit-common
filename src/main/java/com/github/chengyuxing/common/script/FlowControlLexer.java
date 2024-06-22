@@ -58,7 +58,7 @@ public class FlowControlLexer {
     }
 
     private void skipEmptyLine() {
-        while (currentLine().trim().isEmpty()) {
+        while (currentLine().trim().isEmpty() && !currentLine().equals("\0")) {
             advance();
         }
     }
@@ -77,9 +77,8 @@ public class FlowControlLexer {
                 IdentifierLexer lexer = new IdentifierLexer(current);
                 tokens.addAll(lexer.tokenize());
             } else {
-                tokens.add(new Token(TokenType.PLAIN_TEXT, current));
+                tokens.add(new Token(TokenType.PLAIN_TEXT, current + '\n'));
             }
-            tokens.add(new Token(TokenType.NEWLINE, "\n"));
         }
         tokens.add(new Token(TokenType.EOF, ""));
         return tokens;

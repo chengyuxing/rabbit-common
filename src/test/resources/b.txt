@@ -7,9 +7,12 @@ select * from test.user
     #else
         name = :_for.item
     #fi
+    #for item of :user.names delimiter 'or' open '(' close ')'
+        @@@@@@${item}@@@@@@
+    #done
 #done
 
-#if :age >= 3.1415
+#if :age >= 3.1415 && :age <100
    and age = 28
 #fi
 
