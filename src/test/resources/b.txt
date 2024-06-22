@@ -2,8 +2,8 @@ select * from test.user
     where id = 1 or id in
 
 #for item of :user.names delimiter 'or' open '(' close ')'
-    #if :item | upper == 'A'
-        name = :name
+    #if :item @ '\w+'
+        name = ${item}
     #else
         name = :_for.item
     #fi

@@ -96,12 +96,12 @@ public class IdentifierLexer {
                 advance();
                 String str = readWhile(c -> c != '\'');
                 advance();
-                tokens.add(new Token(TokenType.STRING, str));
+                tokens.add(new Token(TokenType.STRING, '\'' + str + '\''));
             } else if (current == '"') {
                 advance();
                 String str = readWhile(c -> c != '"');
                 advance();
-                tokens.add(new Token(TokenType.STRING, str));
+                tokens.add(new Token(TokenType.STRING, '"' + str + '"'));
             } else {
                 String identifier = readWhile(c -> !Character.isWhitespace(c) && c != '\n');
                 switch (identifier.toLowerCase()) {

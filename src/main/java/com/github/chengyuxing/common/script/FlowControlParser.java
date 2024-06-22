@@ -1,6 +1,7 @@
 package com.github.chengyuxing.common.script;
 
 import com.github.chengyuxing.common.script.exception.ScriptSyntaxException;
+import com.github.chengyuxing.common.script.expression.Comparators;
 import com.github.chengyuxing.common.script.expression.IExpression;
 import com.github.chengyuxing.common.script.expression.IPipe;
 import com.github.chengyuxing.common.script.expression.impl.FastExpression;
@@ -283,10 +284,9 @@ public class FlowControlParser {
             variableValue = expression("empty").pipedValue(variableValue, pipes);
         }
 
-        if (variableValue != null) {
-            String content = caseContentMap.get(variableValue.toString());
-            if (content != null) {
-                return content;
+        for (Map.Entry<String, String> entry : caseContentMap.entrySet()) {
+            if (Comparators.compare(variableValue, "=", Comparators.valueOf(entry.getKey()))) {
+                return entry.getValue();
             }
         }
         return defaultContent;
@@ -346,19 +346,19 @@ public class FlowControlParser {
         String delimiter = ", ";
         if (currentToken.getType() == TokenType.FOR_DELIMITER) {
             advance();
-            delimiter = currentToken.getValue();
+            delimiter = Comparators.getString(currentToken.getValue());
             advance();
         }
         String open = "";
         if (currentToken.getType() == TokenType.FOR_OPEN) {
             advance();
-            open = currentToken.getValue();
+            open = Comparators.getString(currentToken.getValue());
             advance();
         }
         String close = "";
         if (currentToken.getType() == TokenType.FOR_CLOSE) {
             advance();
-            close = currentToken.getValue();
+            close = Comparators.getString(currentToken.getValue());
             advance();
         }
 

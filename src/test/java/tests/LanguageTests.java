@@ -20,7 +20,7 @@ public class LanguageTests {
     @BeforeClass
     public static void init() {
         input = new FileResource("b.txt").readString(StandardCharsets.UTF_8);
-        context.put("user", DataRow.of("names", Arrays.asList("a", "b", "A", "e", "f")));
+        context.put("user", DataRow.of("names", Arrays.asList("cyx", "mike", "JACK.SON", "John", "Lisa")));
         context.put("age", 12);
         context.put("lx", 'a');
     }
