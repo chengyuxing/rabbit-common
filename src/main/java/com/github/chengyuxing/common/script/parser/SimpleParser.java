@@ -1,96 +1,24 @@
-package com.github.chengyuxing.common.script;
+package com.github.chengyuxing.common.script.parser;
 
 import com.github.chengyuxing.common.script.exception.ScriptSyntaxException;
 import com.github.chengyuxing.common.script.expression.Comparators;
 import com.github.chengyuxing.common.script.expression.IExpression;
-import com.github.chengyuxing.common.script.expression.impl.FastExpression;
-import com.github.chengyuxing.common.script.expression.IPipe;
 
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.github.chengyuxing.common.script.FlowControlLexer.*;
+import static com.github.chengyuxing.common.script.lexer.FlowControlLexer.*;
 import static com.github.chengyuxing.common.script.expression.Patterns.*;
 import static com.github.chengyuxing.common.utils.ObjectUtil.*;
 import static com.github.chengyuxing.common.utils.StringUtil.*;
 
-/**
- * <h2>Simple script parser</h2>
- * <p>if statement:</p>
- * <blockquote>
- * <pre>
- * #if {@linkplain FastExpression expression1}
- *      #if {@linkplain FastExpression expression2}
- *      ...
- *      #fi
- *      #if {@linkplain FastExpression expression3}
- *      ...
- *      #else
- *      ...
- *      #fi
- * #fi
- * </pre>
- * </blockquote>
- * <p>choose statement:</p>
- * <blockquote>
- * <pre>
- * #choose
- *      #when {@linkplain FastExpression expression1}
- *      ...
- *      #break
- *      #when {@linkplain FastExpression expression2}
- *      ...
- *      #break
- *      ...
- *      #default
- *      ...
- *      #break
- * #end
- * </pre>
- * </blockquote>
- * <p>switch statement</p>
- * <blockquote>
- * <pre>
- * #switch :key [| {@linkplain IPipe pipe1} | {@linkplain IPipe pipeN} | ...]
- *      #case var1
- *      ...
- *      #break
- *      #case var2
- *      ...
- *      #break
- *      ...
- *      #default
- *      ...
- *      #break
- * #end
- * </pre>
- * </blockquote>
- * <p>for statement</p>
- * <blockquote>
- * <pre>
- * #for item[,idx] of :list [| {@linkplain IPipe pipe1} | pipeN | ... ] [delimiter ','] [open ''] [close '']
- *     ...
- * #done
- * </pre>
- * </blockquote>
- *
- * @see FastExpression
- */
-public class SimpleScriptParser extends AbstractParser {
+public class SimpleParser extends AbstractParser {
     //language=RegExp
     public static final Pattern SWITCH_PATTERN = Pattern.compile(":(?<name>" + VAR_KEY_PATTERN + ")\\s*(?<pipes>" + PIPES_PATTERN + ")?");
 
     private int forIndex = 0;
 
-    /**
-     * Parse content with scripts.
-     *
-     * @param content content
-     * @param context data of expression
-     * @return parsed content
-     * @see IExpression
-     */
     @Override
     public String parse(String content, Map<String, Object> context) {
         if (Objects.isNull(content)) {

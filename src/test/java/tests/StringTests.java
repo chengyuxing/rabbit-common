@@ -5,12 +5,10 @@ import com.github.chengyuxing.common.StringFormatter;
 import com.github.chengyuxing.common.io.ClassPathResource;
 import com.github.chengyuxing.common.io.FileResource;
 import com.github.chengyuxing.common.io.TypedProperties;
-import com.github.chengyuxing.common.script.FlowControlLexer;
-import com.github.chengyuxing.common.script.FlowControlParser;
-import com.github.chengyuxing.common.script.Token;
+import com.github.chengyuxing.common.script.parser.FlowControlParser;
 import com.github.chengyuxing.common.script.expression.Comparators;
 import com.github.chengyuxing.common.script.expression.IPipe;
-import com.github.chengyuxing.common.script.SimpleScriptParser;
+import com.github.chengyuxing.common.script.parser.SimpleParser;
 import com.github.chengyuxing.common.tuple.Pair;
 import com.github.chengyuxing.common.utils.CollectionUtil;
 import com.github.chengyuxing.common.utils.ObjectUtil;
@@ -275,7 +273,7 @@ public class StringTests {
 
     @Test
     public void testExp() {
-        SimpleScriptParser simpleScriptParser = new SimpleScriptParser() {
+        SimpleParser simpleScriptParser = new SimpleParser() {
             @Override
             protected String trimExpression(String line) {
                 String tl = line.trim();

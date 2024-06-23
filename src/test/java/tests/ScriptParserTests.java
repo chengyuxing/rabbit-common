@@ -1,11 +1,9 @@
 package tests;
 
 import com.github.chengyuxing.common.DataRow;
-import com.github.chengyuxing.common.script.FlowControlLexer;
-import com.github.chengyuxing.common.script.FlowControlParser;
-import com.github.chengyuxing.common.script.Token;
+import com.github.chengyuxing.common.script.parser.FlowControlParser;
 import com.github.chengyuxing.common.script.expression.IPipe;
-import com.github.chengyuxing.common.script.SimpleScriptParser;
+import com.github.chengyuxing.common.script.parser.SimpleParser;
 import com.github.chengyuxing.common.KeyValue;
 import com.github.chengyuxing.common.utils.StringUtil;
 import org.junit.Test;
@@ -17,7 +15,7 @@ import static com.github.chengyuxing.common.utils.StringUtil.NEW_LINE;
 public class ScriptParserTests {
     @Test
     public void testSqlParser() {
-        SimpleScriptParser parser = new SimpleScriptParser(){
+        SimpleParser parser = new SimpleParser(){
             public static final String FOR_VARS_KEY = "_for";
             public static final String VAR_PREFIX = FOR_VARS_KEY + ".";
 
