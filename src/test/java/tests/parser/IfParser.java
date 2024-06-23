@@ -7,8 +7,8 @@ import org.junit.Test;
 
 import java.util.*;
 
-import static com.github.chengyuxing.common.script.SimpleScriptParser.FI;
-import static com.github.chengyuxing.common.script.SimpleScriptParser.IF;
+import static com.github.chengyuxing.common.script.FlowControlLexer.FI;
+import static com.github.chengyuxing.common.script.FlowControlLexer.IF;
 import static com.github.chengyuxing.common.utils.StringUtil.*;
 
 public class IfParser {

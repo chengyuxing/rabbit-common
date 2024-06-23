@@ -1,5 +1,7 @@
 package com.github.chengyuxing.common.script;
 
+import com.github.chengyuxing.common.utils.StringUtil;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -73,7 +75,7 @@ public class FlowControlLexer {
                 break;
             }
             current = trimExpression(current);
-            if (current.contains("#")) {
+            if (StringUtil.containsAnyIgnoreCase(current, KEYWORDS)) {
                 IdentifierLexer lexer = new IdentifierLexer(current);
                 tokens.addAll(lexer.tokenize());
             } else {
