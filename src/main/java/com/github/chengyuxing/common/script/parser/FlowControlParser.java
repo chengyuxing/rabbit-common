@@ -15,6 +15,9 @@ import static com.github.chengyuxing.common.utils.ObjectUtil.coalesce;
 import static com.github.chengyuxing.common.utils.StringUtil.NEW_LINE;
 import static com.github.chengyuxing.common.utils.StringUtil.isEmpty;
 
+/**
+ * Based lexer tokens Flow-Control parser.
+ */
 public class FlowControlParser extends AbstractParser {
     private int forIndex = 0;
 

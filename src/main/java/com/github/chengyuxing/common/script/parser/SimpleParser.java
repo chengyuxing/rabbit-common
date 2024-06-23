@@ -13,6 +13,9 @@ import static com.github.chengyuxing.common.script.expression.Patterns.*;
 import static com.github.chengyuxing.common.utils.ObjectUtil.*;
 import static com.github.chengyuxing.common.utils.StringUtil.*;
 
+/**
+ * Based content line simple Flow-Control parser.
+ */
 public class SimpleParser extends AbstractParser {
     //language=RegExp
     public static final Pattern SWITCH_PATTERN = Pattern.compile(":(?<name>" + VAR_KEY_PATTERN + ")\\s*(?<pipes>" + PIPES_PATTERN + ")?");
