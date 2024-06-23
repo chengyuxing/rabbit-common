@@ -40,7 +40,7 @@ public class LanguageTests {
     public static void init() {
         input = new FileResource("b.txt").readString(StandardCharsets.UTF_8);
         context.put("user", DataRow.of("names", Arrays.asList("cyx", "mike", "JACK.SON", "John", "Lisa")));
-        context.put("age", 12);
+        context.put("age", 11);
         context.put("lx", 'a');
     }
 
@@ -58,7 +58,7 @@ public class LanguageTests {
 
             @Override
             protected String forLoopBodyFormatter(int forIndex, int varIndex, String varName, String idxName, String body, Map<String, Object> args) {
-                String formatted = StringUtil.FMT.format(String.join(NEW_LINE, body), args);
+                String formatted = StringUtil.FMT.format(body, args);
                 if (Objects.nonNull(varName)) {
                     String varParam = VAR_PREFIX + forVarKey(varName, forIndex, varIndex);
                     formatted = formatted.replace(VAR_PREFIX + varName, varParam);
@@ -79,7 +79,7 @@ public class LanguageTests {
     @Test
     public void test2() {
         SimpleScriptParser simpleScriptParser = new SimpleScriptParser();
-        String res = simpleScriptParser.parse(input, d);
+        String res = simpleScriptParser.parse(input, context);
         System.out.println(res);
         System.out.println(simpleScriptParser.getForContextVars());
     }

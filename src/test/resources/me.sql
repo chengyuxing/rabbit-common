@@ -1,4 +1,5 @@
-select * from user where id = 1
+select * from user
+         where id = 1
 --#if :c <> blank
     --#if :c1 <> blank
         and t.c1 = :c1

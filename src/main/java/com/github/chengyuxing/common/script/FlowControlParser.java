@@ -81,6 +81,9 @@ public class FlowControlParser extends AbstractParser {
 
     @Override
     public String parse(String input, Map<String, Object> context) {
+        if (isEmpty(input)) {
+            return "";
+        }
         forIndex = 0;
         forContextVars = new HashMap<>();
         FlowControlLexer lexer = new FlowControlLexer(input) {

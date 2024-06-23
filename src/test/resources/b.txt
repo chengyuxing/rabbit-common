@@ -14,7 +14,7 @@ select * from test.user
     #done
 #done
 
-#if :age >= 3.1415 && :age <100 then
+#if :age >= 3.1415 && :age <100
    and age = 28
 #fi
 
@@ -37,6 +37,10 @@ select * from test.user
 #choose
     #when :age > 28
         my age is 28
+    #break
+
+    #when :age > 0
+        my age is 90
     #break
 
     #default

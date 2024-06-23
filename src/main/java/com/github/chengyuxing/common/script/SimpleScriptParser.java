@@ -24,6 +24,11 @@ import static com.github.chengyuxing.common.utils.StringUtil.*;
  *      #if {@linkplain FastExpression expression2}
  *      ...
  *      #fi
+ *      #if {@linkplain FastExpression expression3}
+ *      ...
+ *      #else
+ *      ...
+ *      #fi
  * #fi
  * </pre>
  * </blockquote>
@@ -86,6 +91,7 @@ public class SimpleScriptParser extends AbstractParser {
      * @return parsed content
      * @see IExpression
      */
+    @Override
     public String parse(String content, Map<String, Object> context) {
         if (Objects.isNull(content)) {
             return "";
@@ -123,7 +129,8 @@ public class SimpleScriptParser extends AbstractParser {
             // if block
             if (startsWithIgnoreCase(expression, IF)) {
                 ifDepth++;
-                StringJoiner buffer = new StringJoiner(NEW_LINE);
+                List<String> buffer = new ArrayList<>();
+                buffer.add(currentLine);
                 while (++i < j) {
                     String line = lines[i];
                     String trimLine = trimExpression(line);
@@ -136,24 +143,48 @@ public class SimpleScriptParser extends AbstractParser {
                             throw new ScriptSyntaxException("can not find pair of '#if...#fi' block at line " + i);
                         }
                         // it means at the end of if block.
+                        // this line means it's content need to hold.
+                        // e.g.
+                        // #if
+                        // ...
+                        //      #if
+                        //      ...
+                        //      #fi
+                        //      and t.a = :a    --need to hold
+                        // #fi
+                        buffer.add(line);
                         if (ifDepth == 0) {
-                            boolean res = expression(expression.substring(3)).calc(data);
-                            // if true do recursion to parse inside.
-                            if (res) {
-                                output.add(doParse(buffer.toString(), data));
+                            int depth = 0;
+                            int elsePosition = -1;
+                            for (int x = 0; x < buffer.size(); x++) {
+                                String item = trimExpression(buffer.get(x));
+                                if (startsWithIgnoreCase(item, IF)) {
+                                    depth++;
+                                } else if (startsWithIgnoreCase(item, FI)) {
+                                    depth--;
+                                } else if (startsWithIgnoreCase(item, ELSE) && depth == 1) {
+                                    elsePosition = x;
+                                }
+                                if (depth == 0) {
+                                    break;
+                                }
+                            }
+
+                            List<String> thenContent;
+                            List<String> elseContent = new ArrayList<>();
+                            if (elsePosition == -1) {
+                                thenContent = buffer.subList(1, buffer.size() - 1);
+                            } else {
+                                thenContent = buffer.subList(1, elsePosition);
+                                elseContent = buffer.subList(elsePosition + 1, buffer.size() - 1);
+                            }
+
+                            List<String> res = expression(expression.substring(3)).calc(data) ? thenContent : elseContent;
+                            String resContent = doParse(String.join("\n", res), data);
+                            if (!resContent.trim().isEmpty()) {
+                                output.add(resContent);
                             }
                             break;
-                        } else {
-                            // this line means it's content need to hold.
-                            // e.g.
-                            // #if
-                            // ...
-                            //      #if
-                            //      ...
-                            //      #fi
-                            //      and t.a = :a    --need to hold
-                            // #fi
-                            buffer.add(line);
                         }
                     } else {
                         // normal line need to hold.
