@@ -163,17 +163,23 @@ public class FlowControlParser extends AbstractParser {
 
         private String doParseStatement() {
             String result;
-            if (currentToken.getType() == TokenType.IF) {
-                result = parseIfStatement();
-            } else if (currentToken.getType() == TokenType.SWITCH) {
-                result = parseSwitchStatement();
-            } else if (currentToken.getType() == TokenType.CHOOSE) {
-                result = parseChooseStatement();
-            } else if (currentToken.getType() == TokenType.FOR) {
-                result = parseForStatement();
-            } else {
-                result = currentToken.getValue();
-                advance();
+            switch (currentToken.getType()) {
+                case IF:
+                    result = parseIfStatement();
+                    break;
+                case SWITCH:
+                    result = parseSwitchStatement();
+                    break;
+                case CHOOSE:
+                    result = parseChooseStatement();
+                    break;
+                case FOR:
+                    result = parseForStatement();
+                    break;
+                default:
+                    result = currentToken.getValue();
+                    advance();
+                    break;
             }
             return result;
         }
@@ -368,7 +374,7 @@ public class FlowControlParser extends AbstractParser {
                     }
 
                     // for loop body content tokens.
-                    List<Token> newForContent = new ArrayList<>();
+                    List<Token> newForContent = new ArrayList<>(forContent.size());
                     for (Token token : forContent) {
                         if (token.getType() == TokenType.PLAIN_TEXT) {
                             String old = token.getValue();
@@ -390,7 +396,7 @@ public class FlowControlParser extends AbstractParser {
                 forIndex++;
                 String resultFor = result.toString().trim();
                 if (resultFor.isEmpty()) {
-                    return resultFor;
+                    return "";
                 }
                 forContextVars.putAll(localForVars);
                 return open + resultFor + close;
