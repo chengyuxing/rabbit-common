@@ -1,7 +1,7 @@
 select * from test.user
     where id = 1 or id in
 
-#for item of :user.names delimiter 'or' open '(' close ')'
+#for item of :user.names delimiter ' or' open '(' close ')'
     #if :item @ '\w+'
         name = ${item}
     #else
@@ -9,7 +9,7 @@ select * from test.user
         name = :_for.item and alias is ${item}
         #fi
     #fi
-    #for item of :user.names delimiter 'or' open '(' close ')'
+    #for item of :user.names delimiter ' or' open '(' close ')'
         @@@@@@${item}@@@@@@
     #done
 #done

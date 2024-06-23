@@ -75,7 +75,7 @@ public class FlowControlLexer {
                 break;
             }
             current = trimExpression(current);
-            if (StringUtil.containsAnyIgnoreCase(current, KEYWORDS)) {
+            if (StringUtil.startsWithsIgnoreCase(current, KEYWORDS)) {
                 IdentifierLexer lexer = new IdentifierLexer(current);
                 tokens.addAll(lexer.tokenize());
             } else {

@@ -7,10 +7,7 @@ import com.github.chengyuxing.common.script.expression.IPipe;
 import com.github.chengyuxing.common.script.expression.impl.FastExpression;
 import com.github.chengyuxing.common.utils.ObjectUtil;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.StringJoiner;
+import java.util.*;
 import java.util.regex.Matcher;
 
 import static com.github.chengyuxing.common.utils.ObjectUtil.coalesce;
@@ -92,7 +89,8 @@ public class FlowControlParser extends AbstractParser {
                 return FlowControlParser.this.trimExpression(line);
             }
         };
-        Parser parser = new Parser(lexer.tokenize(), context);
+        List<Token> tokens = lexer.tokenize();
+        Parser parser = new Parser(tokens, context);
         return parser.doParse();
     }
 
@@ -382,7 +380,7 @@ public class FlowControlParser extends AbstractParser {
             while (currentToken.getType() != TokenType.EOF) {
                 result.append(doParseStatement());
             }
-            return result.toString().trim();
+            return result.toString().trim().replaceAll("\\s*\r?\n", NEW_LINE);
         }
     }
 }
