@@ -338,6 +338,51 @@ public class StringTests {
     }
 
     @Test
+    public void testNestIf() {
+        String s = "if\n" +
+                "    if\n" +
+                "    else\n" +
+                "       \n" +
+                "    fi\n" +
+                "else\n" +
+                "    if\n" +
+                "        if\n" +
+                "            if\n" +
+                "            else\n" +
+                "            fi\n" +
+                "        else\n" +
+                "        fi\n" +
+                "    fi\n" +
+                "fi\n" +
+                "\n" +
+                "if\n" +
+                "fi\n" +
+                "\n" +
+                "if\n" +
+                "else\n" +
+                "fi\n" +
+                "\n";
+        String[] ss = s.split("\n");
+        int depth = 0;
+        int elsePosition = -1;
+        for (int i = 0; i < ss.length; i++) {
+            String item = ss[i].trim();
+            if (item.equals("if")) {
+                depth++;
+            } else if (item.equals("fi")) {
+                depth--;
+            } else if (item.equals("else") && depth == 1) {
+                elsePosition = i;
+            }
+            if(depth == 0) {
+                break;
+            }
+        }
+        System.out.println(Arrays.toString(ss));
+        System.out.println(elsePosition);
+    }
+
+    @Test
     public void testLexer() {
         String s = new FileResource("me.sql").readString(StandardCharsets.UTF_8);
 
