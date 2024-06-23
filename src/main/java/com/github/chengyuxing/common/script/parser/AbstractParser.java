@@ -83,6 +83,8 @@ public abstract class AbstractParser {
     /**
      * Parse content with scripts.
      *
+     * @param input   content
+     * @param context context params
      * @return parsed content
      * @see IExpression
      */
