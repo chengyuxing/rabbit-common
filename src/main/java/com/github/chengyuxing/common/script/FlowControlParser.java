@@ -137,8 +137,8 @@ public class FlowControlParser extends AbstractParser {
             return condition.toString().trim();
         }
 
-        private String parseForBlock() {
-            StringJoiner content = new StringJoiner(" ");
+        private List<Token> parseForBlock() {
+            List<Token> tokens = new ArrayList<>();
             int forDepth = 0;
             while ((currentToken.getType() != TokenType.END_FOR || forDepth != 0) && currentToken.getType() != TokenType.EOF) {
                 if (currentToken.getType() == TokenType.FOR) {
@@ -146,19 +146,19 @@ public class FlowControlParser extends AbstractParser {
                 } else if (currentToken.getType() == TokenType.END_FOR) {
                     forDepth--;
                 }
-                content.add(currentToken.getValue());
+                tokens.add(currentToken);
                 advance();
             }
-            return content.toString().trim();
+            return tokens;
         }
 
-        private String parseCaseWhenDefaultBlock() {
-            StringJoiner content = new StringJoiner(" ");
+        private List<Token> parseBranchBlock() {
+            List<Token> caseWhenDefaultBlock = new ArrayList<>();
             while (currentToken.getType() != TokenType.BREAK && currentToken.getType() != TokenType.EOF) {
-                content.add(currentToken.getValue());
+                caseWhenDefaultBlock.add(currentToken);
                 advance();
             }
-            return content.toString().trim();
+            return caseWhenDefaultBlock;
         }
 
         private String doParseStatement() {
@@ -182,7 +182,7 @@ public class FlowControlParser extends AbstractParser {
             eat(TokenType.IF);
             String condition = parseCondition();
             eat(TokenType.NEWLINE);
-            List<String> ifBlockContent = new ArrayList<>();
+            List<Token> ifBlockContent = new ArrayList<>();
             int ifDepth = 1;
             int elseIndex = -1;
             int index = 0;
@@ -194,28 +194,26 @@ public class FlowControlParser extends AbstractParser {
                 } else if (currentToken.getType() == TokenType.ELSE && ifDepth == 1) {
                     elseIndex = index;
                 }
-                ifBlockContent.add(currentToken.getValue());
+                ifBlockContent.add(currentToken);
                 index++;
                 advance();
             }
             eat(TokenType.ENDIF);
 
-            if (ifBlockContent.isEmpty()) {
+            List<Token> thenContent;
+            List<Token> elseContent = new ArrayList<>();
+            if (elseIndex == -1) {
+                thenContent = ifBlockContent;
+            } else {
+                thenContent = ifBlockContent.subList(0, elseIndex);
+                elseContent = ifBlockContent.subList(elseIndex + 1, ifBlockContent.size());
+            }
+
+            List<Token> matchedContent = evaluateCondition(condition) ? thenContent : elseContent;
+            if (matchedContent.isEmpty()) {
                 return "";
             }
-
-            String thenContent;
-            String elseContent = "";
-            if (elseIndex == -1) {
-                thenContent = String.join(" ", ifBlockContent);
-            } else {
-                thenContent = String.join(" ", ifBlockContent.subList(0, elseIndex));
-                elseContent = String.join(" ", ifBlockContent.subList(elseIndex + 1, ifBlockContent.size()));
-            }
-
-            String matchedContent = evaluateCondition(condition) ? thenContent : elseContent;
-            FlowControlLexer lexer = new FlowControlLexer(matchedContent);
-            Parser parser = new Parser(lexer.tokenize(), context);
+            Parser parser = new Parser(matchedContent, context);
             return parser.doParse();
         }
 
@@ -224,15 +222,15 @@ public class FlowControlParser extends AbstractParser {
             String variable = parseCondition();
             eat(TokenType.NEWLINE);
 
-            Map<String, String> caseContentMap = new LinkedHashMap<>();
-            String matchedCaseContent = "";
+            Map<String, List<Token>> caseContentMap = new LinkedHashMap<>();
+            List<Token> matchedCaseContent = new ArrayList<>();
 
             while (currentToken.getType() != TokenType.END && currentToken.getType() != TokenType.EOF) {
                 if (currentToken.getType() == TokenType.CASE) {
                     advance();
                     String caseValue = parseCondition();
                     eat(TokenType.NEWLINE);
-                    String caseContent = parseCaseWhenDefaultBlock();
+                    List<Token> caseContent = parseBranchBlock();
                     caseContentMap.put(caseValue, caseContent);
                     if (currentToken.getType() == TokenType.BREAK) {
                         advance();
@@ -240,7 +238,7 @@ public class FlowControlParser extends AbstractParser {
                 } else if (currentToken.getType() == TokenType.DEFAULT) {
                     advance();
                     eat(TokenType.NEWLINE);
-                    matchedCaseContent = parseCaseWhenDefaultBlock();
+                    matchedCaseContent = parseBranchBlock();
                     if (currentToken.getType() == TokenType.BREAK) {
                         advance();
                     }
@@ -269,14 +267,13 @@ public class FlowControlParser extends AbstractParser {
                 variableValue = expression("empty").pipedValue(variableValue, pipes);
             }
 
-            for (Map.Entry<String, String> entry : caseContentMap.entrySet()) {
+            for (Map.Entry<String, List<Token>> entry : caseContentMap.entrySet()) {
                 if (Comparators.compare(variableValue, "=", Comparators.valueOf(entry.getKey()))) {
                     matchedCaseContent = entry.getValue();
                     break;
                 }
             }
-            FlowControlLexer lexer = new FlowControlLexer(matchedCaseContent);
-            Parser parser = new Parser(lexer.tokenize(), context);
+            Parser parser = new Parser(matchedCaseContent, context);
             return parser.doParse();
         }
 
@@ -284,15 +281,15 @@ public class FlowControlParser extends AbstractParser {
             eat(TokenType.CHOOSE);
             eat(TokenType.NEWLINE);
 
-            Map<String, String> whenContentMap = new LinkedHashMap<>();
-            String matchedWhenContent = "";
+            Map<String, List<Token>> whenContentMap = new LinkedHashMap<>();
+            List<Token> matchedWhenContent = new ArrayList<>();
 
             while (currentToken.getType() != TokenType.END && currentToken.getType() != TokenType.EOF) {
                 if (currentToken.getType() == TokenType.WHEN) {
                     advance();
                     String condition = parseCondition();
                     eat(TokenType.NEWLINE);
-                    String whenContent = parseCaseWhenDefaultBlock();
+                    List<Token> whenContent = parseBranchBlock();
                     whenContentMap.put(condition, whenContent);
                     if (currentToken.getType() == TokenType.BREAK) {
                         advance();
@@ -300,7 +297,7 @@ public class FlowControlParser extends AbstractParser {
                 } else if (currentToken.getType() == TokenType.DEFAULT) {
                     advance();
                     eat(TokenType.NEWLINE);
-                    matchedWhenContent = parseCaseWhenDefaultBlock();
+                    matchedWhenContent = parseBranchBlock();
                     if (currentToken.getType() == TokenType.BREAK) {
                         advance();
                     }
@@ -314,14 +311,13 @@ public class FlowControlParser extends AbstractParser {
             }
             eat(TokenType.END);
 
-            for (Map.Entry<String, String> entry : whenContentMap.entrySet()) {
+            for (Map.Entry<String, List<Token>> entry : whenContentMap.entrySet()) {
                 if (evaluateCondition(entry.getKey())) {
                     matchedWhenContent = entry.getValue();
                     break;
                 }
             }
-            FlowControlLexer lexer = new FlowControlLexer(matchedWhenContent);
-            Parser parser = new Parser(lexer.tokenize(), context);
+            Parser parser = new Parser(matchedWhenContent, context);
             return parser.doParse();
         }
 
@@ -329,7 +325,7 @@ public class FlowControlParser extends AbstractParser {
             eat(TokenType.FOR);
             String forCondition = parseCondition();
             eat(TokenType.NEWLINE);
-            String forContent = parseForBlock();
+            List<Token> forContent = parseForBlock();
             eat(TokenType.END_FOR);
             Matcher m = FOR_PATTERN.matcher(forCondition);
             if (m.find()) {
@@ -371,11 +367,20 @@ public class FlowControlParser extends AbstractParser {
                         childContext.put(idxName, i);
                     }
 
-                    String formattedForContent = forLoopBodyFormatter(forIndex, i, itemName, idxName, forContent, childContext);
+                    // for loop body content tokens.
+                    List<Token> newForContent = new ArrayList<>();
+                    for (Token token : forContent) {
+                        if (token.getType() == TokenType.PLAIN_TEXT) {
+                            String old = token.getValue();
+                            String newValue = forLoopBodyFormatter(forIndex, i, itemName, idxName, old, childContext);
+                            Token newToken = new Token(token.getType(), newValue);
+                            newForContent.add(newToken);
+                            continue;
+                        }
+                        newForContent.add(token);
+                    }
 
-                    FlowControlLexer forLoopContentLexer = new FlowControlLexer(formattedForContent);
-                    List<Token> forLoopTokens = forLoopContentLexer.tokenize();
-                    Parser parser = new Parser(forLoopTokens, childContext);
+                    Parser parser = new Parser(newForContent, childContext);
                     String forContentResult = parser.doParse();
 
                     if (!forContentResult.trim().isEmpty()) {
