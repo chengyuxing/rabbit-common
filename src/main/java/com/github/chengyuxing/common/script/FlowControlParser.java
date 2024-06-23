@@ -120,7 +120,7 @@ public class FlowControlParser extends AbstractParser {
             if (currentToken.getType() == type) {
                 advance();
             } else {
-                throw new ScriptSyntaxException("Unexpected token: " + currentToken + ", expected: " + type);
+                throw new ScriptSyntaxException("Unexpected token: " + currentToken + ", expected: " + type + ", At: " + currentTokenIndex);
             }
         }
 
@@ -138,7 +138,7 @@ public class FlowControlParser extends AbstractParser {
         }
 
         private String parseForBlock() {
-            StringJoiner condition = new StringJoiner(" ");
+            StringJoiner content = new StringJoiner(" ");
             int forDepth = 0;
             while ((currentToken.getType() != TokenType.END_FOR || forDepth != 0) && currentToken.getType() != TokenType.EOF) {
                 if (currentToken.getType() == TokenType.FOR) {
@@ -146,10 +146,19 @@ public class FlowControlParser extends AbstractParser {
                 } else if (currentToken.getType() == TokenType.END_FOR) {
                     forDepth--;
                 }
-                condition.add(currentToken.getValue());
+                content.add(currentToken.getValue());
                 advance();
             }
-            return condition.toString().trim();
+            return content.toString().trim();
+        }
+
+        private String parseCaseWhenDefaultBlock() {
+            StringJoiner content = new StringJoiner(" ");
+            while (currentToken.getType() != TokenType.BREAK && currentToken.getType() != TokenType.EOF) {
+                content.add(currentToken.getValue());
+                advance();
+            }
+            return content.toString().trim();
         }
 
         private String doParseStatement() {
@@ -169,32 +178,45 @@ public class FlowControlParser extends AbstractParser {
             return result;
         }
 
-        private String parseContent() {
-            StringJoiner content = new StringJoiner(" ");
-            while (currentToken.getType() != TokenType.ELSE &&
-                    currentToken.getType() != TokenType.ENDIF &&
-                    currentToken.getType() != TokenType.END_FOR &&
-                    currentToken.getType() != TokenType.BREAK &&
-                    currentToken.getType() != TokenType.END &&
-                    currentToken.getType() != TokenType.EOF) {
-                content.add(doParseStatement());
-            }
-            return content.toString();
-        }
-
         private String parseIfStatement() {
             eat(TokenType.IF);
             String condition = parseCondition();
             eat(TokenType.NEWLINE);
-            String thenContent = parseContent();
-            String elseContent = "";
-            if (currentToken.getType() == TokenType.ELSE) {
+            List<String> ifBlockContent = new ArrayList<>();
+            int ifDepth = 1;
+            int elseIndex = -1;
+            int index = 0;
+            while ((currentToken.getType() != TokenType.ENDIF || ifDepth != 1) && currentToken.getType() != TokenType.EOF) {
+                if (currentToken.getType() == TokenType.IF) {
+                    ifDepth++;
+                } else if (currentToken.getType() == TokenType.ENDIF) {
+                    ifDepth--;
+                } else if (currentToken.getType() == TokenType.ELSE && ifDepth == 1) {
+                    elseIndex = index;
+                }
+                ifBlockContent.add(currentToken.getValue());
+                index++;
                 advance();
-                elseContent = parseContent();
             }
             eat(TokenType.ENDIF);
-            boolean conditionSatisfied = evaluateCondition(condition);
-            return conditionSatisfied ? thenContent : elseContent;
+
+            if (ifBlockContent.isEmpty()) {
+                return "";
+            }
+
+            String thenContent;
+            String elseContent = "";
+            if (elseIndex == -1) {
+                thenContent = String.join(" ", ifBlockContent);
+            } else {
+                thenContent = String.join(" ", ifBlockContent.subList(0, elseIndex));
+                elseContent = String.join(" ", ifBlockContent.subList(elseIndex + 1, ifBlockContent.size()));
+            }
+
+            String matchedContent = evaluateCondition(condition) ? thenContent : elseContent;
+            FlowControlLexer lexer = new FlowControlLexer(matchedContent);
+            Parser parser = new Parser(lexer.tokenize(), context);
+            return parser.doParse();
         }
 
         private String parseSwitchStatement() {
@@ -202,23 +224,23 @@ public class FlowControlParser extends AbstractParser {
             String variable = parseCondition();
             eat(TokenType.NEWLINE);
 
-            Map<String, String> caseContentMap = new HashMap<>();
-            String defaultContent = "";
+            Map<String, String> caseContentMap = new LinkedHashMap<>();
+            String matchedCaseContent = "";
 
             while (currentToken.getType() != TokenType.END && currentToken.getType() != TokenType.EOF) {
                 if (currentToken.getType() == TokenType.CASE) {
                     advance();
                     String caseValue = parseCondition();
                     eat(TokenType.NEWLINE);
-                    String caseContent = parseContent();
+                    String caseContent = parseCaseWhenDefaultBlock();
                     caseContentMap.put(caseValue, caseContent);
                     if (currentToken.getType() == TokenType.BREAK) {
                         advance();
                     }
                 } else if (currentToken.getType() == TokenType.DEFAULT) {
                     advance();
-                    defaultContent = parseContent();
                     eat(TokenType.NEWLINE);
+                    matchedCaseContent = parseCaseWhenDefaultBlock();
                     if (currentToken.getType() == TokenType.BREAK) {
                         advance();
                     }
@@ -226,7 +248,7 @@ public class FlowControlParser extends AbstractParser {
                     if (currentToken.getType() == TokenType.NEWLINE) {
                         advance();
                     } else {
-                        throw new ScriptSyntaxException("Unexpected token in switch statement: " + currentToken);
+                        throw new ScriptSyntaxException("Unexpected token in switch statement: " + currentToken + ", At: " + currentTokenIndex);
                     }
                 }
             }
@@ -249,25 +271,28 @@ public class FlowControlParser extends AbstractParser {
 
             for (Map.Entry<String, String> entry : caseContentMap.entrySet()) {
                 if (Comparators.compare(variableValue, "=", Comparators.valueOf(entry.getKey()))) {
-                    return entry.getValue();
+                    matchedCaseContent = entry.getValue();
+                    break;
                 }
             }
-            return defaultContent;
+            FlowControlLexer lexer = new FlowControlLexer(matchedCaseContent);
+            Parser parser = new Parser(lexer.tokenize(), context);
+            return parser.doParse();
         }
 
         private String parseChooseStatement() {
             eat(TokenType.CHOOSE);
             eat(TokenType.NEWLINE);
 
-            Map<String, String> whenContentMap = new HashMap<>();
-            String defaultContent = "";
+            Map<String, String> whenContentMap = new LinkedHashMap<>();
+            String matchedWhenContent = "";
 
             while (currentToken.getType() != TokenType.END && currentToken.getType() != TokenType.EOF) {
                 if (currentToken.getType() == TokenType.WHEN) {
                     advance();
                     String condition = parseCondition();
                     eat(TokenType.NEWLINE);
-                    String whenContent = parseContent();
+                    String whenContent = parseCaseWhenDefaultBlock();
                     whenContentMap.put(condition, whenContent);
                     if (currentToken.getType() == TokenType.BREAK) {
                         advance();
@@ -275,7 +300,7 @@ public class FlowControlParser extends AbstractParser {
                 } else if (currentToken.getType() == TokenType.DEFAULT) {
                     advance();
                     eat(TokenType.NEWLINE);
-                    defaultContent = parseContent();
+                    matchedWhenContent = parseCaseWhenDefaultBlock();
                     if (currentToken.getType() == TokenType.BREAK) {
                         advance();
                     }
@@ -283,7 +308,7 @@ public class FlowControlParser extends AbstractParser {
                     if (currentToken.getType() == TokenType.NEWLINE) {
                         advance();
                     } else {
-                        throw new ScriptSyntaxException("Unexpected token in choose statement: " + currentToken);
+                        throw new ScriptSyntaxException("Unexpected token in choose statement: " + currentToken + ", At: " + currentTokenIndex);
                     }
                 }
             }
@@ -291,10 +316,13 @@ public class FlowControlParser extends AbstractParser {
 
             for (Map.Entry<String, String> entry : whenContentMap.entrySet()) {
                 if (evaluateCondition(entry.getKey())) {
-                    return entry.getValue();
+                    matchedWhenContent = entry.getValue();
+                    break;
                 }
             }
-            return defaultContent;
+            FlowControlLexer lexer = new FlowControlLexer(matchedWhenContent);
+            Parser parser = new Parser(lexer.tokenize(), context);
+            return parser.doParse();
         }
 
         private String parseForStatement() {
@@ -362,7 +390,7 @@ public class FlowControlParser extends AbstractParser {
                 forContextVars.putAll(localForVars);
                 return open + resultFor + close;
             } else {
-                throw new ScriptSyntaxException("#for syntax error of expression '" + forCondition + "'");
+                throw new ScriptSyntaxException("#for syntax error of expression '" + forCondition + "'" + ", At: " + currentTokenIndex);
             }
         }
 
