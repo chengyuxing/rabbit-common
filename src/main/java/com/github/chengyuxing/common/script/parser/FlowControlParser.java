@@ -95,6 +95,30 @@ public class FlowControlParser extends AbstractParser {
             return sb.toString();
         }
 
+        private String parseCaseValue() {
+            switch (currentToken.getType()) {
+                case IDENTIFIER:
+                case STRING:
+                case NUMBER:
+                    return currentToken.getValue();
+                default:
+                    throw new ScriptSyntaxException("Unexpected token: " + currentToken + ", expected: " + TokenType.IDENTIFIER + "/" + TokenType.STRING + "/" + TokenType.NUMBER + ", At: " + currentTokenIndex);
+            }
+        }
+
+        private List<String> parseCaseValues() {
+            List<String> values = new ArrayList<>();
+            values.add(parseCaseValue());
+            advance();
+            while (currentToken.getType() != TokenType.NEWLINE &&
+                    currentToken.getType() != TokenType.EOF) {
+                eat(TokenType.COMMA);
+                values.add(parseCaseValue());
+                advance();
+            }
+            return values;
+        }
+
         private List<Token> parseForBlock() {
             List<Token> tokens = new ArrayList<>();
             int forDepth = 0;
@@ -188,13 +212,13 @@ public class FlowControlParser extends AbstractParser {
             String pipes = parsePipeLine();
             eat(TokenType.NEWLINE);
 
-            Map<String, List<Token>> caseContentMap = new LinkedHashMap<>();
+            Map<List<String>, List<Token>> caseContentMap = new LinkedHashMap<>();
             List<Token> matchedCaseContent = new ArrayList<>();
 
             while (currentToken.getType() != TokenType.END && currentToken.getType() != TokenType.EOF) {
                 if (currentToken.getType() == TokenType.CASE) {
                     advance();
-                    String caseValue = parseCondition();
+                    List<String> caseValue = parseCaseValues();
                     eat(TokenType.NEWLINE);
                     List<Token> caseContent = parseBranchBlock();
                     caseContentMap.put(caseValue, caseContent);
@@ -226,10 +250,14 @@ public class FlowControlParser extends AbstractParser {
                 variableValue = expression("empty").pipedValue(variableValue, pipes);
             }
 
-            for (Map.Entry<String, List<Token>> entry : caseContentMap.entrySet()) {
-                if (Comparators.compare(variableValue, "=", Comparators.valueOf(entry.getKey()))) {
-                    matchedCaseContent = entry.getValue();
-                    break;
+            caseBranch:
+            for (Map.Entry<List<String>, List<Token>> entry : caseContentMap.entrySet()) {
+                List<String> caseValues = entry.getKey();
+                for (String caseValue : caseValues) {
+                    if (Comparators.compare(variableValue, "=", Comparators.valueOf(caseValue))) {
+                        matchedCaseContent = entry.getValue();
+                        break caseBranch;
+                    }
                 }
             }
             if (matchedCaseContent.isEmpty()) {
