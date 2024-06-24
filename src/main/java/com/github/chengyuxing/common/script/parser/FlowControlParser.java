@@ -153,6 +153,8 @@ public class FlowControlParser extends AbstractParser {
                     advance();
                     sb.append(currentToken.getValue());
                     eat(TokenType.IDENTIFIER);
+                } else {
+                    throw new ScriptSyntaxException("Unexpected token: " + currentToken + ", expected: " + TokenType.LOGIC_OR + ", At: " + currentTokenIndex);
                 }
             }
             return sb.toString();

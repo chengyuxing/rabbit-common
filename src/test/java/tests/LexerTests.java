@@ -10,7 +10,7 @@ import java.util.Arrays;
 
 public class LexerTests {
 
-    static String s1 = "#for item,idx of :names open '(' close ')'\n" +
+    static String s1 = "#for item,idx of :names delimiter ' or' open '(' close ')'\n" +
             "${item}:${idx}\n" +
             "#done";
     static String s2 = "#for item, idx of :user.n_ames | 3.14 | upp5er delimiter ' or' open '(' close ')'\n" +
