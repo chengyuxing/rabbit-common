@@ -1,5 +1,7 @@
 package com.github.chengyuxing.common.script.parser;
 
+import com.github.chengyuxing.common.script.expression.IPipe;
+import com.github.chengyuxing.common.script.expression.impl.FastExpression;
 import com.github.chengyuxing.common.script.lexer.FlowControlLexer;
 import com.github.chengyuxing.common.script.Token;
 import com.github.chengyuxing.common.script.TokenType;
@@ -14,7 +16,66 @@ import static com.github.chengyuxing.common.utils.StringUtil.NEW_LINE;
 import static com.github.chengyuxing.common.utils.StringUtil.isEmpty;
 
 /**
- * Based lexer tokens Flow-Control parser.
+ * <h2>Based lexer tokens Flow-Control parser.</h2>
+ * <p>if statement:</p>
+ * <blockquote>
+ * <pre>
+ * #if {@linkplain FastExpression expression1}
+ *      #if {@linkplain FastExpression expression2}
+ *      ...
+ *      #fi
+ *      #if {@linkplain FastExpression expression3}
+ *      ...
+ *      #else
+ *      ...
+ *      #fi
+ * #fi
+ * </pre>
+ * </blockquote>
+ * <p>choose statement:</p>
+ * <blockquote>
+ * <pre>
+ * #choose
+ *      #when {@linkplain FastExpression expression1}
+ *      ...
+ *      #break
+ *      #when {@linkplain FastExpression expression2}
+ *      ...
+ *      #break
+ *      ...
+ *      #default
+ *      ...
+ *      #break
+ * #end
+ * </pre>
+ * </blockquote>
+ * <p>switch statement</p>
+ * <blockquote>
+ * <pre>
+ * #switch :key [| {@linkplain IPipe pipe1} | {@linkplain IPipe pipeN} | ...]
+ *      #case var1[, var2][, varN],...
+ *      ...
+ *      #break
+ *      #case var3
+ *      ...
+ *      #break
+ *      ...
+ *      #default
+ *      ...
+ *      #break
+ * #end
+ * </pre>
+ * </blockquote>
+ * <p>for statement</p>
+ * <blockquote>
+ * <pre>
+ * #for item[,idx] of :list [| {@linkplain IPipe pipe1} | pipeN | ... ] [delimiter ','] [open ''] [close '']
+ *     ...
+ * #done
+ * </pre>
+ * </blockquote>
+ *
+ * @see FastExpression
  */
 public class FlowControlParser extends AbstractParser {
     private int forIndex = 0;

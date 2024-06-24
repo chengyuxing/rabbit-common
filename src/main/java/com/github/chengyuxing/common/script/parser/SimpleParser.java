@@ -3,6 +3,8 @@ package com.github.chengyuxing.common.script.parser;
 import com.github.chengyuxing.common.script.exception.ScriptSyntaxException;
 import com.github.chengyuxing.common.script.expression.Comparators;
 import com.github.chengyuxing.common.script.expression.IExpression;
+import com.github.chengyuxing.common.script.expression.IPipe;
+import com.github.chengyuxing.common.script.expression.impl.FastExpression;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -14,7 +16,66 @@ import static com.github.chengyuxing.common.utils.ObjectUtil.*;
 import static com.github.chengyuxing.common.utils.StringUtil.*;
 
 /**
- * Based content line simple Flow-Control parser.
+ * <h2>Based content line simple Flow-Control parser.</h2>
+ * <p>if statement:</p>
+ * <blockquote>
+ * <pre>
+ * #if {@linkplain FastExpression expression1}
+ *      #if {@linkplain FastExpression expression2}
+ *      ...
+ *      #fi
+ *      #if {@linkplain FastExpression expression3}
+ *      ...
+ *      #else
+ *      ...
+ *      #fi
+ * #fi
+ * </pre>
+ * </blockquote>
+ * <p>choose statement:</p>
+ * <blockquote>
+ * <pre>
+ * #choose
+ *      #when {@linkplain FastExpression expression1}
+ *      ...
+ *      #break
+ *      #when {@linkplain FastExpression expression2}
+ *      ...
+ *      #break
+ *      ...
+ *      #default
+ *      ...
+ *      #break
+ * #end
+ * </pre>
+ * </blockquote>
+ * <p>switch statement</p>
+ * <blockquote>
+ * <pre>
+ * #switch :key [| {@linkplain IPipe pipe1} | {@linkplain IPipe pipeN} | ...]
+ *      #case var1
+ *      ...
+ *      #break
+ *      #case var2
+ *      ...
+ *      #break
+ *      ...
+ *      #default
+ *      ...
+ *      #break
+ * #end
+ * </pre>
+ * </blockquote>
+ * <p>for statement</p>
+ * <blockquote>
+ * <pre>
+ * #for item[,idx] of :list [| {@linkplain IPipe pipe1} | pipeN | ... ] [delimiter ','] [open ''] [close '']
+ *     ...
+ * #done
+ * </pre>
+ * </blockquote>
+ *
+ * @see FastExpression
  */
 public class SimpleParser extends AbstractParser {
     public static final Pattern FOR_PATTERN = Pattern.compile("(?<item>\\w+)(\\s*,\\s*(?<index>\\w+))?\\s+of\\s+:(?<list>" + VAR_KEY_PATTERN + ")(?<pipes>" + PIPES_PATTERN + ")?(\\s+delimiter\\s+(?<delimiter>" + STRING_PATTERN + "))?(\\s+open\\s+(?<open>" + STRING_PATTERN + "))?(\\s+close\\s+(?<close>" + STRING_PATTERN + "))?");
