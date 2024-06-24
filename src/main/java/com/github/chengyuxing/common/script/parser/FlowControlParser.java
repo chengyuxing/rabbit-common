@@ -133,12 +133,12 @@ public class FlowControlParser extends AbstractParser {
         }
 
         private String parseCondition() {
-            StringJoiner condition = new StringJoiner(" ");
+            StringBuilder condition = new StringBuilder();
             while (currentToken.getType() != TokenType.NEWLINE && currentToken.getType() != TokenType.EOF) {
-                condition.add(currentToken.getValue());
+                condition.append(currentToken.getValue());
                 advance();
             }
-            return condition.toString().trim();
+            return condition.toString();
         }
 
         private String parsePipeLine() {

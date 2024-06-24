@@ -1,6 +1,7 @@
 package tests;
 
 import com.github.chengyuxing.common.DataRow;
+import com.github.chengyuxing.common.script.expression.Comparators;
 import com.github.chengyuxing.common.script.lexer.FlowControlLexer;
 import com.github.chengyuxing.common.script.parser.FlowControlParser;
 import org.junit.Test;
@@ -25,6 +26,17 @@ public class LexerTests {
             "rrrrrrrrr\n" +
             "#break\n" +
             "#end";
+
+    static String s4 = "#if :jssj != blank\n" +
+            "aaa\n" +
+            "#fi";
+
+    @Test
+    public void test5() {
+        FlowControlParser parser = new FlowControlParser();
+        String res = parser.parse(s4, DataRow.of("jssj", Comparators.valueOf("null")));
+        System.out.println(res);
+    }
 
     @Test
     public void test1() {
