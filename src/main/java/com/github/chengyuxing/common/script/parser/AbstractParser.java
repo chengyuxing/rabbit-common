@@ -76,8 +76,6 @@ import static com.github.chengyuxing.common.script.expression.Patterns.STRING_PA
  * @see FastExpression
  */
 public abstract class AbstractParser {
-    public static final Pattern FOR_PATTERN = Pattern.compile("(?<item>\\w+)(\\s*,\\s*(?<index>\\w+))?\\s+of\\s+:(?<list>" + VAR_KEY_PATTERN + ")(?<pipes>" + PIPES_PATTERN + ")?(\\s+delimiter\\s+(?<delimiter>" + STRING_PATTERN + "))?(\\s+open\\s+(?<open>" + STRING_PATTERN + "))?(\\s+close\\s+(?<close>" + STRING_PATTERN + "))?");
-
     protected Map<String, Object> forContextVars = new HashMap<>();
 
     /**

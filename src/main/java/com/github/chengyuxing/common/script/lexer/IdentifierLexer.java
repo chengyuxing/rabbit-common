@@ -107,8 +107,26 @@ public class IdentifierLexer {
                 String str = readWhile(c -> c != '"');
                 advance();
                 tokens.add(new Token(TokenType.STRING, '"' + str + '"'));
-            } else {
-                String identifier = readWhile(c -> !Character.isWhitespace(c) && c != '\n');
+            } else if (current == ',') {
+                tokens.add(new Token(TokenType.COMMA, ","));
+                advance();
+            } else if (current == '|') {
+                tokens.add(new Token(TokenType.LOGIC_OR, "|"));
+                advance();
+            } else if (current == '&') {
+                tokens.add(new Token(TokenType.LOGIC_AND, "&"));
+                advance();
+            } else if (current == '!') {
+                tokens.add(new Token(TokenType.LOGIC_NOT, "!"));
+                advance();
+            } else if (current == ':') {
+                advance();
+                String str = readWhile(c -> Character.isLetterOrDigit(c) || c == '_' || c == '.');
+                if (!str.isEmpty()) {
+                    tokens.add(new Token(TokenType.VARIABLE_NAME, ':' + str));
+                }
+            } else if (Character.isAlphabetic(current)) {
+                String identifier = readWhile(c -> Character.isLetterOrDigit(c) || c == '_' || c == '.');
                 switch (identifier.toLowerCase()) {
                     case "of":
                         tokens.add(new Token(TokenType.FOR_OF, "of"));
@@ -123,14 +141,15 @@ public class IdentifierLexer {
                         tokens.add(new Token(TokenType.FOR_CLOSE, "close"));
                         break;
                     default:
-                        if (identifier.charAt(0) == ':') {
-                            tokens.add(new Token(TokenType.VARIABLE_NAME, identifier));
-                        } else if (StringUtil.isNumeric(identifier)) {
-                            tokens.add(new Token(TokenType.NUMBER, identifier));
-                        } else {
-                            tokens.add(new Token(TokenType.IDENTIFIER, identifier));
-                        }
+                        tokens.add(new Token(TokenType.IDENTIFIER, identifier));
                         break;
+                }
+            } else {
+                String identifier = readWhile(c -> !Character.isWhitespace(c) && c != '\n');
+                if (StringUtil.isNumeric(identifier)) {
+                    tokens.add(new Token(TokenType.NUMBER, identifier));
+                } else {
+                    tokens.add(new Token(TokenType.UNKNOWN, identifier));
                 }
             }
         }

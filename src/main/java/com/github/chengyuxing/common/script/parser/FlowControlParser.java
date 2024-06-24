@@ -9,9 +9,7 @@ import com.github.chengyuxing.common.script.expression.IExpression;
 import com.github.chengyuxing.common.utils.ObjectUtil;
 
 import java.util.*;
-import java.util.regex.Matcher;
 
-import static com.github.chengyuxing.common.utils.ObjectUtil.coalesce;
 import static com.github.chengyuxing.common.utils.StringUtil.NEW_LINE;
 import static com.github.chengyuxing.common.utils.StringUtil.isEmpty;
 
@@ -80,6 +78,21 @@ public class FlowControlParser extends AbstractParser {
                 advance();
             }
             return condition.toString().trim();
+        }
+
+        private String parsePipeLine() {
+            StringBuilder sb = new StringBuilder();
+            while (currentToken.getType() != TokenType.FOR_DELIMITER &&
+                    currentToken.getType() != TokenType.NEWLINE &&
+                    currentToken.getType() != TokenType.EOF) {
+                if (currentToken.getType() == TokenType.LOGIC_OR) {
+                    sb.append(currentToken.getValue());
+                    advance();
+                    sb.append(currentToken.getValue());
+                    eat(TokenType.IDENTIFIER);
+                }
+            }
+            return sb.toString();
         }
 
         private List<Token> parseForBlock() {
@@ -170,7 +183,9 @@ public class FlowControlParser extends AbstractParser {
 
         private String parseSwitchStatement() {
             eat(TokenType.SWITCH);
-            String variable = parseCondition();
+            String variable = currentToken.getValue();
+            eat(TokenType.VARIABLE_NAME);
+            String pipes = parsePipeLine();
             eat(TokenType.NEWLINE);
 
             Map<String, List<Token>> caseContentMap = new LinkedHashMap<>();
@@ -204,13 +219,6 @@ public class FlowControlParser extends AbstractParser {
             eat(TokenType.END);
 
             String variableName = variable.substring(1);
-            String pipes = "";
-
-            int pipeIdx = variableName.indexOf('|');
-            if (pipeIdx != -1) {
-                pipes = variableName.substring(pipeIdx);
-                variableName = variableName.substring(0, pipeIdx).trim();
-            }
 
             Object variableValue = ObjectUtil.getDeepValue(context, variableName);
 
@@ -223,6 +231,9 @@ public class FlowControlParser extends AbstractParser {
                     matchedCaseContent = entry.getValue();
                     break;
                 }
+            }
+            if (matchedCaseContent.isEmpty()) {
+                return "";
             }
             Parser parser = new Parser(matchedCaseContent, context);
             return parser.doParse();
@@ -268,86 +279,115 @@ public class FlowControlParser extends AbstractParser {
                     break;
                 }
             }
+            if (matchedWhenContent.isEmpty()) {
+                return "";
+            }
             Parser parser = new Parser(matchedWhenContent, context);
             return parser.doParse();
         }
 
         private String parseForStatement() {
             eat(TokenType.FOR);
-            String forCondition = parseCondition();
+
+            String varName = currentToken.getValue();
+            eat(TokenType.IDENTIFIER);
+            String idxName = "";
+            if (currentToken.getType() == TokenType.COMMA) {
+                advance();
+                idxName = currentToken.getValue();
+                eat(TokenType.IDENTIFIER);
+            }
+
+            eat(TokenType.FOR_OF);
+            String listName = currentToken.getValue().substring(1);
+            eat(TokenType.VARIABLE_NAME);
+
+            String pipes = parsePipeLine();
+
+            String delimiter = ", ";
+            String open = "";
+            String close = "";
+            if (currentToken.getType() == TokenType.FOR_DELIMITER) {
+                advance();
+                delimiter = Comparators.getString(currentToken.getValue());
+                eat(TokenType.STRING);
+            }
+            if (currentToken.getType() == TokenType.FOR_OPEN) {
+                advance();
+                open = Comparators.getString(currentToken.getValue());
+                eat(TokenType.STRING);
+            }
+            if (currentToken.getType() == TokenType.FOR_CLOSE) {
+                advance();
+                close = Comparators.getString(currentToken.getValue());
+                eat(TokenType.STRING);
+            }
+
             eat(TokenType.NEWLINE);
             List<Token> forContent = parseForBlock();
             eat(TokenType.END_FOR);
-            Matcher m = FOR_PATTERN.matcher(forCondition);
-            if (m.find()) {
-                String itemName = m.group("item");
-                String idxName = m.group("index");
-                String listName = m.group("list");
-                String pipes = m.group("pipes");
-                String delimiter = Comparators.getString(coalesce(m.group("delimiter"), ", ")) + NEW_LINE;
-                String open = Comparators.getString(coalesce(m.group("open"), ""));
-                String close = Comparators.getString(coalesce(m.group("close"), ""));
-                //noinspection DataFlowIssue
-                if (!open.isEmpty()) {
-                    open = open + NEW_LINE;
-                }
-                //noinspection DataFlowIssue
-                if (!close.isEmpty()) {
-                    close = NEW_LINE + close;
-                }
 
-                Object listObject = ObjectUtil.getDeepValue(context, listName);
-                if (!isEmpty(pipes)) {
-                    listObject = expression("empty").pipedValue(listObject, pipes);
-                }
-                Object[] iterator = ObjectUtil.toArray(listObject);
-
-                StringJoiner result = new StringJoiner(delimiter);
-                Map<String, Object> localForVars = new HashMap<>();
-                for (int i = 0, j = iterator.length; i < j; i++) {
-                    Object item = iterator[i];
-
-                    Map<String, Object> childContext = new HashMap<>(context);
-
-                    if (itemName != null) {
-                        localForVars.put(forVarKey(itemName, forIndex, i), item);
-                        childContext.put(itemName, item);
-                    }
-                    if (idxName != null) {
-                        localForVars.put(forVarKey(idxName, forIndex, i), i);
-                        childContext.put(idxName, i);
-                    }
-
-                    // for loop body content tokens.
-                    List<Token> newForContent = new ArrayList<>(forContent.size());
-                    for (Token token : forContent) {
-                        if (token.getType() == TokenType.PLAIN_TEXT) {
-                            String old = token.getValue();
-                            String newValue = forLoopBodyFormatter(forIndex, i, itemName, idxName, old, childContext);
-                            Token newToken = new Token(token.getType(), newValue);
-                            newForContent.add(newToken);
-                            continue;
-                        }
-                        newForContent.add(token);
-                    }
-
-                    Parser parser = new Parser(newForContent, childContext);
-                    String forContentResult = parser.doParse();
-
-                    if (!forContentResult.trim().isEmpty()) {
-                        result.add(forContentResult);
-                    }
-                }
-                forIndex++;
-                String resultFor = result.toString().trim();
-                if (resultFor.isEmpty()) {
-                    return "";
-                }
-                forContextVars.putAll(localForVars);
-                return open + resultFor + close;
-            } else {
-                throw new ScriptSyntaxException("#for syntax error of expression '" + forCondition + "'" + ", At: " + currentTokenIndex);
+            if (forContent.isEmpty()) {
+                return "";
             }
+
+            if (!open.isEmpty()) {
+                open = open + NEW_LINE;
+            }
+            if (!close.isEmpty()) {
+                close = NEW_LINE + close;
+            }
+
+            Object listObject = ObjectUtil.getDeepValue(context, listName);
+            if (!isEmpty(pipes)) {
+                listObject = expression("empty").pipedValue(listObject, pipes);
+            }
+            Object[] iterator = ObjectUtil.toArray(listObject);
+
+            StringJoiner result = new StringJoiner(delimiter + '\n');
+            Map<String, Object> localForVars = new HashMap<>();
+
+            for (int i = 0, j = iterator.length; i < j; i++) {
+                Object item = iterator[i];
+
+                Map<String, Object> childContext = new HashMap<>(context);
+
+                if (varName != null) {
+                    localForVars.put(forVarKey(varName, forIndex, i), item);
+                    childContext.put(varName, item);
+                }
+                if (idxName != null) {
+                    localForVars.put(forVarKey(idxName, forIndex, i), i);
+                    childContext.put(idxName, i);
+                }
+
+                // for loop body content tokens.
+                List<Token> newForContent = new ArrayList<>(forContent.size());
+                for (Token token : forContent) {
+                    if (token.getType() == TokenType.PLAIN_TEXT) {
+                        String old = token.getValue();
+                        String newValue = forLoopBodyFormatter(forIndex, i, varName, idxName, old, childContext);
+                        Token newToken = new Token(token.getType(), newValue);
+                        newForContent.add(newToken);
+                        continue;
+                    }
+                    newForContent.add(token);
+                }
+
+                Parser parser = new Parser(newForContent, childContext);
+                String forContentResult = parser.doParse();
+
+                if (!forContentResult.trim().isEmpty()) {
+                    result.add(forContentResult);
+                }
+            }
+            forIndex++;
+            String resultFor = result.toString().trim();
+            if (resultFor.isEmpty()) {
+                return "";
+            }
+            forContextVars.putAll(localForVars);
+            return open + resultFor + close;
         }
 
         /**
