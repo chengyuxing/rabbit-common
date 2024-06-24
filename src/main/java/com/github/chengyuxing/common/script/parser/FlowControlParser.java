@@ -144,6 +144,8 @@ public class FlowControlParser extends AbstractParser {
         private String parsePipeLine() {
             StringBuilder sb = new StringBuilder();
             while (currentToken.getType() != TokenType.FOR_DELIMITER &&
+                    currentToken.getType() != TokenType.FOR_OPEN &&
+                    currentToken.getType() != TokenType.FOR_CLOSE &&
                     currentToken.getType() != TokenType.NEWLINE &&
                     currentToken.getType() != TokenType.EOF) {
                 if (currentToken.getType() == TokenType.LOGIC_OR) {
