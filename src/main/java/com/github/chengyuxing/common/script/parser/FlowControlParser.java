@@ -143,29 +143,6 @@ public class FlowControlParser extends AbstractParser {
             return caseWhenDefaultBlock;
         }
 
-        private String doParseStatement() {
-            String result;
-            switch (currentToken.getType()) {
-                case IF:
-                    result = parseIfStatement();
-                    break;
-                case SWITCH:
-                    result = parseSwitchStatement();
-                    break;
-                case CHOOSE:
-                    result = parseChooseStatement();
-                    break;
-                case FOR:
-                    result = parseForStatement();
-                    break;
-                default:
-                    result = currentToken.getValue();
-                    advance();
-                    break;
-            }
-            return result;
-        }
-
         private String parseIfStatement() {
             eat(TokenType.IF);
             String condition = parseCondition();
@@ -316,7 +293,6 @@ public class FlowControlParser extends AbstractParser {
 
         private String parseForStatement() {
             eat(TokenType.FOR);
-
             String varName = currentToken.getValue();
             eat(TokenType.IDENTIFIER);
             String idxName = "";
@@ -325,7 +301,6 @@ public class FlowControlParser extends AbstractParser {
                 idxName = currentToken.getValue();
                 eat(TokenType.IDENTIFIER);
             }
-
             eat(TokenType.FOR_OF);
             String listName = currentToken.getValue().substring(1);
             eat(TokenType.VARIABLE_NAME);
@@ -430,7 +405,24 @@ public class FlowControlParser extends AbstractParser {
             }
             StringBuilder result = new StringBuilder();
             while (currentToken.getType() != TokenType.EOF) {
-                result.append(doParseStatement());
+                switch (currentToken.getType()) {
+                    case IF:
+                        result.append(parseIfStatement());
+                        break;
+                    case SWITCH:
+                        result.append(parseSwitchStatement());
+                        break;
+                    case CHOOSE:
+                        result.append(parseChooseStatement());
+                        break;
+                    case FOR:
+                        result.append(parseForStatement());
+                        break;
+                    default:
+                        result.append(currentToken.getValue());
+                        advance();
+                        break;
+                }
             }
             return result.toString().trim().replaceAll("\\s*\r?\n", NEW_LINE);
         }
