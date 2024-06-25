@@ -1,7 +1,7 @@
 package com.github.chengyuxing.common.script.parser;
 
+import com.github.chengyuxing.common.script.exception.PipeNotFoundException;
 import com.github.chengyuxing.common.script.expression.IPipe;
-import com.github.chengyuxing.common.script.expression.impl.FastExpression;
 import com.github.chengyuxing.common.script.lexer.FlowControlLexer;
 import com.github.chengyuxing.common.script.Token;
 import com.github.chengyuxing.common.script.TokenType;
@@ -20,11 +20,11 @@ import static com.github.chengyuxing.common.utils.StringUtil.isEmpty;
  * <p>if statement:</p>
  * <blockquote>
  * <pre>
- * #if {@linkplain FastExpression expression1}
- *      #if {@linkplain FastExpression expression2}
+ * #if {@linkplain Parser#evaluateCondition() expression1}
+ *      #if {@linkplain Parser#evaluateCondition() expression2}
  *      ...
  *      #fi
- *      #if {@linkplain FastExpression expression3}
+ *      #if {@linkplain Parser#evaluateCondition() expression3}
  *      ...
  *      #else
  *      ...
@@ -36,10 +36,10 @@ import static com.github.chengyuxing.common.utils.StringUtil.isEmpty;
  * <blockquote>
  * <pre>
  * #choose
- *      #when {@linkplain FastExpression expression1}
+ *      #when {@linkplain Parser#evaluateCondition() expression1}
  *      ...
  *      #break
- *      #when {@linkplain FastExpression expression2}
+ *      #when {@linkplain Parser#evaluateCondition() expression2}
  *      ...
  *      #break
  *      ...
@@ -75,10 +75,21 @@ import static com.github.chengyuxing.common.utils.StringUtil.isEmpty;
  * </pre>
  * </blockquote>
  *
- * @see FastExpression
+ * @see Comparators
  */
 public class FlowControlParser extends AbstractParser {
+    private static final Map<String, IPipe<?>> GLOBAL_PIPES = new HashMap<>();
+    private Map<String, IPipe<?>> customPipes = new HashMap<>();
+
     private int forIndex = 0;
+
+    static {
+        GLOBAL_PIPES.put("length", new IPipe.Length());
+        GLOBAL_PIPES.put("upper", new IPipe.Upper());
+        GLOBAL_PIPES.put("lower", new IPipe.Lower());
+        GLOBAL_PIPES.put("pairs", new IPipe.Map2Pairs());
+        GLOBAL_PIPES.put("kv", new IPipe.Kv());
+    }
 
     @Override
     public String parse(String input, Map<String, Object> context) {
@@ -98,6 +109,28 @@ public class FlowControlParser extends AbstractParser {
         return parser.doParse();
     }
 
+    /**
+     * Set custom pipes.
+     *
+     * @param pipes pipes map
+     */
+    public void setPipes(Map<String, IPipe<?>> pipes) {
+        if (pipes == null) {
+            return;
+        }
+        if (this.customPipes.equals(pipes)) {
+            return;
+        }
+        this.customPipes = new HashMap<>(pipes);
+    }
+
+    public Map<String, IPipe<?>> getPipes() {
+        return customPipes;
+    }
+
+    /**
+     * Parser implementation.
+     */
     final class Parser {
         private final List<Token> tokens;
         private int currentTokenIndex;
@@ -128,39 +161,148 @@ public class FlowControlParser extends AbstractParser {
             }
         }
 
-        private boolean evaluateCondition(String condition) {
-            return expression(condition).calc(context);
+        /**
+         * <p>Boolean condition expression.</p>
+         * <p>Support logic operator: {@code &amp;&amp;, ||, !}, e.g.</p>
+         * <blockquote><pre>!(:id &gt;= 0 || :name | {@link IPipe.Length length} &lt;= 3) &amp;&amp; :age &gt; 21
+         * </pre></blockquote>
+         * Built-in {@link IPipe pipes}：
+         * <ul>
+         *     <li>{@link IPipe.Length length}</li>
+         *     <li>{@link IPipe.Upper upper}</li>
+         *     <li>{@link IPipe.Lower lower}</li>
+         *     <li>{@link IPipe.Map2Pairs pairs}</li>
+         *     <li>{@link IPipe.Kv kv}</li>
+         * </ul>
+         *
+         * @return is matched or not
+         * @see Comparators
+         */
+        private boolean evaluateCondition() {
+            return evaluateOr();
         }
 
-        private String parseCondition() {
-            StringBuilder condition = new StringBuilder();
-            while (currentToken.getType() != TokenType.NEWLINE && currentToken.getType() != TokenType.EOF) {
-                condition.append(currentToken.getValue());
+        private boolean evaluateOr() {
+            boolean result = evaluateAnd();
+            while (currentToken.getType() == TokenType.LOGIC_OR) {
                 advance();
+                boolean next = evaluateAnd();
+                result = result || next;
             }
-            return condition.toString();
+            return result;
         }
 
-        private String parsePipeLine() {
-            StringBuilder sb = new StringBuilder();
+        private boolean evaluateAnd() {
+            boolean result = evaluateCompare();
+            while (currentToken.getType() == TokenType.LOGIC_AND) {
+                advance();
+                boolean next = evaluateCompare();
+                result = result && next;
+            }
+            return result;
+        }
+
+        private boolean evaluateCompare() {
+            if (currentToken.getType() == TokenType.LPAREN) {
+                advance();
+                boolean result = evaluateCondition();
+                eat(TokenType.RPAREN);
+                return result;
+            }
+
+            if (currentToken.getType() == TokenType.LOGIC_NOT) {
+                advance();
+                return !evaluateCompare();
+            }
+
+            Token left = parseBoolExpressionItem();
+            advance();
+            List<String> leftPipes = new ArrayList<>();
+            if (currentToken.getType() == TokenType.PIPE_SYMBOL) {
+                leftPipes = parsePipes();
+            }
+
+            String operator = currentToken.getValue();
+            eat(TokenType.OPERATOR);
+
+            Token right = parseBoolExpressionItem();
+            advance();
+            List<String> rightPipes = new ArrayList<>();
+            if (currentToken.getType() == TokenType.PIPE_SYMBOL) {
+                rightPipes = parsePipes();
+            }
+
+            Object a = parseValue(left, leftPipes);
+            Object b = parseValue(right, rightPipes);
+
+            return Comparators.compare(a, operator, b);
+        }
+
+        private Token parseBoolExpressionItem() {
+            switch (currentToken.getType()) {
+                case IDENTIFIER:
+                case STRING:
+                case NUMBER:
+                case VARIABLE_NAME:
+                    return currentToken;
+                default:
+                    throw new ScriptSyntaxException("Unexpected token: " + currentToken + ", expected: " + TokenType.IDENTIFIER + "/" + TokenType.STRING + "/" + TokenType.NUMBER + "/" + TokenType.VARIABLE_NAME + ", At: " + currentTokenIndex);
+            }
+        }
+
+        private List<String> parsePipes() {
+            List<String> pipes = new ArrayList<>();
             while (currentToken.getType() != TokenType.FOR_DELIMITER &&
                     currentToken.getType() != TokenType.FOR_OPEN &&
                     currentToken.getType() != TokenType.FOR_CLOSE &&
+                    currentToken.getType() != TokenType.OPERATOR &&
+                    currentToken.getType() != TokenType.LOGIC_OR &&
+                    currentToken.getType() != TokenType.LOGIC_AND &&
+                    currentToken.getType() != TokenType.RPAREN &&
                     currentToken.getType() != TokenType.NEWLINE &&
                     currentToken.getType() != TokenType.EOF) {
-                if (currentToken.getType() == TokenType.LOGIC_OR) {
-                    sb.append(currentToken.getValue());
+                if (currentToken.getType() == TokenType.PIPE_SYMBOL) {
                     advance();
-                    sb.append(currentToken.getValue());
+                    pipes.add(currentToken.getValue());
                     eat(TokenType.IDENTIFIER);
                 } else {
-                    throw new ScriptSyntaxException("Unexpected token: " + currentToken + ", expected: " + TokenType.LOGIC_OR + ", At: " + currentTokenIndex);
+                    throw new ScriptSyntaxException("Unexpected token: " + currentToken + ", expected: " + TokenType.PIPE_SYMBOL + ", At: " + currentTokenIndex);
                 }
             }
-            return sb.toString();
+            return pipes;
         }
 
-        private String parseCaseValue() {
+        private Object parsePipedValue(Object value, List<String> pipes) {
+            Object res = value;
+            for (String pipe : pipes) {
+                if (getPipes().containsKey(pipe)) {
+                    res = getPipes().get(pipe).transform(res);
+                } else if (GLOBAL_PIPES.containsKey(pipe)) {
+                    res = GLOBAL_PIPES.get(pipe).transform(res);
+                } else {
+                    throw new PipeNotFoundException("Cannot find pipe '" + pipe + "'");
+                }
+            }
+            return res;
+        }
+
+        private Object parseValue(Token token, List<String> pipes) {
+            if (token.getType() == TokenType.VARIABLE_NAME) {
+                Object value = ObjectUtil.getDeepValue(context, token.getValue().substring(1));
+                if (!pipes.isEmpty()) {
+                    value = parsePipedValue(value, pipes);
+                }
+                return value;
+            }
+            // string literal value
+            Object value = token.getValue();
+            if (!pipes.isEmpty()) {
+                value = parsePipedValue(value, pipes);
+            }
+            return Comparators.valueOf(value);
+        }
+
+        private String parseCaseLiteralValue() {
             switch (currentToken.getType()) {
                 case IDENTIFIER:
                 case STRING:
@@ -171,14 +313,14 @@ public class FlowControlParser extends AbstractParser {
             }
         }
 
-        private List<String> parseCaseValues() {
+        private List<String> parseCaseLiteralValues() {
             List<String> values = new ArrayList<>();
-            values.add(parseCaseValue());
+            values.add(parseCaseLiteralValue());
             advance();
             while (currentToken.getType() != TokenType.NEWLINE &&
                     currentToken.getType() != TokenType.EOF) {
                 eat(TokenType.COMMA);
-                values.add(parseCaseValue());
+                values.add(parseCaseLiteralValue());
                 advance();
             }
             return values;
@@ -208,9 +350,15 @@ public class FlowControlParser extends AbstractParser {
             return caseWhenDefaultBlock;
         }
 
+        private void goToEnd() {
+            while (currentToken.getType() != TokenType.END && currentToken.getType() != TokenType.EOF) {
+                advance();
+            }
+        }
+
         private String parseIfStatement() {
             eat(TokenType.IF);
-            String condition = parseCondition();
+            boolean matched = evaluateCondition();
             eat(TokenType.NEWLINE);
             List<Token> ifBlockContent = new ArrayList<>();
             int ifDepth = 1;
@@ -239,7 +387,7 @@ public class FlowControlParser extends AbstractParser {
                 elseContent = ifBlockContent.subList(elseIndex + 1, ifBlockContent.size());
             }
 
-            List<Token> matchedContent = evaluateCondition(condition) ? thenContent : elseContent;
+            List<Token> matchedContent = matched ? thenContent : elseContent;
             if (matchedContent.isEmpty()) {
                 return "";
             }
@@ -249,63 +397,44 @@ public class FlowControlParser extends AbstractParser {
 
         private String parseSwitchStatement() {
             eat(TokenType.SWITCH);
-            String variable = currentToken.getValue();
+            Token variable = currentToken;
             eat(TokenType.VARIABLE_NAME);
-            String pipes = parsePipeLine();
+            List<String> pipes = parsePipes();
             eat(TokenType.NEWLINE);
 
-            Map<List<String>, List<Token>> caseContentMap = new LinkedHashMap<>();
-            List<Token> matchedCaseContent = new ArrayList<>();
+            Object variableValue = parseValue(variable, pipes);
 
+            List<Token> matchedBranch = new ArrayList<>();
             while (currentToken.getType() != TokenType.END && currentToken.getType() != TokenType.EOF) {
                 if (currentToken.getType() == TokenType.CASE) {
                     advance();
-                    List<String> caseValue = parseCaseValues();
+                    List<String> caseValues = parseCaseLiteralValues();
                     eat(TokenType.NEWLINE);
                     List<Token> caseContent = parseBranchBlock();
-                    caseContentMap.put(caseValue, caseContent);
-                    if (currentToken.getType() == TokenType.BREAK) {
-                        advance();
+                    eat(TokenType.BREAK);
+
+                    for (String caseValue : caseValues) {
+                        if (Comparators.compare(variableValue, "=", Comparators.valueOf(caseValue))) {
+                            matchedBranch = caseContent;
+                            goToEnd();
+                            break;
+                        }
                     }
                 } else if (currentToken.getType() == TokenType.DEFAULT) {
                     advance();
                     eat(TokenType.NEWLINE);
-                    matchedCaseContent = parseBranchBlock();
-                    if (currentToken.getType() == TokenType.BREAK) {
-                        advance();
-                    }
+                    matchedBranch = parseBranchBlock();
+                    eat(TokenType.BREAK);
                 } else {
-                    if (currentToken.getType() == TokenType.NEWLINE) {
-                        advance();
-                    } else {
-                        throw new ScriptSyntaxException("Unexpected token in switch statement: " + currentToken + ", At: " + currentTokenIndex);
-                    }
+                    eat(TokenType.NEWLINE);
                 }
             }
             eat(TokenType.END);
 
-            String variableName = variable.substring(1);
-
-            Object variableValue = ObjectUtil.getDeepValue(context, variableName);
-
-            if (!pipes.trim().isEmpty()) {
-                variableValue = expression("empty").pipedValue(variableValue, pipes);
-            }
-
-            caseBranch:
-            for (Map.Entry<List<String>, List<Token>> entry : caseContentMap.entrySet()) {
-                List<String> caseValues = entry.getKey();
-                for (String caseValue : caseValues) {
-                    if (Comparators.compare(variableValue, "=", Comparators.valueOf(caseValue))) {
-                        matchedCaseContent = entry.getValue();
-                        break caseBranch;
-                    }
-                }
-            }
-            if (matchedCaseContent.isEmpty()) {
+            if (matchedBranch.isEmpty()) {
                 return "";
             }
-            Parser parser = new Parser(matchedCaseContent, context);
+            Parser parser = new Parser(matchedBranch, context);
             return parser.doParse();
         }
 
@@ -313,46 +442,35 @@ public class FlowControlParser extends AbstractParser {
             eat(TokenType.CHOOSE);
             eat(TokenType.NEWLINE);
 
-            Map<String, List<Token>> whenContentMap = new LinkedHashMap<>();
-            List<Token> matchedWhenContent = new ArrayList<>();
+            List<Token> matchedBranch = new ArrayList<>();
 
             while (currentToken.getType() != TokenType.END && currentToken.getType() != TokenType.EOF) {
                 if (currentToken.getType() == TokenType.WHEN) {
                     advance();
-                    String condition = parseCondition();
+                    boolean matched = evaluateCondition();
                     eat(TokenType.NEWLINE);
                     List<Token> whenContent = parseBranchBlock();
-                    whenContentMap.put(condition, whenContent);
-                    if (currentToken.getType() == TokenType.BREAK) {
-                        advance();
+                    eat(TokenType.BREAK);
+
+                    if (matched) {
+                        matchedBranch = whenContent;
+                        goToEnd();
                     }
                 } else if (currentToken.getType() == TokenType.DEFAULT) {
                     advance();
                     eat(TokenType.NEWLINE);
-                    matchedWhenContent = parseBranchBlock();
-                    if (currentToken.getType() == TokenType.BREAK) {
-                        advance();
-                    }
+                    matchedBranch = parseBranchBlock();
+                    eat(TokenType.BREAK);
                 } else {
-                    if (currentToken.getType() == TokenType.NEWLINE) {
-                        advance();
-                    } else {
-                        throw new ScriptSyntaxException("Unexpected token in choose statement: " + currentToken + ", At: " + currentTokenIndex);
-                    }
+                    eat(TokenType.NEWLINE);
                 }
             }
             eat(TokenType.END);
 
-            for (Map.Entry<String, List<Token>> entry : whenContentMap.entrySet()) {
-                if (evaluateCondition(entry.getKey())) {
-                    matchedWhenContent = entry.getValue();
-                    break;
-                }
-            }
-            if (matchedWhenContent.isEmpty()) {
+            if (matchedBranch.isEmpty()) {
                 return "";
             }
-            Parser parser = new Parser(matchedWhenContent, context);
+            Parser parser = new Parser(matchedBranch, context);
             return parser.doParse();
         }
 
@@ -367,10 +485,10 @@ public class FlowControlParser extends AbstractParser {
                 eat(TokenType.IDENTIFIER);
             }
             eat(TokenType.FOR_OF);
-            String listName = currentToken.getValue().substring(1);
+            Token listName = currentToken;
             eat(TokenType.VARIABLE_NAME);
 
-            String pipes = parsePipeLine();
+            List<String> pipes = parsePipes();
 
             String delimiter = ", ";
             String open = "";
@@ -406,10 +524,7 @@ public class FlowControlParser extends AbstractParser {
                 close = NEW_LINE + close;
             }
 
-            Object listObject = ObjectUtil.getDeepValue(context, listName);
-            if (!isEmpty(pipes)) {
-                listObject = expression("empty").pipedValue(listObject, pipes);
-            }
+            Object listObject = parseValue(listName, pipes);
             Object[] iterator = ObjectUtil.toArray(listObject);
 
             StringJoiner result = new StringJoiner(delimiter + '\n');

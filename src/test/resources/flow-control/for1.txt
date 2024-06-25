@@ -1,0 +1,4 @@
+#for item,idx of :names delimiter ' or' open '(' close ')'
+    ${item}:${idx}
+#done
+

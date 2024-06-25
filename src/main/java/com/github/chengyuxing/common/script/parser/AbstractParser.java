@@ -1,7 +1,6 @@
 package com.github.chengyuxing.common.script.parser;
 
 import com.github.chengyuxing.common.script.expression.IExpression;
-import com.github.chengyuxing.common.script.expression.impl.FastExpression;
 import com.github.chengyuxing.common.utils.StringUtil;
 
 import java.util.Collections;
@@ -60,16 +59,6 @@ public abstract class AbstractParser {
             return tl;
         }
         return line;
-    }
-
-    /**
-     * Configure expression parser implementation.
-     *
-     * @param expression expression
-     * @return expression parser implementation
-     */
-    protected IExpression expression(String expression) {
-        return FastExpression.of(expression);
     }
 
     /**

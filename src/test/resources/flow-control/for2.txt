@@ -1,0 +1,3 @@
+#for item, idx of :user.n_ames | 3.14 | upp5er delimiter ' or' open '(' close ')'
+    @@@
+#done

@@ -1,0 +1,14 @@
+#choose
+    #when :id | upper == 'A'
+        a
+    #break
+    #when :id == 'B'
+        b
+    #break
+    #when :id == C
+        a
+    #break
+    #when :id @ '\w+'
+        regex matched.
+    #break
+#end

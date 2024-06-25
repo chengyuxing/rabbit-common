@@ -3,6 +3,7 @@ package com.github.chengyuxing.common.script.lexer;
 import com.github.chengyuxing.common.script.Token;
 import com.github.chengyuxing.common.script.TokenType;
 import com.github.chengyuxing.common.utils.StringUtil;
+import jdk.nashorn.internal.runtime.regexp.joni.exception.SyntaxException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,11 +39,19 @@ public class IdentifierLexer {
 
     private String readWhile(Predicate<Character> predicate) {
         StringBuilder sb = new StringBuilder();
-        while (predicate.test(currentChar())) {
+        while (position < length && predicate.test(currentChar())) {
             sb.append(currentChar());
             advance();
         }
         return sb.toString();
+    }
+
+    private boolean match(String s) {
+        if (input.startsWith(s, position)) {
+            position += s.length();
+            return true;
+        }
+        return false;
     }
 
     public List<Token> tokenize() {
@@ -111,13 +120,63 @@ public class IdentifierLexer {
                 tokens.add(new Token(TokenType.COMMA, ","));
                 advance();
             } else if (current == '|') {
-                tokens.add(new Token(TokenType.LOGIC_OR, "|"));
-                advance();
+                if (match("||")) {
+                    tokens.add(new Token(TokenType.LOGIC_OR, "||"));
+                } else {
+                    tokens.add(new Token(TokenType.PIPE_SYMBOL, "|"));
+                    advance();
+                }
             } else if (current == '&') {
-                tokens.add(new Token(TokenType.LOGIC_AND, "&"));
-                advance();
+                if (match("&&")) {
+                    tokens.add(new Token(TokenType.LOGIC_AND, "&&"));
+                } else {
+                    throw new SyntaxException("Unexpected character '" + current + "'");
+                }
             } else if (current == '!') {
-                tokens.add(new Token(TokenType.LOGIC_NOT, "!"));
+                if (match("!=")) {
+                    tokens.add(new Token(TokenType.OPERATOR, "!="));
+                } else if (match("!~")) {
+                    tokens.add(new Token(TokenType.OPERATOR, "!~"));
+                } else if (match("!@")) {
+                    tokens.add(new Token(TokenType.OPERATOR, "!@"));
+                } else {
+                    tokens.add(new Token(TokenType.LOGIC_NOT, "!"));
+                    advance();
+                }
+            } else if (current == '=') {
+                if (match("==")) {
+                    tokens.add(new Token(TokenType.OPERATOR, "=="));
+                } else {
+                    tokens.add(new Token(TokenType.OPERATOR, "="));
+                    advance();
+                }
+            } else if (current == '>') {
+                if (match(">=")) {
+                    tokens.add(new Token(TokenType.OPERATOR, ">="));
+                } else {
+                    tokens.add(new Token(TokenType.OPERATOR, ">"));
+                    advance();
+                }
+            } else if (current == '<') {
+                if (match("<=")) {
+                    tokens.add(new Token(TokenType.OPERATOR, "<="));
+                } else if (match("<>")) {
+                    tokens.add(new Token(TokenType.OPERATOR, "<>"));
+                } else {
+                    tokens.add(new Token(TokenType.OPERATOR, "<"));
+                    advance();
+                }
+            } else if (current == '~') {
+                tokens.add(new Token(TokenType.OPERATOR, "~"));
+                advance();
+            } else if (current == '@') {
+                tokens.add(new Token(TokenType.OPERATOR, "@"));
+                advance();
+            } else if (current == '(') {
+                tokens.add(new Token(TokenType.LPAREN, "("));
+                advance();
+            } else if (current == ')') {
+                tokens.add(new Token(TokenType.RPAREN, ")"));
                 advance();
             } else if (current == ':') {
                 advance();

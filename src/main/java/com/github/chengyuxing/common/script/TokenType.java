@@ -11,5 +11,13 @@ public enum TokenType {
     // Other tokens
     IDENTIFIER, STRING, NUMBER, VARIABLE_NAME,
     NEWLINE, EOF, UNKNOWN, PLAIN_TEXT, COMMA,
-    LOGIC_OR, LOGIC_AND, LOGIC_NOT
+    PIPE_SYMBOL,
+
+    // bool expression symbol
+    LOGIC_OR,   // ||
+    LOGIC_AND,  // &&
+    LOGIC_NOT,   // !
+    OPERATOR,    // > < >= <= = == != <> ~ !~ @ !@
+    LPAREN,     // (
+    RPAREN      // )
 }

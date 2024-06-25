@@ -94,6 +94,16 @@ public class SimpleParser extends AbstractParser {
     }
 
     /**
+     * Configure expression parser implementation.
+     *
+     * @param expression expression
+     * @return expression parser implementation
+     */
+    protected IExpression expression(String expression) {
+        return FastExpression.of(expression);
+    }
+
+    /**
      * Parse content with scripts.
      *
      * @param content content

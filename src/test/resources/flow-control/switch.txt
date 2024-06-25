@@ -1,0 +1,11 @@
+#switch :name | upper | lower
+    #case 'a' ,'b','c'
+        multiple values.
+    #break
+    #case 3.14
+        number
+    #break
+    #default
+        default branch.
+    #break
+#end

@@ -1,6 +1,6 @@
 package tests;
 
-public class User {
+public final class User {
     private String name;
     private String address;
     private int age;
@@ -38,4 +38,13 @@ public class User {
         this.old = old;
     }
 
+    @Override
+    public String toString() {
+        return "User{" +
+                "name='" + name + '\'' +
+                ", address='" + address + '\'' +
+                ", age=" + age +
+                ", old=" + old +
+                '}';
+    }
 }
