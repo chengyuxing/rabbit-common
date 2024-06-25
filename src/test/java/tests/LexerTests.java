@@ -2,6 +2,7 @@ package tests;
 
 import com.github.chengyuxing.common.DataRow;
 import com.github.chengyuxing.common.io.FileResource;
+import com.github.chengyuxing.common.script.TokenType;
 import com.github.chengyuxing.common.script.lexer.FlowControlLexer;
 import com.github.chengyuxing.common.script.parser.FlowControlParser;
 import org.junit.Test;
@@ -58,16 +59,6 @@ public class LexerTests {
 
     @Test
     public void test10() {
-        User user = new User();
-        user.setAddress("kunming");
-
-        User userR = user;
-
-        User user1 = new User();
-        user.setAddress("beijing");
-
-        user = user1;
-
-        System.out.println(userR);
+        System.out.println(TokenType.OPERATOR);
     }
 }

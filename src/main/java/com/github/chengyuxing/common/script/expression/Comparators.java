@@ -12,7 +12,7 @@ import java.util.regex.Pattern;
 /**
  * <h2>String literal value comparator</h2>
  * <p>support value type: </p>
- * <blockquote><pre>null, blank(''、null、&lt;empty collection&gt;、[]), true, false, string('...' or "..."), number
+ * <blockquote><pre>null, blank('', "", null, &lt;empty collection&gt;, []), true, false, string('...' or "..."), number(1, 3.14)
  * </pre></blockquote>
  * <p>support compare operator: </p>
  * <blockquote><pre>
