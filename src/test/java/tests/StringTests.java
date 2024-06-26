@@ -372,7 +372,7 @@ public class StringTests {
             } else if (item.equals("else") && depth == 1) {
                 elsePosition = i;
             }
-            if(depth == 0) {
+            if (depth == 0) {
                 break;
             }
         }
@@ -404,7 +404,7 @@ public class StringTests {
                         "E")
         );
 
-        FlowControlParser parser = new FlowControlParser() {
+        FlowControlParser parser = new FlowControlParser(s) {
             public static final String FOR_VARS_KEY = "_for";
             public static final String VAR_PREFIX = FOR_VARS_KEY + ".";
 
@@ -435,7 +435,7 @@ public class StringTests {
             }
         };
 
-        String res = parser.parse(s, d);
+        String res = parser.parse(d);
         System.out.println(res);
 
         Map<String, Object> vars = parser.getForContextVars();

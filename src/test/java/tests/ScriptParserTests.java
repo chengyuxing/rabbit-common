@@ -15,7 +15,7 @@ import static com.github.chengyuxing.common.utils.StringUtil.NEW_LINE;
 public class ScriptParserTests {
     @Test
     public void testSqlParser() {
-        SimpleParser parser = new SimpleParser(){
+        SimpleParser parser = new SimpleParser() {
             public static final String FOR_VARS_KEY = "_for";
             public static final String VAR_PREFIX = FOR_VARS_KEY + ".";
 
@@ -67,30 +67,32 @@ public class ScriptParserTests {
                 " #done";
         List<Map<String, Object>> data = new ArrayList<>();
         for (int i = 0; i < 200; i++) {
-            FlowControlParser parser = new FlowControlParser() {
+            FlowControlParser parser = new FlowControlParser(sql) {
                 public static final String FOR_VARS_KEY = "_for";
                 public static final String VAR_PREFIX = FOR_VARS_KEY + ".";
 
                 @Override
                 protected String forLoopBodyFormatter(int forIndex, int varIndex, String varName, String idxName, String body, Map<String, Object> args) {
-                    String formatted = StringUtil.FMT.format(String.join(NEW_LINE, body), args);
-                    if (Objects.nonNull(varName)) {
+                    String formatted = StringUtil.FMT.format(body, args);
+                    if (!varName.isEmpty()) {
                         String varParam = VAR_PREFIX + forVarKey(varName, forIndex, varIndex);
                         formatted = formatted.replace(VAR_PREFIX + varName, varParam);
                     }
-                    if (Objects.nonNull(idxName)) {
+                    if (!idxName.isEmpty()) {
                         String idxParam = VAR_PREFIX + forVarKey(idxName, forIndex, varIndex);
                         formatted = formatted.replace(VAR_PREFIX + idxName, idxParam);
                     }
                     return formatted;
                 }
             };
-            String res = parser.parse(sql, DataRow.of("ids", Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 1 + i, 11, 23, 45, 55, 67),
+//            parser.verify();
+            String res = parser.parse(DataRow.of("ids", Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 1 + i, 11, 23, 45, 55, 67),
                     "address", Arrays.asList("a", "b", "c")));
             data.add(parser.getForContextVars());
             if (i == 1) {
                 System.out.println(res);
                 System.out.println(parser.getForContextVars().size());
+                System.out.println(parser.getForContextVars());
             }
         }
         System.out.println(data.size());

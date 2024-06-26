@@ -3,7 +3,6 @@ package tests;
 import com.github.chengyuxing.common.DataRow;
 import com.github.chengyuxing.common.io.FileResource;
 import com.github.chengyuxing.common.script.TokenType;
-import com.github.chengyuxing.common.script.lexer.FlowControlLexer;
 import com.github.chengyuxing.common.script.parser.FlowControlParser;
 import org.junit.Test;
 
@@ -20,16 +19,16 @@ public class LexerTests {
 
     @Test
     public void test6() {
-        FlowControlParser parser = new FlowControlParser();
-        String res = parser.parse(choose, DataRow.of(
+        FlowControlParser parser = new FlowControlParser(choose);
+        String res = parser.parse(DataRow.of(
                 "id", "C"));
         System.out.println(res);
     }
 
     @Test
     public void test5() {
-        FlowControlParser parser = new FlowControlParser();
-        String res = parser.parse(If, DataRow.of(
+        FlowControlParser parser = new FlowControlParser(If);
+        String res = parser.parse(DataRow.of(
                 "jssj", "nubll",
                 "kssj", "2022-12-12",
                 "name", "cyx",
@@ -39,21 +38,21 @@ public class LexerTests {
 
     @Test
     public void test1() {
-        FlowControlLexer lexer = new FlowControlLexer(If);
-        lexer.tokenize().forEach(System.out::println);
+        FlowControlParser lexer = new FlowControlParser(If);
+        lexer.verify();
     }
 
     @Test
     public void test2() {
-        FlowControlParser parser = new FlowControlParser();
-        String res = parser.parse(Switch, DataRow.of("name", "b"));
+        FlowControlParser parser = new FlowControlParser(Switch);
+        String res = parser.parse(DataRow.of("name", "b"));
         System.out.println(res);
     }
 
     @Test
     public void test3() {
-        FlowControlParser parser = new FlowControlParser();
-        String res = parser.parse(for1, DataRow.of("names", Arrays.asList('a', 'b', 'c')));
+        FlowControlParser parser = new FlowControlParser(for1);
+        String res = parser.parse(DataRow.of("names", Arrays.asList('a', 'b', 'c')));
         System.out.println(res);
     }
 

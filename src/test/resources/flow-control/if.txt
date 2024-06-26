@@ -1,4 +1,4 @@
-#if :jssj != blank && (:kssj = '2024' || :name ~ 'c') || :id | upper = ABC | lower
+#if :jssj != blank && (:kssj = '2024' | upper || :name ~ 'c') || :id | upper = ABC | lower
     matched.
 #fi
 

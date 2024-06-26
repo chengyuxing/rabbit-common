@@ -7,13 +7,12 @@ import com.github.chengyuxing.common.script.Token;
 import com.github.chengyuxing.common.script.TokenType;
 import com.github.chengyuxing.common.script.exception.ScriptSyntaxException;
 import com.github.chengyuxing.common.script.expression.Comparators;
-import com.github.chengyuxing.common.script.expression.IExpression;
 import com.github.chengyuxing.common.utils.ObjectUtil;
+import com.github.chengyuxing.common.utils.StringUtil;
 
 import java.util.*;
 
 import static com.github.chengyuxing.common.utils.StringUtil.NEW_LINE;
-import static com.github.chengyuxing.common.utils.StringUtil.isEmpty;
 
 /**
  * <h2>Based lexer tokens Flow-Control parser.</h2>
@@ -77,11 +76,14 @@ import static com.github.chengyuxing.common.utils.StringUtil.isEmpty;
  *
  * @see Comparators
  */
-public class FlowControlParser extends AbstractParser {
+public class FlowControlParser {
     private static final Map<String, IPipe<?>> GLOBAL_PIPES = new HashMap<>();
     private Map<String, IPipe<?>> customPipes = new HashMap<>();
 
+    private final List<Token> tokens;
+
     private int forIndex = 0;
+    private Map<String, Object> forContextVars = new HashMap<>();
 
     static {
         GLOBAL_PIPES.put("length", new IPipe.Length());
@@ -91,22 +93,46 @@ public class FlowControlParser extends AbstractParser {
         GLOBAL_PIPES.put("kv", new IPipe.Kv());
     }
 
-    @Override
-    public String parse(String input, Map<String, Object> context) {
-        if (isEmpty(input)) {
-            return "";
-        }
-        forIndex = 0;
-        forContextVars = new HashMap<>();
+    /**
+     * Construct a new FlowControlParser with input content.
+     *
+     * @param input content with flow-control scripts
+     */
+    public FlowControlParser(String input) {
         FlowControlLexer lexer = new FlowControlLexer(input) {
             @Override
             protected String trimExpression(String line) {
                 return FlowControlParser.this.trimExpression(line);
             }
         };
-        List<Token> tokens = lexer.tokenize();
+        this.tokens = lexer.tokenize();
+    }
+
+    /**
+     * Parse content with scripts.
+     *
+     * @param context context params
+     * @return parsed content
+     */
+    public String parse(Map<String, Object> context) {
+        if (tokens.isEmpty()) {
+            return "";
+        }
+        forIndex = 0;
+        forContextVars = new HashMap<>();
         Parser parser = new Parser(tokens, context);
         return parser.doParse();
+    }
+
+    /**
+     * Verify scripts syntax.
+     */
+    public void verify() {
+        if (tokens.isEmpty()) {
+            return;
+        }
+        Verifier verifier = new Verifier(tokens);
+        verifier.doVerify();
     }
 
     /**
@@ -124,8 +150,101 @@ public class FlowControlParser extends AbstractParser {
         this.customPipes = new HashMap<>(pipes);
     }
 
-    public Map<String, IPipe<?>> getPipes() {
+    /**
+     * Get custom pipes.
+     *
+     * @return custom pipes
+     */
+    protected Map<String, IPipe<?>> getPipes() {
         return customPipes;
+    }
+
+    /**
+     * Trim each line for search prefix {@code #} to detect expression.
+     *
+     * @param line current line
+     * @return expression or normal line
+     */
+    protected String trimExpression(String line) {
+        String tl = line.trim();
+        if (tl.startsWith("#")) {
+            return tl;
+        }
+        return line;
+    }
+
+    /**
+     * <code>#for</code> loop body content formatter, format custom template variable and args resolve, e.g.
+     * <p>args:</p>
+     * <blockquote>
+     * <pre>
+     * {
+     *   users: [
+     *     {name: 'cyx', name: 'json'}
+     *   ]
+     * }
+     * </pre>
+     * </blockquote>
+     * <p>for expression:</p>
+     * <blockquote>
+     * <pre>
+     * #for user,idx of :users delimiter ' and '
+     *    '${user.name}'
+     * #done
+     * </pre>
+     * </blockquote>
+     * <p>result:</p>
+     * <blockquote>
+     * <pre>'cyx' and 'json'</pre>
+     * </blockquote>
+     *
+     * @param forIndex each for loop auto index
+     * @param varIndex for var auto index
+     * @param varName  for context var name,  e.g. {@code <user>}
+     * @param idxName  for context index name,  e.g. {@code <idx>}
+     * @param body     content in for loop
+     * @param context  each for loop context args (index and value) which created by for expression
+     * @return formatted content
+     * @see #getForContextVars()
+     */
+    protected String forLoopBodyFormatter(int forIndex, int varIndex, String varName, String idxName, String body, Map<String, Object> context) {
+        return StringUtil.FMT.format(body, context);
+    }
+
+    /**
+     * Build {@code #for} var key.
+     *
+     * @param name   for context var name
+     * @param forIdx for auto index
+     * @param varIdx var auto index
+     * @return unique for var key
+     */
+    protected String forVarKey(String name, int forIdx, int varIdx) {
+        return name + "_" + forIdx + "_" + varIdx;
+    }
+
+    /**
+     * Get {@code #for} context variable map which saved by expression calc.<br>
+     * Format: {@code (varName_forAutoIdx_varAutoIdx: var)}, e.g.
+     * <blockquote>
+     * <pre>
+     * list: ["a", "b", "c"]; forIdx: 0
+     * </pre>
+     * <pre>
+     * #for item of :list
+     *      ...
+     * #done
+     * </pre>
+     * <pre>
+     * vars: {item_0_0: "a", item_0_1: "b", item_0_2: "c"}
+     * </pre>
+     * </blockquote>
+     *
+     * @return {@code #for} context variable map
+     * @see #forVarKey(String, int, int)
+     */
+    public Map<String, Object> getForContextVars() {
+        return Collections.unmodifiableMap(forContextVars);
     }
 
     /**
@@ -535,11 +654,11 @@ public class FlowControlParser extends AbstractParser {
 
                 Map<String, Object> childContext = new HashMap<>(context);
 
-                if (varName != null) {
+                if (!varName.isEmpty()) {
                     localForVars.put(forVarKey(varName, forIndex, i), item);
                     childContext.put(varName, item);
                 }
-                if (idxName != null) {
+                if (!idxName.isEmpty()) {
                     localForVars.put(forVarKey(idxName, forIndex, i), i);
                     childContext.put(idxName, i);
                 }
@@ -577,7 +696,6 @@ public class FlowControlParser extends AbstractParser {
          * Parse tokens.
          *
          * @return parsed tokens
-         * @see IExpression
          */
         public String doParse() {
             if (tokens.isEmpty()) {
@@ -605,6 +723,255 @@ public class FlowControlParser extends AbstractParser {
                 }
             }
             return result.toString().trim().replaceAll("\\s*\r?\n", NEW_LINE);
+        }
+    }
+
+    /**
+     * Syntax verifier.
+     */
+    static final class Verifier {
+        private final List<Token> tokens;
+        private int currentTokenIndex;
+        private Token currentToken;
+
+        public Verifier(List<Token> tokens) {
+            this.tokens = tokens;
+            this.currentTokenIndex = 0;
+            this.currentToken = tokens.get(currentTokenIndex);
+        }
+
+        private void advance() {
+            currentTokenIndex++;
+            if (currentTokenIndex < tokens.size()) {
+                currentToken = tokens.get(currentTokenIndex);
+            } else {
+                currentToken = new Token(TokenType.EOF, "");
+            }
+        }
+
+        private void eat(TokenType type) {
+            if (currentToken.getType() == type) {
+                advance();
+            } else {
+                throw new ScriptSyntaxException("Unexpected token: " + currentToken + ", expected: " + type + ", At: " + currentTokenIndex);
+            }
+        }
+
+        private void verifyCondition() {
+            verifyOr();
+        }
+
+        private void verifyOr() {
+            verifyAnd();
+            while (currentToken.getType() == TokenType.LOGIC_OR) {
+                advance();
+                verifyAnd();
+            }
+        }
+
+        private void verifyAnd() {
+            verifyCompare();
+            while (currentToken.getType() == TokenType.LOGIC_AND) {
+                advance();
+                verifyCompare();
+            }
+        }
+
+        private void verifyCompare() {
+            if (currentToken.getType() == TokenType.LPAREN) {
+                advance();
+                verifyCondition();
+                eat(TokenType.RPAREN);
+                return;
+            }
+            if (currentToken.getType() == TokenType.LOGIC_NOT) {
+                advance();
+                verifyCompare();
+                return;
+            }
+            verifyBoolExpressionItem();
+            advance();
+            if (currentToken.getType() == TokenType.PIPE_SYMBOL) {
+                verifyPipes();
+            }
+
+            eat(TokenType.OPERATOR);
+
+            verifyBoolExpressionItem();
+            advance();
+            if (currentToken.getType() == TokenType.PIPE_SYMBOL) {
+                verifyPipes();
+            }
+        }
+
+        private void verifyBoolExpressionItem() {
+            switch (currentToken.getType()) {
+                case IDENTIFIER:
+                case STRING:
+                case NUMBER:
+                case VARIABLE_NAME:
+                    break;
+                default:
+                    throw new ScriptSyntaxException("Unexpected token: " + currentToken + ", expected: " + TokenType.IDENTIFIER + "/" + TokenType.STRING + "/" + TokenType.NUMBER + "/" + TokenType.VARIABLE_NAME + ", At: " + currentTokenIndex);
+            }
+        }
+
+        private void verifyPipes() {
+            while (currentToken.getType() != TokenType.FOR_DELIMITER &&
+                    currentToken.getType() != TokenType.FOR_OPEN &&
+                    currentToken.getType() != TokenType.FOR_CLOSE &&
+                    currentToken.getType() != TokenType.OPERATOR &&
+                    currentToken.getType() != TokenType.LOGIC_OR &&
+                    currentToken.getType() != TokenType.LOGIC_AND &&
+                    currentToken.getType() != TokenType.RPAREN &&
+                    currentToken.getType() != TokenType.NEWLINE &&
+                    currentToken.getType() != TokenType.EOF) {
+                if (currentToken.getType() == TokenType.PIPE_SYMBOL) {
+                    advance();
+                    eat(TokenType.IDENTIFIER);
+                } else {
+                    throw new ScriptSyntaxException("Unexpected token: " + currentToken + ", expected: " + TokenType.PIPE_SYMBOL + ", At: " + currentTokenIndex);
+                }
+            }
+        }
+
+        private void verifyCaseLiteralValue() {
+            switch (currentToken.getType()) {
+                case IDENTIFIER:
+                case STRING:
+                case NUMBER:
+                    break;
+                default:
+                    throw new ScriptSyntaxException("Unexpected token: " + currentToken + ", expected: " + TokenType.IDENTIFIER + "/" + TokenType.STRING + "/" + TokenType.NUMBER + ", At: " + currentTokenIndex);
+            }
+        }
+
+        private void verifyCaseLiteralValues() {
+            verifyCaseLiteralValue();
+            advance();
+            while (currentToken.getType() != TokenType.NEWLINE &&
+                    currentToken.getType() != TokenType.EOF) {
+                eat(TokenType.COMMA);
+                verifyCaseLiteralValue();
+                advance();
+            }
+        }
+
+        private void verifyContent() {
+            while (currentToken.getType() != TokenType.END &&
+                    currentToken.getType() != TokenType.BREAK &&
+                    currentToken.getType() != TokenType.ELSE &&
+                    currentToken.getType() != TokenType.ENDIF &&
+                    currentToken.getType() != TokenType.END_FOR &&
+                    currentToken.getType() != TokenType.EOF) {
+                doVerifyStatement();
+            }
+        }
+
+        private void doVerifyStatement() {
+            if (currentToken.getType() == TokenType.IF) {
+                verifyIfStatement();
+            } else if (currentToken.getType() == TokenType.SWITCH) {
+                verifySwitchStatement();
+            } else if (currentToken.getType() == TokenType.CHOOSE) {
+                verifyChooseStatement();
+            } else if (currentToken.getType() == TokenType.FOR) {
+                verifyForStatement();
+            } else {
+                advance();
+            }
+        }
+
+        private void verifyIfStatement() {
+            eat(TokenType.IF);
+            verifyCondition();
+            eat(TokenType.NEWLINE);
+            verifyContent();
+            if (currentToken.getType() == TokenType.ELSE) {
+                advance();
+                verifyContent();
+            }
+            eat(TokenType.ENDIF);
+        }
+
+        private void verifySwitchStatement() {
+            eat(TokenType.SWITCH);
+            eat(TokenType.VARIABLE_NAME);
+            verifyPipes();
+            eat(TokenType.NEWLINE);
+
+            while (currentToken.getType() != TokenType.END && currentToken.getType() != TokenType.EOF) {
+                if (currentToken.getType() == TokenType.CASE) {
+                    advance();
+                    verifyCaseLiteralValues();
+                    eat(TokenType.NEWLINE);
+                    verifyContent();
+                    eat(TokenType.BREAK);
+                } else if (currentToken.getType() == TokenType.DEFAULT) {
+                    advance();
+                    eat(TokenType.NEWLINE);
+                    verifyContent();
+                    eat(TokenType.BREAK);
+                } else {
+                    eat(TokenType.NEWLINE);
+                }
+            }
+            eat(TokenType.END);
+        }
+
+        private void verifyChooseStatement() {
+            eat(TokenType.CHOOSE);
+            eat(TokenType.NEWLINE);
+
+            while (currentToken.getType() != TokenType.END && currentToken.getType() != TokenType.EOF) {
+                if (currentToken.getType() == TokenType.WHEN) {
+                    advance();
+                    verifyCondition();
+                    eat(TokenType.NEWLINE);
+                    verifyContent();
+                    eat(TokenType.BREAK);
+                } else if (currentToken.getType() == TokenType.DEFAULT) {
+                    advance();
+                    eat(TokenType.NEWLINE);
+                    verifyContent();
+                    eat(TokenType.BREAK);
+                } else {
+                    eat(TokenType.NEWLINE);
+                }
+            }
+            eat(TokenType.END);
+        }
+
+        private void verifyForStatement() {
+            eat(TokenType.FOR);
+            eat(TokenType.IDENTIFIER);
+            if (currentToken.getType() == TokenType.COMMA) {
+                advance();
+                eat(TokenType.IDENTIFIER);
+            }
+            eat(TokenType.FOR_OF);
+            eat(TokenType.VARIABLE_NAME);
+            if (currentToken.getType() == TokenType.FOR_DELIMITER) {
+                advance();
+                eat(TokenType.STRING);
+            }
+            if (currentToken.getType() == TokenType.FOR_OPEN) {
+                advance();
+                eat(TokenType.STRING);
+            }
+            if (currentToken.getType() == TokenType.FOR_CLOSE) {
+                advance();
+                eat(TokenType.STRING);
+            }
+            eat(TokenType.NEWLINE);
+            verifyContent();
+            eat(TokenType.END_FOR);
+        }
+
+        public void doVerify() {
+            while (currentToken.getType() != TokenType.EOF) {
+                doVerifyStatement();
+            }
         }
     }
 }
