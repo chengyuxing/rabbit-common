@@ -20,6 +20,7 @@ public class LexerTests {
     @Test
     public void test6() {
         FlowControlParser parser = new FlowControlParser(choose);
+        parser.verify();
         String res = parser.parse(DataRow.of(
                 "id", "C"));
         System.out.println(res);

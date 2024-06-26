@@ -496,6 +496,7 @@ public class FlowControlParser {
                 advance();
             }
             eat(TokenType.ENDIF);
+            eat(TokenType.NEWLINE);
 
             List<Token> thenContent;
             List<Token> elseContent = new ArrayList<>();
@@ -549,6 +550,7 @@ public class FlowControlParser {
                 }
             }
             eat(TokenType.END);
+            eat(TokenType.NEWLINE);
 
             if (matchedBranch.isEmpty()) {
                 return "";
@@ -585,6 +587,7 @@ public class FlowControlParser {
                 }
             }
             eat(TokenType.END);
+            eat(TokenType.NEWLINE);
 
             if (matchedBranch.isEmpty()) {
                 return "";
@@ -631,6 +634,7 @@ public class FlowControlParser {
             eat(TokenType.NEWLINE);
             List<Token> forContent = parseForBlock();
             eat(TokenType.END_FOR);
+            eat(TokenType.NEWLINE);
 
             if (forContent.isEmpty()) {
                 return "";
@@ -898,6 +902,7 @@ public class FlowControlParser {
                 verifyContent();
             }
             eat(TokenType.ENDIF);
+            eat(TokenType.NEWLINE);
         }
 
         private void verifySwitchStatement() {
@@ -923,6 +928,7 @@ public class FlowControlParser {
                 }
             }
             eat(TokenType.END);
+            eat(TokenType.NEWLINE);
         }
 
         private void verifyChooseStatement() {
@@ -946,6 +952,7 @@ public class FlowControlParser {
                 }
             }
             eat(TokenType.END);
+            eat(TokenType.NEWLINE);
         }
 
         private void verifyForStatement() {
@@ -972,6 +979,7 @@ public class FlowControlParser {
             eat(TokenType.NEWLINE);
             verifyContent();
             eat(TokenType.END_FOR);
+            eat(TokenType.NEWLINE);
         }
 
         public void doVerify() {
