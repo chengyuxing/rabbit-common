@@ -85,7 +85,7 @@ public class ScriptParserTests {
                     return formatted;
                 }
             };
-//            parser.verify();
+            parser.verify();
             String res = parser.parse(DataRow.of("ids", Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 1 + i, 11, 23, 45, 55, 67),
                     "address", Arrays.asList("a", "b", "c")));
             data.add(parser.getForContextVars());

@@ -28,6 +28,7 @@ public class LexerTests {
     @Test
     public void test5() {
         FlowControlParser parser = new FlowControlParser(If);
+        parser.verify();
         String res = parser.parse(DataRow.of(
                 "jssj", "nubll",
                 "kssj", "2022-12-12",

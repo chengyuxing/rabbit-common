@@ -869,16 +869,22 @@ public class FlowControlParser {
         }
 
         private void doVerifyStatement() {
-            if (currentToken.getType() == TokenType.IF) {
-                verifyIfStatement();
-            } else if (currentToken.getType() == TokenType.SWITCH) {
-                verifySwitchStatement();
-            } else if (currentToken.getType() == TokenType.CHOOSE) {
-                verifyChooseStatement();
-            } else if (currentToken.getType() == TokenType.FOR) {
-                verifyForStatement();
-            } else {
-                advance();
+            switch (currentToken.getType()) {
+                case IF:
+                    verifyIfStatement();
+                    break;
+                case SWITCH:
+                    verifySwitchStatement();
+                    break;
+                case CHOOSE:
+                    verifyChooseStatement();
+                    break;
+                case FOR:
+                    verifyForStatement();
+                    break;
+                default:
+                    advance();
+                    break;
             }
         }
 

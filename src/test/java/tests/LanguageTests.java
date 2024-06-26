@@ -70,6 +70,7 @@ public class LanguageTests {
                 return formatted;
             }
         };
+        parser.verify();
         String result = parser.parse(context);
         System.out.println("--------------");
         System.out.println(result);
