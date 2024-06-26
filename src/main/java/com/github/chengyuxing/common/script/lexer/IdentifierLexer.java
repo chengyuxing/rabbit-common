@@ -2,8 +2,8 @@ package com.github.chengyuxing.common.script.lexer;
 
 import com.github.chengyuxing.common.script.Token;
 import com.github.chengyuxing.common.script.TokenType;
+import com.github.chengyuxing.common.script.exception.ScriptSyntaxException;
 import com.github.chengyuxing.common.utils.StringUtil;
-import jdk.nashorn.internal.runtime.regexp.joni.exception.SyntaxException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -130,7 +130,7 @@ public class IdentifierLexer {
                 if (match("&&")) {
                     tokens.add(new Token(TokenType.LOGIC_AND, "&&"));
                 } else {
-                    throw new SyntaxException("Unexpected character '" + current + "'");
+                    throw new ScriptSyntaxException("Unexpected character '" + current + "'");
                 }
             } else if (current == '!') {
                 if (match("!=")) {
