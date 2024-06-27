@@ -463,6 +463,9 @@ public class FlowControlParser {
         private List<Token> parseBranchBlock() {
             List<Token> caseWhenDefaultBlock = new ArrayList<>();
             while (currentToken.getType() != TokenType.BREAK && currentToken.getType() != TokenType.EOF) {
+                if (currentToken.getType() == TokenType.WHEN || currentToken.getType() == TokenType.CASE) {
+                    throw new ScriptSyntaxException("Unexpected token: " + currentToken + ", expected: " + TokenType.BREAK + ", At: " + currentTokenIndex);
+                }
                 caseWhenDefaultBlock.add(currentToken);
                 advance();
             }
