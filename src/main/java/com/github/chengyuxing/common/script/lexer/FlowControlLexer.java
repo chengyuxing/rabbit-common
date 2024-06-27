@@ -2,7 +2,6 @@ package com.github.chengyuxing.common.script.lexer;
 
 import com.github.chengyuxing.common.script.Token;
 import com.github.chengyuxing.common.script.TokenType;
-import com.github.chengyuxing.common.utils.StringUtil;
 
 import java.util.ArrayList;
 import java.util.List;
