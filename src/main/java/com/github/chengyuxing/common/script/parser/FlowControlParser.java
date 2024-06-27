@@ -334,30 +334,30 @@ public class FlowControlParser {
                 return !evaluateCompare();
             }
 
-            Token left = parseBoolExpressionItem();
+            Token left = getBoolExpressionItem();
             advance();
             List<String> leftPipes = new ArrayList<>();
             if (currentToken.getType() == TokenType.PIPE_SYMBOL) {
-                leftPipes = parsePipes();
+                leftPipes = collectPipes();
             }
 
             String operator = currentToken.getValue();
             eat(TokenType.OPERATOR);
 
-            Token right = parseBoolExpressionItem();
+            Token right = getBoolExpressionItem();
             advance();
             List<String> rightPipes = new ArrayList<>();
             if (currentToken.getType() == TokenType.PIPE_SYMBOL) {
-                rightPipes = parsePipes();
+                rightPipes = collectPipes();
             }
 
-            Object a = parseValue(left, leftPipes);
-            Object b = parseValue(right, rightPipes);
+            Object a = calcValue(left, leftPipes);
+            Object b = calcValue(right, rightPipes);
 
             return Comparators.compare(a, operator, b);
         }
 
-        private Token parseBoolExpressionItem() {
+        private Token getBoolExpressionItem() {
             switch (currentToken.getType()) {
                 case IDENTIFIER:
                 case STRING:
@@ -369,8 +369,9 @@ public class FlowControlParser {
             }
         }
 
-        private List<String> parsePipes() {
+        private List<String> collectPipes() {
             List<String> pipes = new ArrayList<>();
+            //noinspection DuplicatedCode
             while (currentToken.getType() != TokenType.FOR_DELIMITER &&
                     currentToken.getType() != TokenType.FOR_OPEN &&
                     currentToken.getType() != TokenType.FOR_CLOSE &&
@@ -391,7 +392,7 @@ public class FlowControlParser {
             return pipes;
         }
 
-        private Object parsePipedValue(Object value, List<String> pipes) {
+        private Object calcPipedValue(Object value, List<String> pipes) {
             Object res = value;
             for (String pipe : pipes) {
                 if (getPipes().containsKey(pipe)) {
@@ -405,23 +406,23 @@ public class FlowControlParser {
             return res;
         }
 
-        private Object parseValue(Token token, List<String> pipes) {
+        private Object calcValue(Token token, List<String> pipes) {
             if (token.getType() == TokenType.VARIABLE_NAME) {
                 Object value = ObjectUtil.getDeepValue(context, token.getValue().substring(1));
                 if (!pipes.isEmpty()) {
-                    value = parsePipedValue(value, pipes);
+                    value = calcPipedValue(value, pipes);
                 }
                 return value;
             }
             // string literal value
             Object value = token.getValue();
             if (!pipes.isEmpty()) {
-                value = parsePipedValue(value, pipes);
+                value = calcPipedValue(value, pipes);
             }
             return Comparators.valueOf(value);
         }
 
-        private String parseCaseLiteralValue() {
+        private String getCaseLiteralValue() {
             switch (currentToken.getType()) {
                 case IDENTIFIER:
                 case STRING:
@@ -432,20 +433,20 @@ public class FlowControlParser {
             }
         }
 
-        private List<String> parseCaseLiteralValues() {
+        private List<String> collectCaseLiteralValues() {
             List<String> values = new ArrayList<>();
-            values.add(parseCaseLiteralValue());
+            values.add(getCaseLiteralValue());
             advance();
             while (currentToken.getType() != TokenType.NEWLINE &&
                     currentToken.getType() != TokenType.EOF) {
                 eat(TokenType.COMMA);
-                values.add(parseCaseLiteralValue());
+                values.add(getCaseLiteralValue());
                 advance();
             }
             return values;
         }
 
-        private List<Token> parseForBlock() {
+        private List<Token> collectForBlock() {
             List<Token> tokens = new ArrayList<>();
             int forDepth = 0;
             while ((currentToken.getType() != TokenType.END_FOR || forDepth != 0) && currentToken.getType() != TokenType.EOF) {
@@ -460,22 +461,19 @@ public class FlowControlParser {
             return tokens;
         }
 
-        private List<Token> parseBranchBlock() {
+        private List<Token> collectBranchBlock() {
             List<Token> caseWhenDefaultBlock = new ArrayList<>();
-            while (currentToken.getType() != TokenType.BREAK && currentToken.getType() != TokenType.EOF) {
-                if (currentToken.getType() == TokenType.WHEN || currentToken.getType() == TokenType.CASE) {
-                    throw new ScriptSyntaxException("Unexpected token: " + currentToken + ", expected: " + TokenType.BREAK + ", At: " + currentTokenIndex);
+            int switchChooseDepth = 0;
+            while ((currentToken.getType() != TokenType.BREAK || switchChooseDepth != 0) && currentToken.getType() != TokenType.EOF) {
+                if (currentToken.getType() == TokenType.CHOOSE || currentToken.getType() == TokenType.SWITCH) {
+                    switchChooseDepth++;
+                } else if (currentToken.getType() == TokenType.END) {
+                    switchChooseDepth--;
                 }
                 caseWhenDefaultBlock.add(currentToken);
                 advance();
             }
             return caseWhenDefaultBlock;
-        }
-
-        private void goToEnd() {
-            while (currentToken.getType() != TokenType.END && currentToken.getType() != TokenType.EOF) {
-                advance();
-            }
         }
 
         private String parseIfStatement() {
@@ -522,75 +520,77 @@ public class FlowControlParser {
             eat(TokenType.SWITCH);
             Token variable = currentToken;
             eat(TokenType.VARIABLE_NAME);
-            List<String> pipes = parsePipes();
+            List<String> pipes = collectPipes();
             eat(TokenType.NEWLINE);
 
-            Object variableValue = parseValue(variable, pipes);
+            Object variableValue = calcValue(variable, pipes);
 
-            List<Token> matchedBranch = new ArrayList<>();
+            List<Token> matchedBranch = null;
+            List<Token> defaultBranch = new ArrayList<>();
+
             while (currentToken.getType() != TokenType.END && currentToken.getType() != TokenType.EOF) {
                 if (currentToken.getType() == TokenType.CASE) {
                     advance();
-                    List<String> caseValues = parseCaseLiteralValues();
+                    List<String> caseValues = collectCaseLiteralValues();
                     eat(TokenType.NEWLINE);
-                    List<Token> caseContent = parseBranchBlock();
+                    List<Token> caseContent = collectBranchBlock();
                     eat(TokenType.BREAK);
 
-                    for (String caseValue : caseValues) {
-                        if (Comparators.compare(variableValue, "=", Comparators.valueOf(caseValue))) {
-                            matchedBranch = caseContent;
-                            goToEnd();
-                            break;
+                    if (Objects.isNull(matchedBranch)) {
+                        for (String caseValue : caseValues) {
+                            if (Comparators.compare(variableValue, "=", Comparators.valueOf(caseValue))) {
+                                matchedBranch = caseContent;
+                                break;
+                            }
                         }
                     }
                 } else if (currentToken.getType() == TokenType.DEFAULT) {
                     advance();
                     eat(TokenType.NEWLINE);
-                    matchedBranch = parseBranchBlock();
+                    defaultBranch = collectBranchBlock();
                     eat(TokenType.BREAK);
                 } else {
                     eat(TokenType.NEWLINE);
                 }
             }
-            eat(TokenType.END);
-            eat(TokenType.NEWLINE);
-
-            if (matchedBranch.isEmpty()) {
-                return "";
-            }
-            Parser parser = new Parser(matchedBranch, context);
-            return parser.doParse();
+            return parseMatchedBranch(matchedBranch, defaultBranch);
         }
 
         private String parseChooseStatement() {
             eat(TokenType.CHOOSE);
             eat(TokenType.NEWLINE);
 
-            List<Token> matchedBranch = new ArrayList<>();
+            List<Token> matchedBranch = null;
+            List<Token> defaultBranch = new ArrayList<>();
 
             while (currentToken.getType() != TokenType.END && currentToken.getType() != TokenType.EOF) {
                 if (currentToken.getType() == TokenType.WHEN) {
                     advance();
                     boolean matched = evaluateCondition();
                     eat(TokenType.NEWLINE);
-                    List<Token> whenContent = parseBranchBlock();
+                    List<Token> whenContent = collectBranchBlock();
                     eat(TokenType.BREAK);
 
-                    if (matched) {
+                    if (matched && Objects.isNull(matchedBranch)) {
                         matchedBranch = whenContent;
-                        goToEnd();
                     }
                 } else if (currentToken.getType() == TokenType.DEFAULT) {
                     advance();
                     eat(TokenType.NEWLINE);
-                    matchedBranch = parseBranchBlock();
+                    defaultBranch = collectBranchBlock();
                     eat(TokenType.BREAK);
                 } else {
                     eat(TokenType.NEWLINE);
                 }
             }
+            return parseMatchedBranch(matchedBranch, defaultBranch);
+        }
+
+        private String parseMatchedBranch(List<Token> matchedBranch, List<Token> defaultBranch) {
             eat(TokenType.END);
             eat(TokenType.NEWLINE);
+
+            matchedBranch = Objects.isNull(matchedBranch) ? defaultBranch : matchedBranch;
 
             if (matchedBranch.isEmpty()) {
                 return "";
@@ -613,7 +613,7 @@ public class FlowControlParser {
             Token listName = currentToken;
             eat(TokenType.VARIABLE_NAME);
 
-            List<String> pipes = parsePipes();
+            List<String> pipes = collectPipes();
 
             String delimiter = ", ";
             String open = "";
@@ -635,7 +635,7 @@ public class FlowControlParser {
             }
 
             eat(TokenType.NEWLINE);
-            List<Token> forContent = parseForBlock();
+            List<Token> forContent = collectForBlock();
             eat(TokenType.END_FOR);
             eat(TokenType.NEWLINE);
 
@@ -650,7 +650,7 @@ public class FlowControlParser {
                 close = NEW_LINE + close;
             }
 
-            Object listObject = parseValue(listName, pipes);
+            Object listObject = calcValue(listName, pipes);
             Object[] iterator = ObjectUtil.toArray(listObject);
 
             StringJoiner result = new StringJoiner(delimiter + '\n');
@@ -724,8 +724,13 @@ public class FlowControlParser {
                         result.add(parseForStatement());
                         break;
                     case ENDIF:
+                    case ELSE:
                     case END:
                     case END_FOR:
+                    case WHEN:
+                    case CASE:
+                    case DEFAULT:
+                    case BREAK:
                         throw new ScriptSyntaxException("Unexpected " + currentToken.getValue() + " statement without preceding matching statement");
                     default:
                         result.add(currentToken.getValue());
@@ -828,6 +833,7 @@ public class FlowControlParser {
         }
 
         private void verifyPipes() {
+            //noinspection DuplicatedCode
             while (currentToken.getType() != TokenType.FOR_DELIMITER &&
                     currentToken.getType() != TokenType.FOR_OPEN &&
                     currentToken.getType() != TokenType.FOR_CLOSE &&
@@ -868,34 +874,30 @@ public class FlowControlParser {
             }
         }
 
-        private void verifyContent() {
-            while (currentToken.getType() != TokenType.END &&
-                    currentToken.getType() != TokenType.BREAK &&
-                    currentToken.getType() != TokenType.ELSE &&
-                    currentToken.getType() != TokenType.ENDIF &&
-                    currentToken.getType() != TokenType.END_FOR &&
-                    currentToken.getType() != TokenType.EOF) {
-                doVerifyStatement();
-            }
-        }
-
-        private void doVerifyStatement() {
-            switch (currentToken.getType()) {
-                case IF:
-                    verifyIfStatement();
-                    break;
-                case SWITCH:
-                    verifySwitchStatement();
-                    break;
-                case CHOOSE:
-                    verifyChooseStatement();
-                    break;
-                case FOR:
-                    verifyForStatement();
-                    break;
-                default:
-                    advance();
-                    break;
+        private void verifyContent(TokenType endToken, TokenType... illegalTokens) {
+            while (currentToken.getType() != TokenType.EOF && currentToken.getType() != endToken) {
+                for (TokenType type : illegalTokens) {
+                    if (currentToken.getType() == type) {
+                        throw new ScriptSyntaxException("Illegal token: " + currentToken + ", At: " + currentTokenIndex);
+                    }
+                }
+                switch (currentToken.getType()) {
+                    case IF:
+                        verifyIfStatement();
+                        break;
+                    case SWITCH:
+                        verifySwitchStatement();
+                        break;
+                    case CHOOSE:
+                        verifyChooseStatement();
+                        break;
+                    case FOR:
+                        verifyForStatement();
+                        break;
+                    default:
+                        advance();
+                        break;
+                }
             }
         }
 
@@ -903,10 +905,25 @@ public class FlowControlParser {
             eat(TokenType.IF);
             verifyCondition();
             eat(TokenType.NEWLINE);
-            verifyContent();
+            verifyContent(TokenType.ENDIF,
+                    TokenType.CASE,
+                    TokenType.WHEN,
+                    TokenType.DEFAULT,
+                    TokenType.END_FOR,
+                    TokenType.END,
+                    TokenType.BREAK
+            );
             if (currentToken.getType() == TokenType.ELSE) {
                 advance();
-                verifyContent();
+                verifyContent(TokenType.ENDIF,
+                        TokenType.ELSE,
+                        TokenType.CASE,
+                        TokenType.WHEN,
+                        TokenType.DEFAULT,
+                        TokenType.END_FOR,
+                        TokenType.END,
+                        TokenType.BREAK
+                );
             }
             eat(TokenType.ENDIF);
             eat(TokenType.NEWLINE);
@@ -923,15 +940,10 @@ public class FlowControlParser {
                     advance();
                     verifyCaseLiteralValues();
                     eat(TokenType.NEWLINE);
-                    verifyContent();
-                    eat(TokenType.BREAK);
-                } else if (currentToken.getType() == TokenType.DEFAULT) {
-                    advance();
-                    eat(TokenType.NEWLINE);
-                    verifyContent();
+                    verifyBranchContent();
                     eat(TokenType.BREAK);
                 } else {
-                    eat(TokenType.NEWLINE);
+                    verifyDefaultBranch();
                 }
             }
             eat(TokenType.END);
@@ -947,19 +959,37 @@ public class FlowControlParser {
                     advance();
                     verifyCondition();
                     eat(TokenType.NEWLINE);
-                    verifyContent();
-                    eat(TokenType.BREAK);
-                } else if (currentToken.getType() == TokenType.DEFAULT) {
-                    advance();
-                    eat(TokenType.NEWLINE);
-                    verifyContent();
+                    verifyBranchContent();
                     eat(TokenType.BREAK);
                 } else {
-                    eat(TokenType.NEWLINE);
+                    verifyDefaultBranch();
                 }
             }
             eat(TokenType.END);
             eat(TokenType.NEWLINE);
+        }
+
+        private void verifyDefaultBranch() {
+            if (currentToken.getType() == TokenType.DEFAULT) {
+                advance();
+                eat(TokenType.NEWLINE);
+                verifyBranchContent();
+                eat(TokenType.BREAK);
+            } else {
+                eat(TokenType.NEWLINE);
+            }
+        }
+
+        private void verifyBranchContent() {
+            verifyContent(TokenType.BREAK,
+                    TokenType.ENDIF,
+                    TokenType.ELSE,
+                    TokenType.END,
+                    TokenType.END_FOR,
+                    TokenType.WHEN,
+                    TokenType.CASE,
+                    TokenType.DEFAULT
+            );
         }
 
         private void verifyForStatement() {
@@ -984,14 +1014,47 @@ public class FlowControlParser {
                 eat(TokenType.STRING);
             }
             eat(TokenType.NEWLINE);
-            verifyContent();
+            verifyContent(TokenType.END_FOR,
+                    TokenType.ENDIF,
+                    TokenType.ELSE,
+                    TokenType.CASE,
+                    TokenType.WHEN,
+                    TokenType.BREAK,
+                    TokenType.DEFAULT,
+                    TokenType.END
+            );
             eat(TokenType.END_FOR);
             eat(TokenType.NEWLINE);
         }
 
         public void doVerify() {
             while (currentToken.getType() != TokenType.EOF) {
-                doVerifyStatement();
+                switch (currentToken.getType()) {
+                    case IF:
+                        verifyIfStatement();
+                        break;
+                    case SWITCH:
+                        verifySwitchStatement();
+                        break;
+                    case CHOOSE:
+                        verifyChooseStatement();
+                        break;
+                    case FOR:
+                        verifyForStatement();
+                        break;
+                    case ENDIF:
+                    case ELSE:
+                    case END:
+                    case END_FOR:
+                    case WHEN:
+                    case CASE:
+                    case DEFAULT:
+                    case BREAK:
+                        throw new ScriptSyntaxException("Unexpected " + currentToken.getValue() + " statement without preceding matching statement");
+                    default:
+                        advance();
+                        break;
+                }
             }
         }
     }
