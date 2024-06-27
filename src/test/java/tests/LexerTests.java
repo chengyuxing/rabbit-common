@@ -2,12 +2,14 @@ package tests;
 
 import com.github.chengyuxing.common.DataRow;
 import com.github.chengyuxing.common.io.FileResource;
+import com.github.chengyuxing.common.script.lexer.FlowControlLexer;
 import com.github.chengyuxing.common.script.parser.FlowControlParser;
 import org.junit.Test;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 public class LexerTests {
@@ -23,13 +25,10 @@ public class LexerTests {
     public void test7() {
         FlowControlParser parser = new FlowControlParser(query) {
             @Override
-            protected String trimExpression(String line) {
+            protected String trimExpressionLine(String line) {
                 String tl = line.trim();
                 if (tl.startsWith("--")) {
-                    String kl = tl.substring(2).trim();
-                    if (kl.startsWith("#")) {
-                        return kl;
-                    }
+                    return tl.substring(2).trim();
                 }
                 return line;
             }
@@ -78,8 +77,9 @@ public class LexerTests {
     @Test
     public void test3() {
         FlowControlParser parser = new FlowControlParser(for1);
-
+        parser.verify();
         String res = parser.parse(DataRow.of("names", Arrays.asList('a', 'b', 'c')));
         System.out.println(res);
     }
+
 }
