@@ -720,6 +720,10 @@ public class FlowControlParser {
                     case FOR:
                         result.add(parseForStatement());
                         break;
+                    case ENDIF:
+                    case END:
+                    case END_FOR:
+                        throw new ScriptSyntaxException("Unexpected " + currentToken.getValue() + " statement without preceding matching statement");
                     default:
                         result.add(currentToken.getValue());
                         advance();
