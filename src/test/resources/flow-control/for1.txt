@@ -1,4 +1,9 @@
-#for item,idx of :names delimiter ' or' open '(' close ')'
-    ${item}:${idx}
+#for item,idx of :names delimiter ', ' open '(' close ')'
+
 #done
+
+
+#if :names <> blank
+    aaaaa
+#fi
 

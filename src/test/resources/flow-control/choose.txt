@@ -3,7 +3,30 @@
         a
     #break
     #when :id == 'B'
-        b
+        #choose
+            #when :id != blank
+                ddd
+                #switch :id
+                    #case 'B'
+                        caseA
+                    #break
+                    #default
+                        defaultA
+                    #break
+                #end
+            #break
+            #default
+                #switch :id
+                    #case 'B'
+                        88888
+                    #break
+                    #default
+                        8899999
+                    #break
+                #end
+                ccc
+            #break
+        #end
     #break
     #when :id == C
         a
@@ -12,6 +35,3 @@
         regex matched.
     #break
 #end
-#if !(:id == '1')
- dd he.
-#fi

@@ -423,11 +423,11 @@ public class StringTests {
             @Override
             protected String forLoopBodyFormatter(int forIndex, int varIndex, String varName, String idxName, String body, Map<String, Object> args) {
                 String formatted = StringUtil.FMT.format(body, args);
-                if (Objects.nonNull(varName)) {
+                if (!varName.isEmpty()) {
                     String varParam = VAR_PREFIX + forVarKey(varName, forIndex, varIndex);
                     formatted = formatted.replace(VAR_PREFIX + varName, varParam);
                 }
-                if (Objects.nonNull(idxName)) {
+                if (!idxName.isEmpty()) {
                     String idxParam = VAR_PREFIX + forVarKey(idxName, forIndex, varIndex);
                     formatted = formatted.replace(VAR_PREFIX + idxName, idxParam);
                 }

@@ -60,7 +60,7 @@ public class ScriptParserTests {
                 " #for id of :ids delimiter ', ' open ' or id in (' close ')'\n" +
                 "    #for add of :address\n" +
                 "       :_for.add\n" +
-                "       #if :id >= 2\n" +
+                "       #if :id == 2\n" +
                 "       :_for.id\n" +
                 "       #fi\n" +
                 "    #done\n" +

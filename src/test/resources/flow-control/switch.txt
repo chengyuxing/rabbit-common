@@ -1,6 +1,16 @@
 #switch :name | upper | lower
     #case 'a' ,'b','c'
         multiple values.
+        #switch :name
+            #default
+                caseDefault.
+            #break
+        #end
+        #choose
+            #when :name == c
+                name ccc
+            #break
+        #end
     #break
     #case 3.14
         number
