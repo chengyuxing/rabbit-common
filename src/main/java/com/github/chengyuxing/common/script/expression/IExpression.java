@@ -5,6 +5,7 @@ import java.util.Map;
 /**
  * Abstract expression parser interface.
  */
+@Deprecated
 public abstract class IExpression {
 
     protected final String expression;

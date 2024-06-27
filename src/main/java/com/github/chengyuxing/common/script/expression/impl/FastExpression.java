@@ -32,6 +32,7 @@ import static com.github.chengyuxing.common.script.expression.Patterns.*;
  *
  * @see Comparators
  */
+@Deprecated
 public class FastExpression extends IExpression {
     //language=RegExp
     public static final Pattern CRITERIA_PATTERN = Pattern.compile("(?<compare>:?" + VAR_KEY_PATTERN + "|" + VAR_PATTERN + "|" + STRING_PATTERN + ")(?<comparePipes>" + PIPES_PATTERN + ")?\\s*(?<operator>[!=<>~@]{1,2})\\s*(?<compared>:?" + VAR_KEY_PATTERN + "|" + VAR_PATTERN + "|" + STRING_PATTERN + ")(?<comparedPipes>" + PIPES_PATTERN + ")?");
