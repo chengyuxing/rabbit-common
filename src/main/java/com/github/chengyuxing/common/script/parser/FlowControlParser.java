@@ -278,7 +278,7 @@ public class FlowControlParser {
 
         /**
          * <p>Boolean condition expression.</p>
-         * <p>Support logic operator: {@code &amp;&amp;, ||, !}, e.g.</p>
+         * <p>Support logic operator: {@code &&, ||, !}, e.g.</p>
          * <blockquote><pre>!(:id &gt;= 0 || :name | {@link IPipe.Length length} &lt;= 3) &amp;&amp; :age &gt; 21
          * </pre></blockquote>
          * Built-in {@link IPipe pipes}：
