@@ -165,11 +165,7 @@ public class FlowControlParser {
      * @param line current line
      * @return expression or normal line
      */
-    protected String trimExpression(String line) {
-        String tl = line.trim();
-        if (tl.startsWith("#")) {
-            return tl;
-        }
+    protected String trimExpressionLine(String line) {
         return line;
     }
 
@@ -220,7 +216,7 @@ public class FlowControlParser {
      * @return unique for var key
      */
     protected String forVarKey(String name, int forIdx, int varIdx) {
-        return name + "_" + forIdx + "_" + varIdx;
+        return "_" + name + "_" + forIdx + "_" + varIdx;
     }
 
     /**
@@ -608,6 +604,9 @@ public class FlowControlParser {
                 advance();
                 idxName = currentToken.getValue();
                 eat(TokenType.IDENTIFIER);
+                if (varName.equals(idxName)) {
+                    throw new ScriptSyntaxException("For statement item and index must not have the same name: " + varName);
+                }
             }
             eat(TokenType.FOR_OF);
             Token listName = currentToken;
@@ -994,10 +993,15 @@ public class FlowControlParser {
 
         private void verifyForStatement() {
             eat(TokenType.FOR);
+            String varName = currentToken.getValue();
             eat(TokenType.IDENTIFIER);
             if (currentToken.getType() == TokenType.COMMA) {
                 advance();
+                String idxName = currentToken.getValue();
                 eat(TokenType.IDENTIFIER);
+                if (varName.equals(idxName)) {
+                    throw new ScriptSyntaxException("For statement item and index must not have the same name: " + varName);
+                }
             }
             eat(TokenType.FOR_OF);
             eat(TokenType.VARIABLE_NAME);
