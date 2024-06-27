@@ -38,6 +38,14 @@ public class FlowControlLexer {
         this.position = 0;
     }
 
+    /**
+     * Trim line to valid expression.
+     * <p> e.g
+     * {@code [ #if :id > 0 ]} -&gt; {@code #if :id > 0}</p>
+     *
+     * @param line content line
+     * @return expression line
+     */
     protected String trimExpressionLine(String line) {
         return line;
     }
