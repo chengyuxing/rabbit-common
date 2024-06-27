@@ -688,8 +688,8 @@ public class FlowControlParser {
                 }
             }
             forIndex++;
-            String resultFor = result.toString().trim();
-            if (resultFor.isEmpty()) {
+            String resultFor = result.toString();
+            if (resultFor.trim().isEmpty()) {
                 return "";
             }
             forContextVars.putAll(localForVars);
@@ -705,28 +705,28 @@ public class FlowControlParser {
             if (tokens.isEmpty()) {
                 return "";
             }
-            StringBuilder result = new StringBuilder();
+            StringJoiner result = new StringJoiner(NEW_LINE);
             while (currentToken.getType() != TokenType.EOF) {
                 switch (currentToken.getType()) {
                     case IF:
-                        result.append(parseIfStatement());
+                        result.add(parseIfStatement());
                         break;
                     case SWITCH:
-                        result.append(parseSwitchStatement());
+                        result.add(parseSwitchStatement());
                         break;
                     case CHOOSE:
-                        result.append(parseChooseStatement());
+                        result.add(parseChooseStatement());
                         break;
                     case FOR:
-                        result.append(parseForStatement());
+                        result.add(parseForStatement());
                         break;
                     default:
-                        result.append(currentToken.getValue());
+                        result.add(currentToken.getValue());
                         advance();
                         break;
                 }
             }
-            return result.toString().trim().replaceAll("\\s*\r?\n", NEW_LINE);
+            return result.toString().replaceAll("\\s*\r?\n", NEW_LINE);
         }
     }
 
