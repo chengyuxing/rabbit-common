@@ -23,10 +23,11 @@ public class FlowControlLexer {
     public static final String END = "#end";
     public static final String FOR = "#for";
     public static final String DONE = "#done";
-
     public static final String[] KEYWORDS = new String[]{
             IF, ELSE, FI, CHOOSE, WHEN, SWITCH, CASE, DEFAULT, BREAK, END, FOR, DONE
     };
+    // language=RegExp
+    public static final String KEYWORDS_PATTERN = "\\s*(?:" + String.join("|", KEYWORDS) + ")(?:\\s+.*|$)";
 
     private final String[] lines;
     private int position;
@@ -38,18 +39,7 @@ public class FlowControlLexer {
         this.position = 0;
     }
 
-    /**
-     * Trim each line for search prefix {@code #} to detect expression.
-     *
-     * @param line current line
-     * @return expression or normal line
-     * @see #IF
-     */
-    protected String trimExpression(String line) {
-        String tl = line.trim();
-        if (tl.startsWith("#")) {
-            return tl;
-        }
+    protected String trimExpressionLine(String line) {
         return line;
     }
 
@@ -76,9 +66,9 @@ public class FlowControlLexer {
             if (current.equals("\0")) {
                 break;
             }
-            current = trimExpression(current);
-            if (StringUtil.startsWithsIgnoreCase(current, KEYWORDS)) {
-                IdentifierLexer lexer = new IdentifierLexer(current);
+            String tl = trimExpressionLine(current);
+            if (tl.matches(KEYWORDS_PATTERN)) {
+                IdentifierLexer lexer = new IdentifierLexer(tl);
                 tokens.addAll(lexer.tokenize());
             } else {
                 tokens.add(new Token(TokenType.PLAIN_TEXT, current + '\n'));

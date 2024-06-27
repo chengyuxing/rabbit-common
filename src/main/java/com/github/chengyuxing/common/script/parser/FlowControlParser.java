@@ -101,8 +101,8 @@ public class FlowControlParser {
     public FlowControlParser(String input) {
         FlowControlLexer lexer = new FlowControlLexer(input) {
             @Override
-            protected String trimExpression(String line) {
-                return FlowControlParser.this.trimExpression(line);
+            protected String trimExpressionLine(String line) {
+                return FlowControlParser.this.trimExpressionLine(line);
             }
         };
         this.tokens = lexer.tokenize();
