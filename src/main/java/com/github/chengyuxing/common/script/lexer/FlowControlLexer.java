@@ -78,7 +78,7 @@ public class FlowControlLexer {
                 IdentifierLexer lexer = new IdentifierLexer(tl);
                 tokens.addAll(lexer.tokenize());
             } else {
-                tokens.add(new Token(TokenType.PLAIN_TEXT, current + '\n'));
+                tokens.add(new Token(TokenType.PLAIN_TEXT, current));
             }
         }
         tokens.add(new Token(TokenType.EOF, ""));

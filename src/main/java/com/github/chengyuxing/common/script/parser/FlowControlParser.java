@@ -652,7 +652,7 @@ public class FlowControlParser {
             Object listObject = calcValue(listName, pipes);
             Object[] iterator = ObjectUtil.toArray(listObject);
 
-            StringJoiner result = new StringJoiner(delimiter + '\n');
+            StringJoiner result = new StringJoiner(delimiter + NEW_LINE);
             Map<String, Object> localForVars = new HashMap<>();
 
             for (int i = 0, j = iterator.length; i < j; i++) {
