@@ -221,7 +221,7 @@ public class FlowControlParser {
 
     /**
      * Get {@code #for} context variable map which saved by expression calc.<br>
-     * Format: {@code (varName_forAutoIdx_varAutoIdx: var)}, e.g.
+     * Format: {@code (_varName_forAutoIdx_varAutoIdx: var)}, e.g.
      * <blockquote>
      * <pre>
      * list: ["a", "b", "c"]; forIdx: 0
@@ -232,7 +232,7 @@ public class FlowControlParser {
      * #done
      * </pre>
      * <pre>
-     * vars: {item_0_0: "a", item_0_1: "b", item_0_2: "c"}
+     * vars: {_item_0_0: "a", _item_0_1: "b", _item_0_2: "c"}
      * </pre>
      * </blockquote>
      *
@@ -549,6 +549,8 @@ public class FlowControlParser {
                     eat(TokenType.NEWLINE);
                 }
             }
+            eat(TokenType.END);
+            eat(TokenType.NEWLINE);
             return parseMatchedBranch(matchedBranch, defaultBranch);
         }
 
@@ -579,13 +581,12 @@ public class FlowControlParser {
                     eat(TokenType.NEWLINE);
                 }
             }
+            eat(TokenType.END);
+            eat(TokenType.NEWLINE);
             return parseMatchedBranch(matchedBranch, defaultBranch);
         }
 
         private String parseMatchedBranch(List<Token> matchedBranch, List<Token> defaultBranch) {
-            eat(TokenType.END);
-            eat(TokenType.NEWLINE);
-
             matchedBranch = Objects.isNull(matchedBranch) ? defaultBranch : matchedBranch;
 
             if (matchedBranch.isEmpty()) {
