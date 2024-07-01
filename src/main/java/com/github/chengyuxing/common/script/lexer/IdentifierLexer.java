@@ -206,7 +206,7 @@ public class IdentifierLexer {
                 String number = readWhile(c -> Character.isDigit(c) || c == '.');
                 tokens.add(new Token(TokenType.NUMBER, number));
             } else {
-                String identifier = readWhile(c -> !Character.isWhitespace(c) && c != '\n');
+                String identifier = readWhile(c -> !Character.isWhitespace(c));
                 tokens.add(new Token(TokenType.UNKNOWN, identifier));
             }
         }

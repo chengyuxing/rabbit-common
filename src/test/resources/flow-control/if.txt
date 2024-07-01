@@ -10,3 +10,7 @@
     dddd
     dd he.
 #fi
+
+#if (:id >= 99 || :id < 1000.1) && :name <> blank
+    ok ok
+#fi
