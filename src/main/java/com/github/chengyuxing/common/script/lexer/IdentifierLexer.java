@@ -3,7 +3,6 @@ package com.github.chengyuxing.common.script.lexer;
 import com.github.chengyuxing.common.script.Token;
 import com.github.chengyuxing.common.script.TokenType;
 import com.github.chengyuxing.common.script.exception.ScriptSyntaxException;
-import com.github.chengyuxing.common.utils.StringUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -203,13 +202,12 @@ public class IdentifierLexer {
                         tokens.add(new Token(TokenType.IDENTIFIER, identifier));
                         break;
                 }
+            } else if (Character.isDigit(current)) {
+                String number = readWhile(c -> Character.isDigit(c) || c == '.');
+                tokens.add(new Token(TokenType.NUMBER, number));
             } else {
                 String identifier = readWhile(c -> !Character.isWhitespace(c) && c != '\n');
-                if (StringUtil.isNumeric(identifier)) {
-                    tokens.add(new Token(TokenType.NUMBER, identifier));
-                } else {
-                    tokens.add(new Token(TokenType.UNKNOWN, identifier));
-                }
+                tokens.add(new Token(TokenType.UNKNOWN, identifier));
             }
         }
         tokens.add(new Token(TokenType.NEWLINE, "\n"));
