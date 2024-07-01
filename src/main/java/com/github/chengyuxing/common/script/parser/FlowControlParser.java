@@ -216,12 +216,12 @@ public class FlowControlParser {
      * @return unique for var key
      */
     protected String forVarKey(String name, int forIdx, int varIdx) {
-        return "_" + name + "_" + forIdx + "_" + varIdx;
+        return name + "_" + forIdx + "_" + varIdx;
     }
 
     /**
      * Get {@code #for} context variable map which saved by expression calc.<br>
-     * Format: {@code (_varName_forAutoIdx_varAutoIdx: var)}, e.g.
+     * Format: {@code (varName_forAutoIdx_varAutoIdx: var)}, e.g.
      * <blockquote>
      * <pre>
      * list: ["a", "b", "c"]; forIdx: 0
@@ -232,7 +232,7 @@ public class FlowControlParser {
      * #done
      * </pre>
      * <pre>
-     * vars: {_item_0_0: "a", _item_0_1: "b", _item_0_2: "c"}
+     * vars: {item_0_0: "a", item_0_1: "b", item_0_2: "c"}
      * </pre>
      * </blockquote>
      *
@@ -1006,6 +1006,7 @@ public class FlowControlParser {
             }
             eat(TokenType.FOR_OF);
             eat(TokenType.VARIABLE_NAME);
+            verifyPipes();
             if (currentToken.getType() == TokenType.FOR_DELIMITER) {
                 advance();
                 eat(TokenType.STRING);
