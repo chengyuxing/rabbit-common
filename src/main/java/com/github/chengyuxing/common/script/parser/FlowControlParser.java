@@ -121,7 +121,8 @@ public class FlowControlParser {
         forIndex = 0;
         forContextVars = new HashMap<>();
         Parser parser = new Parser(tokens, context);
-        return parser.doParse();
+        String result = parser.doParse();
+        return result.replaceAll("\\s*\r?\n", NEW_LINE);
     }
 
     /**
@@ -606,7 +607,7 @@ public class FlowControlParser {
                 idxName = currentToken.getValue();
                 eat(TokenType.IDENTIFIER);
                 if (varName.equals(idxName)) {
-                    throw new ScriptSyntaxException("For statement item and index must not have the same name: " + varName);
+                    throw new ScriptSyntaxException("#for statement item and index must not have the same name: " + varName);
                 }
             }
             eat(TokenType.FOR_OF);
@@ -738,7 +739,7 @@ public class FlowControlParser {
                         break;
                 }
             }
-            return result.toString().replaceAll("\\s*\r?\n", NEW_LINE);
+            return result.toString();
         }
     }
 
@@ -1001,7 +1002,7 @@ public class FlowControlParser {
                 String idxName = currentToken.getValue();
                 eat(TokenType.IDENTIFIER);
                 if (varName.equals(idxName)) {
-                    throw new ScriptSyntaxException("For statement item and index must not have the same name: " + varName);
+                    throw new ScriptSyntaxException("#for statement item and index must not have the same name: " + varName);
                 }
             }
             eat(TokenType.FOR_OF);

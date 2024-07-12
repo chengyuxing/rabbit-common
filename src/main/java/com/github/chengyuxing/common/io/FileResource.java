@@ -103,7 +103,7 @@ public class FileResource extends ClassPathResource {
                         throw new UnsupportedOperationException("unknown schema");
                 }
             } catch (IOException e) {
-                throw new UncheckedIOException(e);
+                throw new UncheckedIOException("Failed to open stream: " + getURL(), e);
             }
         }
         return super.getInputStream();

@@ -97,18 +97,12 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
         if (rows.isEmpty()) {
             return new DataRow(0);
         }
-        boolean first = true;
-        DataRow res = null;
-        Set<String> names = null;
+        Set<String> names = rows.iterator().next().keySet();
+        DataRow res = new DataRow(names.size());
+        for (String name : names) {
+            res.put(name, new ArrayList<>());
+        }
         for (Map<String, Object> row : rows) {
-            if (first) {
-                res = new DataRow(row.size());
-                names = row.keySet();
-                for (String name : names) {
-                    res.put(name, new ArrayList<>());
-                }
-                first = false;
-            }
             for (String name : names) {
                 //noinspection unchecked
                 ((List<Object>) res.get(name)).add(row.get(name));
