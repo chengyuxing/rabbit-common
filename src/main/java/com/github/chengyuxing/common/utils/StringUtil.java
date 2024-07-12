@@ -355,4 +355,8 @@ public final class StringUtil {
         }
         return count;
     }
+
+    public static String removeEmptyLine(String content) {
+        return content.replaceAll("\\s*\r?\n", NEW_LINE);
+    }
 }

@@ -122,7 +122,7 @@ public class FlowControlParser {
         forContextVars = new HashMap<>();
         Parser parser = new Parser(tokens, context);
         String result = parser.doParse();
-        return result.replaceAll("\\s*\r?\n", NEW_LINE);
+        return StringUtil.removeEmptyLine(result);
     }
 
     /**

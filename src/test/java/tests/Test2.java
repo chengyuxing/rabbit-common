@@ -80,9 +80,13 @@ public class Test2 {
 
     @Test
     public void mp() throws Exception {
-        Map<String, Object> map = new HashMap<>();
-        map.put("x", "d");
-        System.out.println(map.get("a"));
+        DataRow row = DataRow.zip(Arrays.asList(
+                DataRow.of("name", "cyx", "age", 217),
+                DataRow.of("name", "cydx", "age", 247),
+                DataRow.of("name", "cyxx", "age", 27),
+                DataRow.of("name", "cyx", "age", 257)
+        ));
+        System.out.println(row);
     }
 
     @Test
