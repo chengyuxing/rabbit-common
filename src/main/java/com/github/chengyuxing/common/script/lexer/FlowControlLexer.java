@@ -26,7 +26,7 @@ public class FlowControlLexer {
             IF, ELSE, FI, CHOOSE, WHEN, SWITCH, CASE, DEFAULT, BREAK, END, FOR, DONE
     };
     // language=RegExp
-    public static final String KEYWORDS_PATTERN = "\\s*(?:" + String.join("|", KEYWORDS) + ")(?:\\s+.*|$)";
+    public static final String KEYWORDS_PATTERN = "(?i)\\s*(?:" + String.join("|", KEYWORDS) + ")(?:\\s+.*|$)";
 
     private final String[] lines;
     private int position;

@@ -15,15 +15,15 @@ import java.util.*;
 import static com.github.chengyuxing.common.utils.StringUtil.NEW_LINE;
 
 /**
- * <h2>Based lexer tokens Flow-Control parser.</h2>
+ * <h2>Flow-Control parser.</h2>
  * <p>if statement:</p>
  * <blockquote>
  * <pre>
- * #if {@linkplain Parser#evaluateCondition() expression1}
- *      #if {@linkplain Parser#evaluateCondition() expression2}
+ * #if <i>expression1</i>
+ *      #if <i>expression2</i>
  *      ...
  *      #fi
- *      #if {@linkplain Parser#evaluateCondition() expression3}
+ *      #if <i>expression3</i>
  *      ...
  *      #else
  *      ...
@@ -35,10 +35,10 @@ import static com.github.chengyuxing.common.utils.StringUtil.NEW_LINE;
  * <blockquote>
  * <pre>
  * #choose
- *      #when {@linkplain Parser#evaluateCondition() expression1}
+ *      #when <i>expression1</i>
  *      ...
  *      #break
- *      #when {@linkplain Parser#evaluateCondition() expression2}
+ *      #when <i>expression2</i>
  *      ...
  *      #break
  *      ...
@@ -73,6 +73,18 @@ import static com.github.chengyuxing.common.utils.StringUtil.NEW_LINE;
  * #done
  * </pre>
  * </blockquote>
+ * <p>Boolean condition expression.</p>
+ * <p>Support logic operator: {@code &&, ||, !}, e.g.</p>
+ * <blockquote><pre>!(:id &gt;= 0 || :name | {@link IPipe.Length length} &lt;= 3) &amp;&amp; :age &gt; 21
+ * </pre></blockquote>
+ * Built-in {@link IPipe pipes}：
+ * <ul>
+ *     <li>{@link IPipe.Length length}</li>
+ *     <li>{@link IPipe.Upper upper}</li>
+ *     <li>{@link IPipe.Lower lower}</li>
+ *     <li>{@link IPipe.Map2Pairs pairs}</li>
+ *     <li>{@link IPipe.Kv kv}</li>
+ * </ul>
  *
  * @see Comparators
  */
@@ -277,23 +289,6 @@ public class FlowControlParser {
             }
         }
 
-        /**
-         * <p>Boolean condition expression.</p>
-         * <p>Support logic operator: {@code &&, ||, !}, e.g.</p>
-         * <blockquote><pre>!(:id &gt;= 0 || :name | {@link IPipe.Length length} &lt;= 3) &amp;&amp; :age &gt; 21
-         * </pre></blockquote>
-         * Built-in {@link IPipe pipes}：
-         * <ul>
-         *     <li>{@link IPipe.Length length}</li>
-         *     <li>{@link IPipe.Upper upper}</li>
-         *     <li>{@link IPipe.Lower lower}</li>
-         *     <li>{@link IPipe.Map2Pairs pairs}</li>
-         *     <li>{@link IPipe.Kv kv}</li>
-         * </ul>
-         *
-         * @return is matched or not
-         * @see Comparators
-         */
         private boolean evaluateCondition() {
             return evaluateOr();
         }

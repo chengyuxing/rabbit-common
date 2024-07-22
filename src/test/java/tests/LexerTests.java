@@ -8,9 +8,6 @@ import org.junit.Test;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
-import java.util.List;
-import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
 public class LexerTests {
 
@@ -20,6 +17,20 @@ public class LexerTests {
     static String If = new FileResource("flow-control/if.txt").readString(StandardCharsets.UTF_8);
     static String choose = new FileResource("flow-control/choose.txt").readString(StandardCharsets.UTF_8);
     static String query = new FileResource("query.txt").readString(StandardCharsets.UTF_8);
+
+    @Test
+    public void testLexer() {
+        FlowControlLexer lexer = new FlowControlLexer(query){
+            @Override
+            protected String trimExpressionLine(String line) {
+                if (line.trim().startsWith("--")) {
+                    return line.trim().substring(2);
+                }
+                return line;
+            }
+        };
+        lexer.tokenize().forEach(System.out::println);
+    }
 
     @Test
     public void test7() {
