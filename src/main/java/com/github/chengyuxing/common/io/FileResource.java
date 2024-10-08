@@ -4,6 +4,7 @@ import com.github.chengyuxing.common.DataRow;
 
 import java.io.*;
 import java.net.*;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Formatter;
 import java.util.LinkedHashMap;
@@ -69,8 +70,7 @@ public class FileResource extends ClassPathResource {
                 String schema = path.substring(0, path.indexOf(':'));
                 switch (schema) {
                     case "file":
-                        //noinspection IOStreamConstructor
-                        return new FileInputStream(getURL().getFile());
+                        return Files.newInputStream(Paths.get(URI.create(path)));
                     case "http":
                     case "https":
                         HttpURLConnection httpCon = (HttpURLConnection) getURL().openConnection();
@@ -105,6 +105,14 @@ public class FileResource extends ClassPathResource {
             }
         }
         return super.getInputStream();
+    }
+
+    @Override
+    public boolean exists() {
+        if (path.startsWith("file:")) {
+            return Files.exists(Paths.get(URI.create(path)));
+        }
+        return super.exists();
     }
 
     @Override
@@ -165,16 +173,12 @@ public class FileResource extends ClassPathResource {
      * @return file short name
      */
     public static String getFileName(String fullFileName, boolean withExtension) {
-        String name;
-        String acFileName = fullFileName;
-        if (acFileName.matches(SCHEMAS_PATTERN) || acFileName.startsWith("file:")) {
-            try {
-                acFileName = new URL(acFileName).getPath();
-            } catch (MalformedURLException e) {
-                throw new RuntimeException(e);
-            }
+        String name = fullFileName;
+        if (name.matches(SCHEMAS_PATTERN)) {
+            name = URI.create(name).getPath();
         }
-        name = Paths.get(acFileName).getFileName().toString();
+        int index = name.lastIndexOf("/");
+        name = index != -1 ? name.substring(index + 1) : name;
         if (withExtension || !name.contains(".")) {
             return name;
         }

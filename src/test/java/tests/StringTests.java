@@ -134,7 +134,7 @@ public class StringTests {
 
     @Test
     public void test3w() throws URISyntaxException, IOException {
-        FileResource resource = new FileResource("file:///Users/chengyuxing/Downloads/rabbit-sql-plugin-2.3.1-signed.zip");
+        FileResource resource = new FileResource("file:///Users/chengyuxing/Downloads/istatmenus6.73.1.zip");
         System.out.println(resource.exists());
         System.out.println(resource.getFileName());
         System.out.println(resource.getFilenameExtension());
