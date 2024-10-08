@@ -359,4 +359,16 @@ public final class StringUtil {
     public static String removeEmptyLine(String content) {
         return content.replaceAll("\\s*\r?\n", NEW_LINE);
     }
+
+    public static String xorEncryptDecrypt(String content, String key) {
+        char[] keys = key.toCharArray();
+        char[] contentChars = content.toCharArray();
+        char[] result = new char[content.length()];
+
+        for (int i = 0; i < contentChars.length; i++) {
+            result[i] = (char) (contentChars[i] ^ keys[i % keys.length]);
+        }
+
+        return new String(result);
+    }
 }
