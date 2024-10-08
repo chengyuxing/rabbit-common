@@ -4,8 +4,6 @@ import com.github.chengyuxing.common.DataRow;
 
 import java.io.*;
 import java.net.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Formatter;
 import java.util.LinkedHashMap;
@@ -68,7 +66,7 @@ public class FileResource extends ClassPathResource {
     public InputStream getInputStream() {
         if (isURI()) {
             try {
-                String schema = uriSchema(path);
+                String schema = path.substring(0, path.indexOf(':'));
                 switch (schema) {
                     case "file":
                         //noinspection IOStreamConstructor
@@ -113,22 +111,7 @@ public class FileResource extends ClassPathResource {
     public URL getURL() {
         if (isURI()) {
             try {
-                String schema = uriSchema(path);
-                switch (schema) {
-                    case "file":
-                        URI uri = URI.create(path);
-                        Path p = Paths.get(uri);
-                        if (!Files.isDirectory(p) && Files.exists(p)) {
-                            return uri.toURL();
-                        }
-                        return null;
-                    case "http":
-                    case "https":
-                    case "ftp":
-                        return new URL(path);
-                    default:
-                        throw new UnsupportedOperationException("unknown schema");
-                }
+                return new URL(path);
             } catch (MalformedURLException e) {
                 throw new RuntimeException(e);
             }
@@ -139,7 +122,7 @@ public class FileResource extends ClassPathResource {
     @Override
     public String getPath() {
         if (isURI()) {
-            return getURL().getFile();
+            return getURL().getPath();
         }
         return super.getPath();
     }
@@ -147,11 +130,7 @@ public class FileResource extends ClassPathResource {
     @Override
     public String getFilenameExtension() {
         if (isURI()) {
-            String schema = uriSchema(path);
-            if (schema.startsWith("http")) {
-                String fullFileName = cleanHttpUri(path);
-                return getFileExtension(fullFileName);
-            }
+            return getFileExtension(getFileName(path, true));
         }
         return super.getFilenameExtension();
     }
@@ -159,10 +138,7 @@ public class FileResource extends ClassPathResource {
     @Override
     public String getFileName() {
         if (isURI()) {
-            String schema = uriSchema(path);
-            if (schema.startsWith("http")) {
-                return getFileName(path, true);
-            }
+            return getFileName(path, true);
         }
         return super.getFileName();
     }
@@ -190,25 +166,15 @@ public class FileResource extends ClassPathResource {
      */
     public static String getFileName(String fullFileName, boolean withExtension) {
         String name;
-        if (fullFileName.matches(SCHEMAS_PATTERN) || fullFileName.startsWith("file:")) {
-            String schema = uriSchema(fullFileName);
-            switch (schema) {
-                case "file":
-                    name = Paths.get(URI.create(fullFileName)).getFileName().toString();
-                    break;
-                case "http":
-                case "https":
-                case "ftp":
-                    fullFileName = cleanHttpUri(fullFileName);
-                    int pIdx = fullFileName.lastIndexOf('/');
-                    name = fullFileName.substring(pIdx + 1);
-                    break;
-                default:
-                    throw new UnsupportedOperationException("unknown schema");
+        String acFileName = fullFileName;
+        if (acFileName.matches(SCHEMAS_PATTERN) || acFileName.startsWith("file:")) {
+            try {
+                acFileName = new URL(acFileName).getPath();
+            } catch (MalformedURLException e) {
+                throw new RuntimeException(e);
             }
-        } else {
-            name = Paths.get(fullFileName).getFileName().toString();
         }
+        name = Paths.get(acFileName).getFileName().toString();
         if (withExtension || !name.contains(".")) {
             return name;
         }
@@ -242,34 +208,5 @@ public class FileResource extends ClassPathResource {
             size = fmt.format("%.2f", bytes / 1024.0) + " KB";
         }
         return size;
-    }
-
-    /**
-     * Remove # and ? parts.
-     *
-     * @param uri http uri
-     * @return http uri
-     */
-    private static String cleanHttpUri(String uri) {
-        String fullFileName = uri;
-        int hashIdx = fullFileName.indexOf('#');
-        if (hashIdx != -1) {
-            fullFileName = fullFileName.substring(0, hashIdx);
-        }
-        int qIdx = fullFileName.indexOf('?');
-        if (qIdx != -1) {
-            fullFileName = fullFileName.substring(0, qIdx);
-        }
-        return fullFileName;
-    }
-
-    /**
-     * Get uri schema.
-     *
-     * @param uri uri
-     * @return schema
-     */
-    private static String uriSchema(String uri) {
-        return uri.substring(0, uri.indexOf(':'));
     }
 }
