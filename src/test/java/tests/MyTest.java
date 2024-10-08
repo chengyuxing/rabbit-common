@@ -44,6 +44,9 @@ public class MyTest {
         rows.add(DataRow.of("a", 4, "b", "x3"));
         rows.add(DataRow.of("a", 5, "b", "x4"));
 
+        DataRow row1 = DataRow.of().add("a", "b").add("b", "b");
+        System.out.println(row1);
+
     }
 
     @Test

@@ -10,7 +10,6 @@ import com.github.chengyuxing.common.script.expression.Comparators;
 import com.github.chengyuxing.common.script.expression.IPipe;
 import com.github.chengyuxing.common.script.parser.SimpleParser;
 import com.github.chengyuxing.common.tuple.Pair;
-import com.github.chengyuxing.common.utils.CollectionUtil;
 import com.github.chengyuxing.common.utils.ObjectUtil;
 import com.github.chengyuxing.common.utils.StringUtil;
 import org.junit.Test;
@@ -124,11 +123,6 @@ public class StringTests {
     @Test
     public void testx1() throws Exception {
         System.out.println(LocalDateTime.now().format(DateTimeFormatter.ISO_WEEK_DATE));
-    }
-
-    @Test
-    public void testCol() throws Exception {
-        System.out.println(CollectionUtil.hasSameKeyIgnoreCase(DataRow.of("id", "1", "ID", "2")));
     }
 
     @Test
