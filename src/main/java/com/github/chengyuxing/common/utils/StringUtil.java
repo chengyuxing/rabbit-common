@@ -388,9 +388,13 @@ public final class StringUtil {
     }
 
     public static String hash(String content, String algorithm) {
+        return hash(content.getBytes(StandardCharsets.UTF_8), algorithm);
+    }
+
+    public static String hash(byte[] content, String algorithm) {
         try {
             MessageDigest digest = MessageDigest.getInstance(algorithm);
-            byte[] digestBytes = digest.digest(content.getBytes(StandardCharsets.UTF_8));
+            byte[] digestBytes = digest.digest(content);
             StringBuilder hexString = new StringBuilder(2 * digestBytes.length);
             for (byte b : digestBytes) {
                 String hex = Integer.toHexString(0xff & b);
