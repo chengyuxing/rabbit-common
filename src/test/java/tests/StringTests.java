@@ -35,6 +35,11 @@ public class StringTests {
     static String sql = "${   a   } ${!a.d} insert into ${  Table  } ${tables.fields} values (${  VALUES.1.f }), (${values.0}), (${  Values   })${b}";
 
     @Test
+    public void testHash() {
+        System.out.println(StringUtil.hash(sql, "MD5"));
+    }
+
+    @Test
     public void test() throws Exception {
         Map<String, Object> args = new HashMap<>();
         args.put("Table", "test.user");

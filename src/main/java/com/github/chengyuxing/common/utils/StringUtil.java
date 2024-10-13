@@ -4,6 +4,9 @@ package com.github.chengyuxing.common.utils;
 import com.github.chengyuxing.common.StringFormatter;
 import com.github.chengyuxing.common.tuple.Pair;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -16,7 +19,6 @@ import java.util.regex.Pattern;
 public final class StringUtil {
     public static final String NUMBER_REGEX = "-?(0|[1-9]\\d*)(\\.\\d+)?";
     public static final String NEW_LINE = "\n";
-    public static final String TAB = "\t";
     /**
      * String formatter.
      */
@@ -360,15 +362,46 @@ public final class StringUtil {
         return content.replaceAll("\\s*\r?\n", NEW_LINE);
     }
 
+    /**
+     * Convert kebab-case to camel-case.
+     *
+     * @param content kebab-case content
+     * @return camel-case content
+     */
+    public static String camelize(String content) {
+        int idx = content.indexOf("-");
+        if (idx == -1) return content;
+        if (idx + 1 >= content.length()) return content;
+        String p = content.substring(idx, idx + 2);
+        content = content.replace(p, p.substring(1).toUpperCase());
+        return camelize(content);
+    }
+
     public static String xorEncryptDecrypt(String content, String key) {
         char[] keys = key.toCharArray();
         char[] contentChars = content.toCharArray();
         char[] result = new char[content.length()];
-
         for (int i = 0; i < contentChars.length; i++) {
             result[i] = (char) (contentChars[i] ^ keys[i % keys.length]);
         }
-
         return new String(result);
+    }
+
+    public static String hash(String content, String algorithm) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance(algorithm);
+            byte[] digestBytes = digest.digest(content.getBytes(StandardCharsets.UTF_8));
+            StringBuilder hexString = new StringBuilder(2 * digestBytes.length);
+            for (byte b : digestBytes) {
+                String hex = Integer.toHexString(0xff & b);
+                if (hex.length() == 1) {
+                    hexString.append('0');
+                }
+                hexString.append(hex);
+            }
+            return hexString.toString();
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
