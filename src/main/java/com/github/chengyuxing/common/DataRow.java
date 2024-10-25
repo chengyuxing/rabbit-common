@@ -3,14 +3,13 @@ package com.github.chengyuxing.common;
 import com.github.chengyuxing.common.utils.ObjectUtil;
 
 import java.util.*;
-import java.util.function.Function;
 
 import static com.github.chengyuxing.common.utils.ObjectUtil.coalesce;
 
 /**
  * A useful data type with more feature which extends LinkedHashMap.
  */
-public final class DataRow extends LinkedHashMap<String, Object> implements MapExtends<Object> {
+public class DataRow extends LinkedHashMap<String, Object> implements MapExtends<DataRow, Object> {
     /**
      * Constructs a new empty DataRow.
      */
@@ -308,65 +307,6 @@ public final class DataRow extends LinkedHashMap<String, Object> implements MapE
     public Long getLong(int index, Long... defaults) {
         Long v = ObjectUtil.toLong(_getByIndex(index));
         return Objects.nonNull(v) ? v : coalesce(defaults);
-    }
-
-    /**
-     * Get value type class by name.
-     *
-     * @param name key
-     * @return type class or null
-     */
-    public Class<?> getType(String name) {
-        Object v = get(name);
-        if (Objects.nonNull(v)) {
-            return v.getClass();
-        }
-        return null;
-    }
-
-    /**
-     * Get value type class by name.
-     *
-     * @param index index
-     * @return type class or null
-     */
-    public Class<?> getType(int index) {
-        Object v = _getByIndex(index);
-        if (Objects.nonNull(v)) {
-            return v.getClass();
-        }
-        return null;
-    }
-
-    /**
-     * Add a key-value.
-     *
-     * @param key   key
-     * @param value value
-     * @return DataRow
-     */
-    public DataRow add(String key, Object value) {
-        put(key, value);
-        return this;
-    }
-
-    /**
-     * Update a value.
-     *
-     * @param key     key
-     * @param updater updater: old value -&gt; new value
-     * @param <T>     old value type
-     * @return true if exists &amp; updated or false
-     */
-    @SuppressWarnings({"UnusedReturnValue", "unchecked"})
-    public <T> boolean update(String key, Function<T, Object> updater) {
-        if (containsKey(key)) {
-            Object oldV = get(key);
-            Object newV = updater.apply((T) oldV);
-            put(key, newV);
-            return true;
-        }
-        return false;
     }
 
     /**
