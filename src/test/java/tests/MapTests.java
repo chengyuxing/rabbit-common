@@ -25,7 +25,7 @@ public class MapTests {
 
     @Test
     public void testaa() throws Exception {
-        class MyMap extends HashMap<String, Object> implements MapExtends<Object> {
+        class MyMap extends HashMap<String, Object> implements MapExtends<MyMap, Object> {
         }
         MyMap map = new MyMap();
         map.put("a", 1);

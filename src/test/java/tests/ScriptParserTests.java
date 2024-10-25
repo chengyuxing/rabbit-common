@@ -3,55 +3,52 @@ package tests;
 import com.github.chengyuxing.common.DataRow;
 import com.github.chengyuxing.common.script.parser.FlowControlParser;
 import com.github.chengyuxing.common.script.expression.IPipe;
-import com.github.chengyuxing.common.script.parser.SimpleParser;
 import com.github.chengyuxing.common.KeyValue;
 import com.github.chengyuxing.common.utils.StringUtil;
 import org.junit.Test;
 
 import java.util.*;
 
-import static com.github.chengyuxing.common.utils.StringUtil.NEW_LINE;
-
 public class ScriptParserTests {
     @Test
     public void testSqlParser() {
-        SimpleParser parser = new SimpleParser() {
-            public static final String FOR_VARS_KEY = "_for";
-            public static final String VAR_PREFIX = FOR_VARS_KEY + ".";
-
-            @Override
-            protected String forLoopBodyFormatter(int forIndex, int varIndex, String varName, String idxName, String body, Map<String, Object> args) {
-                String formatted = StringUtil.FMT.format(String.join(NEW_LINE, body), args);
-                if (Objects.nonNull(varName)) {
-                    String varParam = VAR_PREFIX + forVarKey(varName, forIndex, varIndex);
-                    formatted = formatted.replace(VAR_PREFIX + varName, varParam);
-                }
-                if (Objects.nonNull(idxName)) {
-                    String idxParam = VAR_PREFIX + forVarKey(idxName, forIndex, varIndex);
-                    formatted = formatted.replace(VAR_PREFIX + idxName, idxParam);
-                }
-                return formatted;
-            }
-        };
-        List<Map<String, Object>> data = new ArrayList<>();
-        for (int i = 0; i < 200; i++) {
-            String sql = parser.parse("select * from test.user\n where id = 1\n" +
-                    " #for id of :ids delimiter ', ' open ' or id in (' close ')'\n" +
-                    "    #for add of :address\n" +
-                    "       :_for.add\n" +
-                    "       #if :id >= 2\n" +
-                    "       :_for.id\n" +
-                    "       #fi\n" +
-                    "    #done\n" +
-                    " #done", DataRow.of("ids", Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 1 + i, 11, 23, 45, 55, 67),
-                    "address", Arrays.asList("a", "b", "c")));
-            data.add(parser.getForContextVars());
-            if (i == 1) {
-                System.out.println(sql);
-                System.out.println(parser.getForContextVars().size());
-            }
-        }
-        System.out.println(data.size());
+//        SimpleParser parser = new SimpleParser() {
+//            public static final String FOR_VARS_KEY = "_for";
+//            public static final String VAR_PREFIX = FOR_VARS_KEY + ".";
+//
+//            @Override
+//            protected String forLoopBodyFormatter(int forIndex, int varIndex, String varName, String idxName, String body, Map<String, Object> args) {
+//                String formatted = StringUtil.FMT.format(String.join(NEW_LINE, body), args);
+//                if (Objects.nonNull(varName)) {
+//                    String varParam = VAR_PREFIX + forVarKey(varName, forIndex, varIndex);
+//                    formatted = formatted.replace(VAR_PREFIX + varName, varParam);
+//                }
+//                if (Objects.nonNull(idxName)) {
+//                    String idxParam = VAR_PREFIX + forVarKey(idxName, forIndex, varIndex);
+//                    formatted = formatted.replace(VAR_PREFIX + idxName, idxParam);
+//                }
+//                return formatted;
+//            }
+//        };
+//        List<Map<String, Object>> data = new ArrayList<>();
+//        for (int i = 0; i < 200; i++) {
+//            String sql = parser.parse("select * from test.user\n where id = 1\n" +
+//                    " #for id of :ids delimiter ', ' open ' or id in (' close ')'\n" +
+//                    "    #for add of :address\n" +
+//                    "       :_for.add\n" +
+//                    "       #if :id >= 2\n" +
+//                    "       :_for.id\n" +
+//                    "       #fi\n" +
+//                    "    #done\n" +
+//                    " #done", DataRow.of("ids", Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 1 + i, 11, 23, 45, 55, 67),
+//                    "address", Arrays.asList("a", "b", "c")));
+//            data.add(parser.getForContextVars());
+//            if (i == 1) {
+//                System.out.println(sql);
+//                System.out.println(parser.getForContextVars().size());
+//            }
+//        }
+//        System.out.println(data.size());
     }
 
     @Test

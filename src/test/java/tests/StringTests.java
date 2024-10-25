@@ -8,7 +8,6 @@ import com.github.chengyuxing.common.io.TypedProperties;
 import com.github.chengyuxing.common.script.parser.FlowControlParser;
 import com.github.chengyuxing.common.script.expression.Comparators;
 import com.github.chengyuxing.common.script.expression.IPipe;
-import com.github.chengyuxing.common.script.parser.SimpleParser;
 import com.github.chengyuxing.common.tuple.Pair;
 import com.github.chengyuxing.common.utils.ObjectUtil;
 import com.github.chengyuxing.common.utils.StringUtil;
@@ -272,37 +271,37 @@ public class StringTests {
 
     @Test
     public void testExp() {
-        SimpleParser simpleScriptParser = new SimpleParser() {
-            @Override
-            protected String trimExpression(String line) {
-                String tl = line.trim();
-                if (tl.startsWith("--")) {
-                    String s = tl.substring(2).trim();
-                    if (s.startsWith("#")) {
-                        return s;
-                    }
-                }
-                return line;
-            }
-
-            @Override
-            protected String forLoopBodyFormatter(int forIndex, int varIndex, String varName, String idxName, String body, Map<String, Object> args) {
-//                body.removeIf(l -> {
-//                    String tl = l.trim();
-//                    return tl.startsWith("--") && !tl.substring(2).trim().startsWith("#");
-//                });
-                String formatted = FMT.format(String.join(NEW_LINE, body), args);
-                if (varName != null) {
-                    String varParam = "_for." + forVarKey(varName, forIndex, varIndex);
-                    formatted = formatted.replace("_for." + varName, varParam);
-                }
-                if (idxName != null) {
-                    String idxParam = "_for." + forVarKey(idxName, forIndex, varIndex);
-                    formatted = formatted.replace("_for." + idxName, idxParam);
-                }
-                return formatted;
-            }
-        };
+//        SimpleParser simpleScriptParser = new SimpleParser() {
+//            @Override
+//            protected String trimExpression(String line) {
+//                String tl = line.trim();
+//                if (tl.startsWith("--")) {
+//                    String s = tl.substring(2).trim();
+//                    if (s.startsWith("#")) {
+//                        return s;
+//                    }
+//                }
+//                return line;
+//            }
+//
+//            @Override
+//            protected String forLoopBodyFormatter(int forIndex, int varIndex, String varName, String idxName, String body, Map<String, Object> args) {
+////                body.removeIf(l -> {
+////                    String tl = l.trim();
+////                    return tl.startsWith("--") && !tl.substring(2).trim().startsWith("#");
+////                });
+//                String formatted = FMT.format(String.join(NEW_LINE, body), args);
+//                if (varName != null) {
+//                    String varParam = "_for." + forVarKey(varName, forIndex, varIndex);
+//                    formatted = formatted.replace("_for." + varName, varParam);
+//                }
+//                if (idxName != null) {
+//                    String idxParam = "_for." + forVarKey(idxName, forIndex, varIndex);
+//                    formatted = formatted.replace("_for." + idxName, idxParam);
+//                }
+//                return formatted;
+//            }
+//        };
 
         DataRow d = DataRow.of(
                 "c", "blank",
@@ -326,12 +325,12 @@ public class StringTests {
 
         String s = new FileResource("me.sql").readString(StandardCharsets.UTF_8);
 
-        String res = simpleScriptParser.parse(s, d);
-        System.out.println(res);
+//        String res = simpleScriptParser.parse(s, d);
+//        System.out.println(res);
 
-        Map<String, Object> vars = simpleScriptParser.getForContextVars();
-        System.out.println(vars);
-        System.out.println(ObjectUtil.getDeepValue(vars, "item_6_0.value"));
+//        Map<String, Object> vars = simpleScriptParser.getForContextVars();
+//        System.out.println(vars);
+//        System.out.println(ObjectUtil.getDeepValue(vars, "item_6_0.value"));
     }
 
     @Test

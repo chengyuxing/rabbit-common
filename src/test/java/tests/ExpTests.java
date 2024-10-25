@@ -2,7 +2,6 @@ package tests;
 
 import com.github.chengyuxing.common.DataRow;
 import com.github.chengyuxing.common.script.expression.Comparators;
-import com.github.chengyuxing.common.script.expression.impl.FastExpression;
 import com.github.chengyuxing.common.utils.ObjectUtil;
 import com.github.chengyuxing.common.utils.StringUtil;
 import org.junit.Test;
@@ -23,12 +22,12 @@ public class ExpTests {
 
     @Test
     public void regexTest() throws Exception {
-        FastExpression expression = FastExpression.of(":user.id @ '^2\\d*$'");
-        Map<String, Object> map = new HashMap<>();
-        map.put("id", "2");
-        map.put("user", DataRow.of("id", "22"));
-        boolean res = expression.calc(map);
-        System.out.println(res);
+//        FastExpression expression = FastExpression.of(":user.id @ '^2\\d*$'");
+//        Map<String, Object> map = new HashMap<>();
+//        map.put("id", "2");
+//        map.put("user", DataRow.of("id", "22"));
+//        boolean res = expression.calc(map);
+//        System.out.println(res);
     }
 
     @Test
@@ -42,13 +41,13 @@ public class ExpTests {
 
     @Test
     public void test1() throws Exception {
-        System.out.println(FastExpression.boolExpressionEval(expression));
-        System.out.println(FastExpression.boolExpressionEval(expression2));
+//        System.out.println(FastExpression.boolExpressionEval(expression));
+//        System.out.println(FastExpression.boolExpressionEval(expression2));
     }
 
     @Test
     public void test3() throws Exception {
-        System.out.println(FastExpression.boolExpressionEval("true && false && true && true && true"));
+//        System.out.println(FastExpression.boolExpressionEval("true && false && true && true && true"));
     }
 
     @Test

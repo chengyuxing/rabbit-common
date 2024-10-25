@@ -4,7 +4,6 @@ import com.github.chengyuxing.common.DataRow;
 import com.github.chengyuxing.common.io.FileResource;
 import com.github.chengyuxing.common.script.lexer.IdentifierLexer;
 import com.github.chengyuxing.common.script.parser.FlowControlParser;
-import com.github.chengyuxing.common.script.parser.SimpleParser;
 import com.github.chengyuxing.common.utils.StringUtil;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -79,9 +78,9 @@ public class LanguageTests {
 
     @Test
     public void test2() {
-        SimpleParser simpleScriptParser = new SimpleParser();
-        String res = simpleScriptParser.parse(input, context);
-        System.out.println(res);
-        System.out.println(simpleScriptParser.getForContextVars());
+//        SimpleParser simpleScriptParser = new SimpleParser();
+//        String res = simpleScriptParser.parse(input, context);
+//        System.out.println(res);
+//        System.out.println(simpleScriptParser.getForContextVars());
     }
 }

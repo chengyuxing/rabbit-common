@@ -2,7 +2,6 @@ package tests.parser;
 
 import com.github.chengyuxing.common.DataRow;
 import com.github.chengyuxing.common.script.exception.ScriptSyntaxException;
-import com.github.chengyuxing.common.script.expression.impl.FastExpression;
 import org.junit.Test;
 
 import java.util.*;
@@ -42,29 +41,29 @@ public class IfParser {
         );
         Condition condition = new Condition(dataRow, "");
         parser(sql, dataRow, condition);
-        String res = calc(condition);
-        System.out.println(res);
+//        String res = calc(condition);
+//        System.out.println(res);
     }
 
-    public String calc(Condition root) {
-        StringJoiner sb = new StringJoiner("\n");
-        sb.add(String.join("\n", root.getPrefix()));
-        boolean res;
-        if (root.getExpression().equals("")) {
-            res = true;
-        } else {
-            FastExpression expression = new FastExpression(root.getExpression().trim().substring(3));
-            res = expression.calc(root.getArgs());
-        }
-        if (res) {
-            sb.add(String.join("\n", root.getContent()));
-            for (Condition condition : root.getChild()) {
-                sb.add(calc(condition));
-            }
-        }
-        sb.add(String.join("\n", root.getSuffix()));
-        return sb.toString();
-    }
+//    public String calc(Condition root) {
+//        StringJoiner sb = new StringJoiner("\n");
+//        sb.add(String.join("\n", root.getPrefix()));
+//        boolean res;
+//        if (root.getExpression().equals("")) {
+//            res = true;
+//        } else {
+////            FastExpression expression = new FastExpression(root.getExpression().trim().substring(3));
+////            res = expression.calc(root.getArgs());
+//        }
+//        if (res) {
+//            sb.add(String.join("\n", root.getContent()));
+//            for (Condition condition : root.getChild()) {
+//                sb.add(calc(condition));
+//            }
+//        }
+//        sb.add(String.join("\n", root.getSuffix()));
+//        return sb.toString();
+//    }
 
     public void parser(String content, Map<String, Object> args, Condition condition) {
         String[] lines = content.split(NEW_LINE);

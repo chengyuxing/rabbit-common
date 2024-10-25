@@ -28,7 +28,14 @@ public class NewRowTest {
     @Test
     public void testUpd() {
         DataRow row = DataRow.of("now", LocalDateTime.now(), "age", 28);
-        row.<LocalDateTime>update("now", v -> MostDateTime.of(v).toString("yyyy-MM-dd"));
+//        row.updateValue("now", v -> v.toString()+"][")
+//                .updateValue("age", v -> v.toString()+"][");
+        row.updateValues((k, v) -> {
+            if (k.equals("now")) {
+                return v.toString() + "{}";
+            }
+            return v.toString() + "[]";
+        });
         System.out.println(row);
     }
 
@@ -55,8 +62,9 @@ public class NewRowTest {
 
     @Test
     public void test3() {
-        String json = "{\"name\":\"cyx\"}";
-//        DataRow row = Jackson.toObject(json, DataRow.class);
-//        System.out.println(row);
+        System.out.println(DataRow.of("name", "cyx", "age", 28)
+                .add("address", "kunming")
+                .add("email", null)
+                .add("file", "").getInt("age"));
     }
 }

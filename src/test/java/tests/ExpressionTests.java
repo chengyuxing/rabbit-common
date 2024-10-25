@@ -2,7 +2,6 @@ package tests;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
-import com.github.chengyuxing.common.script.expression.impl.FastExpression;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,8 +19,8 @@ public class ExpressionTests {
 
     @Test
     public void fast() throws Exception {
-        FastExpression expression = FastExpression.of(exp);
-        System.out.println(expression.calc(args));
+//        FastExpression expression = FastExpression.of(exp);
+//        System.out.println(expression.calc(args));
     }
 
 
