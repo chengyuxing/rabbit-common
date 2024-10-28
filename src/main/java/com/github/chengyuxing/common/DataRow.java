@@ -70,7 +70,6 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
      *
      * @param entity entity
      * @return DataRow instance
-     * @see com.github.chengyuxing.common.anno.Alias @Alias
      */
     public static DataRow ofEntity(Object entity) {
         return ObjectUtil.entity2map(entity, DataRow::new);
@@ -354,7 +353,6 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
      *                              </blockquote>
      * @param <T>                   entity class type
      * @return entity
-     * @see com.github.chengyuxing.common.anno.Alias @Alias
      */
     public <T> T toEntity(Class<T> clazz, Object... constructorParameters) {
         return ObjectUtil.map2entity(this, clazz, constructorParameters);

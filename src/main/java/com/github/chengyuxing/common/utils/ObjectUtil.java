@@ -1,7 +1,7 @@
 package com.github.chengyuxing.common.utils;
 
 import com.github.chengyuxing.common.MostDateTime;
-import com.github.chengyuxing.common.anno.Alias;
+import com.github.chengyuxing.common.TiFunction;
 
 import java.beans.IntrospectionException;
 import java.lang.reflect.Field;
@@ -296,13 +296,13 @@ public final class ObjectUtil {
     /**
      * Entity convert to map.
      *
-     * @param entity     standard java bean entity
-     * @param mapBuilder (key-value count) {@code ->} (new Map instance)
-     * @param <T>        result type
+     * @param entity      standard java bean entity
+     * @param fieldMapper getter field mapping to the result map key
+     * @param mapBuilder  (key-value count) {@code ->} (new Map instance)
+     * @param <T>         result type
      * @return map
-     * @see Alias @Alias
      */
-    public static <T extends Map<String, Object>> T entity2map(Object entity, Function<Integer, T> mapBuilder) {
+    public static <T extends Map<String, Object>> T entity2map(Object entity, Function<Field, String> fieldMapper, Function<Integer, T> mapBuilder) {
         if (Objects.isNull(entity)) return mapBuilder.apply(0);
         try {
             Class<?> clazz = entity.getClass();
@@ -319,11 +319,8 @@ public final class ObjectUtil {
                     continue;
                 }
                 Object value = getter.invoke(entity);
-                String getName = get.getName();
-                if (get.isAnnotationPresent(Alias.class)) {
-                    getName = get.getDeclaredAnnotation(Alias.class).value();
-                }
-                map.put(getName, value);
+                String name = fieldMapper.apply(get);
+                map.put(name, value);
             }
             return map;
         } catch (IllegalAccessException | IntrospectionException | InvocationTargetException e) {
@@ -332,16 +329,29 @@ public final class ObjectUtil {
     }
 
     /**
+     * Entity convert to map.
+     *
+     * @param entity     standard java bean entity
+     * @param mapBuilder (key-value count) {@code ->} (new Map instance)
+     * @param <T>        result type
+     * @return map
+     */
+    public static <T extends Map<String, Object>> T entity2map(Object entity, Function<Integer, T> mapBuilder) {
+        return entity2map(entity, Field::getName, mapBuilder);
+    }
+
+    /**
      * Map convert to entity.
      *
      * @param source                map
      * @param targetType            entity class
+     * @param fieldMapper           setter field mapping to the source map key
+     * @param valueMapper           invoke setter to set the mapping value (value type, entity field type, value) -&gt; (new value)
      * @param constructorParameters constructor parameters
      * @param <T>                   entity type
      * @return entity
-     * @see Alias @Alias
      */
-    public static <T> T map2entity(Map<String, Object> source, Class<T> targetType, Object... constructorParameters) {
+    public static <T> T map2entity(Map<String, Object> source, Class<T> targetType, Function<Field, String> fieldMapper, TiFunction<Class<?>, Class<?>, Object, Object> valueMapper, Object... constructorParameters) {
         try {
             if (Objects.isNull(source)) return null;
             T entity = ReflectUtil.getInstance(targetType, constructorParameters);
@@ -356,71 +366,77 @@ public final class ObjectUtil {
                 if (Objects.isNull(set)) {
                     continue;
                 }
-                String setName = set.getName();
-                if (set.isAnnotationPresent(Alias.class)) {
-                    setName = set.getDeclaredAnnotation(Alias.class).value();
-                }
-                Object value = source.get(setName);
+                String name = fieldMapper.apply(set);
+                Object value = source.get(name);
                 if (Objects.isNull(value) || setter.getParameterCount() != 1) {
                     continue;
                 }
                 // dataRow field type
-                Class<?> dft = value.getClass();
+                Class<?> vt = value.getClass();
                 // entity field type
-                Class<?> eft = setter.getParameterTypes()[0];
-                if (eft.isAssignableFrom(dft)) {
+                Class<?> et = setter.getParameterTypes()[0];
+
+                if (Objects.nonNull(valueMapper)) {
+                    Object mapperValue = valueMapper.apply(vt, et, value);
+                    if (Objects.nonNull(mapperValue)) {
+                        setter.invoke(entity, mapperValue);
+                        continue;
+                    }
+                }
+
+                if (et.isAssignableFrom(vt)) {
                     setter.invoke(entity, value);
                     continue;
                 }
-                if (eft == String.class) {
+                if (et == String.class) {
                     setter.invoke(entity, value.toString());
                     continue;
                 }
-                if (eft == Character.class) {
+                if (et == Character.class || et == char.class) {
                     setter.invoke(entity, value.toString().charAt(0));
                     continue;
                 }
-                if (eft == Integer.class) {
+                if (et == Integer.class || et == int.class) {
                     setter.invoke(entity, toInteger(value));
                     continue;
                 }
-                if (eft == Long.class) {
+                if (et == Long.class || et == long.class) {
                     setter.invoke(entity, toLong(value));
                     continue;
                 }
-                if (eft == Double.class) {
+                if (et == Double.class || et == double.class) {
                     setter.invoke(entity, toDouble(value));
                     continue;
                 }
-                if (eft == Float.class) {
+                if (et == Float.class || et == float.class) {
                     setter.invoke(entity, toFloat(value));
                     continue;
                 }
-                if (eft == Date.class) {
+                if (et == Date.class) {
                     setter.invoke(entity, MostDateTime.toDate(value.toString()));
                     continue;
                 }
-                if (Temporal.class.isAssignableFrom(eft)) {
-                    @SuppressWarnings("unchecked") Class<? extends Temporal> j8DateTypeClass = (Class<? extends Temporal>) eft;
-                    if (Date.class.isAssignableFrom(dft)) {
+                if (Temporal.class.isAssignableFrom(et)) {
+                    @SuppressWarnings("unchecked") Class<? extends Temporal> j8DateTypeClass = (Class<? extends Temporal>) et;
+                    if (Date.class.isAssignableFrom(vt)) {
                         setter.invoke(entity, toTemporal(j8DateTypeClass, (Date) value));
                         continue;
                     }
-                    if (dft == String.class) {
+                    if (vt == String.class) {
                         Date date = MostDateTime.toDate(value.toString());
                         setter.invoke(entity, toTemporal(j8DateTypeClass, date));
                     }
                     continue;
                 }
                 // array to collection
-                if (Collection.class.isAssignableFrom(eft)) {
+                if (Collection.class.isAssignableFrom(et)) {
                     // object array parsing to collection exclude blob
-                    if (dft != byte[].class && value instanceof Object[]) {
-                        if (List.class.isAssignableFrom(eft)) {
+                    if (vt != byte[].class && value instanceof Object[]) {
+                        if (List.class.isAssignableFrom(et)) {
                             setter.invoke(entity, new ArrayList<>(Arrays.asList((Object[]) value)));
                             continue;
                         }
-                        if (Set.class.isAssignableFrom(eft)) {
+                        if (Set.class.isAssignableFrom(et)) {
                             setter.invoke(entity, new HashSet<>(Arrays.asList((Object[]) value)));
                         }
                     }
@@ -431,5 +447,18 @@ public final class ObjectUtil {
                  IllegalAccessException e) {
             throw new RuntimeException("convert to " + targetType.getTypeName() + " error.", e);
         }
+    }
+
+    /**
+     * Map convert to entity.
+     *
+     * @param source                map
+     * @param targetType            entity class
+     * @param constructorParameters constructor parameters
+     * @param <T>                   entity type
+     * @return entity
+     */
+    public static <T> T map2entity(Map<String, Object> source, Class<T> targetType, Object... constructorParameters) {
+        return map2entity(source, targetType, Field::getName, null, constructorParameters);
     }
 }
