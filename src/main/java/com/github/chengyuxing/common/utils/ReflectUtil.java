@@ -22,7 +22,7 @@ public final class ReflectUtil {
 
     public static String initGetMethod(String field, Class<?> type) {
         String prefix = "get";
-        if (type == boolean.class || type == Boolean.class)
+        if (type == boolean.class)
             prefix = "is";
         return prefix + field.substring(0, 1).toUpperCase().concat(field.substring(1));
     }

@@ -19,7 +19,9 @@ public class ReflectTests {
     @Test
     public void r2e() throws Exception {
         int x = 10, y = 18;
-        DataRow row = DataRow.of("x", x, "y", y, "name", "昆明市");
+        DataRow row = DataRow.of("x", x, "y", y, "name", "昆明市")
+                .updateKey("","")
+                .removeIfAbsent();
         System.out.println(row);
         System.out.println(row.toEntity(Coord.class, row.get("x"), row.get("y")));
     }
@@ -65,18 +67,6 @@ public class ReflectTests {
         DataRow row = DataRow.of("a", 1, "b", "cyx");
         Your your = ReflectUtil.getInstance(Your.class, row);
         System.out.println(your);
-    }
-
-    @Test
-    public void testD() throws NoSuchMethodException {
-        My my = new My();
-        my.setAge(20);
-        my.setName(100);
-        DataRow row = DataRow.ofEntity(my);
-        System.out.println(row);
-
-        My my1 = row.toEntity(My.class);
-        System.out.println(my1);
     }
 
     @Test
