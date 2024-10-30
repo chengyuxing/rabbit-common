@@ -362,6 +362,17 @@ public final class StringUtil {
         return content.replaceAll("\\s*\r?\n", NEW_LINE);
     }
 
+    public static String repeat(String str, int times) {
+        if (times <= 0) {
+            return "";
+        }
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < times; i++) {
+            builder.append(str);
+        }
+        return builder.toString();
+    }
+
     /**
      * Convert kebab-case to camel-case.
      *
