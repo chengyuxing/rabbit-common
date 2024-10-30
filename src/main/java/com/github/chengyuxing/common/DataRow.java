@@ -41,7 +41,7 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
      * @return DataRow instance
      */
     public static DataRow of(Object... input) {
-        return ObjectUtil.pairs2map(DataRow::new, input);
+        return ObjectUtil.pairsToMap(DataRow::new, input);
     }
 
     /**
@@ -72,7 +72,7 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
      * @return DataRow instance
      */
     public static DataRow ofEntity(Object entity) {
-        return ObjectUtil.entity2map(entity, DataRow::new);
+        return ObjectUtil.entityToMap(entity, DataRow::new);
     }
 
     /**
@@ -355,7 +355,7 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
      * @return entity
      */
     public <T> T toEntity(Class<T> clazz, Object... constructorParameters) {
-        return ObjectUtil.map2entity(this, clazz, constructorParameters);
+        return ObjectUtil.mapToEntity(this, clazz, constructorParameters);
     }
 
     /**

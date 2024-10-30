@@ -280,7 +280,7 @@ public final class ObjectUtil {
      * @param <T>        result type
      * @return map
      */
-    public static <T extends Map<String, Object>> T pairs2map(Function<Integer, T> mapBuilder, Object... input) {
+    public static <T extends Map<String, Object>> T pairsToMap(Function<Integer, T> mapBuilder, Object... input) {
         if ((input.length & 1) != 0) {
             throw new IllegalArgumentException("key value are not a pair.");
         }
@@ -302,7 +302,7 @@ public final class ObjectUtil {
      * @param <T>         result type
      * @return map
      */
-    public static <T extends Map<String, Object>> T entity2map(Object entity, Function<Field, String> fieldMapper, Function<Integer, T> mapBuilder) {
+    public static <T extends Map<String, Object>> T entityToMap(Object entity, Function<Field, String> fieldMapper, Function<Integer, T> mapBuilder) {
         if (Objects.isNull(entity)) return mapBuilder.apply(0);
         try {
             Class<?> clazz = entity.getClass();
@@ -336,8 +336,8 @@ public final class ObjectUtil {
      * @param <T>        result type
      * @return map
      */
-    public static <T extends Map<String, Object>> T entity2map(Object entity, Function<Integer, T> mapBuilder) {
-        return entity2map(entity, Field::getName, mapBuilder);
+    public static <T extends Map<String, Object>> T entityToMap(Object entity, Function<Integer, T> mapBuilder) {
+        return entityToMap(entity, Field::getName, mapBuilder);
     }
 
     /**
@@ -351,7 +351,7 @@ public final class ObjectUtil {
      * @param <T>                   entity type
      * @return entity
      */
-    public static <T> T map2entity(Map<String, Object> source, Class<T> targetType, Function<Field, String> fieldMapper, TiFunction<Class<?>, Class<?>, Object, Object> valueMapper, Object... constructorParameters) {
+    public static <T> T mapToEntity(Map<String, Object> source, Class<T> targetType, Function<Field, String> fieldMapper, TiFunction<Class<?>, Class<?>, Object, Object> valueMapper, Object... constructorParameters) {
         try {
             if (Objects.isNull(source)) return null;
             T entity = ReflectUtil.getInstance(targetType, constructorParameters);
@@ -458,7 +458,7 @@ public final class ObjectUtil {
      * @param <T>                   entity type
      * @return entity
      */
-    public static <T> T map2entity(Map<String, Object> source, Class<T> targetType, Object... constructorParameters) {
-        return map2entity(source, targetType, Field::getName, null, constructorParameters);
+    public static <T> T mapToEntity(Map<String, Object> source, Class<T> targetType, Object... constructorParameters) {
+        return mapToEntity(source, targetType, Field::getName, null, constructorParameters);
     }
 }
