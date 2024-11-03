@@ -1,6 +1,8 @@
 package com.github.chengyuxing.common.io;
 
 import com.github.chengyuxing.common.utils.ResourceUtil;
+import org.intellij.lang.annotations.Pattern;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
 import java.net.URISyntaxException;
@@ -26,7 +28,7 @@ public class ClassPathResource {
      *
      * @param path file path
      */
-    public ClassPathResource(String path) {
+    public ClassPathResource(@NotNull @Pattern("[^/].*") String path) {
         this.path = cleanPath(path);
         classLoader = getClassLoader();
     }
@@ -37,7 +39,7 @@ public class ClassPathResource {
      * @param path path
      * @return correct classpath resource path
      */
-    private String cleanPath(String path) {
+    private String cleanPath(@NotNull String path) {
         if (path.startsWith("/")) {
             return path.substring(1).trim();
         }

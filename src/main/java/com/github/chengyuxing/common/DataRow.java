@@ -1,6 +1,7 @@
 package com.github.chengyuxing.common;
 
 import com.github.chengyuxing.common.utils.ObjectUtil;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
@@ -30,7 +31,7 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
      *
      * @param map map
      */
-    public DataRow(Map<String, Object> map) {
+    public DataRow(@NotNull Map<String, Object> map) {
         super(map);
     }
 
@@ -51,7 +52,7 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
      * @param values values array
      * @return DataRow instance
      */
-    public static DataRow of(String[] keys, Object[] values) {
+    public static DataRow of(String[] @NotNull keys, Object[] @NotNull values) {
         if (keys.length == values.length) {
             if (keys.length == 0) {
                 return new DataRow(0);
@@ -81,7 +82,7 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
      * @param map map
      * @return DataRow instance
      */
-    public static DataRow ofMap(Map<String, Object> map) {
+    public static DataRow ofMap(@NotNull Map<String, Object> map) {
         return new DataRow(map);
     }
 
@@ -354,7 +355,7 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
      * @param <T>                   entity class type
      * @return entity
      */
-    public <T> T toEntity(Class<T> clazz, Object... constructorParameters) {
+    public <T> T toEntity(@NotNull Class<T> clazz, Object... constructorParameters) {
         return ObjectUtil.mapToEntity(this, clazz, constructorParameters);
     }
 

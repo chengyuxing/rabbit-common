@@ -309,7 +309,7 @@ public class Test2 {
     @Test
     public void testDt() {
         DataRow row = DataRow.of("now", "2022-12-23T09:54:00", "dt", new Date());
-        DateEntity dateEntity = ObjectUtil.map2entity(row, DateEntity.class);
+        DateEntity dateEntity = ObjectUtil.mapToEntity(row, DateEntity.class);
         System.out.println(dateEntity);
 
         Instant instant = ObjectUtil.toTemporal(Instant.class, new Date());

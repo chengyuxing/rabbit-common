@@ -1,6 +1,7 @@
 package com.github.chengyuxing.common.io;
 
 import com.github.chengyuxing.common.DataRow;
+import org.intellij.lang.annotations.Subst;
 
 import java.io.*;
 import java.net.*;
@@ -36,7 +37,7 @@ public class FileResource extends ClassPathResource {
      * @param path file path
      * @see FileResource
      */
-    public FileResource(String path) {
+    public FileResource(@Subst("uri or classpath") String path) {
         super(path);
     }
 
@@ -47,7 +48,7 @@ public class FileResource extends ClassPathResource {
      * @param properties properties e.g. http(s) request property {@code headers}:{@link Map}
      * @see FileResource
      */
-    public FileResource(String path, Map<String, Object> properties) {
+    public FileResource(@Subst("uri or classpath") String path, Map<String, Object> properties) {
         super(path);
         if (Objects.nonNull(properties)) {
             this.properties.putAll(properties);
