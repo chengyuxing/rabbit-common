@@ -52,7 +52,7 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
      * @param values values array
      * @return DataRow instance
      */
-    public static DataRow of(String[] @NotNull keys, Object[] @NotNull values) {
+    public static DataRow of(@NotNull String[] keys, @NotNull Object[] values) {
         if (keys.length == values.length) {
             if (keys.length == 0) {
                 return new DataRow(0);
