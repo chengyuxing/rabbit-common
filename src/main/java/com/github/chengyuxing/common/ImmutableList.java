@@ -1,5 +1,7 @@
 package com.github.chengyuxing.common;
 
+import org.jetbrains.annotations.UnmodifiableView;
+
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.Stream;
@@ -9,6 +11,7 @@ import java.util.stream.Stream;
  *
  * @param <T> element type
  */
+@UnmodifiableView
 public final class ImmutableList<T> {
     private final List<T> elements;
 
