@@ -1,6 +1,5 @@
 package com.github.chengyuxing.common.io;
 
-import com.github.chengyuxing.common.utils.ResourceUtil;
 import org.intellij.lang.annotations.Pattern;
 import org.jetbrains.annotations.NotNull;
 
@@ -122,17 +121,7 @@ public class ClassPathResource {
      * @throws IOException if file not exists
      */
     public void transferTo(OutputStream out) throws IOException {
-        try (ReadableByteChannel inChannel = Channels.newChannel(getInputStream());
-             WritableByteChannel outChannel = Channels.newChannel(out)) {
-            ByteBuffer buffer = ByteBuffer.allocate(8192);
-            while (inChannel.read(buffer) != -1) {
-                buffer.flip();
-                while (buffer.hasRemaining()) {
-                    outChannel.write(buffer);
-                }
-                buffer.clear();
-            }
-        }
+        transferTo(getInputStream(), out);
     }
 
     /**
@@ -197,13 +186,48 @@ public class ClassPathResource {
     public long getLastModified() throws URISyntaxException {
         URL url = getURL();
         long dt = 0;
-        if (ResourceUtil.isFileURL(url)) {
+        if (isFileURL(url)) {
             File f = Paths.get(url.toURI()).toFile();
             dt = f.lastModified();
-        } else if (ResourceUtil.isJarURL(url)) {
+        } else if (isJarURL(url)) {
             dt = -1;
         }
         return dt;
+    }
+
+    /**
+     * Read all bytes.
+     *
+     * @param in input stream
+     * @return all bytes
+     * @throws IOException if file not exists
+     */
+    public static byte[] readBytes(InputStream in) throws IOException {
+        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            transferTo(in, out);
+            return out.toByteArray();
+        }
+    }
+
+    /**
+     * Transfer input to output.
+     *
+     * @param in  input stream
+     * @param out output stream
+     * @throws IOException if file not exists
+     */
+    public static void transferTo(InputStream in, OutputStream out) throws IOException {
+        try (ReadableByteChannel inChannel = Channels.newChannel(in);
+             WritableByteChannel outChannel = Channels.newChannel(out)) {
+            ByteBuffer buffer = ByteBuffer.allocate(8192);
+            while (inChannel.read(buffer) != -1) {
+                buffer.flip();
+                while (buffer.hasRemaining()) {
+                    outChannel.write(buffer);
+                }
+                buffer.clear();
+            }
+        }
     }
 
     /**
@@ -230,5 +254,27 @@ public class ClassPathResource {
         }
 
         return cl;
+    }
+
+    /**
+     * Check is file url or not by protocol.
+     *
+     * @param url url
+     * @return true or false
+     */
+    public static boolean isFileURL(URL url) {
+        String protocol = url.getProtocol();
+        return "file".equals(protocol) || "vfsfile".equals(protocol) || "vfs".equals(protocol);
+    }
+
+    /**
+     * Check is jar url or not by protocol.
+     *
+     * @param url url
+     * @return true or false
+     */
+    public static boolean isJarURL(URL url) {
+        String protocol = url.getProtocol();
+        return "jar".equals(protocol) || "war".equals(protocol) || "zip".equals(protocol) || "vfszip".equals(protocol) || "wsjar".equals(protocol);
     }
 }
