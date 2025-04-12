@@ -157,7 +157,7 @@ public class StringTests {
         System.out.println(httpR.getPath());
         System.out.println(httpR.getURL());
         System.out.println(httpR.getLastModified());
-        System.out.println(FileResource.formatFileSize(httpR.readBytes()));
+        System.out.println(FileResource.formatFileSize(httpR.readBytes().length));
         System.out.println("----");
         String s = new FileResource("https://github.com/chengyuxing/sqlc/raw/master/README.md").readString(StandardCharsets.UTF_8);
         System.out.println(s);
