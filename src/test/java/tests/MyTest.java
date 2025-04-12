@@ -2,24 +2,33 @@ package tests;
 
 import com.github.chengyuxing.common.DataRow;
 import com.github.chengyuxing.common.ImmutableList;
-import com.github.chengyuxing.common.KeyValue;
-import com.github.chengyuxing.common.tuple.Pair;
+import com.github.chengyuxing.common.io.FileResource;
 import com.github.chengyuxing.common.tuple.Quintuple;
 import com.github.chengyuxing.common.tuple.Triple;
 import com.github.chengyuxing.common.tuple.Tuples;
 import com.github.chengyuxing.common.utils.ObjectUtil;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
+import org.jetbrains.annotations.Nullable;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.beans.IntrospectionException;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 public class MyTest {
+    private static final OkHttpClient client = new OkHttpClient();
 
     static Map<String, Object> map = new HashMap<>();
     static DataRow row = DataRow.of();
@@ -33,6 +42,34 @@ public class MyTest {
         row = DataRow.of("a", 1,
                 "b", 2,
                 "name", "chengyuxing");
+    }
+
+    @Test
+    public void testResourceIntercept() {
+        new FileResource("http://localhost:8080/share/homebrew.md") {
+            @Override
+            protected @Nullable Supplier<InputStream> requestIntercept(final String path) {
+                if (!path.endsWith("http:")) {
+                    return null;
+                }
+                return () -> {
+                    Request request = new Request.Builder().get().url(path).build();
+                    try {
+                        Response response = client.newCall(request).execute();
+                        if (response.isSuccessful()) {
+                            ResponseBody body = response.body();
+                            if (body != null) {
+                                return body.byteStream();
+                            }
+                        }
+                        throw new RuntimeException("");
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                };
+            }
+        }.readLines(StandardCharsets.UTF_8)
+                .forEach(System.out::println);
     }
 
     @Test

@@ -224,7 +224,6 @@ public class Test2 {
     public void sss() throws Exception {
         String str = ";;;;;;;;]\n  \t\r   Select * from Test.user;;;\t   ;;";
 //        System.out.println(StringUtil.trimStarts(str, ";", "\n", " ", "]", "\t", "\r"));
-        System.out.println(StringUtil.trim(str, "\n", "\t", "]", ";", " ", "\r"));
     }
 
     @Test
