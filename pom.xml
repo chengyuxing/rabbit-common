@@ -6,7 +6,7 @@
     <description>A common utils lib.</description>
     <groupId>com.github.chengyuxing</groupId>
     <artifactId>rabbit-common</artifactId>
-    <version>3.0.0</version>
+    <version>3.0.1</version>
     <packaging>jar</packaging>
     <name>rabbit-common</name>
     <url>https://github.com/chengyuxing/rabbit-common</url>
@@ -129,6 +129,12 @@
     </profiles>
 
     <dependencies>
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp</artifactId>
+            <version>4.12.0</version>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
