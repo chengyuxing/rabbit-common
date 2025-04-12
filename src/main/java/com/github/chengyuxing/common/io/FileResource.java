@@ -200,16 +200,6 @@ public class FileResource extends ClassPathResource {
     /**
      * Get string size view of bytes size.
      *
-     * @param bytes bytes
-     * @return string size view with unit
-     */
-    public static String formatFileSize(byte[] bytes) {
-        return formatFileSize(bytes.length);
-    }
-
-    /**
-     * Get string size view of bytes size.
-     *
      * @param bytes bytes length
      * @return string size view with unit
      */
