@@ -72,20 +72,18 @@ public final class StringUtil {
     public static Pair<String, List<String>> replaceAll(final String s, @Language("Regexp") final String regex, final String replacement) {
         Pattern p = Pattern.compile(regex);
         Matcher m = p.matcher(s);
-        List<String> founded = new ArrayList<>();
-        StringBuilder sb = new StringBuilder();
-        int lastMatchEnd = 0;
+        List<String> found = new ArrayList<>();
+        StringBuffer sb = new StringBuffer();
         while (m.find()) {
-            String myReplacement = replacement;
+            found.add(m.group());
+            String resolvedReplacement = replacement;
             for (int i = 0, j = m.groupCount(); i <= j; i++) {
-                myReplacement = myReplacement.replace("$" + i, m.group(i));
+                resolvedReplacement = resolvedReplacement.replace("$" + i, Matcher.quoteReplacement(m.group(i)));
             }
-            sb.append(s, lastMatchEnd, m.start()).append(myReplacement);
-            founded.add(m.group());
-            lastMatchEnd = m.end();
+            m.appendReplacement(sb, resolvedReplacement);
         }
-        sb.append(s.substring(lastMatchEnd));
-        return Pair.of(sb.toString(), founded);
+        m.appendTail(sb);
+        return Pair.of(sb.toString(), found);
     }
 
     public static boolean startsWiths(String str, String... keywords) {
