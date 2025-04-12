@@ -170,7 +170,7 @@ public class Test2 {
                 out.write(i);
             }
             byte[] bytes = arr.toByteArray();
-            System.out.println(FileResource.formatFileSize(bytes));
+            System.out.println(FileResource.formatFileSize(bytes.length));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
