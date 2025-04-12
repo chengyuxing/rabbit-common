@@ -1,16 +1,16 @@
 package com.github.chengyuxing.common.io;
 
 import com.github.chengyuxing.common.DataRow;
+import org.intellij.lang.annotations.Language;
 import org.intellij.lang.annotations.Subst;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
 import java.net.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Formatter;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
+import java.util.function.Supplier;
 
 /**
  * File resource, support classpath and uri e.g.
@@ -27,7 +27,7 @@ import java.util.Objects;
  * </ul>
  */
 public class FileResource extends ClassPathResource {
-    //language=regexp
+    @Language("Regexp")
     private final static String SCHEMAS_PATTERN = "(file|http|https|ftp)://.+";
     private final DataRow properties = new DataRow();
 
@@ -66,6 +66,10 @@ public class FileResource extends ClassPathResource {
 
     @Override
     public InputStream getInputStream() {
+        Supplier<InputStream> interceptor = requestIntercept(path);
+        if (Objects.nonNull(interceptor)) {
+            return interceptor.get();
+        }
         if (isURI()) {
             try {
                 String schema = path.substring(0, path.indexOf(':'));
@@ -150,6 +154,13 @@ public class FileResource extends ClassPathResource {
             return getFileName(path, true);
         }
         return super.getFileName();
+    }
+
+    /**
+     * Intercept the resource request.
+     */
+    protected @Nullable Supplier<InputStream> requestIntercept(final String path) {
+        return null;
     }
 
     /**
