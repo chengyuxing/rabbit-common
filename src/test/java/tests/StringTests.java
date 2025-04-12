@@ -234,7 +234,11 @@ public class StringTests {
 
     @Test
     public void test35() {
-        System.out.println(StringUtil.replaceIgnoreCase("abcO", "o", "D"));
+//        System.out.println(StringUtil.replaceIgnoreCase("abcO", "o", "D"));
+        String s = "curl -T /Volumes/TU280Pro/work/word/word4.zip ftp://ftpuser:skynet123456@221.3.220.93:6021";
+        System.out.println(StringUtil.replaceAll(s, "word|skynet|220|280|330", "<b>$0</b>"));
+        System.out.println(StringUtil.replaceAll("Hello world!", "ll|o", "#$0#"));
+        System.out.println("Hello worls".replaceAll("(?i)d|s$", ""));
     }
 
     public static void inc(AtomicInteger i) {

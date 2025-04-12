@@ -147,12 +147,12 @@ public final class ObjectUtil {
         if (!path.startsWith("/")) {
             throw new IllegalArgumentException("Path expression syntax error, must startsWith '/', for example '/" + path + "'");
         }
-        String trimStart = path.substring(1);
-        if (!trimStart.contains("/")) {
-            return getValue(obj, trimStart);
+        String paths = path.substring(1);
+        if (!paths.contains("/")) {
+            return getValue(obj, paths);
         }
-        String key = trimStart.substring(0, trimStart.indexOf("/"));
-        String tail = trimStart.substring(trimStart.indexOf("/"));
+        String key = paths.substring(0, paths.indexOf("/"));
+        String tail = paths.substring(paths.indexOf("/"));
         return walkDeepValue(getValue(obj, key), tail);
     }
 
