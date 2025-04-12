@@ -3,6 +3,7 @@ package com.github.chengyuxing.common.utils;
 
 import com.github.chengyuxing.common.StringFormatter;
 import com.github.chengyuxing.common.tuple.Pair;
+import org.intellij.lang.annotations.Language;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -38,7 +39,7 @@ public final class StringUtil {
      * @param groupName regex splitter group name
      * @return [each parts, splitters]
      */
-    public static Pair<List<String>, List<String>> regexSplit(String s, String regex, String groupName) {
+    public static Pair<List<String>, List<String>> regexSplit(final String s, @Language("Regexp") final String regex, final String groupName) {
         Pattern p = Pattern.compile(regex);
         Matcher m = p.matcher(s);
         int splitIndex = 0;
@@ -51,6 +52,40 @@ public final class StringUtil {
         }
         items.add(s.substring(splitIndex));
         return Pair.of(items, splitSymbols);
+    }
+
+    /**
+     * Replace all and returns the founded terms.
+     * <p>e.g. <code>Hello world!</code></p>
+     * <blockquote>
+     * <pre>replaceAll("Hello world!", "ll|o", "#$0#")</pre>
+     * </blockquote>
+     * <blockquote>
+     * <pre>(He#ll##o# w#o#rld!, [ll, o, o])</pre>
+     * </blockquote>
+     *
+     * @param s           string
+     * @param regex       regex
+     * @param replacement replacement
+     * @return [new string, founded terms]
+     */
+    public static Pair<String, List<String>> replaceAll(final String s, @Language("Regexp") final String regex, final String replacement) {
+        Pattern p = Pattern.compile(regex);
+        Matcher m = p.matcher(s);
+        List<String> founded = new ArrayList<>();
+        StringBuilder sb = new StringBuilder();
+        int lastMatchEnd = 0;
+        while (m.find()) {
+            String myReplacement = replacement;
+            for (int i = 0, j = m.groupCount(); i <= j; i++) {
+                myReplacement = myReplacement.replace("$" + i, m.group(i));
+            }
+            sb.append(s, lastMatchEnd, m.start()).append(myReplacement);
+            founded.add(m.group());
+            lastMatchEnd = m.end();
+        }
+        sb.append(s.substring(lastMatchEnd));
+        return Pair.of(sb.toString(), founded);
     }
 
     public static boolean startsWiths(String str, String... keywords) {
@@ -126,44 +161,6 @@ public final class StringUtil {
             }
         }
         return ok;
-    }
-
-    public static String trimStarts(String str, String... starts) {
-        if (starts.length < 1) {
-            return str;
-        }
-        boolean again = false;
-        for (String s : starts) {
-            if (!s.isEmpty() && str.startsWith(s)) {
-                str = str.substring(s.length());
-                again = true;
-            }
-        }
-        if (again) {
-            return trimStarts(str, starts);
-        }
-        return str;
-    }
-
-    public static String trimEnds(String str, String... ends) {
-        if (ends.length < 1) {
-            return str;
-        }
-        boolean again = false;
-        for (String end : ends) {
-            if (!end.isEmpty() && str.endsWith(end)) {
-                str = str.substring(0, str.length() - end.length());
-                again = true;
-            }
-        }
-        if (again) {
-            return trimEnds(str, ends);
-        }
-        return str;
-    }
-
-    public static String trim(String str, String... keywords) {
-        return trimStarts(trimEnds(str, keywords), keywords);
     }
 
     public static int indexOfIgnoreCase(String source, String target) {
@@ -301,39 +298,6 @@ public final class StringUtil {
             return false;
         }
         return numeric.toString().matches(NUMBER_REGEX);
-    }
-
-    public static int searchIndexUntilNotBlank(String text, int index, boolean reverse) {
-        if (reverse) {
-            while (index-- > 0) {
-                char c = text.charAt(index);
-                if (c != '\n' && c != '\t' && c != '\r' && c != ' ') {
-                    return index;
-                }
-            }
-            return -1;
-        } else {
-            int lastIndex = text.length() - 1;
-            while (index++ < lastIndex) {
-                char c = text.charAt(index);
-                if (c != '\n' && c != '\t' && c != '\r' && c != ' ') {
-                    return index;
-                }
-            }
-            return lastIndex + 1;
-        }
-    }
-
-    public static String replaceFirst(String str, String oldValue, String newValue) {
-        return Pattern.compile(oldValue, Pattern.LITERAL).matcher(str).replaceFirst(newValue);
-    }
-
-    public static String replaceFirstIgnoreCase(String str, String oldValue, String newValue) {
-        return Pattern.compile(oldValue, Pattern.LITERAL | Pattern.CASE_INSENSITIVE).matcher(str).replaceFirst(newValue);
-    }
-
-    public static String replaceIgnoreCase(String str, String oldValue, String newValue) {
-        return Pattern.compile(oldValue, Pattern.LITERAL | Pattern.CASE_INSENSITIVE).matcher(str).replaceAll(newValue);
     }
 
     public static int countOfContainsIgnoreCase(final String str, final String substr) {
