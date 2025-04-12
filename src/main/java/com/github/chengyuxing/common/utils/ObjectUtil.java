@@ -2,6 +2,8 @@ package com.github.chengyuxing.common.utils;
 
 import com.github.chengyuxing.common.MostDateTime;
 import com.github.chengyuxing.common.TiFunction;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.beans.IntrospectionException;
 import java.lang.reflect.Field;
@@ -39,7 +41,7 @@ public final class ObjectUtil {
      * @param more   more above.
      * @return result
      */
-    public static Object decode(Object value, Object equal, Object result, Object... more) {
+    public static @Nullable Object decode(Object value, Object equal, Object result, Object... more) {
         Object[] objs = new Object[more.length + 2];
         objs[0] = equal;
         objs[1] = result;
@@ -48,7 +50,7 @@ public final class ObjectUtil {
         Object res = null;
         int i = 0;
         while (i < objs.length) {
-            if (value.equals(objs[i])) {
+            if (Objects.equals(value, objs[i])) {
                 res = objs[i + 1];
                 break;
             }
@@ -69,7 +71,7 @@ public final class ObjectUtil {
      * @return value or null
      */
     @SafeVarargs
-    public static <T> T coalesce(T... values) {
+    public static @Nullable <T> T coalesce(T... values) {
         for (T v : values) {
             if (Objects.nonNull(v)) {
                 return v;
@@ -86,7 +88,7 @@ public final class ObjectUtil {
      * @return value
      * @throws IllegalArgumentException if java bean access error
      */
-    public static Object getValue(Object obj, String key) {
+    public static @Nullable Object getValue(Object obj, @NotNull String key) {
         if (Objects.isNull(obj)) {
             return null;
         }
@@ -140,7 +142,7 @@ public final class ObjectUtil {
      * @return value
      * @throws IllegalArgumentException if java bean access error
      */
-    public static Object walkDeepValue(Object obj, String path) {
+    public static @Nullable Object walkDeepValue(Object obj, @NotNull String path) {
         if (Objects.isNull(obj)) {
             return null;
         }
@@ -163,7 +165,7 @@ public final class ObjectUtil {
      * @param propertyChains property chains（{@code user.name}）
      * @return value
      */
-    public static Object getDeepValue(Object obj, String propertyChains) {
+    public static @Nullable Object getDeepValue(Object obj, @NotNull String propertyChains) {
         if (propertyChains.contains(".")) {
             String path = '/' + propertyChains.replace('.', '/');
             return walkDeepValue(obj, path);
@@ -203,7 +205,7 @@ public final class ObjectUtil {
      * @return java8 temporal implementation
      */
     @SuppressWarnings("unchecked")
-    public static <T extends Temporal> T toTemporal(Class<T> clazz, Date date, ZoneId zoneId) {
+    public static @Nullable <T extends Temporal> T toTemporal(Class<T> clazz, Date date, ZoneId zoneId) {
         if (clazz == LocalDateTime.class) {
             return (T) date.toInstant().atZone(zoneId).toLocalDateTime();
         }
@@ -236,11 +238,11 @@ public final class ObjectUtil {
      * @param <T>   result type
      * @return java8 temporal implementation
      */
-    public static <T extends Temporal> T toTemporal(Class<T> clazz, Date date) {
+    public static @Nullable <T extends Temporal> T toTemporal(Class<T> clazz, Date date) {
         return toTemporal(clazz, date, ZoneId.systemDefault());
     }
 
-    public static Integer toInteger(Object obj) {
+    public static @Nullable Integer toInteger(Object obj) {
         if (Objects.isNull(obj)) return null;
         if (obj instanceof Integer) {
             return (Integer) obj;
@@ -248,7 +250,7 @@ public final class ObjectUtil {
         return Integer.parseInt(obj.toString());
     }
 
-    public static Long toLong(Object obj) {
+    public static @Nullable Long toLong(Object obj) {
         if (Objects.isNull(obj)) return null;
         if (obj instanceof Long) {
             return (Long) obj;
@@ -256,7 +258,7 @@ public final class ObjectUtil {
         return Long.parseLong(obj.toString());
     }
 
-    public static Double toDouble(Object obj) {
+    public static @Nullable Double toDouble(Object obj) {
         if (Objects.isNull(obj)) return null;
         if (obj instanceof Double) {
             return (Double) obj;
@@ -264,7 +266,7 @@ public final class ObjectUtil {
         return Double.parseDouble(obj.toString());
     }
 
-    public static Float toFloat(Object obj) {
+    public static @Nullable Float toFloat(Object obj) {
         if (Objects.isNull(obj)) return null;
         if (obj instanceof Float) {
             return (Float) obj;
