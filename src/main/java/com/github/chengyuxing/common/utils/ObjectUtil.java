@@ -81,6 +81,20 @@ public final class ObjectUtil {
     }
 
     /**
+     * Returns null if a equals b
+     *
+     * @param a value a
+     * @param b value b
+     * @return null or a
+     */
+    public static @Nullable Object nullif(Object a, Object b) {
+        if (Objects.equals(a, b)) {
+            return null;
+        }
+        return a;
+    }
+
+    /**
      * Get value of object.
      *
      * @param obj object or array

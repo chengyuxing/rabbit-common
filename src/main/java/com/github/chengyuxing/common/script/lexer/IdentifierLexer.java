@@ -2,7 +2,6 @@ package com.github.chengyuxing.common.script.lexer;
 
 import com.github.chengyuxing.common.script.Token;
 import com.github.chengyuxing.common.script.TokenType;
-import com.github.chengyuxing.common.script.exception.ScriptSyntaxException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -129,7 +128,8 @@ public class IdentifierLexer {
                 if (match("&&")) {
                     tokens.add(new Token(TokenType.LOGIC_AND, "&&"));
                 } else {
-                    throw new ScriptSyntaxException("Unexpected character '" + current + "'");
+                    tokens.add(new Token(TokenType.AND_SYMBOL, "&"));
+                    advance();
                 }
             } else if (current == '!') {
                 if (match("!=")) {
@@ -177,11 +177,19 @@ public class IdentifierLexer {
             } else if (current == ')') {
                 tokens.add(new Token(TokenType.RPAREN, ")"));
                 advance();
+            } else if (current == '{') {
+                tokens.add(new Token(TokenType.LBRACE, "{"));
+                advance();
+            } else if (current == '}') {
+                tokens.add(new Token(TokenType.RBRACE, "}"));
+                advance();
             } else if (current == ':') {
                 advance();
                 String str = readWhile(c -> Character.isLetterOrDigit(c) || c == '_' || c == '.');
                 if (!str.isEmpty()) {
                     tokens.add(new Token(TokenType.VARIABLE_NAME, ':' + str));
+                } else {
+                    tokens.add(new Token(TokenType.COLON, ":"));
                 }
             } else if (Character.isAlphabetic(current)) {
                 String identifier = readWhile(c -> Character.isLetterOrDigit(c) || c == '_' || c == '.');

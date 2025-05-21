@@ -14,8 +14,9 @@ public enum TokenType {
     // Other tokens
     IDENTIFIER, STRING, NUMBER,
     VARIABLE_NAME,  // :name
-    NEWLINE, EOF, UNKNOWN, PLAIN_TEXT, COMMA,
+    NEWLINE, EOF, UNKNOWN, PLAIN_TEXT, COMMA, COLON,
     PIPE_SYMBOL,    // |
+    AND_SYMBOL,     // &
 
     // Bool expression tokens
     LOGIC_OR,   // ||
@@ -23,5 +24,7 @@ public enum TokenType {
     LOGIC_NOT,   // !
     OPERATOR,    // > < >= <= = == != <> ~ !~ @ !@
     LPAREN,     // (
-    RPAREN      // )
+    RPAREN,      // )
+    LBRACE,     // {
+    RBRACE      // }
 }

@@ -1,6 +1,8 @@
 package tests;
 
 import com.github.chengyuxing.common.DataRow;
+import com.github.chengyuxing.common.script.Token;
+import com.github.chengyuxing.common.script.lexer.IdentifierLexer;
 import com.github.chengyuxing.common.script.parser.FlowControlParser;
 import com.github.chengyuxing.common.script.expression.IPipe;
 import com.github.chengyuxing.common.KeyValue;
@@ -10,6 +12,14 @@ import org.junit.Test;
 import java.util.*;
 
 public class ScriptParserTests {
+
+    @Test
+    public void testSS() {
+        IdentifierLexer lexer = new IdentifierLexer(":{id|date('yyyy-mm-dd',12)|upper|trim}");
+        List<Token> tokens = lexer.tokenize();
+        tokens.forEach(System.out::println);
+    }
+
     @Test
     public void testSqlParser() {
 //        SimpleParser parser = new SimpleParser() {

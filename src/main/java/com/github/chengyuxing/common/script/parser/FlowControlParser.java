@@ -9,6 +9,8 @@ import com.github.chengyuxing.common.script.exception.ScriptSyntaxException;
 import com.github.chengyuxing.common.script.expression.Comparators;
 import com.github.chengyuxing.common.utils.ObjectUtil;
 import com.github.chengyuxing.common.utils.StringUtil;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.*;
 
@@ -89,7 +91,7 @@ import static com.github.chengyuxing.common.utils.StringUtil.NEW_LINE;
  * @see Comparators
  */
 public class FlowControlParser {
-    private static final Map<String, IPipe<?>> GLOBAL_PIPES = new HashMap<>();
+    private static final Map<String, IPipe<?>> BUILTIN_PIPES = new HashMap<>();
     private Map<String, IPipe<?>> customPipes = new HashMap<>();
 
     private final List<Token> tokens;
@@ -98,11 +100,11 @@ public class FlowControlParser {
     private Map<String, Object> forContextVars = new HashMap<>();
 
     static {
-        GLOBAL_PIPES.put("length", new IPipe.Length());
-        GLOBAL_PIPES.put("upper", new IPipe.Upper());
-        GLOBAL_PIPES.put("lower", new IPipe.Lower());
-        GLOBAL_PIPES.put("pairs", new IPipe.Map2Pairs());
-        GLOBAL_PIPES.put("kv", new IPipe.Kv());
+        BUILTIN_PIPES.put("length", new IPipe.Length());
+        BUILTIN_PIPES.put("upper", new IPipe.Upper());
+        BUILTIN_PIPES.put("lower", new IPipe.Lower());
+        BUILTIN_PIPES.put("pairs", new IPipe.Map2Pairs());
+        BUILTIN_PIPES.put("kv", new IPipe.Kv());
     }
 
     /**
@@ -257,6 +259,15 @@ public class FlowControlParser {
     }
 
     /**
+     * Returns the builtin pipes.
+     *
+     * @return pipes map
+     */
+    public @NotNull @Unmodifiable Map<String, IPipe<?>> getBuiltinPipes() {
+        return Collections.unmodifiableMap(BUILTIN_PIPES);
+    }
+
+    /**
      * Parser implementation.
      */
     final class Parser {
@@ -389,8 +400,8 @@ public class FlowControlParser {
             for (String pipe : pipes) {
                 if (getPipes().containsKey(pipe)) {
                     res = getPipes().get(pipe).transform(res);
-                } else if (GLOBAL_PIPES.containsKey(pipe)) {
-                    res = GLOBAL_PIPES.get(pipe).transform(res);
+                } else if (BUILTIN_PIPES.containsKey(pipe)) {
+                    res = BUILTIN_PIPES.get(pipe).transform(res);
                 } else {
                     throw new PipeNotFoundException("Cannot find pipe '" + pipe + "'");
                 }
