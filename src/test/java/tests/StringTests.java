@@ -477,6 +477,11 @@ public class StringTests {
     }
 
     @Test
+    public void testRow() {
+        System.out.println(DataRow.ofEntity(new User(), f -> f.getName().toUpperCase()));
+    }
+
+    @Test
     public void rowTest() {
         System.out.println(DataRow.of("a", 1, "c", 2));
         System.out.println(DataRow.ofEntity(new User()));

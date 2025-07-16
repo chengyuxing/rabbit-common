@@ -23,9 +23,11 @@ public class DataRowTests {
     public void test2() throws Exception {
         DataRow dr = DataRow.of("dt", "2021-12-23",
                 "ldt", LocalDateTime.now(),
-                "id", 12);
+                "id", 12,
+                "user_id", 90);
         System.out.println(dr);
         System.out.println(dr.toEntity(Entity.class));
+        System.out.println(dr.toEntity(Entity.class, f -> f.getName().replaceAll("([A-Z])", "_$1").toLowerCase(), null));
     }
 
     @Test

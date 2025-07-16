@@ -2,8 +2,11 @@ package com.github.chengyuxing.common;
 
 import com.github.chengyuxing.common.utils.ObjectUtil;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import java.lang.reflect.Field;
 import java.util.*;
+import java.util.function.Function;
 
 import static com.github.chengyuxing.common.utils.ObjectUtil.coalesce;
 
@@ -74,6 +77,17 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
      */
     public static DataRow ofEntity(Object entity) {
         return ObjectUtil.entityToMap(entity, DataRow::new);
+    }
+
+    /**
+     * Returns a new DataRow from standard java bean entity.
+     *
+     * @param entity      entity
+     * @param fieldMapper entity field mapping to map's key
+     * @return DataRow instance
+     */
+    public static DataRow ofEntity(Object entity, @NotNull Function<Field, String> fieldMapper) {
+        return ObjectUtil.entityToMap(entity, fieldMapper, DataRow::new);
     }
 
     /**
@@ -357,6 +371,30 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
      */
     public <T> T toEntity(@NotNull Class<T> clazz, Object... constructorParameters) {
         return ObjectUtil.mapToEntity(this, clazz, constructorParameters);
+    }
+
+    /**
+     * Convert to standard java bean entity.
+     *
+     * @param clazz                 entity class
+     * @param fieldMapper           entity field mapping to map's key, e.g.
+     *                              <blockquote>
+     *                              <pre>f -&gt; f.getName().replaceAll("([A-Z])", "_$1").toLowerCase();</pre>
+     *                              <pre>// userId -&gt; user_id</pre>
+     *                              </blockquote>
+     * @param valueMapper           map value mapping to entity field: (map value type, entity field type, map value) -&gt; new value
+     * @param constructorParameters <p>constructor's parameters are required if entity class only have
+     *                              1 constructor with parameters,
+     *                              e.g.</p>
+     *                              <blockquote>
+     *                              <pre>DataRow row = DataRow.of("x", 2, "y", 5, ...);</pre>
+     *                              <pre>row.toEntity(A.class, row.get("x"), row.get("y"));</pre>
+     *                              </blockquote>
+     * @param <T>                   entity class type
+     * @return entity
+     */
+    public <T> T toEntity(@NotNull Class<T> clazz, @NotNull Function<Field, String> fieldMapper, @Nullable TiFunction<Class<?>, Class<?>, Object, Object> valueMapper, Object... constructorParameters) {
+        return ObjectUtil.mapToEntity(this, clazz, fieldMapper, valueMapper, constructorParameters);
     }
 
     /**

@@ -296,7 +296,7 @@ public final class ObjectUtil {
      * @param <T>        result type
      * @return map
      */
-    public static <T extends Map<String, Object>> T pairsToMap(Function<Integer, T> mapBuilder, Object... input) {
+    public static <T extends Map<String, Object>> T pairsToMap(@NotNull Function<Integer, T> mapBuilder, Object... input) {
         if ((input.length & 1) != 0) {
             throw new IllegalArgumentException("key value are not a pair.");
         }
@@ -318,7 +318,7 @@ public final class ObjectUtil {
      * @param <T>         result type
      * @return map
      */
-    public static <T extends Map<String, Object>> T entityToMap(Object entity, Function<Field, String> fieldMapper, Function<Integer, T> mapBuilder) {
+    public static <T extends Map<String, Object>> T entityToMap(Object entity, @NotNull Function<Field, String> fieldMapper, @NotNull Function<Integer, T> mapBuilder) {
         if (Objects.isNull(entity)) return mapBuilder.apply(0);
         try {
             Class<?> clazz = entity.getClass();
@@ -367,7 +367,7 @@ public final class ObjectUtil {
      * @param <T>                   entity type
      * @return entity
      */
-    public static <T> T mapToEntity(Map<String, Object> source, Class<T> targetType, Function<Field, String> fieldMapper, TiFunction<Class<?>, Class<?>, Object, Object> valueMapper, Object... constructorParameters) {
+    public static <T> T mapToEntity(Map<String, Object> source, @NotNull Class<T> targetType, @NotNull Function<Field, String> fieldMapper, @Nullable TiFunction<Class<?>, Class<?>, Object, Object> valueMapper, Object... constructorParameters) {
         try {
             if (Objects.isNull(source)) return null;
             T entity = ReflectUtil.getInstance(targetType, constructorParameters);
@@ -474,7 +474,7 @@ public final class ObjectUtil {
      * @param <T>                   entity type
      * @return entity
      */
-    public static <T> T mapToEntity(Map<String, Object> source, Class<T> targetType, Object... constructorParameters) {
+    public static <T> T mapToEntity(Map<String, Object> source, @NotNull Class<T> targetType, Object... constructorParameters) {
         return mapToEntity(source, targetType, Field::getName, null, constructorParameters);
     }
 }

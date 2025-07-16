@@ -9,6 +9,7 @@ public class Entity {
     private LocalDateTime ldt;
     private Integer id;
     private Map<String,Object> pg;
+    private String userId;
 
 
     @Override
@@ -18,6 +19,7 @@ public class Entity {
                 ", ldt=" + ldt +
                 ", id=" + id +
                 ", pg=" + pg +
+                ", userId='" + userId + '\'' +
                 '}';
     }
 
@@ -51,5 +53,13 @@ public class Entity {
 
     public void setId(Integer id) {
         this.id = id;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 }
