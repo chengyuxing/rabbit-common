@@ -80,7 +80,21 @@ public class StringTests {
     @Test
     public void test6() throws Exception {
         String str = "${ user } <> blank && ${ user.name } !~ 'j'";
-        System.out.println(FMT.format(str, DataRow.of("user", ":user", "user.name", ":user.name")));
+        System.out.println(FMT.format(str, DataRow.of("user", "${user}", "user.name", ":user.name")));
+    }
+
+    @Test
+    public void test7() {
+        String s = "select ${ fields } from table where 1 = ${table}";
+        String f = FMT.format(s, DataRow.of("fields", "${!fields}", "db", "${table}", "table", "test"));
+        System.out.println(f);
+    }
+
+    @Test
+    public void test90() {
+        String s = "select ${ fields } from table where ${cnd}";
+        String f = FMT.format(s, DataRow.of("fields", "${fields}", "cnd", "1 = 1 and ${fields}"));
+        System.out.println(f);
     }
 
     @Test

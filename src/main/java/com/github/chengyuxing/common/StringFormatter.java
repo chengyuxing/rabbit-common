@@ -2,10 +2,10 @@ package com.github.chengyuxing.common;
 
 import com.github.chengyuxing.common.script.expression.Patterns;
 import com.github.chengyuxing.common.utils.ObjectUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.Map;
-import java.util.Objects;
-import java.util.StringJoiner;
+import java.util.*;
 import java.util.function.BiFunction;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -14,6 +14,9 @@ import java.util.regex.Pattern;
  * String template formatter.
  */
 public class StringFormatter {
+    private static final Logger log = LoggerFactory.getLogger(StringFormatter.class);
+    private static final int WARN_DEPTH = 10;
+    private static final int MAX_DEPTH = 50;
     private static final char DEFAULT_HOLDER_PREFIX = '$';
     @SuppressWarnings("UnnecessaryUnicodeEscape")
     private static final char TEMP_HOLDER_PREFIX = '\u0c32';
@@ -63,7 +66,7 @@ public class StringFormatter {
         if (Objects.isNull(data) || data.isEmpty()) {
             return template;
         }
-        return doFormat(template, data, valueFormatter);
+        return doFormat(template, data, valueFormatter, 0);
     }
 
     /**
@@ -124,24 +127,32 @@ public class StringFormatter {
      * @param valueFormatter value formatter
      * @return formatted string template
      */
-    protected String doFormat(final String template, final Map<String, ?> data, BiFunction<Object, Boolean, String> valueFormatter) {
+    protected String doFormat(final String template, final Map<String, ?> data, BiFunction<Object, Boolean, String> valueFormatter, int depth) {
+        if (depth > MAX_DEPTH) {
+            log.warn("recursion depth exceeded {}, possible circular reference. Template: {}", MAX_DEPTH, template);
+            return template;
+        }
+        if (depth >= WARN_DEPTH) {
+            log.warn("unusual deep recursion (depth={}), check for template design issues. Template: {}", depth, template);
+        }
         String copy = template;
         Matcher m = getPattern().matcher(copy);
-        if (m.find()) {
-            // full str template key e.g. ${ !myKey  }
+        boolean found = false;
+        StringBuffer sb = new StringBuffer();
+
+        while (m.find()) {
+            found = true;
             String holder = m.group(0);
-            // real key e.g. !myKey
             String key = m.group("key");
             boolean isSpecial = key.startsWith("!");
             if (isSpecial) {
                 key = key.substring(1);
             }
-            // e.g. user.cats.1
-            // template var key contains dot but data not contains this key, then be key-path otherwise normal key.
             boolean isKeyPath = key.contains(".") && !data.containsKey(key);
             String dataKey = isKeyPath ? key.substring(0, key.indexOf(".")) : key;
+
             if (!data.containsKey(dataKey)) {
-                copy = copy.replace(holder, TEMP_HOLDER_PREFIX + holder.substring(1));
+                m.appendReplacement(sb, Matcher.quoteReplacement(TEMP_HOLDER_PREFIX + holder.substring(1)));
             } else {
                 try {
                     String value;
@@ -150,17 +161,21 @@ public class StringFormatter {
                     } else {
                         value = valueFormatter.apply(data.get(key), isSpecial);
                     }
-                    copy = copy.replace(holder, value);
+                    m.appendReplacement(sb, Matcher.quoteReplacement(value));
                 } catch (Exception e) {
                     throw new IllegalArgumentException(e);
                 }
             }
-            return doFormat(copy, data, valueFormatter);
         }
+
+        m.appendTail(sb);
+        copy = sb.toString();
+
         if (copy.lastIndexOf(TEMP_HOLDER_PREFIX) != -1) {
             copy = copy.replace(TEMP_HOLDER_PREFIX, DEFAULT_HOLDER_PREFIX);
         }
-        return copy;
+
+        return found ? doFormat(copy, data, valueFormatter, depth + 1) : copy;
     }
 
     /**
