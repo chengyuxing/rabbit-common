@@ -2,7 +2,6 @@ package com.github.chengyuxing.common;
 
 import java.util.Arrays;
 import java.util.Map;
-import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
@@ -87,9 +86,6 @@ public interface MapExtends<SELF extends MapExtends<SELF, V>, V> extends Map<Str
     default SELF updateKeys(Function<String, String> updater) {
         for (String key : keySet().toArray(new String[0])) {
             String newKey = updater.apply(key);
-            if (containsKey(newKey)) {
-                throw new IllegalStateException("New key " + newKey + " already exists");
-            }
             put(newKey, remove(key));
         }
         //noinspection unchecked
@@ -104,9 +100,8 @@ public interface MapExtends<SELF extends MapExtends<SELF, V>, V> extends Map<Str
      * @return SELF
      */
     default SELF updateValue(String key, Function<V, V> updater) {
-        V currentValue = get(key);
-        if (Objects.nonNull(currentValue) || containsKey(key)) {
-            put(key, updater.apply(get(key)));
+        if (containsKey(key)) {
+            compute(key, (k, currentValue) -> updater.apply(currentValue));
         }
         //noinspection unchecked
         return (SELF) this;
