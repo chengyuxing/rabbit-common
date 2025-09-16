@@ -98,6 +98,13 @@ public class StringTests {
     }
 
     @Test
+    public void test91() {
+        String s = "select * from table where ${cnd}";
+        String f = FMT.format(s, DataRow.of("id", 1));
+        System.out.println(f);
+    }
+
+    @Test
     public void testa() {
         Matcher m = Pattern.compile("(?<out>\\$\\{\\s*(?<key>!?[\\w._-]+)\\s*})").matcher("select ${ fields } from test.user where ${  cnd} and id in (${!idArr}) or id = ${!idArr.1}");
         while (m.find()) {

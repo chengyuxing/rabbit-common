@@ -9,6 +9,7 @@ import com.github.chengyuxing.common.KeyValue;
 import com.github.chengyuxing.common.utils.StringUtil;
 import org.junit.Test;
 
+import java.lang.reflect.Field;
 import java.util.*;
 
 public class ScriptParserTests {
@@ -59,6 +60,12 @@ public class ScriptParserTests {
 //            }
 //        }
 //        System.out.println(data.size());
+    }
+
+    @Test
+    public void testField() throws NoSuchFieldException {
+        Field field = User.class.getDeclaredField("name");
+        System.out.println(field.getType());
     }
 
     @Test
