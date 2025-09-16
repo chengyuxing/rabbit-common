@@ -108,10 +108,7 @@ public class ClassPathResource {
      * @throws IOException if file not exists
      */
     public byte[] readBytes() throws IOException {
-        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-            transferTo(out);
-            return out.toByteArray();
-        }
+        return readBytes(getInputStream());
     }
 
     /**

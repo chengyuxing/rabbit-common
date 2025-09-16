@@ -382,9 +382,15 @@ public final class ObjectUtil {
                 if (Objects.isNull(set)) {
                     continue;
                 }
+                if (setter.getParameterCount() != 1) {
+                    continue;
+                }
+
                 String name = fieldMapper.apply(set);
                 Object value = source.get(name);
-                if (Objects.isNull(value) || setter.getParameterCount() != 1) {
+
+                if (Objects.isNull(value)) {
+                    setter.invoke(entity, (Object) null);
                     continue;
                 }
                 // dataRow field type
@@ -394,10 +400,8 @@ public final class ObjectUtil {
 
                 if (Objects.nonNull(valueMapper)) {
                     Object mapperValue = valueMapper.apply(vt, et, value);
-                    if (Objects.nonNull(mapperValue)) {
-                        setter.invoke(entity, mapperValue);
-                        continue;
-                    }
+                    setter.invoke(entity, mapperValue);
+                    continue;
                 }
 
                 if (et.isAssignableFrom(vt)) {
