@@ -166,15 +166,15 @@ public class StringFormatter {
                 }
             }
         }
-
         m.appendTail(sb);
         copy = sb.toString();
-
+        if (found) {
+            return doFormat(copy, data, valueFormatter, depth + 1);
+        }
         if (copy.lastIndexOf(TEMP_HOLDER_PREFIX) != -1) {
             copy = copy.replace(TEMP_HOLDER_PREFIX, DEFAULT_HOLDER_PREFIX);
         }
-
-        return found ? doFormat(copy, data, valueFormatter, depth + 1) : copy;
+        return copy;
     }
 
     /**
