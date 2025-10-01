@@ -34,6 +34,14 @@ import static com.github.chengyuxing.common.utils.StringUtil.NEW_LINE;
  * #fi
  * </pre>
  * </blockquote>
+ * <p>guard statement:</p>
+ * <blockquote>
+ * <pre>
+ * #guard <i>expression</i>
+ *     ...
+ * #throw 'message'
+ * </pre>
+ * </blockquote>
  * <p>choose statement:</p>
  * <blockquote>
  * <pre>
