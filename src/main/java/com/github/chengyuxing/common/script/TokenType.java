@@ -10,6 +10,7 @@ public enum TokenType {
     FOR,
     END_FOR,   // #done
     FOR_OF, FOR_DELIMITER, FOR_OPEN, FOR_CLOSE,
+    GUARD,THROW,
 
     // Other tokens
     IDENTIFIER, STRING, NUMBER,

@@ -1,0 +1,8 @@
+#guard :id != null
+#throw
+select 1 from table t where
+    #guard :id > 10
+     #if :id = 90
+        t.id = :id
+     #fi
+    #throw 'id 必须大于 10.'

@@ -16,7 +16,16 @@ public class LexerTests {
     static String Switch = new FileResource("flow-control/switch.txt").readString(StandardCharsets.UTF_8);
     static String If = new FileResource("flow-control/if.txt").readString(StandardCharsets.UTF_8);
     static String choose = new FileResource("flow-control/choose.txt").readString(StandardCharsets.UTF_8);
+    static String guard = new FileResource("flow-control/guard.txt").readString(StandardCharsets.UTF_8);
     static String query = new FileResource("query.txt").readString(StandardCharsets.UTF_8);
+
+    @Test
+    public void testGuard() {
+        FlowControlParser parser = new FlowControlParser(guard);
+        parser.verify();
+        String res = parser.parse(DataRow.of("id", 10));
+        System.out.println(res);
+    }
 
     @Test
     public void testLexer() {
@@ -68,7 +77,7 @@ public class LexerTests {
                 "jssj", "nubll",
                 "kssj", "2022-12-12",
                 "name", "cyx",
-                "id", "1"));
+                "id", "2"));
         System.out.println(res);
     }
 

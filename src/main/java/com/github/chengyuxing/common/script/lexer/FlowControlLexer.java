@@ -22,8 +22,10 @@ public class FlowControlLexer {
     public static final String END = "#end";
     public static final String FOR = "#for";
     public static final String DONE = "#done";
+    public static final String GUARD = "#guard";
+    public static final String THROW = "#throw";
     public static final String[] KEYWORDS = new String[]{
-            IF, ELSE, FI, CHOOSE, WHEN, SWITCH, CASE, DEFAULT, BREAK, END, FOR, DONE
+            IF, ELSE, FI, CHOOSE, WHEN, SWITCH, CASE, DEFAULT, BREAK, END, FOR, DONE, GUARD, THROW
     };
     // language=RegExp
     public static final String KEYWORDS_PATTERN = "(?i)\\s*(?:" + String.join("|", KEYWORDS) + ")(?:\\s+.*|$)";

@@ -1,5 +1,6 @@
 package com.github.chengyuxing.common.script.parser;
 
+import com.github.chengyuxing.common.script.exception.GuardViolationException;
 import com.github.chengyuxing.common.script.exception.PipeNotFoundException;
 import com.github.chengyuxing.common.script.expression.IPipe;
 import com.github.chengyuxing.common.script.lexer.FlowControlLexer;
@@ -519,6 +520,39 @@ public class FlowControlParser {
             return parser.doParse();
         }
 
+        private String parseGuardStatement() {
+            eat(TokenType.GUARD);
+            boolean matched = evaluateCondition();
+            eat(TokenType.NEWLINE);
+            List<Token> matchedContent = new ArrayList<>();
+            int guardDepth = 1;
+            while ((currentToken.getType() != TokenType.THROW || guardDepth != 1) && currentToken.getType() != TokenType.EOF) {
+                if (currentToken.getType() == TokenType.GUARD) {
+                    guardDepth++;
+                } else if (currentToken.getType() == TokenType.THROW) {
+                    guardDepth--;
+                }
+                matchedContent.add(currentToken);
+                advance();
+            }
+            eat(TokenType.THROW);
+            String message = "Guard condition failed, At: " + currentTokenIndex;
+            if (currentToken.getType() == TokenType.STRING) {
+                message = currentToken.getValue();
+                advance();
+            }
+            eat(TokenType.NEWLINE);
+
+            if (!matched) {
+                throw new GuardViolationException(message);
+            }
+            if (matchedContent.isEmpty()) {
+                return "";
+            }
+            Parser parser = new Parser(matchedContent, context);
+            return parser.doParse();
+        }
+
         private String parseSwitchStatement() {
             eat(TokenType.SWITCH);
             Token variable = currentToken;
@@ -730,6 +764,9 @@ public class FlowControlParser {
                     case FOR:
                         result.add(parseForStatement());
                         break;
+                    case GUARD:
+                        result.add(parseGuardStatement());
+                        break;
                     case ENDIF:
                     case ELSE:
                     case END:
@@ -738,6 +775,7 @@ public class FlowControlParser {
                     case CASE:
                     case DEFAULT:
                     case BREAK:
+                    case THROW:
                         throw new ScriptSyntaxException("Unexpected " + currentToken.getValue() + " statement without preceding matching statement");
                     default:
                         result.add(currentToken.getValue());
@@ -901,6 +939,9 @@ public class FlowControlParser {
                     case FOR:
                         verifyForStatement();
                         break;
+                    case GUARD:
+                        verifyGuardStatement();
+                        break;
                     default:
                         advance();
                         break;
@@ -918,7 +959,8 @@ public class FlowControlParser {
                     TokenType.DEFAULT,
                     TokenType.END_FOR,
                     TokenType.END,
-                    TokenType.BREAK
+                    TokenType.BREAK,
+                    TokenType.THROW
             );
             if (currentToken.getType() == TokenType.ELSE) {
                 advance();
@@ -929,10 +971,35 @@ public class FlowControlParser {
                         TokenType.DEFAULT,
                         TokenType.END_FOR,
                         TokenType.END,
-                        TokenType.BREAK
+                        TokenType.BREAK,
+                        TokenType.THROW
                 );
             }
             eat(TokenType.ENDIF);
+            eat(TokenType.NEWLINE);
+        }
+
+        private void verifyGuardStatement() {
+            eat(TokenType.GUARD);
+            verifyCondition();
+            eat(TokenType.NEWLINE);
+            verifyContent(TokenType.THROW,
+                    TokenType.ELSE,
+                    TokenType.ENDIF,
+                    TokenType.CASE,
+                    TokenType.WHEN,
+                    TokenType.DEFAULT,
+                    TokenType.END_FOR,
+                    TokenType.END,
+                    TokenType.BREAK
+            );
+            eat(TokenType.THROW);
+            if (currentToken.getType() != TokenType.STRING && currentToken.getType() != TokenType.NEWLINE) {
+                throw new ScriptSyntaxException("Illegal token: " + currentToken + ", excepted: " + TokenType.STRING + " or " + TokenType.NEWLINE + ", At: " + currentTokenIndex);
+            }
+            if (currentToken.getType() == TokenType.STRING) {
+                advance();
+            }
             eat(TokenType.NEWLINE);
         }
 
@@ -995,7 +1062,8 @@ public class FlowControlParser {
                     TokenType.END_FOR,
                     TokenType.WHEN,
                     TokenType.CASE,
-                    TokenType.DEFAULT
+                    TokenType.DEFAULT,
+                    TokenType.THROW
             );
         }
 
@@ -1034,7 +1102,8 @@ public class FlowControlParser {
                     TokenType.WHEN,
                     TokenType.BREAK,
                     TokenType.DEFAULT,
-                    TokenType.END
+                    TokenType.END,
+                    TokenType.THROW
             );
             eat(TokenType.END_FOR);
             eat(TokenType.NEWLINE);
@@ -1055,6 +1124,9 @@ public class FlowControlParser {
                     case FOR:
                         verifyForStatement();
                         break;
+                    case GUARD:
+                        verifyGuardStatement();
+                        break;
                     case ENDIF:
                     case ELSE:
                     case END:
@@ -1063,6 +1135,7 @@ public class FlowControlParser {
                     case CASE:
                     case DEFAULT:
                     case BREAK:
+                    case THROW:
                         throw new ScriptSyntaxException("Unexpected " + currentToken.getValue() + " statement without preceding matching statement");
                     default:
                         advance();

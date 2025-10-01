@@ -100,6 +100,12 @@ public class IdentifierLexer {
                     case "done":
                         tokens.add(new Token(TokenType.END_FOR, FlowControlLexer.DONE));
                         break;
+                    case "guard":
+                        tokens.add(new Token(TokenType.GUARD, FlowControlLexer.GUARD));
+                        break;
+                    case "throw":
+                        tokens.add(new Token(TokenType.THROW, FlowControlLexer.THROW));
+                        break;
                     default:
                         tokens.add(new Token(TokenType.UNKNOWN, '#' + keyword));
                         break;
