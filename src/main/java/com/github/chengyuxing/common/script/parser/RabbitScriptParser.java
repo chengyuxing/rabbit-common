@@ -1,5 +1,6 @@
 package com.github.chengyuxing.common.script.parser;
 
+import com.github.chengyuxing.common.script.exception.CheckViolationException;
 import com.github.chengyuxing.common.script.exception.GuardViolationException;
 import com.github.chengyuxing.common.script.exception.PipeNotFoundException;
 import com.github.chengyuxing.common.script.expression.IPipe;
@@ -18,7 +19,13 @@ import java.util.*;
 import static com.github.chengyuxing.common.utils.StringUtil.NEW_LINE;
 
 /**
- * <h2>Flow-Control parser.</h2>
+ * <h2>Rabbit script parser.</h2>
+ * <p>check statement:</p>
+ * <blockquote>
+ * <pre>
+ * #check expression throw 'message'
+ * </pre>
+ * </blockquote>
  * <p>if statement:</p>
  * <blockquote>
  * <pre>
@@ -561,6 +568,21 @@ public class FlowControlParser {
             return parser.doParse();
         }
 
+        private void parseCheckStatement() {
+            eat(TokenType.CHECK);
+            boolean matched = evaluateCondition();
+            eat(TokenType.CHECK_THROW);
+            if (currentToken.getType() != TokenType.STRING) {
+                throw new ScriptSyntaxException("Unexcepted token: " + currentToken + ", excepted: " + TokenType.STRING);
+            }
+            String message = currentToken.getValue();
+            advance();
+            eat(TokenType.NEWLINE);
+            if (matched) {
+                throw new CheckViolationException(message);
+            }
+        }
+
         private String parseSwitchStatement() {
             eat(TokenType.SWITCH);
             Token variable = currentToken;
@@ -775,7 +797,10 @@ public class FlowControlParser {
                     case GUARD:
                         result.add(parseGuardStatement());
                         break;
-                    case ENDIF:
+                    case CHECK:
+                        parseCheckStatement();
+                        break;
+                    case END_IF:
                     case ELSE:
                     case END:
                     case END_FOR:
@@ -950,6 +975,9 @@ public class FlowControlParser {
                     case GUARD:
                         verifyGuardStatement();
                         break;
+                    case CHECK:
+                        verifyCheckStatement();
+                        break;
                     default:
                         advance();
                         break;
@@ -1008,6 +1036,17 @@ public class FlowControlParser {
             if (currentToken.getType() == TokenType.STRING) {
                 advance();
             }
+            eat(TokenType.NEWLINE);
+        }
+
+        private void verifyCheckStatement() {
+            eat(TokenType.CHECK);
+            verifyCondition();
+            eat(TokenType.CHECK_THROW);
+            if (currentToken.getType() != TokenType.STRING) {
+                throw new ScriptSyntaxException("Unexcepted token: " + currentToken + ", excepted: " + TokenType.STRING);
+            }
+            advance();
             eat(TokenType.NEWLINE);
         }
 
@@ -1135,7 +1174,10 @@ public class FlowControlParser {
                     case GUARD:
                         verifyGuardStatement();
                         break;
-                    case ENDIF:
+                    case CHECK:
+                        verifyCheckStatement();
+                        break;
+                    case END_IF:
                     case ELSE:
                     case END:
                     case END_FOR:

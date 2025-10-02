@@ -104,7 +104,10 @@ public class IdentifierLexer {
                         tokens.add(new Token(TokenType.GUARD, FlowControlLexer.GUARD));
                         break;
                     case "throw":
-                        tokens.add(new Token(TokenType.THROW, FlowControlLexer.THROW));
+                        tokens.add(new Token(TokenType.END_GUARD, THROW, line, position));
+                        break;
+                    case "check":
+                        tokens.add(new Token(TokenType.CHECK, CHECK, line, position));
                         break;
                     default:
                         tokens.add(new Token(TokenType.UNKNOWN, '#' + keyword));
@@ -210,7 +213,10 @@ public class IdentifierLexer {
                         tokens.add(new Token(TokenType.FOR_OPEN, "open"));
                         break;
                     case "close":
-                        tokens.add(new Token(TokenType.FOR_CLOSE, "close"));
+                        tokens.add(new Token(TokenType.FOR_CLOSE, identifier, line, position));
+                        break;
+                    case "throw":
+                        tokens.add(new Token(TokenType.CHECK_THROW, identifier, line, position));
                         break;
                     default:
                         tokens.add(new Token(TokenType.IDENTIFIER, identifier));
