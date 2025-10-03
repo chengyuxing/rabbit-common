@@ -93,35 +93,20 @@ import static com.github.chengyuxing.common.utils.StringUtil.NEW_LINE;
  * </blockquote>
  * <p>Boolean condition expression.</p>
  * <p>Support logic operator: {@code &&, ||, !}, e.g.</p>
- * <blockquote><pre>!(:id &gt;= 0 || :name | {@link IPipe.Length length} &lt;= 3) &amp;&amp; :age &gt; 21
+ * <blockquote><pre>!(:id &gt;= 0 || :name | {@link com.github.chengyuxing.common.script.pipe.builtin.Nvl nvl('admin')} | {@link com.github.chengyuxing.common.script.pipe.builtin.Length length} &lt;= 3) &amp;&amp; :age &gt; 21
  * </pre></blockquote>
- * Built-in {@link IPipe pipes}：
- * <ul>
- *     <li>{@link IPipe.Length length}</li>
- *     <li>{@link IPipe.Upper upper}</li>
- *     <li>{@link IPipe.Lower lower}</li>
- *     <li>{@link IPipe.Map2Pairs pairs}</li>
- *     <li>{@link IPipe.Kv kv}</li>
- * </ul>
+ * Built-in {@link IPipe pipes}：{@link com.github.chengyuxing.common.script.pipe.BuiltinPipes}
  *
  * @see Comparators
  */
-public class FlowControlParser {
-    private static final Map<String, IPipe<?>> BUILTIN_PIPES = new HashMap<>();
-    private Map<String, IPipe<?>> customPipes = new HashMap<>();
+public class RabbitScriptParser {
+    private static final Map<String, IPipe<?>> builtinPipes = BuiltinPipes.getAll();
+    private Map<String, IPipe<?>> pipes = new HashMap<>();
 
     private final List<Token> tokens;
 
     private int forIndex = 0;
     private Map<String, Object> forContextVars = new HashMap<>();
-
-    static {
-        BUILTIN_PIPES.put("length", new IPipe.Length());
-        BUILTIN_PIPES.put("upper", new IPipe.Upper());
-        BUILTIN_PIPES.put("lower", new IPipe.Lower());
-        BUILTIN_PIPES.put("pairs", new IPipe.Map2Pairs());
-        BUILTIN_PIPES.put("kv", new IPipe.Kv());
-    }
 
     /**
      * Construct a new FlowControlParser with input content.
@@ -151,8 +136,7 @@ public class FlowControlParser {
         forIndex = 0;
         forContextVars = new HashMap<>();
         Parser parser = new Parser(tokens, context);
-        String result = parser.doParse();
-        return StringUtil.removeEmptyLine(result);
+        return parser.doParse();
     }
 
     /**
@@ -175,10 +159,10 @@ public class FlowControlParser {
         if (pipes == null) {
             return;
         }
-        if (this.customPipes.equals(pipes)) {
+        if (this.pipes.equals(pipes)) {
             return;
         }
-        this.customPipes = new HashMap<>(pipes);
+        this.pipes = new HashMap<>(pipes);
     }
 
     /**
@@ -187,7 +171,7 @@ public class FlowControlParser {
      * @return custom pipes
      */
     protected Map<String, IPipe<?>> getPipes() {
-        return customPipes;
+        return pipes;
     }
 
     /**
@@ -275,15 +259,6 @@ public class FlowControlParser {
     }
 
     /**
-     * Returns the builtin pipes.
-     *
-     * @return pipes map
-     */
-    public @NotNull @Unmodifiable Map<String, IPipe<?>> getBuiltinPipes() {
-        return Collections.unmodifiableMap(BUILTIN_PIPES);
-    }
-
-    /**
      * Parser implementation.
      */
     final class Parser {
@@ -304,7 +279,8 @@ public class FlowControlParser {
             if (currentTokenIndex < tokens.size()) {
                 currentToken = tokens.get(currentTokenIndex);
             } else {
-                currentToken = new Token(TokenType.EOF, "");
+                Token lastToken = tokens.get(currentTokenIndex - 1);
+                currentToken = new Token(TokenType.EOF, "", lastToken.getLine(), lastToken.getColumn());
             }
         }
 
