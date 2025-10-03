@@ -390,22 +390,13 @@ public class FlowControlParser {
 
         private List<String> collectPipes() {
             List<String> pipes = new ArrayList<>();
-            //noinspection DuplicatedCode
-            while (currentToken.getType() != TokenType.FOR_DELIMITER &&
-                    currentToken.getType() != TokenType.FOR_OPEN &&
-                    currentToken.getType() != TokenType.FOR_CLOSE &&
-                    currentToken.getType() != TokenType.OPERATOR &&
-                    currentToken.getType() != TokenType.LOGIC_OR &&
-                    currentToken.getType() != TokenType.LOGIC_AND &&
-                    currentToken.getType() != TokenType.RPAREN &&
-                    currentToken.getType() != TokenType.NEWLINE &&
-                    currentToken.getType() != TokenType.EOF) {
+            while (currentToken.getType() != TokenType.NEWLINE && currentToken.getType() != TokenType.EOF) {
                 if (currentToken.getType() == TokenType.PIPE_SYMBOL) {
                     advance();
                     pipes.add(currentToken.getValue());
                     eat(TokenType.IDENTIFIER);
                 } else {
-                    throw new ScriptSyntaxException("Unexpected token: " + currentToken + ", expected: " + TokenType.PIPE_SYMBOL + ", At: " + currentTokenIndex);
+                    break;
                 }
             }
             return pipes;
@@ -911,21 +902,12 @@ public class FlowControlParser {
         }
 
         private void verifyPipes() {
-            //noinspection DuplicatedCode
-            while (currentToken.getType() != TokenType.FOR_DELIMITER &&
-                    currentToken.getType() != TokenType.FOR_OPEN &&
-                    currentToken.getType() != TokenType.FOR_CLOSE &&
-                    currentToken.getType() != TokenType.OPERATOR &&
-                    currentToken.getType() != TokenType.LOGIC_OR &&
-                    currentToken.getType() != TokenType.LOGIC_AND &&
-                    currentToken.getType() != TokenType.RPAREN &&
-                    currentToken.getType() != TokenType.NEWLINE &&
-                    currentToken.getType() != TokenType.EOF) {
+            while (currentToken.getType() != TokenType.NEWLINE && currentToken.getType() != TokenType.EOF) {
                 if (currentToken.getType() == TokenType.PIPE_SYMBOL) {
                     advance();
                     eat(TokenType.IDENTIFIER);
                 } else {
-                    throw new ScriptSyntaxException("Unexpected token: " + currentToken + ", expected: " + TokenType.PIPE_SYMBOL + ", At: " + currentTokenIndex);
+                    break;
                 }
             }
         }
