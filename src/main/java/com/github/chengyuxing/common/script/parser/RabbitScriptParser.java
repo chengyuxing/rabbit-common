@@ -1,18 +1,19 @@
 package com.github.chengyuxing.common.script.parser;
 
+import com.github.chengyuxing.common.CleanStringJoiner;
 import com.github.chengyuxing.common.script.exception.CheckViolationException;
 import com.github.chengyuxing.common.script.exception.GuardViolationException;
 import com.github.chengyuxing.common.script.exception.PipeNotFoundException;
-import com.github.chengyuxing.common.script.expression.IPipe;
-import com.github.chengyuxing.common.script.lexer.FlowControlLexer;
+import com.github.chengyuxing.common.script.pipe.BuiltinPipes;
+import com.github.chengyuxing.common.script.pipe.IPipe;
+import com.github.chengyuxing.common.script.lexer.RabbitScriptLexer;
 import com.github.chengyuxing.common.script.Token;
 import com.github.chengyuxing.common.script.TokenType;
 import com.github.chengyuxing.common.script.exception.ScriptSyntaxException;
-import com.github.chengyuxing.common.script.expression.Comparators;
+import com.github.chengyuxing.common.script.Comparators;
+import com.github.chengyuxing.common.tuple.Pair;
 import com.github.chengyuxing.common.utils.ObjectUtil;
 import com.github.chengyuxing.common.utils.StringUtil;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.*;
 
@@ -109,15 +110,15 @@ public class RabbitScriptParser {
     private Map<String, Object> forContextVars = new HashMap<>();
 
     /**
-     * Construct a new FlowControlParser with input content.
+     * Construct a new RabbitScriptParser with input content.
      *
      * @param input content with flow-control scripts
      */
-    public FlowControlParser(String input) {
-        FlowControlLexer lexer = new FlowControlLexer(input) {
+    public RabbitScriptParser(String input) {
+        RabbitScriptLexer lexer = new RabbitScriptLexer(input) {
             @Override
             protected String trimExpressionLine(String line) {
-                return FlowControlParser.this.trimExpressionLine(line);
+                return RabbitScriptParser.this.trimExpressionLine(line);
             }
         };
         this.tokens = lexer.tokenize();
@@ -288,7 +289,7 @@ public class RabbitScriptParser {
             if (currentToken.getType() == type) {
                 advance();
             } else {
-                throw new ScriptSyntaxException("Unexpected token: " + currentToken + ", expected: " + type + ", At: " + currentTokenIndex);
+                throw new ScriptSyntaxException("Unexpected token: " + currentToken + ", expected: " + type);
             }
         }
 
@@ -354,7 +355,7 @@ public class RabbitScriptParser {
                 case VARIABLE_NAME:
                     return currentToken;
                 default:
-                    throw new ScriptSyntaxException("Unexpected token: " + currentToken + ", expected: " + TokenType.IDENTIFIER + "/" + TokenType.STRING + "/" + TokenType.NUMBER + "/" + TokenType.VARIABLE_NAME + ", At: " + currentTokenIndex);
+                    throw new ScriptSyntaxException("Unexpected token: " + currentToken + ", expected: " + TokenType.IDENTIFIER + " / " + TokenType.STRING + " / " + TokenType.NUMBER + " / " + TokenType.VARIABLE_NAME);
             }
         }
 
@@ -488,7 +489,7 @@ public class RabbitScriptParser {
                 case NUMBER:
                     return currentToken.getValue();
                 default:
-                    throw new ScriptSyntaxException("Unexpected token: " + currentToken + ", expected: " + TokenType.IDENTIFIER + "/" + TokenType.STRING + "/" + TokenType.NUMBER + ", At: " + currentTokenIndex);
+                    throw new ScriptSyntaxException("Unexpected token: " + currentToken + ", expected: " + TokenType.IDENTIFIER + " / " + TokenType.STRING + " / " + TokenType.NUMBER);
             }
         }
 
@@ -725,7 +726,7 @@ public class RabbitScriptParser {
                 idxName = currentToken.getValue();
                 eat(TokenType.IDENTIFIER);
                 if (varName.equals(idxName)) {
-                    throw new ScriptSyntaxException("#for statement item and index must not have the same name: " + varName);
+                    throw new ScriptSyntaxException("#for statement item and index must not have the same name: '" + varName + "', near " + currentToken);
                 }
             }
             eat(TokenType.FOR_OF);
@@ -795,7 +796,7 @@ public class RabbitScriptParser {
                     if (token.getType() == TokenType.PLAIN_TEXT) {
                         String old = token.getValue();
                         String newValue = forLoopBodyFormatter(forIndex, i, varName, idxName, old, childContext);
-                        Token newToken = new Token(token.getType(), newValue);
+                        Token newToken = new Token(token.getType(), newValue, token.getLine(), token.getColumn());
                         newForContent.add(newToken);
                         continue;
                     }
@@ -887,7 +888,8 @@ public class RabbitScriptParser {
             if (currentTokenIndex < tokens.size()) {
                 currentToken = tokens.get(currentTokenIndex);
             } else {
-                currentToken = new Token(TokenType.EOF, "");
+                Token lastToken = tokens.get(currentTokenIndex - 1);
+                currentToken = new Token(TokenType.EOF, "", lastToken.getLine(), lastToken.getColumn());
             }
         }
 
@@ -895,7 +897,7 @@ public class RabbitScriptParser {
             if (currentToken.getType() == type) {
                 advance();
             } else {
-                throw new ScriptSyntaxException("Unexpected token: " + currentToken + ", expected: " + type + ", At: " + currentTokenIndex);
+                throw new ScriptSyntaxException("Unexpected token: " + currentToken + ", expected: " + type);
             }
         }
 
@@ -954,7 +956,7 @@ public class RabbitScriptParser {
                 case VARIABLE_NAME:
                     break;
                 default:
-                    throw new ScriptSyntaxException("Unexpected token: " + currentToken + ", expected: " + TokenType.IDENTIFIER + "/" + TokenType.STRING + "/" + TokenType.NUMBER + "/" + TokenType.VARIABLE_NAME + ", At: " + currentTokenIndex);
+                    throw new ScriptSyntaxException("Unexpected token: " + currentToken + ", expected: " + TokenType.IDENTIFIER + " / " + TokenType.STRING + " / " + TokenType.NUMBER + " / " + TokenType.VARIABLE_NAME);
             }
         }
 
@@ -963,6 +965,7 @@ public class RabbitScriptParser {
                 if (currentToken.getType() == TokenType.PIPE_SYMBOL) {
                     advance();
                     eat(TokenType.IDENTIFIER);
+                    verifyPipeParams();
                 } else {
                     break;
                 }
@@ -997,7 +1000,7 @@ public class RabbitScriptParser {
                 case NUMBER:
                     break;
                 default:
-                    throw new ScriptSyntaxException("Unexpected token: " + currentToken + ", expected: " + TokenType.IDENTIFIER + "/" + TokenType.STRING + "/" + TokenType.NUMBER + ", At: " + currentTokenIndex);
+                    throw new ScriptSyntaxException("Unexpected token: " + currentToken + ", expected: " + TokenType.IDENTIFIER + " / " + TokenType.STRING + " / " + TokenType.NUMBER);
             }
         }
 
@@ -1016,7 +1019,7 @@ public class RabbitScriptParser {
             while (currentToken.getType() != TokenType.EOF && currentToken.getType() != endToken) {
                 for (TokenType type : illegalTokens) {
                     if (currentToken.getType() == type) {
-                        throw new ScriptSyntaxException("Illegal token: " + currentToken + ", At: " + currentTokenIndex);
+                        throw new ScriptSyntaxException("Illegal token: " + currentToken);
                     }
                 }
                 switch (currentToken.getType()) {
@@ -1091,7 +1094,7 @@ public class RabbitScriptParser {
             );
             eat(TokenType.END_GUARD);
             if (currentToken.getType() != TokenType.STRING && currentToken.getType() != TokenType.NEWLINE) {
-                throw new ScriptSyntaxException("Illegal token: " + currentToken + ", excepted: " + TokenType.STRING + " or " + TokenType.NEWLINE + ", At: " + currentTokenIndex);
+                throw new ScriptSyntaxException("Illegal token: " + currentToken + ", excepted: " + TokenType.STRING + " / " + TokenType.NEWLINE);
             }
             if (currentToken.getType() == TokenType.STRING) {
                 advance();
@@ -1183,7 +1186,7 @@ public class RabbitScriptParser {
                 String idxName = currentToken.getValue();
                 eat(TokenType.IDENTIFIER);
                 if (varName.equals(idxName)) {
-                    throw new ScriptSyntaxException("#for statement item and index must not have the same name: " + varName);
+                    throw new ScriptSyntaxException("#for statement item and index must not have the same name: '" + varName + "', near " + currentToken);
                 }
             }
             eat(TokenType.FOR_OF);
