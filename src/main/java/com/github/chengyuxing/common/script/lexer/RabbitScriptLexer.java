@@ -6,35 +6,23 @@ import com.github.chengyuxing.common.script.TokenType;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.github.chengyuxing.common.script.Directives.*;
+
 /**
- * <h2>Flow-Control lexer</h2>
+ * <h2>Rabbit script lexer</h2>
  */
-public class FlowControlLexer {
-    public static final String IF = "#if";
-    public static final String ELSE = "#else";
-    public static final String FI = "#fi";
-    public static final String CHOOSE = "#choose";
-    public static final String WHEN = "#when";
-    public static final String SWITCH = "#switch";
-    public static final String CASE = "#case";
-    public static final String DEFAULT = "#default";
-    public static final String BREAK = "#break";
-    public static final String END = "#end";
-    public static final String FOR = "#for";
-    public static final String DONE = "#done";
-    public static final String GUARD = "#guard";
-    public static final String THROW = "#throw";
-    public static final String[] KEYWORDS = new String[]{
-            IF, ELSE, FI, CHOOSE, WHEN, SWITCH, CASE, DEFAULT, BREAK, END, FOR, DONE, GUARD, THROW
+public class RabbitScriptLexer {
+    public static final String[] DIRECTIVES = new String[]{
+            IF, ELSE, FI, CHOOSE, WHEN, SWITCH, CASE, DEFAULT, BREAK, END, FOR, DONE, GUARD, THROW, CHECK
     };
     // language=RegExp
-    public static final String KEYWORDS_PATTERN = "(?i)\\s*(?:" + String.join("|", KEYWORDS) + ")(?:\\s+.*|$)";
+    public static final String DIRECTIVES_PATTERN = "(?i)\\s*(?:" + String.join("|", DIRECTIVES) + ")(?:\\s+.*|$)";
 
     private final String[] lines;
     private int position;
     private final int length;
 
-    public FlowControlLexer(String input) {
+    public RabbitScriptLexer(String input) {
         this.lines = input.split("\n");
         this.length = this.lines.length;
         this.position = 0;
@@ -71,19 +59,19 @@ public class FlowControlLexer {
         while (position < length) {
             skipEmptyLine();
             String current = currentLine();
-            advance();
             if (current.equals("\0")) {
                 break;
             }
             String tl = trimExpressionLine(current);
-            if (tl.matches(KEYWORDS_PATTERN)) {
-                IdentifierLexer lexer = new IdentifierLexer(tl);
+            if (tl.matches(DIRECTIVES_PATTERN)) {
+                IdentifierLexer lexer = new IdentifierLexer(tl, position);
                 tokens.addAll(lexer.tokenize());
             } else {
-                tokens.add(new Token(TokenType.PLAIN_TEXT, current));
+                tokens.add(new Token(TokenType.PLAIN_TEXT, current, position, 0));
             }
+            advance();
         }
-        tokens.add(new Token(TokenType.EOF, ""));
+        tokens.add(new Token(TokenType.EOF, "", position, 0));
         return tokens;
     }
 }
