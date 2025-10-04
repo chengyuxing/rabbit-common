@@ -108,6 +108,7 @@ public class RabbitScriptParser {
 
     private int forIndex = 0;
     private Map<String, Object> forContextVars = new HashMap<>();
+    private Map<String, Object> definedVars = new HashMap<>();
 
     /**
      * Construct a new RabbitScriptParser with input content.
@@ -255,8 +256,17 @@ public class RabbitScriptParser {
      * @return {@code #for} context variable map
      * @see #forVarKey(String, int, int)
      */
-    public Map<String, Object> getForContextVars() {
+    public @NotNull @Unmodifiable Map<String, Object> getForContextVars() {
         return Collections.unmodifiableMap(forContextVars);
+    }
+
+    /**
+     * Returns the #let and #set vars.
+     *
+     * @return vars
+     */
+    public @NotNull @Unmodifiable Map<String, Object> getDefinedVars() {
+        return Collections.unmodifiableMap(definedVars);
     }
 
     /**
@@ -632,6 +642,26 @@ public class RabbitScriptParser {
             }
         }
 
+        /**
+         * #var id = :id | upper
+         */
+        private void parseVarStatement() {
+            eat(TokenType.DEFINE_VAR);
+            String varName = currentToken.getValue();
+            eat(TokenType.IDENTIFIER);
+            if (currentToken.getType() == TokenType.OPERATOR && currentToken.getValue().equals("=")) {
+                advance();
+                Token variable = getValueHolderToken();
+                advance();
+                List<Pair<String, List<Object>>> pipes = collectPipes();
+                eat(TokenType.NEWLINE);
+                Object value = calcValue(variable, pipes);
+                definedVars.put(varName, value);
+            } else {
+                throw new ScriptSyntaxException("Unexcepted token: " + currentToken + ", excepted: '=' operator");
+            }
+        }
+
         private String parseSwitchStatement() {
             eat(TokenType.SWITCH);
             Token variable = currentToken;
@@ -848,6 +878,9 @@ public class RabbitScriptParser {
                         break;
                     case CHECK:
                         parseCheckStatement();
+                        break;
+                    case DEFINE_VAR:
+                        parseVarStatement();
                         break;
                     case END_IF:
                     case ELSE:
@@ -1113,6 +1146,20 @@ public class RabbitScriptParser {
             eat(TokenType.NEWLINE);
         }
 
+        private void verifyVarStatement() {
+            eat(TokenType.DEFINE_VAR);
+            eat(TokenType.IDENTIFIER);
+            if (currentToken.getType() == TokenType.OPERATOR && currentToken.getValue().equals("=")) {
+                advance();
+                verifyValueHolderItem();
+                advance();
+                verifyPipes();
+                eat(TokenType.NEWLINE);
+            } else {
+                throw new ScriptSyntaxException("Unexcepted token: " + currentToken + ", excepted: '=' operator");
+            }
+        }
+
         private void verifySwitchStatement() {
             eat(TokenType.SWITCH);
             eat(TokenType.VARIABLE_NAME);
@@ -1239,6 +1286,9 @@ public class RabbitScriptParser {
                         break;
                     case CHECK:
                         verifyCheckStatement();
+                        break;
+                    case DEFINE_VAR:
+                        verifyVarStatement();
                         break;
                     case END_IF:
                     case ELSE:

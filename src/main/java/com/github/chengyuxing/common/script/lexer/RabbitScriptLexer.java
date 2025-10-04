@@ -13,7 +13,7 @@ import static com.github.chengyuxing.common.script.Directives.*;
  */
 public class RabbitScriptLexer {
     public static final String[] DIRECTIVES = new String[]{
-            IF, ELSE, FI, CHOOSE, WHEN, SWITCH, CASE, DEFAULT, BREAK, END, FOR, DONE, GUARD, THROW, CHECK
+            IF, ELSE, FI, CHOOSE, WHEN, SWITCH, CASE, DEFAULT, BREAK, END, FOR, DONE, GUARD, THROW, CHECK, VAR
     };
     // language=RegExp
     public static final String DIRECTIVES_PATTERN = "(?i)\\s*(?:" + String.join("|", DIRECTIVES) + ")(?:\\s+.*|$)";

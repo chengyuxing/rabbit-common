@@ -113,6 +113,9 @@ public class IdentifierLexer {
                     case "check":
                         tokens.add(new Token(TokenType.CHECK, CHECK, line, position));
                         break;
+                    case "var":
+                        tokens.add(new Token(TokenType.DEFINE_VAR, VAR, line, position));
+                        break;
                     default:
                         tokens.add(new Token(TokenType.UNKNOWN, '#' + keyword, line, position));
                         break;
