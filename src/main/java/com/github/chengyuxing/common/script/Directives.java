@@ -19,4 +19,5 @@ public final class Directives {
     public static final String GUARD = "#guard";
     public static final String THROW = "#throw";
     public static final String CHECK = "#check";
+    public static final String VAR = "#var";
 }
