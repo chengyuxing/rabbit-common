@@ -343,14 +343,14 @@ public class RabbitScriptParser {
                 return !evaluateCompare();
             }
 
-            Token left = getBoolExpressionItem();
+            Token left = getValueHolderToken();
             advance();
             List<Pair<String, List<Object>>> leftPipes = collectPipes();
 
             String operator = currentToken.getValue();
             eat(TokenType.OPERATOR);
 
-            Token right = getBoolExpressionItem();
+            Token right = getValueHolderToken();
             advance();
             List<Pair<String, List<Object>>> rightPipes = collectPipes();
 
@@ -360,7 +360,7 @@ public class RabbitScriptParser {
             return Comparators.compare(a, operator, b);
         }
 
-        private Token getBoolExpressionItem() {
+        private Token getValueHolderToken() {
             switch (currentToken.getType()) {
                 case IDENTIFIER:
                 case STRING:
@@ -395,7 +395,7 @@ public class RabbitScriptParser {
                 while (currentToken.getType() != TokenType.RPAREN &&
                         currentToken.getType() != TokenType.NEWLINE &&
                         currentToken.getType() != TokenType.EOF) {
-                    params.add(getLiteralObject());
+                    params.add(getLiteralValue(currentToken));
                     advance();
                     if (currentToken.getType() == TokenType.COMMA) {
                         advance();
