@@ -124,12 +124,12 @@ public class IdentifierLexer {
                 advance();
                 String str = readWhile(c -> c != '\'');
                 advance();
-                tokens.add(new Token(TokenType.STRING, '\'' + str + '\'', line, position));
+                tokens.add(new Token(TokenType.STRING, str, line, position));
             } else if (current == '"') {
                 advance();
                 String str = readWhile(c -> c != '"');
                 advance();
-                tokens.add(new Token(TokenType.STRING, '"' + str + '"', line, position));
+                tokens.add(new Token(TokenType.STRING, str, line, position));
             } else if (current == ',') {
                 tokens.add(new Token(TokenType.COMMA, ",", line, position));
                 advance();
