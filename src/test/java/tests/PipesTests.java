@@ -1,6 +1,6 @@
 package tests;
 
-import com.github.chengyuxing.common.script.expression.IPipe;
+import com.github.chengyuxing.common.script.pipe.IPipe;
 import org.junit.Test;
 
 public class PipesTests {
@@ -54,7 +54,7 @@ public class PipesTests {
 
     static class IsIdCard implements IPipe<Boolean> {
         @Override
-        public Boolean transform(Object value) {
+        public Boolean transform(Object value, Object... params) {
             if (value == null) {
                 return false;
             }

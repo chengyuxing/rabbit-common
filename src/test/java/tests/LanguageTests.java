@@ -3,7 +3,7 @@ package tests;
 import com.github.chengyuxing.common.DataRow;
 import com.github.chengyuxing.common.io.FileResource;
 import com.github.chengyuxing.common.script.lexer.IdentifierLexer;
-import com.github.chengyuxing.common.script.parser.FlowControlParser;
+import com.github.chengyuxing.common.script.parser.RabbitScriptParser;
 import com.github.chengyuxing.common.utils.StringUtil;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -45,13 +45,13 @@ public class LanguageTests {
 
     @Test
     public void testTokens() {
-        IdentifierLexer lexer2 = new IdentifierLexer(input);
+        IdentifierLexer lexer2 = new IdentifierLexer(input,0);
         lexer2.tokenize().forEach(System.out::println);
     }
 
     @Test
     public void test1() {
-        FlowControlParser parser = new FlowControlParser(input) {
+        RabbitScriptParser parser = new RabbitScriptParser(input) {
             public static final String FOR_VARS_KEY = "_for";
             public static final String VAR_PREFIX = FOR_VARS_KEY + ".";
 

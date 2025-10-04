@@ -3,9 +3,10 @@ package tests;
 import com.github.chengyuxing.common.DataRow;
 import com.github.chengyuxing.common.script.Token;
 import com.github.chengyuxing.common.script.lexer.IdentifierLexer;
-import com.github.chengyuxing.common.script.parser.FlowControlParser;
-import com.github.chengyuxing.common.script.expression.IPipe;
+import com.github.chengyuxing.common.script.parser.RabbitScriptParser;
+import com.github.chengyuxing.common.script.pipe.IPipe;
 import com.github.chengyuxing.common.KeyValue;
+import com.github.chengyuxing.common.script.pipe.builtin.Kv;
 import com.github.chengyuxing.common.utils.StringUtil;
 import org.junit.Test;
 
@@ -16,7 +17,7 @@ public class ScriptParserTests {
 
     @Test
     public void testSS() {
-        IdentifierLexer lexer = new IdentifierLexer(":{id|date('yyyy-mm-dd',12)|upper|trim}");
+        IdentifierLexer lexer = new IdentifierLexer(":{id|date('yyyy-mm-dd',12)|upper|trim}", 0);
         List<Token> tokens = lexer.tokenize();
         tokens.forEach(System.out::println);
     }
@@ -81,7 +82,7 @@ public class ScriptParserTests {
                 " #done";
         List<Map<String, Object>> data = new ArrayList<>();
         for (int i = 0; i < 200; i++) {
-            FlowControlParser parser = new FlowControlParser(sql) {
+            RabbitScriptParser parser = new RabbitScriptParser(sql) {
                 public static final String FOR_VARS_KEY = "_for";
                 public static final String VAR_PREFIX = FOR_VARS_KEY + ".";
 
@@ -114,7 +115,7 @@ public class ScriptParserTests {
 
     @Test
     public void test1() {
-        IPipe.Kv kv = new IPipe.Kv();
+        Kv kv = new Kv();
         User user = new User();
         user.setName("cyx");
         user.setAge(27);

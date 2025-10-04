@@ -3,6 +3,9 @@ package tests;
 import com.github.chengyuxing.common.DataRow;
 import com.github.chengyuxing.common.ImmutableList;
 import com.github.chengyuxing.common.io.FileResource;
+import com.github.chengyuxing.common.script.TokenType;
+import com.github.chengyuxing.common.script.pipe.IPipe;
+import com.github.chengyuxing.common.script.pipe.builtin.Type;
 import com.github.chengyuxing.common.tuple.Quintuple;
 import com.github.chengyuxing.common.tuple.Triple;
 import com.github.chengyuxing.common.tuple.Tuples;
@@ -42,6 +45,14 @@ public class MyTest {
         row = DataRow.of("a", 1,
                 "b", 2,
                 "name", "chengyuxing");
+    }
+
+    @Test
+    public void testType() {
+        Type type = new Type();
+        System.out.println(type.transform("LocalDateTime.now()"));
+        System.out.println(TokenType.CHECK_THROW);
+        System.out.println(Long.parseLong("10009090909099099099"));
     }
 
     @Test

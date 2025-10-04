@@ -5,9 +5,9 @@ import com.github.chengyuxing.common.StringFormatter;
 import com.github.chengyuxing.common.io.ClassPathResource;
 import com.github.chengyuxing.common.io.FileResource;
 import com.github.chengyuxing.common.io.TypedProperties;
-import com.github.chengyuxing.common.script.parser.FlowControlParser;
-import com.github.chengyuxing.common.script.expression.Comparators;
-import com.github.chengyuxing.common.script.expression.IPipe;
+import com.github.chengyuxing.common.script.parser.RabbitScriptParser;
+import com.github.chengyuxing.common.script.Comparators;
+import com.github.chengyuxing.common.script.pipe.builtin.Kv;
 import com.github.chengyuxing.common.tuple.Pair;
 import com.github.chengyuxing.common.utils.ObjectUtil;
 import com.github.chengyuxing.common.utils.StringUtil;
@@ -26,9 +26,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.github.chengyuxing.common.script.expression.Patterns.PIPES_PATTERN;
 import static com.github.chengyuxing.common.utils.StringUtil.FMT;
-import static com.github.chengyuxing.common.utils.StringUtil.NEW_LINE;
 
 public class StringTests {
     static String sql = "${   a   } ${!a.d} insert into ${  Table  } ${tables.fields} values (${  VALUES.1.f }), (${values.0}), (${  Values   })${b}";
@@ -220,29 +218,18 @@ public class StringTests {
 
     @Test
     public void test10() {
-        System.out.println(Comparators.compare(null, "==", Comparators.valueOf(null)));
+//        System.out.println(Comparators.compare(null, "==", Comparators.valueOf(null)));
     }
 
     @Test
     public void test11() {
-        Object v = Comparators.valueOf("'abc'");
+//        Object v = Comparators.valueOf("'abc'");
         System.out.println(Comparators.compare("'abc'", "@", "^'\\w+'"));
 
-        System.out.println(Comparators.compare("'  '", "=", Comparators.ValueType.BLANK));
+//        System.out.println(Comparators.compare("'  '", "=", Comparators.ValueType.BLANK));
 
-        System.out.println(v);
-        System.out.println(v.getClass());
-    }
-
-    @Test
-    public void test12() {
-        IPipe<?> pipe = new IPipe.Length();
-        Map<String, IPipe<?>> pipes1 = new HashMap<>();
-        pipes1.put("a", pipe);
-        Map<String, IPipe<?>> pipes2 = new HashMap<>();
-        pipes2.put("a", pipe);
-
-        System.out.println(new HashMap<>(pipes1).equals(pipes2));
+//        System.out.println(v);
+//        System.out.println(v.getClass());
     }
 
     @Test
@@ -428,7 +415,7 @@ public class StringTests {
                         "E")
         );
 
-        FlowControlParser parser = new FlowControlParser(s) {
+        RabbitScriptParser parser = new RabbitScriptParser(s) {
             public static final String FOR_VARS_KEY = "_for";
             public static final String VAR_PREFIX = FOR_VARS_KEY + ".";
 
@@ -484,12 +471,12 @@ public class StringTests {
                 "age", 30,
                 "address", "昆明市"
         );
-        System.out.println(new IPipe.Map2Pairs().transform(row));
+        System.out.println(new Kv().transform(row));
     }
 
     @Test
     public void testPipePattern() {
-        System.out.println("|".matches(PIPES_PATTERN));
+//        System.out.println("|".matches(PIPES_PATTERN));
     }
 
     @Test
