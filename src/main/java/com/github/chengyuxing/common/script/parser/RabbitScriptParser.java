@@ -962,22 +962,18 @@ public class RabbitScriptParser {
                 verifyCompare();
                 return;
             }
-            verifyBoolExpressionItem();
+            verifyValueHolderItem();
             advance();
-            if (currentToken.getType() == TokenType.PIPE_SYMBOL) {
-                verifyPipes();
-            }
+            verifyPipes();
 
             eat(TokenType.OPERATOR);
 
-            verifyBoolExpressionItem();
+            verifyValueHolderItem();
             advance();
-            if (currentToken.getType() == TokenType.PIPE_SYMBOL) {
-                verifyPipes();
-            }
+            verifyPipes();
         }
 
-        private void verifyBoolExpressionItem() {
+        private void verifyValueHolderItem() {
             switch (currentToken.getType()) {
                 case IDENTIFIER:
                 case STRING:
@@ -1044,64 +1040,17 @@ public class RabbitScriptParser {
             }
         }
 
-        private void verifyContent(TokenType endToken, TokenType... illegalTokens) {
-            while (currentToken.getType() != TokenType.EOF && currentToken.getType() != endToken) {
-                for (TokenType type : illegalTokens) {
-                    if (currentToken.getType() == type) {
-                        throw new ScriptSyntaxException("Illegal token: " + currentToken);
-                    }
-                }
-                switch (currentToken.getType()) {
-                    case IF:
-                        verifyIfStatement();
-                        break;
-                    case SWITCH:
-                        verifySwitchStatement();
-                        break;
-                    case CHOOSE:
-                        verifyChooseStatement();
-                        break;
-                    case FOR:
-                        verifyForStatement();
-                        break;
-                    case GUARD:
-                        verifyGuardStatement();
-                        break;
-                    case CHECK:
-                        verifyCheckStatement();
-                        break;
-                    default:
-                        advance();
-                        break;
-                }
-            }
-        }
-
         private void verifyIfStatement() {
             eat(TokenType.IF);
             verifyCondition();
             eat(TokenType.NEWLINE);
-            verifyContent(TokenType.END_IF,
-                    TokenType.CASE,
-                    TokenType.WHEN,
-                    TokenType.DEFAULT,
-                    TokenType.END_FOR,
-                    TokenType.END,
-                    TokenType.BREAK,
-                    TokenType.END_GUARD
-            );
+            // verify if block，until ELSE or END_IF
+            doVerify(TokenType.ELSE, TokenType.END_IF);
             if (currentToken.getType() == TokenType.ELSE) {
-                advance();
-                verifyContent(TokenType.END_IF,
-                        TokenType.ELSE,
-                        TokenType.CASE,
-                        TokenType.WHEN,
-                        TokenType.DEFAULT,
-                        TokenType.END_FOR,
-                        TokenType.END,
-                        TokenType.BREAK,
-                        TokenType.END_GUARD
-                );
+                eat(TokenType.ELSE);
+                eat(TokenType.NEWLINE);
+                // verify else block，until END_IF
+                doVerify(TokenType.END_IF);
             }
             eat(TokenType.END_IF);
             eat(TokenType.NEWLINE);
@@ -1111,16 +1060,7 @@ public class RabbitScriptParser {
             eat(TokenType.GUARD);
             verifyCondition();
             eat(TokenType.NEWLINE);
-            verifyContent(TokenType.END_GUARD,
-                    TokenType.ELSE,
-                    TokenType.END_IF,
-                    TokenType.CASE,
-                    TokenType.WHEN,
-                    TokenType.DEFAULT,
-                    TokenType.END_FOR,
-                    TokenType.END,
-                    TokenType.BREAK
-            );
+            doVerify(TokenType.END_GUARD);
             eat(TokenType.END_GUARD);
             if (currentToken.getType() != TokenType.STRING && currentToken.getType() != TokenType.NEWLINE) {
                 throw new ScriptSyntaxException("Illegal token: " + currentToken + ", excepted: " + TokenType.STRING + " / " + TokenType.NEWLINE);
@@ -1135,10 +1075,7 @@ public class RabbitScriptParser {
             eat(TokenType.CHECK);
             verifyCondition();
             eat(TokenType.CHECK_THROW);
-            if (currentToken.getType() != TokenType.STRING) {
-                throw new ScriptSyntaxException("Unexcepted token: " + currentToken + ", excepted: " + TokenType.STRING);
-            }
-            advance();
+            eat(TokenType.STRING);
             eat(TokenType.NEWLINE);
         }
 
@@ -1158,7 +1095,8 @@ public class RabbitScriptParser {
 
         private void verifySwitchStatement() {
             eat(TokenType.SWITCH);
-            eat(TokenType.VARIABLE_NAME);
+            verifyValueHolderItem();
+            advance();
             verifyPipes();
             eat(TokenType.NEWLINE);
 
@@ -1167,7 +1105,7 @@ public class RabbitScriptParser {
                     advance();
                     verifyCaseLiteralValues();
                     eat(TokenType.NEWLINE);
-                    verifyBranchContent();
+                    doVerify(TokenType.BREAK);
                     eat(TokenType.BREAK);
                 } else {
                     verifyDefaultBranch();
@@ -1186,7 +1124,7 @@ public class RabbitScriptParser {
                     advance();
                     verifyCondition();
                     eat(TokenType.NEWLINE);
-                    verifyBranchContent();
+                    doVerify(TokenType.BREAK);
                     eat(TokenType.BREAK);
                 } else {
                     verifyDefaultBranch();
@@ -1200,24 +1138,11 @@ public class RabbitScriptParser {
             if (currentToken.getType() == TokenType.DEFAULT) {
                 advance();
                 eat(TokenType.NEWLINE);
-                verifyBranchContent();
+                doVerify(TokenType.BREAK);
                 eat(TokenType.BREAK);
             } else {
                 eat(TokenType.NEWLINE);
             }
-        }
-
-        private void verifyBranchContent() {
-            verifyContent(TokenType.BREAK,
-                    TokenType.END_IF,
-                    TokenType.ELSE,
-                    TokenType.END,
-                    TokenType.END_FOR,
-                    TokenType.WHEN,
-                    TokenType.CASE,
-                    TokenType.DEFAULT,
-                    TokenType.END_GUARD
-            );
         }
 
         private void verifyForStatement() {
@@ -1233,7 +1158,8 @@ public class RabbitScriptParser {
                 }
             }
             eat(TokenType.FOR_OF);
-            eat(TokenType.VARIABLE_NAME);
+            verifyValueHolderItem();
+            advance();
             verifyPipes();
             if (currentToken.getType() == TokenType.FOR_DELIMITER) {
                 advance();
@@ -1248,22 +1174,22 @@ public class RabbitScriptParser {
                 eat(TokenType.STRING);
             }
             eat(TokenType.NEWLINE);
-            verifyContent(TokenType.END_FOR,
-                    TokenType.END_IF,
-                    TokenType.ELSE,
-                    TokenType.CASE,
-                    TokenType.WHEN,
-                    TokenType.BREAK,
-                    TokenType.DEFAULT,
-                    TokenType.END,
-                    TokenType.END_GUARD
-            );
+            doVerify(TokenType.END_FOR);
             eat(TokenType.END_FOR);
             eat(TokenType.NEWLINE);
         }
 
-        public void doVerify() {
-            while (currentToken.getType() != TokenType.EOF) {
+        private boolean isEndToken(Token token, TokenType... endTokens) {
+            for (TokenType end : endTokens) {
+                if (token.getType() == end) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public void doVerify(TokenType... endTokens) {
+            while (currentToken.getType() != TokenType.EOF && !isEndToken(currentToken, endTokens)) {
                 switch (currentToken.getType()) {
                     case IF:
                         verifyIfStatement();
