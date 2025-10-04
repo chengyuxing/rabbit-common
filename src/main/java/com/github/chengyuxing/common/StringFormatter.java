@@ -1,6 +1,5 @@
 package com.github.chengyuxing.common;
 
-import com.github.chengyuxing.common.script.expression.Patterns;
 import com.github.chengyuxing.common.utils.ObjectUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
