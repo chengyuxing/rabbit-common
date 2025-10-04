@@ -14,6 +14,8 @@ import com.github.chengyuxing.common.script.Comparators;
 import com.github.chengyuxing.common.tuple.Pair;
 import com.github.chengyuxing.common.utils.ObjectUtil;
 import com.github.chengyuxing.common.utils.StringUtil;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.*;
 
@@ -137,6 +139,7 @@ public class RabbitScriptParser {
         }
         forIndex = 0;
         forContextVars = new HashMap<>();
+        definedVars = new HashMap<>();
         Parser parser = new Parser(tokens, context);
         return parser.doParse();
     }
