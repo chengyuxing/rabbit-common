@@ -102,7 +102,7 @@ import static com.github.chengyuxing.common.utils.StringUtil.NEW_LINE;
  * </blockquote>
  * <p>Boolean condition expression.</p>
  * <p>Support logic operator: {@code &&, ||, !}, e.g.</p>
- * <blockquote><pre>!(:id &gt;= 0 || :name | {@link com.github.chengyuxing.common.script.pipe.builtin.Nvl nvl('admin')} | {@link com.github.chengyuxing.common.script.pipe.builtin.Length length} &lt;= 3) &amp;&amp; :age &gt; 21
+ * <blockquote><pre>!(:id &gt;= 0 || :name | {@link com.github.chengyuxing.common.script.pipe.builtin.Nvl nvl('guest')} | {@link com.github.chengyuxing.common.script.pipe.builtin.Length length} &lt;= 3) &amp;&amp; :age &gt; 21
  * </pre></blockquote>
  * Built-in {@link IPipe pipes}：{@link com.github.chengyuxing.common.script.pipe.BuiltinPipes}
  *
@@ -279,6 +279,25 @@ public class RabbitScriptParser {
     }
 
     /**
+     * Is current token not the end token type.
+     *
+     * @param token     current token
+     * @param endTokens end token types
+     * @return true or false
+     */
+    private static boolean nonEndToken(Token token, TokenType... endTokens) {
+        if (token.getType() == TokenType.EOF) {
+            return false;
+        }
+        for (TokenType end : endTokens) {
+            if (token.getType() == end) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
      * Parser implementation.
      */
     final class Parser {
@@ -380,7 +399,7 @@ public class RabbitScriptParser {
 
         private List<Pair<String, List<Object>>> collectPipes() {
             List<Pair<String, List<Object>>> pipes = new ArrayList<>();
-            while (currentToken.getType() != TokenType.NEWLINE && currentToken.getType() != TokenType.EOF) {
+            while (nonEndToken(currentToken, TokenType.NEWLINE)) {
                 if (currentToken.getType() == TokenType.PIPE_SYMBOL) {
                     advance();
                     String pipeName = currentToken.getValue();
@@ -398,9 +417,7 @@ public class RabbitScriptParser {
             List<Object> params = new ArrayList<>();
             if (currentToken.getType() == TokenType.LPAREN) {
                 advance();
-                while (currentToken.getType() != TokenType.RPAREN &&
-                        currentToken.getType() != TokenType.NEWLINE &&
-                        currentToken.getType() != TokenType.EOF) {
+                while (nonEndToken(currentToken, TokenType.RPAREN, TokenType.NEWLINE)) {
                     params.add(getLiteralValue(currentToken));
                     advance();
                     if (currentToken.getType() == TokenType.COMMA) {
@@ -514,8 +531,7 @@ public class RabbitScriptParser {
             List<Object> values = new ArrayList<>();
             values.add(getLiteralValue(currentToken));
             advance();
-            while (currentToken.getType() != TokenType.NEWLINE &&
-                    currentToken.getType() != TokenType.EOF) {
+            while (nonEndToken(currentToken, TokenType.NEWLINE)) {
                 eat(TokenType.COMMA);
                 values.add(getLiteralValue(currentToken));
                 advance();
@@ -526,7 +542,7 @@ public class RabbitScriptParser {
         private List<Token> collectForBlock() {
             List<Token> tokens = new ArrayList<>();
             int forDepth = 0;
-            while ((currentToken.getType() != TokenType.END_FOR || forDepth != 0) && currentToken.getType() != TokenType.EOF) {
+            while ((currentToken.getType() != TokenType.END_FOR || forDepth != 0) && nonEndToken(currentToken)) {
                 if (currentToken.getType() == TokenType.FOR) {
                     forDepth++;
                 } else if (currentToken.getType() == TokenType.END_FOR) {
@@ -541,7 +557,7 @@ public class RabbitScriptParser {
         private List<Token> collectBranchBlock() {
             List<Token> caseWhenDefaultBlock = new ArrayList<>();
             int switchChooseDepth = 0;
-            while ((currentToken.getType() != TokenType.BREAK || switchChooseDepth != 0) && currentToken.getType() != TokenType.EOF) {
+            while ((currentToken.getType() != TokenType.BREAK || switchChooseDepth != 0) && nonEndToken(currentToken)) {
                 if (currentToken.getType() == TokenType.CHOOSE || currentToken.getType() == TokenType.SWITCH) {
                     switchChooseDepth++;
                 } else if (currentToken.getType() == TokenType.END) {
@@ -558,15 +574,15 @@ public class RabbitScriptParser {
             boolean matched = evaluateCondition();
             eat(TokenType.NEWLINE);
             List<Token> ifBlockContent = new ArrayList<>();
-            int ifDepth = 1;
+            int ifDepth = 0;
             int elseIndex = -1;
             int index = 0;
-            while ((currentToken.getType() != TokenType.END_IF || ifDepth != 1) && currentToken.getType() != TokenType.EOF) {
+            while ((currentToken.getType() != TokenType.END_IF || ifDepth != 0) && nonEndToken(currentToken)) {
                 if (currentToken.getType() == TokenType.IF) {
                     ifDepth++;
                 } else if (currentToken.getType() == TokenType.END_IF) {
                     ifDepth--;
-                } else if (currentToken.getType() == TokenType.ELSE && ifDepth == 1) {
+                } else if (currentToken.getType() == TokenType.ELSE && ifDepth == 0) {
                     elseIndex = index;
                 }
                 ifBlockContent.add(currentToken);
@@ -598,8 +614,8 @@ public class RabbitScriptParser {
             boolean matched = evaluateCondition();
             eat(TokenType.NEWLINE);
             List<Token> matchedContent = new ArrayList<>();
-            int guardDepth = 1;
-            while ((currentToken.getType() != TokenType.END_GUARD || guardDepth != 1) && currentToken.getType() != TokenType.EOF) {
+            int guardDepth = 0;
+            while ((currentToken.getType() != TokenType.END_GUARD || guardDepth != 0) && nonEndToken(currentToken)) {
                 if (currentToken.getType() == TokenType.GUARD) {
                     guardDepth++;
                 } else if (currentToken.getType() == TokenType.END_GUARD) {
@@ -676,7 +692,7 @@ public class RabbitScriptParser {
             List<Token> matchedBranch = null;
             List<Token> defaultBranch = new ArrayList<>();
 
-            while (currentToken.getType() != TokenType.END && currentToken.getType() != TokenType.EOF) {
+            while (nonEndToken(currentToken, TokenType.END)) {
                 if (currentToken.getType() == TokenType.CASE) {
                     advance();
                     List<Object> caseValues = collectCaseLiteralValues();
@@ -713,7 +729,7 @@ public class RabbitScriptParser {
             List<Token> matchedBranch = null;
             List<Token> defaultBranch = new ArrayList<>();
 
-            while (currentToken.getType() != TokenType.END && currentToken.getType() != TokenType.EOF) {
+            while (nonEndToken(currentToken, TokenType.END)) {
                 if (currentToken.getType() == TokenType.WHEN) {
                     advance();
                     boolean matched = evaluateCondition();
@@ -861,7 +877,7 @@ public class RabbitScriptParser {
                 return "";
             }
             CleanStringJoiner result = new CleanStringJoiner(NEW_LINE);
-            while (currentToken.getType() != TokenType.EOF) {
+            while (nonEndToken(currentToken)) {
                 switch (currentToken.getType()) {
                     case IF:
                         result.add(parseIfStatement());
@@ -992,7 +1008,7 @@ public class RabbitScriptParser {
         }
 
         private void verifyPipes() {
-            while (currentToken.getType() != TokenType.NEWLINE && currentToken.getType() != TokenType.EOF) {
+            while (nonEndToken(currentToken, TokenType.NEWLINE)) {
                 if (currentToken.getType() == TokenType.PIPE_SYMBOL) {
                     advance();
                     eat(TokenType.IDENTIFIER);
@@ -1006,9 +1022,7 @@ public class RabbitScriptParser {
         private void verifyPipeParams() {
             if (currentToken.getType() == TokenType.LPAREN) {
                 advance();
-                while (currentToken.getType() != TokenType.RPAREN &&
-                        currentToken.getType() != TokenType.NEWLINE &&
-                        currentToken.getType() != TokenType.EOF) {
+                while (nonEndToken(currentToken, TokenType.RPAREN, TokenType.NEWLINE)) {
                     verifyLiteralValue();
                     advance();
                     if (currentToken.getType() == TokenType.COMMA) {
@@ -1038,8 +1052,7 @@ public class RabbitScriptParser {
         private void verifyCaseLiteralValues() {
             verifyLiteralValue();
             advance();
-            while (currentToken.getType() != TokenType.NEWLINE &&
-                    currentToken.getType() != TokenType.EOF) {
+            while (nonEndToken(currentToken, TokenType.NEWLINE)) {
                 eat(TokenType.COMMA);
                 verifyLiteralValue();
                 advance();
@@ -1106,7 +1119,7 @@ public class RabbitScriptParser {
             verifyPipes();
             eat(TokenType.NEWLINE);
 
-            while (currentToken.getType() != TokenType.END && currentToken.getType() != TokenType.EOF) {
+            while (nonEndToken(currentToken, TokenType.END)) {
                 if (currentToken.getType() == TokenType.CASE) {
                     advance();
                     verifyCaseLiteralValues();
@@ -1125,7 +1138,7 @@ public class RabbitScriptParser {
             eat(TokenType.CHOOSE);
             eat(TokenType.NEWLINE);
 
-            while (currentToken.getType() != TokenType.END && currentToken.getType() != TokenType.EOF) {
+            while (nonEndToken(currentToken, TokenType.END)) {
                 if (currentToken.getType() == TokenType.WHEN) {
                     advance();
                     verifyCondition();
@@ -1185,17 +1198,8 @@ public class RabbitScriptParser {
             eat(TokenType.NEWLINE);
         }
 
-        private boolean isEndToken(Token token, TokenType... endTokens) {
-            for (TokenType end : endTokens) {
-                if (token.getType() == end) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
         public void doVerify(TokenType... endTokens) {
-            while (currentToken.getType() != TokenType.EOF && !isEndToken(currentToken, endTokens)) {
+            while (nonEndToken(currentToken, endTokens)) {
                 switch (currentToken.getType()) {
                     case IF:
                         verifyIfStatement();
