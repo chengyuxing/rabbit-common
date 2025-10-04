@@ -18,6 +18,10 @@ import java.util.regex.Pattern;
  * String util.
  */
 public final class StringUtil {
+    //language=RegExp
+    /**
+     * e.g. {@code 1, -1, 3.14}
+     */
     public static final String NUMBER_REGEX = "-?(0|[1-9]\\d*)(\\.\\d+)?";
     public static final String NEW_LINE = "\n";
     /**
