@@ -11,6 +11,7 @@ public enum TokenType {
     END_FOR(Directives.DONE),
     GUARD(Directives.GUARD), END_GUARD(Directives.THROW),
     CHECK(Directives.CHECK), CHECK_THROW("throw"),
+    DEFINE_VAR(Directives.VAR),
 
     // Other tokens
     IDENTIFIER("<identifier>"), STRING("'<string>'"), NUMBER("<number>"),
