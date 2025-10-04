@@ -29,6 +29,12 @@ import static com.github.chengyuxing.common.utils.StringUtil.NEW_LINE;
  * #check expression throw 'message'
  * </pre>
  * </blockquote>
+ * <p>var statement:</p>
+ * <blockquote>
+ * <pre>
+ * #var myVal = :key [| {@linkplain IPipe pipe1} | {@linkplain IPipe pipeN} | ...]
+ * </pre>
+ * </blockquote>
  * <p>if statement:</p>
  * <blockquote>
  * <pre>
@@ -264,7 +270,7 @@ public class RabbitScriptParser {
     }
 
     /**
-     * Returns the #let and #set vars.
+     * Returns the #var variables.
      *
      * @return vars
      */
