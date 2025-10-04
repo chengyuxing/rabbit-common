@@ -1,0 +1,37 @@
+#if ((:name | upper |length > 5) && 55 > :address | lower | length) || :id = 1
+    aaa
+#fi
+
+#for item of :list | kv delimiter ','
+    ${item.key}:${item.value}
+#done
+
+#for user of :users | nvl('a,b,c') | split(',') delimiter '-'
+    ${user}
+#done
+
+#if :users | split(',') | length() > 3 && :home != blank
+    #guard :home == blank
+        1000
+        2000
+    #throw 'Home not allow blank'
+#else
+    #switch :id
+        #case 1
+            #if :id != 10
+                1111
+            #else
+            #fi
+        #break
+    #end
+#fi
+
+#var items = :users | upper
+
+#for item of :items | split(',')
+    #if :item != C
+    ${item}
+    #else
+    111
+    #fi
+#done

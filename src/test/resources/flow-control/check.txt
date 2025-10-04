@@ -1,0 +1,6 @@
+
+#check :id == null || :id = '' throw 'ID 不能为空！'
+#check :id | type != Integer throw 'ID 必须为数字！'
+
+select * from table where id = :id
+and name = :name;

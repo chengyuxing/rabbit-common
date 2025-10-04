@@ -19,7 +19,6 @@ import java.util.StringJoiner;
  * Reflect util.
  */
 public final class ReflectUtil {
-
     public static String initGetMethod(String field, Class<?> type) {
         String prefix = "get";
         if (type == boolean.class)
