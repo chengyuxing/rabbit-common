@@ -166,10 +166,7 @@ public class StringTests {
         System.out.println(resource.getLastModified());
         System.out.println(resource.getInputStream().available());
         System.out.println("--------");
-        FileResource httpR = new FileResource("https://github.com/chengyuxing/sqlc/releases/download/2.1.2/sqlc-v2.1.2.tar.gz?id=13&dt=2021-12-12",
-                DataRow.of(
-                        "headers", DataRow.of("token", "abc"),
-                        "connectTimeout", 0));
+        FileResource httpR = new FileResource("https://github.com/chengyuxing/sqlc/releases/download/2.1.2/sqlc-v2.1.2.tar.gz?id=13&dt=2021-12-12");
         System.out.println(httpR.exists());
         System.out.println(httpR.getFileName());
         System.out.println(httpR.getFilenameExtension());
