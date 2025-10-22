@@ -10,6 +10,7 @@ import java.net.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -29,7 +30,11 @@ import java.util.function.Supplier;
 public class FileResource extends ClassPathResource {
     @Language("Regexp")
     private final static String SCHEMAS_PATTERN = "(file|http|https|ftp)://.+";
+    public static final String HTTP_PROP_CONNECTION_TIMEOUT = "connectTimeout";
+    public static final String HTTP_PROP_READ_TIMEOUT = "readTimeout";
+    public static final String HTTP_PROP_HEADERS = "headers";
     private final DataRow properties = new DataRow();
+    private Function<String, InputStream> requestInterceptor;
 
     /**
      * Constructs a new FileResource with file path.
@@ -42,17 +47,14 @@ public class FileResource extends ClassPathResource {
     }
 
     /**
-     * Constructs a new FileResource with file path.
+     * Constructs a new FileResource with file path and buffer size.
      *
      * @param path       file path
-     * @param properties properties e.g. http(s) request property {@code headers}:{@link Map}
+     * @param bufferSize buffer size
      * @see FileResource
      */
-    public FileResource(@Subst("uri or classpath") String path, Map<String, Object> properties) {
-        super(path);
-        if (Objects.nonNull(properties)) {
-            this.properties.putAll(properties);
-        }
+    public FileResource(@Subst("uri or classpath") String path, int bufferSize) {
+        super(path, bufferSize);
     }
 
     /**
@@ -66,6 +68,9 @@ public class FileResource extends ClassPathResource {
 
     @Override
     public InputStream getInputStream() {
+        if (Objects.nonNull(requestInterceptor)) {
+            return requestInterceptor.apply(path);
+        }
         Supplier<InputStream> interceptor = requestIntercept(path);
         if (Objects.nonNull(interceptor)) {
             return interceptor.get();
@@ -80,14 +85,14 @@ public class FileResource extends ClassPathResource {
                     case "https":
                         HttpURLConnection httpCon = (HttpURLConnection) getURL().openConnection();
                         httpCon.setRequestMethod("GET");
-                        if (properties.containsKey("connectTimeout")) {
-                            httpCon.setConnectTimeout(properties.getInt("connectTimeout", 5000));
+                        if (properties.containsKey(HTTP_PROP_CONNECTION_TIMEOUT)) {
+                            httpCon.setConnectTimeout(properties.getInt(HTTP_PROP_CONNECTION_TIMEOUT, 5000));
                         }
-                        if (properties.containsKey("readTimeout")) {
-                            httpCon.setReadTimeout(properties.getInt("readTimeout", 5000));
+                        if (properties.containsKey(HTTP_PROP_READ_TIMEOUT)) {
+                            httpCon.setReadTimeout(properties.getInt(HTTP_PROP_READ_TIMEOUT, 15000));
                         }
-                        if (properties.containsKey("headers")) {
-                            Map<String, Object> headers = properties.getAs("headers", new LinkedHashMap<>());
+                        if (properties.containsKey(HTTP_PROP_HEADERS)) {
+                            Map<String, Object> headers = properties.getAs(HTTP_PROP_HEADERS, new LinkedHashMap<>());
                             for (Map.Entry<String, Object> e : headers.entrySet()) {
                                 httpCon.setRequestProperty(e.getKey(), e.getValue().toString());
                             }
@@ -95,11 +100,11 @@ public class FileResource extends ClassPathResource {
                         return httpCon.getInputStream();
                     case "ftp":
                         URLConnection ftpCon = getURL().openConnection();
-                        if (properties.containsKey("connectTimeout")) {
-                            ftpCon.setConnectTimeout(properties.getInt("connectTimeout", 5000));
+                        if (properties.containsKey(HTTP_PROP_CONNECTION_TIMEOUT)) {
+                            ftpCon.setConnectTimeout(properties.getInt(HTTP_PROP_CONNECTION_TIMEOUT, 5000));
                         }
-                        if (properties.containsKey("readTimeout")) {
-                            ftpCon.setReadTimeout(properties.getInt("readTimeout", 5000));
+                        if (properties.containsKey(HTTP_PROP_READ_TIMEOUT)) {
+                            ftpCon.setReadTimeout(properties.getInt(HTTP_PROP_READ_TIMEOUT, 15000));
                         }
                         return ftpCon.getInputStream();
                     default:
@@ -161,6 +166,26 @@ public class FileResource extends ClassPathResource {
      */
     protected @Nullable Supplier<InputStream> requestIntercept(final String path) {
         return null;
+    }
+
+    /**
+     * Set resource request interceptor.
+     *
+     * @param requestInterceptor request interceptor
+     */
+    public void setRequestInterceptor(Function<String, InputStream> requestInterceptor) {
+        this.requestInterceptor = requestInterceptor;
+    }
+
+    /**
+     * Prepare some properties for resource if needed.
+     *
+     * @param properties properties e.g. http(s) request property {@code headers}:{@link Map}
+     */
+    public void setProperties(Map<String, Object> properties) {
+        if (Objects.nonNull(properties)) {
+            this.properties.putAll(properties);
+        }
     }
 
     /**

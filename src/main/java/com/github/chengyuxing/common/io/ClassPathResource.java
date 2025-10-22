@@ -19,8 +19,10 @@ import java.util.stream.Stream;
  * Classpath resource.
  */
 public class ClassPathResource {
+    public static final int DEFAULT_BUFFER_SIZE = 8192;
     protected final String path;
     private final ClassLoader classLoader;
+    private final int bufferSize;
 
     /**
      * Constructs a new ClassPathResource with file path.
@@ -29,7 +31,20 @@ public class ClassPathResource {
      */
     public ClassPathResource(@NotNull @Pattern("[^/].*") String path) {
         this.path = cleanPath(path);
-        classLoader = getClassLoader();
+        this.classLoader = getClassLoader();
+        this.bufferSize = DEFAULT_BUFFER_SIZE;
+    }
+
+    /**
+     * Constructs a new ClassPathResource with file path.
+     *
+     * @param path       file path
+     * @param bufferSize buffer size
+     */
+    public ClassPathResource(@NotNull @Pattern("[^/].*") String path, int bufferSize) {
+        this.path = cleanPath(path);
+        this.classLoader = getClassLoader();
+        this.bufferSize = bufferSize;
     }
 
     /**
@@ -76,7 +91,7 @@ public class ClassPathResource {
      * @return BufferedReader
      */
     public BufferedReader getBufferedReader(Charset charset) {
-        return new BufferedReader(new InputStreamReader(getInputStream(), charset));
+        return new BufferedReader(new InputStreamReader(getInputStream(), charset), bufferSize);
     }
 
     /**
@@ -108,7 +123,7 @@ public class ClassPathResource {
      * @throws IOException if file not exists
      */
     public byte[] readBytes() throws IOException {
-        return readBytes(getInputStream());
+        return readBytes(getInputStream(), bufferSize);
     }
 
     /**
@@ -118,7 +133,19 @@ public class ClassPathResource {
      * @throws IOException if file not exists
      */
     public void transferTo(OutputStream out) throws IOException {
-        transferTo(getInputStream(), out);
+        transferTo(getInputStream(), out, 0, Long.MAX_VALUE, bufferSize);
+    }
+
+    /**
+     * Current resource part transfer to another.
+     *
+     * @param out    output stream
+     * @param offset resource part bytes offset position
+     * @param length resource part bytes length
+     * @throws IOException if file not exists
+     */
+    public void transferTo(OutputStream out, long offset, long length) throws IOException {
+        transferTo(getInputStream(), out, offset, length, bufferSize);
     }
 
     /**
@@ -200,8 +227,20 @@ public class ClassPathResource {
      * @throws IOException if file not exists
      */
     public static byte[] readBytes(InputStream in) throws IOException {
+        return readBytes(in, DEFAULT_BUFFER_SIZE);
+    }
+
+    /**
+     * Read all bytes.
+     *
+     * @param in         input stream
+     * @param bufferSize buffer size, in bytes
+     * @return all bytes
+     * @throws IOException if file not exists
+     */
+    public static byte[] readBytes(InputStream in, int bufferSize) throws IOException {
         try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-            transferTo(in, out);
+            transferTo(in, out, 0, Long.MAX_VALUE, bufferSize);
             return out.toByteArray();
         }
     }
@@ -209,20 +248,58 @@ public class ClassPathResource {
     /**
      * Transfer input to output.
      *
-     * @param in  input stream
-     * @param out output stream
+     * @param in     input stream
+     * @param out    output stream
+     * @param offset bytes offset position
+     * @param length bytes length
      * @throws IOException if file not exists
      */
-    public static void transferTo(InputStream in, OutputStream out) throws IOException {
+    public static void transferTo(InputStream in, OutputStream out, long offset, long length) throws IOException {
+        transferTo(in, out, offset, length, DEFAULT_BUFFER_SIZE);
+    }
+
+    /**
+     * Transfer input to output.
+     *
+     * @param in         input stream
+     * @param out        output stream
+     * @param offset     bytes offset position
+     * @param length     bytes length
+     * @param bufferSize buffer size, in bytes
+     * @throws IOException if file not exists
+     */
+    public static void transferTo(InputStream in, OutputStream out, long offset, long length, int bufferSize) throws IOException {
         try (ReadableByteChannel inChannel = Channels.newChannel(in);
              WritableByteChannel outChannel = Channels.newChannel(out)) {
-            ByteBuffer buffer = ByteBuffer.allocate(8192);
-            while (inChannel.read(buffer) != -1) {
+            ByteBuffer buffer = ByteBuffer.allocate(bufferSize);
+
+            if (offset > 0) {
+                long skipped = 0L;
+                // if the resource is http(s), ftp or any other resource from remote
+                // discard buffer may be more precision than in.skip()
+                byte[] skipBuffer = new byte[DEFAULT_BUFFER_SIZE];
+                while (skipped < offset) {
+                    long toSkip = Math.min(skipBuffer.length, offset - skipped);
+                    int n = in.read(skipBuffer, 0, (int) toSkip);
+                    if (n == -1) break;
+                    skipped += n;
+                }
+            }
+            long totalRead = 0L;
+            while (totalRead < length) {
+                int toRead = (int) Math.min(buffer.capacity(), length - totalRead);
+                buffer.clear();
+                buffer.limit(toRead);
+
+                int read = inChannel.read(buffer);
+                if (read == -1) {
+                    break;
+                }
                 buffer.flip();
                 while (buffer.hasRemaining()) {
                     outChannel.write(buffer);
                 }
-                buffer.clear();
+                totalRead += read;
             }
         }
     }

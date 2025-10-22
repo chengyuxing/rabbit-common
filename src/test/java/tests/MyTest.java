@@ -14,6 +14,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -81,6 +82,11 @@ public class MyTest {
             }
         }.readLines(StandardCharsets.UTF_8)
                 .forEach(System.out::println);
+    }
+
+    @Test
+    public void testRequestIntercept() {
+
     }
 
     @Test
