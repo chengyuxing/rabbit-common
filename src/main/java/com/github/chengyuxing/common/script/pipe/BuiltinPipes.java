@@ -22,6 +22,7 @@ public final class BuiltinPipes {
         BUILTIN_PIPES.put("type", new Type());
         BUILTIN_PIPES.put("split", new Split());
         BUILTIN_PIPES.put("nvl", new Nvl());
+        BUILTIN_PIPES.put("in", new In());
     }
 
     public static @NotNull @Unmodifiable Map<String, IPipe<?>> getAll() {
