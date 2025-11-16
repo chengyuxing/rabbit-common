@@ -517,8 +517,14 @@ public class RabbitScriptParser {
                         return (int) value;
                     }
                     return value;
+                case VARIABLE_NAME:
+                    String key = token.getValue().substring(1);
+                    if (definedVars.containsKey(key)) {
+                        return definedVars.get(key);
+                    }
+                    return ObjectUtil.getDeepValue(context, key);
                 default:
-                    throw new ScriptSyntaxException("Unexpected token: " + token + ", expected: " + TokenType.IDENTIFIER + " / " + TokenType.STRING + " / " + TokenType.NUMBER);
+                    throw new ScriptSyntaxException("Unexpected token: " + token + ", expected: " + TokenType.IDENTIFIER + " / " + TokenType.STRING + " / " + TokenType.NUMBER + " / " + TokenType.VARIABLE_NAME);
             }
         }
 
@@ -1043,9 +1049,10 @@ public class RabbitScriptParser {
                 case IDENTIFIER:
                 case STRING:
                 case NUMBER:
+                case VARIABLE_NAME:
                     break;
                 default:
-                    throw new ScriptSyntaxException("Unexpected token: " + currentToken + ", expected: " + TokenType.IDENTIFIER + " / " + TokenType.STRING + " / " + TokenType.NUMBER);
+                    throw new ScriptSyntaxException("Unexpected token: " + currentToken + ", expected: " + TokenType.IDENTIFIER + " / " + TokenType.STRING + " / " + TokenType.NUMBER + " / " + TokenType.VARIABLE_NAME);
             }
         }
 

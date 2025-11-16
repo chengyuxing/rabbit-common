@@ -27,9 +27,10 @@
 #fi
 
 #var items = :users | upper
+#var max = :id | x(:list.age)
 
 #for item of :items | split(',')
-    #if :item != C
+    #if :item != C && :max > 1
     ${item}
     #else
     111
