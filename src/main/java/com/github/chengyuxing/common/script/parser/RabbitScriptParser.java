@@ -220,17 +220,17 @@ public class RabbitScriptParser {
      * <pre>'cyx' and 'json'</pre>
      * </blockquote>
      *
-     * @param forIndex each for loop auto index
-     * @param varIndex for var auto index
-     * @param varName  for context var name,  e.g. {@code <user>}
-     * @param idxName  for context index name,  e.g. {@code <idx>}
-     * @param body     content in for loop
-     * @param context  each for loop context args (index and value) which created by for expression
+     * @param forIndex  each for loop auto index
+     * @param itemIndex for each item auto index
+     * @param varName   for context var name,  e.g. {@code <user>}
+     * @param idxName   for context index name,  e.g. {@code <idx>}
+     * @param body      content in for loop
+     * @param context   each for loop context args (index and value) which created by for expression
      * @return formatted content
      * @see #getForContextVars()
      */
-    protected String forLoopBodyFormatter(int forIndex, int varIndex, String varName, String idxName, String body, Map<String, Object> context) {
-        return StringUtil.FMT.format(body, context);
+    protected String forLoopBodyFormatter(int forIndex, int itemIndex, String varName, String idxName, String body, Map<String, Object> context) {
+        return body;
     }
 
     /**
