@@ -1,6 +1,7 @@
 package com.github.chengyuxing.common.script.parser;
 
 import com.github.chengyuxing.common.CleanStringJoiner;
+import com.github.chengyuxing.common.script.Directives;
 import com.github.chengyuxing.common.script.exception.CheckViolationException;
 import com.github.chengyuxing.common.script.exception.GuardViolationException;
 import com.github.chengyuxing.common.script.exception.PipeNotFoundException;
@@ -13,11 +14,11 @@ import com.github.chengyuxing.common.script.exception.ScriptSyntaxException;
 import com.github.chengyuxing.common.script.Comparators;
 import com.github.chengyuxing.common.tuple.Pair;
 import com.github.chengyuxing.common.utils.ObjectUtil;
-import com.github.chengyuxing.common.utils.StringUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.*;
+import java.util.function.BiConsumer;
 
 import static com.github.chengyuxing.common.utils.StringUtil.NEW_LINE;
 
@@ -670,6 +671,12 @@ public class RabbitScriptParser {
          * #var id = :id | upper
          */
         private void parseVarStatement() {
+            parseVarStatement((varName, value) -> {
+                definedVars.put(varName, value);
+            });
+        }
+
+        private void parseVarStatement(BiConsumer<String, Object> varConsumer) {
             eat(TokenType.DEFINE_VAR);
             String varName = currentToken.getValue();
             eat(TokenType.IDENTIFIER);
@@ -680,7 +687,7 @@ public class RabbitScriptParser {
                 List<Pair<String, List<Object>>> pipes = collectPipes();
                 eat(TokenType.NEWLINE);
                 Object value = calcValue(variable, pipes);
-                definedVars.put(varName, value);
+                varConsumer.accept(varName, value);
             } else {
                 throw new ScriptSyntaxException("Unexcepted token: " + currentToken + ", excepted: '=' operator");
             }
@@ -772,15 +779,15 @@ public class RabbitScriptParser {
 
         private String parseForStatement() {
             eat(TokenType.FOR);
-            String varName = currentToken.getValue();
+            String itemName = currentToken.getValue();
             eat(TokenType.IDENTIFIER);
             String idxName = "";
             if (currentToken.getType() == TokenType.COMMA) {
                 advance();
                 idxName = currentToken.getValue();
                 eat(TokenType.IDENTIFIER);
-                if (varName.equals(idxName)) {
-                    throw new ScriptSyntaxException("#for statement item and index must not have the same name: '" + varName + "', near " + currentToken);
+                if (itemName.equals(idxName)) {
+                    throw new ScriptSyntaxException("#for statement item and index must not have the same name: '" + itemName + "', near " + currentToken);
                 }
             }
             eat(TokenType.FOR_OF);
@@ -833,11 +840,12 @@ public class RabbitScriptParser {
             for (int i = 0, j = iterator.length; i < j; i++) {
                 Object item = iterator[i];
 
-                Map<String, Object> childContext = new HashMap<>(context);
+                Map<String, Object> childContext = new HashMap<>(definedVars);
+                childContext.putAll(context);
 
-                if (!varName.isEmpty()) {
-                    localForVars.put(forVarKey(varName, forIndex, i), item);
-                    childContext.put(varName, item);
+                if (!itemName.isEmpty()) {
+                    localForVars.put(forVarKey(itemName, forIndex, i), item);
+                    childContext.put(itemName, item);
                 }
                 if (!idxName.isEmpty()) {
                     localForVars.put(forVarKey(idxName, forIndex, i), i);
@@ -846,10 +854,32 @@ public class RabbitScriptParser {
 
                 // for loop body content tokens.
                 List<Token> newForContent = new ArrayList<>(forContent.size());
-                for (Token token : forContent) {
+                int forPosition = forContent.indexOf(new Token(TokenType.FOR, Directives.FOR));
+                for (int k = 0; k < forContent.size(); k++) {
+                    Token token = forContent.get(k);
+                    // FIXME 解决一下for里面定义的var的问题
+                    // 在好好想想用户参数和定义var参数谁覆盖谁的问题
+                    // 用户参数覆盖常规变量，for循环里的变量带编号自成一套
+                    if (token.getType() == TokenType.DEFINE_VAR && (forPosition == -1 || forPosition > k)) {
+                        List<Token> startVarTokens = forContent.subList(k, forContent.size());
+                        int endVarPosition = startVarTokens.indexOf(new Token(TokenType.NEWLINE, "\n"));
+                        List<Token> varTokens = startVarTokens.subList(0, endVarPosition + 1);
+                        Parser parser = new Parser(varTokens, childContext);
+                        int finalI = i;
+                        parser.parseVarStatement((varName, value) -> {
+                            definedVars.put(forVarKey(varName, forIndex, finalI), value);
+                            childContext.put(varName, value);
+                        });
+                        k += endVarPosition;
+                        continue;
+                    }
                     if (token.getType() == TokenType.PLAIN_TEXT) {
                         String old = token.getValue();
-                        String newValue = forLoopBodyFormatter(forIndex, i, varName, idxName, old, childContext);
+                        // FIXME 要不要重构一下上下文的结构，for的item和idx姓名要不要单独存，定义变量也单独存
+                        // 不然定义的变量在循环体里只有最后一个会生效
+                        // 还会有多个定义的var变量，应该专门用一个list来存这些别名
+                        // 还是其实 纯文本中，有特殊符号，根据context变量来匹配，进行格式化就好
+                        String newValue = forLoopBodyFormatter(forIndex, i, itemName, idxName, old, childContext);
                         Token newToken = new Token(token.getType(), newValue, token.getLine(), token.getColumn());
                         newForContent.add(newToken);
                         continue;
