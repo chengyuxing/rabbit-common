@@ -909,10 +909,7 @@ public class RabbitScriptParser {
                 eachLoopContext.putAll(eachLoopVars);
                 Parser parser = new Parser(newForContent, eachLoopContext);
                 String forContentResult = parser.doParse();
-
-                if (!forContentResult.trim().isEmpty()) {
-                    result.add(forContentResult);
-                }
+                result.add(forContentResult);
             }
             forIndex++;
             String resultFor = result.toString();
