@@ -56,16 +56,8 @@ public class LanguageTests {
             public static final String VAR_PREFIX = FOR_VARS_KEY + ".";
 
             @Override
-            protected String forLoopBodyFormatter(int forIndex, int itemIndex, String varName, String idxName, String body, Map<String, Object> args) {
+            protected String forLoopBodyFormatter(int forIndex, int itemIndex, String body, Map<String, Object> args) {
                 String formatted = StringUtil.FMT.format(body, args);
-                if (Objects.nonNull(varName)) {
-                    String varParam = VAR_PREFIX + forVarGeneratedKey(varName, forIndex, itemIndex);
-                    formatted = formatted.replace(VAR_PREFIX + varName, varParam);
-                }
-                if (Objects.nonNull(idxName)) {
-                    String idxParam = VAR_PREFIX + forVarGeneratedKey(idxName, forIndex, itemIndex);
-                    formatted = formatted.replace(VAR_PREFIX + idxName, idxParam);
-                }
                 return formatted;
             }
         };
