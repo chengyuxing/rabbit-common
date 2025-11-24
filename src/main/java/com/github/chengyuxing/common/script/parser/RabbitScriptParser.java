@@ -116,7 +116,7 @@ public class RabbitScriptParser {
     private final List<Token> tokens;
 
     private int forIndex = 0;
-    private Map<String, Object> forContextVars = new HashMap<>();
+    private Map<String, Object> forGeneratedVars = new HashMap<>();
     private Map<String, Object> definedVars = new HashMap<>();
 
     /**
@@ -145,7 +145,7 @@ public class RabbitScriptParser {
             return "";
         }
         forIndex = 0;
-        forContextVars = new HashMap<>();
+        forGeneratedVars = new HashMap<>();
         definedVars = new HashMap<>();
         Parser parser = new Parser(tokens, context);
         return parser.doParse();
@@ -223,14 +223,12 @@ public class RabbitScriptParser {
      *
      * @param forIndex  each for loop auto index
      * @param itemIndex for each item auto index
-     * @param varName   for context var name,  e.g. {@code <user>}
-     * @param idxName   for context index name,  e.g. {@code <idx>}
      * @param body      content in for loop
-     * @param context   each for loop context args (index and value) which created by for expression
+     * @param context   each for loop context args which created by for expression
      * @return formatted content
-     * @see #getForContextVars()
+     * @see #getForGeneratedVars()
      */
-    protected String forLoopBodyFormatter(int forIndex, int itemIndex, String varName, String idxName, String body, Map<String, Object> context) {
+    protected String forLoopBodyFormatter(int forIndex, int itemIndex, String body, Map<String, Object> context) {
         return body;
     }
 
@@ -242,7 +240,7 @@ public class RabbitScriptParser {
      * @param varIdx var auto index
      * @return unique for var key
      */
-    protected String forVarKey(String name, int forIdx, int varIdx) {
+    protected String forVarGeneratedKey(String name, int forIdx, int varIdx) {
         return name + "_" + forIdx + "_" + varIdx;
     }
 
@@ -264,10 +262,10 @@ public class RabbitScriptParser {
      * </blockquote>
      *
      * @return {@code #for} context variable map
-     * @see #forVarKey(String, int, int)
+     * @see #forVarGeneratedKey(String, int, int)
      */
-    public @NotNull @Unmodifiable Map<String, Object> getForContextVars() {
-        return Collections.unmodifiableMap(forContextVars);
+    public @NotNull @Unmodifiable Map<String, Object> getForGeneratedVars() {
+        return Collections.unmodifiableMap(forGeneratedVars);
     }
 
     /**
@@ -672,6 +670,12 @@ public class RabbitScriptParser {
          */
         private void parseVarStatement() {
             parseVarStatement((varName, value) -> {
+                if (context.containsKey(varName)) {
+                    throw new IllegalArgumentException("Duplicate variable name: " + varName);
+                }
+                if (definedVars.containsKey(varName)) {
+                    throw new IllegalArgumentException("Variable already defined: " + varName);
+                }
                 definedVars.put(varName, value);
             });
         }
@@ -778,6 +782,7 @@ public class RabbitScriptParser {
         }
 
         private String parseForStatement() {
+            Token forToken = currentToken;
             eat(TokenType.FOR);
             String itemName = currentToken.getValue();
             eat(TokenType.IDENTIFIER);
@@ -835,21 +840,25 @@ public class RabbitScriptParser {
             Object[] iterator = ObjectUtil.toArray(listObject);
 
             CleanStringJoiner result = new CleanStringJoiner(delimiter + NEW_LINE);
-            Map<String, Object> localForVars = new HashMap<>();
 
             for (int i = 0, j = iterator.length; i < j; i++) {
                 Object item = iterator[i];
 
-                Map<String, Object> childContext = new HashMap<>(definedVars);
-                childContext.putAll(context);
+                Map<String, Object> eachLoopVars = new HashMap<>();
 
                 if (!itemName.isEmpty()) {
-                    localForVars.put(forVarKey(itemName, forIndex, i), item);
-                    childContext.put(itemName, item);
+                    if (context.containsKey(itemName)) {
+                        throw new IllegalArgumentException("Item name has already been used in the context '" + itemName + "' of " + forToken);
+                    }
+                    forGeneratedVars.put(forVarGeneratedKey(itemName, forIndex, i), item);
+                    eachLoopVars.put(itemName, item);
                 }
                 if (!idxName.isEmpty()) {
-                    localForVars.put(forVarKey(idxName, forIndex, i), i);
-                    childContext.put(idxName, i);
+                    if (context.containsKey(idxName)) {
+                        throw new IllegalArgumentException("Index name has already been used in the context '" + idxName + "' of " + forToken);
+                    }
+                    forGeneratedVars.put(forVarGeneratedKey(idxName, forIndex, i), i);
+                    eachLoopVars.put(idxName, i);
                 }
 
                 // for loop body content tokens.
@@ -857,37 +866,48 @@ public class RabbitScriptParser {
                 int forPosition = forContent.indexOf(new Token(TokenType.FOR, Directives.FOR));
                 for (int k = 0; k < forContent.size(); k++) {
                     Token token = forContent.get(k);
-                    // FIXME 解决一下for里面定义的var的问题
-                    // 在好好想想用户参数和定义var参数谁覆盖谁的问题
-                    // 用户参数覆盖常规变量，for循环里的变量带编号自成一套
+                    // only parsing #var in current layer in nest for loop
                     if (token.getType() == TokenType.DEFINE_VAR && (forPosition == -1 || forPosition > k)) {
                         List<Token> startVarTokens = forContent.subList(k, forContent.size());
-                        int endVarPosition = startVarTokens.indexOf(new Token(TokenType.NEWLINE, "\n"));
+                        int endVarPosition = startVarTokens.indexOf(new Token(TokenType.NEWLINE, NEW_LINE));
                         List<Token> varTokens = startVarTokens.subList(0, endVarPosition + 1);
-                        Parser parser = new Parser(varTokens, childContext);
-                        int finalI = i;
+
+                        final int finalI = i;
+                        // the #var value probably need input context e.g. #var a = :id
+                        Map<String, Object> eachLoopContext = new HashMap<>(context);
+                        eachLoopContext.putAll(eachLoopVars);
+                        Parser parser = new Parser(varTokens, eachLoopContext);
                         parser.parseVarStatement((varName, value) -> {
-                            definedVars.put(forVarKey(varName, forIndex, finalI), value);
-                            childContext.put(varName, value);
+                            // def vars in the #for, then as the #for context vars
+                            if (context.containsKey(varName)) {
+                                throw new IllegalArgumentException("Variable already defined in the context '" + varName + "' of " + token);
+                            }
+                            if (eachLoopVars.containsKey(varName)) {
+                                throw new IllegalArgumentException("Variable already defined in the current for loop context '" + varName + "' of " + token);
+                            }
+                            forGeneratedVars.put(forVarGeneratedKey(varName, forIndex, finalI), value);
+                            eachLoopVars.put(varName, value);
                         });
+                        // skip the current #var expression all tokens of line
                         k += endVarPosition;
                         continue;
                     }
                     if (token.getType() == TokenType.PLAIN_TEXT) {
                         String old = token.getValue();
-                        // FIXME 要不要重构一下上下文的结构，for的item和idx姓名要不要单独存，定义变量也单独存
-                        // 不然定义的变量在循环体里只有最后一个会生效
-                        // 还会有多个定义的var变量，应该专门用一个list来存这些别名
-                        // 还是其实 纯文本中，有特殊符号，根据context变量来匹配，进行格式化就好
-                        String newValue = forLoopBodyFormatter(forIndex, i, itemName, idxName, old, childContext);
+                        // plain text format only need the vars generated by current for loop
+                        // other input vars will be used in the final step e.g. FMT.format(...)
+                        String newValue = forLoopBodyFormatter(forIndex, i, old, eachLoopVars);
                         Token newToken = new Token(token.getType(), newValue, token.getLine(), token.getColumn());
                         newForContent.add(newToken);
                         continue;
                     }
                     newForContent.add(token);
                 }
-
-                Parser parser = new Parser(newForContent, childContext);
+                // the next parser is a new complete start
+                // the content of #for block always need the input context
+                Map<String, Object> eachLoopContext = new HashMap<>(context);
+                eachLoopContext.putAll(eachLoopVars);
+                Parser parser = new Parser(newForContent, eachLoopContext);
                 String forContentResult = parser.doParse();
 
                 if (!forContentResult.trim().isEmpty()) {
@@ -899,7 +919,6 @@ public class RabbitScriptParser {
             if (resultFor.trim().isEmpty()) {
                 return "";
             }
-            forContextVars.putAll(localForVars);
             return open + resultFor + close;
         }
 

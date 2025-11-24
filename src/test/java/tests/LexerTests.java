@@ -11,6 +11,7 @@ import org.junit.Test;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Collections;
 
 public class LexerTests {
 
@@ -27,16 +28,19 @@ public class LexerTests {
     @Test
     public void testPipes() {
         RabbitScriptParser parser = new RabbitScriptParser(pipes);
+        parser.setPipes(Collections.singletonMap("x", new X()));
         parser.verify();
         String res = parser.parse(
                 DataRow.of("name", "cyx",
                         "address", "kunming",
-                        "id", 1,
+                        "id", 5,
                         "list", DataRow.of("id", 1, "age", 22),
                         "users", "a,b,c,d",
                         "home", null)
         );
         System.out.println(res);
+        System.out.println(parser.getForGeneratedVars());
+        System.out.println(parser.getDefinedVars());
     }
 
     @Test

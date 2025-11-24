@@ -338,7 +338,7 @@ public class StringTests {
 //        String res = simpleScriptParser.parse(s, d);
 //        System.out.println(res);
 
-//        Map<String, Object> vars = simpleScriptParser.getForContextVars();
+//        Map<String, Object> vars = simpleScriptParser.getForGeneratedVars();
 //        System.out.println(vars);
 //        System.out.println(ObjectUtil.getDeepValue(vars, "item_6_0.value"));
     }
@@ -429,14 +429,14 @@ public class StringTests {
             }
 
             @Override
-            protected String forLoopBodyFormatter(int forIndex, int varIndex, String varName, String idxName, String body, Map<String, Object> args) {
+            protected String forLoopBodyFormatter(int forIndex, int itemIndex, String varName, String idxName, String body, Map<String, Object> args) {
                 String formatted = StringUtil.FMT.format(body, args);
                 if (!varName.isEmpty()) {
-                    String varParam = VAR_PREFIX + forVarKey(varName, forIndex, varIndex);
+                    String varParam = VAR_PREFIX + forVarGeneratedKey(varName, forIndex, itemIndex);
                     formatted = formatted.replace(VAR_PREFIX + varName, varParam);
                 }
                 if (!idxName.isEmpty()) {
-                    String idxParam = VAR_PREFIX + forVarKey(idxName, forIndex, varIndex);
+                    String idxParam = VAR_PREFIX + forVarGeneratedKey(idxName, forIndex, itemIndex);
                     formatted = formatted.replace(VAR_PREFIX + idxName, idxParam);
                 }
                 return formatted;
@@ -446,7 +446,7 @@ public class StringTests {
         String res = parser.parse(d);
         System.out.println(res);
 
-        Map<String, Object> vars = parser.getForContextVars();
+        Map<String, Object> vars = parser.getForGeneratedVars();
         System.out.println(vars);
         System.out.println(ObjectUtil.getDeepValue(vars, "item_6_0.value"));
     }

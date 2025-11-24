@@ -56,14 +56,14 @@ public class LanguageTests {
             public static final String VAR_PREFIX = FOR_VARS_KEY + ".";
 
             @Override
-            protected String forLoopBodyFormatter(int forIndex, int varIndex, String varName, String idxName, String body, Map<String, Object> args) {
+            protected String forLoopBodyFormatter(int forIndex, int itemIndex, String varName, String idxName, String body, Map<String, Object> args) {
                 String formatted = StringUtil.FMT.format(body, args);
                 if (Objects.nonNull(varName)) {
-                    String varParam = VAR_PREFIX + forVarKey(varName, forIndex, varIndex);
+                    String varParam = VAR_PREFIX + forVarGeneratedKey(varName, forIndex, itemIndex);
                     formatted = formatted.replace(VAR_PREFIX + varName, varParam);
                 }
                 if (Objects.nonNull(idxName)) {
-                    String idxParam = VAR_PREFIX + forVarKey(idxName, forIndex, varIndex);
+                    String idxParam = VAR_PREFIX + forVarGeneratedKey(idxName, forIndex, itemIndex);
                     formatted = formatted.replace(VAR_PREFIX + idxName, idxParam);
                 }
                 return formatted;
@@ -73,7 +73,7 @@ public class LanguageTests {
         String result = parser.parse(context);
         System.out.println("--------------");
         System.out.println(result);
-        System.out.println(parser.getForContextVars());
+        System.out.println(parser.getForGeneratedVars());
     }
 
     @Test
@@ -81,6 +81,6 @@ public class LanguageTests {
 //        SimpleParser simpleScriptParser = new SimpleParser();
 //        String res = simpleScriptParser.parse(input, context);
 //        System.out.println(res);
-//        System.out.println(simpleScriptParser.getForContextVars());
+//        System.out.println(simpleScriptParser.getForGeneratedVars());
     }
 }

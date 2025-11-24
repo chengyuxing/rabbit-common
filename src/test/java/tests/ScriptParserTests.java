@@ -4,7 +4,6 @@ import com.github.chengyuxing.common.DataRow;
 import com.github.chengyuxing.common.script.Token;
 import com.github.chengyuxing.common.script.lexer.IdentifierLexer;
 import com.github.chengyuxing.common.script.parser.RabbitScriptParser;
-import com.github.chengyuxing.common.script.pipe.IPipe;
 import com.github.chengyuxing.common.KeyValue;
 import com.github.chengyuxing.common.script.pipe.builtin.Kv;
 import com.github.chengyuxing.common.utils.StringUtil;
@@ -54,10 +53,10 @@ public class ScriptParserTests {
 //                    "    #done\n" +
 //                    " #done", DataRow.of("ids", Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 1 + i, 11, 23, 45, 55, 67),
 //                    "address", Arrays.asList("a", "b", "c")));
-//            data.add(parser.getForContextVars());
+//            data.add(parser.getForGeneratedVars());
 //            if (i == 1) {
 //                System.out.println(sql);
-//                System.out.println(parser.getForContextVars().size());
+//                System.out.println(parser.getForGeneratedVars().size());
 //            }
 //        }
 //        System.out.println(data.size());
@@ -87,14 +86,14 @@ public class ScriptParserTests {
                 public static final String VAR_PREFIX = FOR_VARS_KEY + ".";
 
                 @Override
-                protected String forLoopBodyFormatter(int forIndex, int varIndex, String varName, String idxName, String body, Map<String, Object> args) {
+                protected String forLoopBodyFormatter(int forIndex, int itemIndex, String varName, String idxName, String body, Map<String, Object> args) {
                     String formatted = StringUtil.FMT.format(body, args);
                     if (!varName.isEmpty()) {
-                        String varParam = VAR_PREFIX + forVarKey(varName, forIndex, varIndex);
+                        String varParam = VAR_PREFIX + forVarGeneratedKey(varName, forIndex, itemIndex);
                         formatted = formatted.replace(VAR_PREFIX + varName, varParam);
                     }
                     if (!idxName.isEmpty()) {
-                        String idxParam = VAR_PREFIX + forVarKey(idxName, forIndex, varIndex);
+                        String idxParam = VAR_PREFIX + forVarGeneratedKey(idxName, forIndex, itemIndex);
                         formatted = formatted.replace(VAR_PREFIX + idxName, idxParam);
                     }
                     return formatted;
@@ -103,11 +102,11 @@ public class ScriptParserTests {
             parser.verify();
             String res = parser.parse(DataRow.of("ids", Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 1 + i, 11, 23, 45, 55, 67),
                     "address", Arrays.asList("a", "b", "c")));
-            data.add(parser.getForContextVars());
+            data.add(parser.getForGeneratedVars());
             if (i == 1) {
                 System.out.println(res);
-                System.out.println(parser.getForContextVars().size());
-                System.out.println(parser.getForContextVars());
+                System.out.println(parser.getForGeneratedVars().size());
+                System.out.println(parser.getForGeneratedVars());
             }
         }
         System.out.println(data.size());
