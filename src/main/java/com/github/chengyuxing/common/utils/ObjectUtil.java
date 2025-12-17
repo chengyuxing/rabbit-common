@@ -1,7 +1,6 @@
 package com.github.chengyuxing.common.utils;
 
 import com.github.chengyuxing.common.MostDateTime;
-import com.github.chengyuxing.common.TiFunction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -12,6 +11,7 @@ import java.lang.reflect.Method;
 import java.time.*;
 import java.time.temporal.Temporal;
 import java.util.*;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 /**
@@ -288,6 +288,60 @@ public final class ObjectUtil {
         return Float.parseFloat(obj.toString());
     }
 
+    public static Object convertValue(Class<?> targetType, Object value) {
+        if(Objects.isNull(value)) {
+            return null;
+        }
+        Class<?> vt = value.getClass();
+        if (targetType.isAssignableFrom(vt)) {
+            return value;
+        }
+        if (targetType == String.class) {
+            return value.toString();
+        }
+        if (targetType == Character.class || targetType == char.class) {
+            return value.toString().charAt(0);
+        }
+        if (targetType == Integer.class || targetType == int.class) {
+            return toInteger(value);
+        }
+        if (targetType == Long.class || targetType == long.class) {
+            return toLong(value);
+        }
+        if (targetType == Double.class || targetType == double.class) {
+            return toDouble(value);
+        }
+        if (targetType == Float.class || targetType == float.class) {
+            return toFloat(value);
+        }
+        if (targetType == Date.class) {
+            return MostDateTime.toDate(value.toString());
+        }
+        if (Temporal.class.isAssignableFrom(targetType)) {
+            @SuppressWarnings("unchecked") Class<? extends Temporal> j8DateTypeClass = (Class<? extends Temporal>) targetType;
+            if (Date.class.isAssignableFrom(vt)) {
+                return toTemporal(j8DateTypeClass, (Date) value);
+            }
+            if (vt == String.class) {
+                Date date = MostDateTime.toDate(value.toString());
+                return toTemporal(j8DateTypeClass, date);
+            }
+        }
+        // array to collection
+        if (Collection.class.isAssignableFrom(targetType)) {
+            // object array parsing to collection exclude blob
+            if (vt != byte[].class && value instanceof Object[]) {
+                if (List.class.isAssignableFrom(targetType)) {
+                    return new ArrayList<>(Arrays.asList((Object[]) value));
+                }
+                if (Set.class.isAssignableFrom(targetType)) {
+                    return new HashSet<>(Arrays.asList((Object[]) value));
+                }
+            }
+        }
+        return value;
+    }
+
     /**
      * Multi key-value pairs convert to map.
      *
@@ -362,12 +416,12 @@ public final class ObjectUtil {
      * @param source                map
      * @param targetType            entity class
      * @param fieldMapper           setter field mapping to the source map key
-     * @param valueMapper           invoke setter to set the mapping value (value type, entity field type, value) -&gt; (new value)
+     * @param valueMapper           invoke setter to set the mapping value (entity field, map value) -&gt; (new value)
      * @param constructorParameters constructor parameters
      * @param <T>                   entity type
      * @return entity
      */
-    public static <T> T mapToEntity(Map<String, Object> source, @NotNull Class<T> targetType, @NotNull Function<Field, String> fieldMapper, @Nullable TiFunction<Class<?>, Class<?>, Object, Object> valueMapper, Object... constructorParameters) {
+    public static <T> T mapToEntity(Map<String, Object> source, @NotNull Class<T> targetType, @NotNull Function<Field, String> fieldMapper, @Nullable BiFunction<Field, Object, Object> valueMapper, Object... constructorParameters) {
         try {
             if (Objects.isNull(source)) return null;
             T entity = ReflectUtil.getInstance(targetType, constructorParameters);
@@ -393,74 +447,12 @@ public final class ObjectUtil {
                     setter.invoke(entity, (Object) null);
                     continue;
                 }
-                // dataRow field type
-                Class<?> vt = value.getClass();
-                // entity field type
-                Class<?> et = setter.getParameterTypes()[0];
-
                 if (Objects.nonNull(valueMapper)) {
-                    Object mapperValue = valueMapper.apply(vt, et, value);
+                    Object mapperValue = valueMapper.apply(set, value);
                     setter.invoke(entity, mapperValue);
                     continue;
                 }
-
-                if (et.isAssignableFrom(vt)) {
-                    setter.invoke(entity, value);
-                    continue;
-                }
-                if (et == String.class) {
-                    setter.invoke(entity, value.toString());
-                    continue;
-                }
-                if (et == Character.class || et == char.class) {
-                    setter.invoke(entity, value.toString().charAt(0));
-                    continue;
-                }
-                if (et == Integer.class || et == int.class) {
-                    setter.invoke(entity, toInteger(value));
-                    continue;
-                }
-                if (et == Long.class || et == long.class) {
-                    setter.invoke(entity, toLong(value));
-                    continue;
-                }
-                if (et == Double.class || et == double.class) {
-                    setter.invoke(entity, toDouble(value));
-                    continue;
-                }
-                if (et == Float.class || et == float.class) {
-                    setter.invoke(entity, toFloat(value));
-                    continue;
-                }
-                if (et == Date.class) {
-                    setter.invoke(entity, MostDateTime.toDate(value.toString()));
-                    continue;
-                }
-                if (Temporal.class.isAssignableFrom(et)) {
-                    @SuppressWarnings("unchecked") Class<? extends Temporal> j8DateTypeClass = (Class<? extends Temporal>) et;
-                    if (Date.class.isAssignableFrom(vt)) {
-                        setter.invoke(entity, toTemporal(j8DateTypeClass, (Date) value));
-                        continue;
-                    }
-                    if (vt == String.class) {
-                        Date date = MostDateTime.toDate(value.toString());
-                        setter.invoke(entity, toTemporal(j8DateTypeClass, date));
-                    }
-                    continue;
-                }
-                // array to collection
-                if (Collection.class.isAssignableFrom(et)) {
-                    // object array parsing to collection exclude blob
-                    if (vt != byte[].class && value instanceof Object[]) {
-                        if (List.class.isAssignableFrom(et)) {
-                            setter.invoke(entity, new ArrayList<>(Arrays.asList((Object[]) value)));
-                            continue;
-                        }
-                        if (Set.class.isAssignableFrom(et)) {
-                            setter.invoke(entity, new HashSet<>(Arrays.asList((Object[]) value)));
-                        }
-                    }
-                }
+                setter.invoke(entity, convertValue(setter.getParameterTypes()[0], value));
             }
             return entity;
         } catch (NoSuchMethodException | InstantiationException | InvocationTargetException | IntrospectionException |
