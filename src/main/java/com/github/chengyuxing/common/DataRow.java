@@ -6,6 +6,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
 import java.util.*;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import static com.github.chengyuxing.common.utils.ObjectUtil.coalesce;
@@ -13,7 +14,7 @@ import static com.github.chengyuxing.common.utils.ObjectUtil.coalesce;
 /**
  * A useful data type with more feature which extends LinkedHashMap.
  */
-public class DataRow extends LinkedHashMap<String, Object> implements MapExtends<DataRow, Object> {
+public class DataRow<T> extends LinkedHashMap<String, T> implements MapExtends<DataRow<T>, T> {
     /**
      * Constructs a new empty DataRow.
      */
@@ -34,7 +35,7 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
      *
      * @param map map
      */
-    public DataRow(@NotNull Map<String, Object> map) {
+    public DataRow(@NotNull Map<String, T> map) {
         super(map);
     }
 
@@ -44,7 +45,7 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
      * @param input key-value pairs: k v，k v...
      * @return DataRow instance
      */
-    public static DataRow of(Object... input) {
+    public static DataRow<Object> of(Object... input) {
         return ObjectUtil.pairsToMap(DataRow::new, input);
     }
 
@@ -55,12 +56,12 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
      * @param values values array
      * @return DataRow instance
      */
-    public static DataRow of(@NotNull String[] keys, @NotNull Object[] values) {
+    public static DataRow<Object> of(@NotNull String[] keys, @NotNull Object[] values) {
         if (keys.length == values.length) {
             if (keys.length == 0) {
-                return new DataRow(0);
+                return new DataRow<>(0);
             }
-            DataRow row = new DataRow(keys.length);
+            DataRow<Object> row = new DataRow<>(keys.length);
             for (int i = 0; i < keys.length; i++) {
                 row.put(keys[i], values[i]);
             }
@@ -75,7 +76,7 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
      * @param entity entity
      * @return DataRow instance
      */
-    public static DataRow ofEntity(Object entity) {
+    public static DataRow<Object> ofEntity(Object entity) {
         return ObjectUtil.entityToMap(entity, DataRow::new);
     }
 
@@ -86,7 +87,7 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
      * @param fieldMapper entity field mapping to map's key
      * @return DataRow instance
      */
-    public static DataRow ofEntity(Object entity, @NotNull Function<Field, String> fieldMapper) {
+    public static DataRow<Object> ofEntity(Object entity, @NotNull Function<Field, String> fieldMapper) {
         return ObjectUtil.entityToMap(entity, fieldMapper, DataRow::new);
     }
 
@@ -96,8 +97,8 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
      * @param map map
      * @return DataRow instance
      */
-    public static DataRow ofMap(@NotNull Map<String, Object> map) {
-        return new DataRow(map);
+    public static DataRow<Object> ofMap(@NotNull Map<String, Object> map) {
+        return new DataRow<>(map);
     }
 
     /**
@@ -106,12 +107,12 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
      * @param rows collection of map
      * @return columns struct data
      */
-    public static DataRow zip(Collection<? extends Map<String, Object>> rows) {
+    public static DataRow<Object> zip(Collection<? extends Map<String, Object>> rows) {
         if (rows.isEmpty()) {
-            return new DataRow(0);
+            return new DataRow<>(0);
         }
         Set<String> names = rows.iterator().next().keySet();
-        DataRow res = new DataRow(names.size());
+        DataRow<Object> res = new DataRow<>(names.size());
         for (String name : names) {
             res.put(name, new ArrayList<>());
         }
@@ -139,11 +140,11 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
      * @param index index
      * @return value or null
      */
-    private Object _getByIndex(int index) {
+    private T _getByIndex(int index) {
         if (index < 0 || index >= size()) {
             return null;
         }
-        Iterator<Map.Entry<String, Object>> it = entrySet().iterator();
+        Iterator<Map.Entry<String, T>> it = entrySet().iterator();
         for (int i = 0; i < index; i++) {
             it.next();
         }
@@ -156,11 +157,12 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
      * @param defaults default values, detect get first non-null value
      * @return value or null
      */
-    public Object getFirst(Object... defaults) {
+    @SafeVarargs
+    public final T getFirst(T... defaults) {
         if (isEmpty()) {
             return coalesce(defaults);
         }
-        Object v = _getByIndex(0);
+        T v = _getByIndex(0);
         return Objects.nonNull(v) ? v : coalesce(defaults);
     }
 
@@ -168,13 +170,13 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
      * Convert first value and get.
      *
      * @param defaults default values, detect get first non-null value
-     * @param <T>      result type
+     * @param <E>      result type
      * @return value or null
      */
     @SuppressWarnings("unchecked")
     @SafeVarargs
-    public final <T> T getFirstAs(T... defaults) {
-        return (T) getFirst((Object[]) defaults);
+    public final <E> E getFirstAs(E... defaults) {
+        return (E) getFirst((T[]) defaults);
     }
 
     /**
@@ -182,13 +184,13 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
      *
      * @param name     key
      * @param defaults default values, detect get first non-null value
-     * @param <T>      result type
+     * @param <E>      result type
      * @return value or null
      */
     @SuppressWarnings("unchecked")
     @SafeVarargs
-    public final <T> T getAs(String name, T... defaults) {
-        T v = (T) get(name);
+    public final <E> E getAs(String name, E... defaults) {
+        E v = (E) get(name);
         return Objects.nonNull(v) ? v : coalesce(defaults);
     }
 
@@ -197,13 +199,13 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
      *
      * @param index    index
      * @param defaults default values, detect get first non-null value
-     * @param <T>      result type
+     * @param <E>      result type
      * @return value or null
      */
     @SuppressWarnings("unchecked")
     @SafeVarargs
-    public final <T> T getAs(int index, T... defaults) {
-        T v = (T) _getByIndex(index);
+    public final <E> E getAs(int index, E... defaults) {
+        E v = (E) _getByIndex(index);
         return Objects.nonNull(v) ? v : coalesce(defaults);
     }
 
@@ -330,8 +332,8 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
      * @param more more keys
      * @return new DataRow instance
      */
-    public DataRow pick(String name, String... more) {
-        DataRow row = new DataRow(more.length + 1);
+    public DataRow<T> pick(String name, String... more) {
+        DataRow<T> row = new DataRow<>(more.length + 1);
         row.put(name, get(name));
         for (String n : more) {
             row.put(n, get(n));
@@ -344,12 +346,12 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
      *
      * @param init   initial accumulator value
      * @param mapper (accumulator, key, value) -&gt; accumulator
-     * @param <T>    result type
+     * @param <E>    result type
      * @return any type result
      */
-    public <T> T reduce(T init, TiFunction<T, String, Object, T> mapper) {
-        T acc = init;
-        for (Map.Entry<String, Object> e : entrySet()) {
+    public <E> E reduce(E init, TiFunction<E, String, Object, E> mapper) {
+        E acc = init;
+        for (Map.Entry<String, T> e : entrySet()) {
             acc = mapper.apply(acc, e.getKey(), e.getValue());
         }
         return acc;
@@ -366,11 +368,12 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
      *                              <pre>DataRow row = DataRow.of("x", 2, "y", 5, ...);</pre>
      *                              <pre>row.toEntity(A.class, row.get("x"), row.get("y"));</pre>
      *                              </blockquote>
-     * @param <T>                   entity class type
+     * @param <E>                   entity class type
      * @return entity
      */
-    public <T> T toEntity(@NotNull Class<T> clazz, Object... constructorParameters) {
-        return ObjectUtil.mapToEntity(this, clazz, constructorParameters);
+    @SuppressWarnings("unchecked")
+    public <E> E toEntity(@NotNull Class<E> clazz, Object... constructorParameters) {
+        return ObjectUtil.mapToEntity((DataRow<Object>) this, clazz, constructorParameters);
     }
 
     /**
@@ -382,7 +385,7 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
      *                              <pre>f -&gt; f.getName().replaceAll("([A-Z])", "_$1").toLowerCase();</pre>
      *                              <pre>// userId -&gt; user_id</pre>
      *                              </blockquote>
-     * @param valueMapper           map value mapping to entity field: (map value type, entity field type, map value) -&gt; new value
+     * @param valueMapper           map value mapping to entity field: (entity field, map value) -&gt; new value
      * @param constructorParameters <p>constructor's parameters are required if entity class only have
      *                              1 constructor with parameters,
      *                              e.g.</p>
@@ -390,11 +393,12 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
      *                              <pre>DataRow row = DataRow.of("x", 2, "y", 5, ...);</pre>
      *                              <pre>row.toEntity(A.class, row.get("x"), row.get("y"));</pre>
      *                              </blockquote>
-     * @param <T>                   entity class type
+     * @param <E>                   entity class type
      * @return entity
      */
-    public <T> T toEntity(@NotNull Class<T> clazz, @NotNull Function<Field, String> fieldMapper, @Nullable TiFunction<Class<?>, Class<?>, Object, Object> valueMapper, Object... constructorParameters) {
-        return ObjectUtil.mapToEntity(this, clazz, fieldMapper, valueMapper, constructorParameters);
+    @SuppressWarnings("unchecked")
+    public <E> E toEntity(@NotNull Class<E> clazz, @NotNull Function<Field, String> fieldMapper, @Nullable BiFunction<Field, Object, Object> valueMapper, Object... constructorParameters) {
+        return ObjectUtil.mapToEntity((DataRow<Object>) this, clazz, fieldMapper, valueMapper, constructorParameters);
     }
 
     /**
@@ -404,7 +408,7 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
      */
     public List<KeyValue> toKeyValue() {
         List<KeyValue> kvs = new ArrayList<>(size());
-        for (Map.Entry<String, Object> e : entrySet()) {
+        for (Map.Entry<String, T> e : entrySet()) {
             kvs.add(new KeyValue(e.getKey(), e.getValue()));
         }
         return kvs;
