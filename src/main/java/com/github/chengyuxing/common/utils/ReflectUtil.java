@@ -1,24 +1,27 @@
 package com.github.chengyuxing.common.utils;
 
+import com.github.chengyuxing.common.MethodReference;
 import com.github.chengyuxing.common.tuple.Pair;
+import org.jetbrains.annotations.NotNull;
 
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
+import java.lang.invoke.SerializedLambda;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.StringJoiner;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Reflect util.
  */
 public final class ReflectUtil {
+    private static final Map<String, String> METHOD_REF_CACHE = new ConcurrentHashMap<>();
+
     public static String initGetMethod(String field, Class<?> type) {
         String prefix = "get";
         if (type == boolean.class)
@@ -28,6 +31,30 @@ public final class ReflectUtil {
 
     public static String initSetMethod(String field) {
         return "set" + field.substring(0, 1).toUpperCase().concat(field.substring(1));
+    }
+
+    /**
+     * Get field name from Lambda method reference.
+     *
+     * @param methodRef method reference e.g. User::getName
+     * @param <T>       class type
+     * @return field name
+     */
+    public static <T> String getFieldName(@NotNull MethodReference<T> methodRef) {
+        return METHOD_REF_CACHE.computeIfAbsent(methodRef.getClass().getName(), k -> {
+            try {
+                Method writeReplace = methodRef.getClass().getDeclaredMethod("writeReplace");
+                writeReplace.setAccessible(true);
+                SerializedLambda serializedLambda = (SerializedLambda) writeReplace.invoke(methodRef);
+                String methodName = serializedLambda.getImplMethodName();
+                if (methodName.startsWith("get") && methodName.length() > 3) {
+                    return Introspector.decapitalize(methodName.substring(3));
+                }
+                throw new IllegalArgumentException("Invalid method reference: " + methodName);
+            } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+                throw new RuntimeException("Unable to parse lambda expression", e);
+            }
+        });
     }
 
     /**
