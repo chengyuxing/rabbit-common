@@ -12,7 +12,8 @@ import java.util.function.Function;
 import static com.github.chengyuxing.common.utils.ObjectUtil.coalesce;
 
 /**
- * A useful data type with more feature which extends LinkedHashMap.
+ * Represents a row of data, similar to a database table row, with key-value pairs.
+ * Provides various methods for creating, manipulating, and converting DataRow instances.
  */
 public class DataRow extends LinkedHashMap<String, Object> implements MapExtends<DataRow, Object> {
     /**
@@ -190,6 +191,25 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
     @SafeVarargs
     public final <T> T getAs(String name, T... defaults) {
         T v = (T) get(name);
+        return Objects.nonNull(v) ? v : coalesce(defaults);
+    }
+
+    /**
+     * Retrieves a deeply nested value from the object based on the provided path.
+     * If the value is not found, it returns the first non-null default value provided.
+     *
+     * @param <T>      The type of the value to retrieve.
+     * @param path     The path to the value, using dot notation for nested properties.
+     * @param defaults Variable length argument list of default values to return if the
+     *                 requested value is null. The first non-null value in this list will
+     *                 be returned.
+     * @return The value found at the specified path, or the first non-null value from
+     * the defaults if the path does not resolve to a non-null value.
+     */
+    @SuppressWarnings("unchecked")
+    @SafeVarargs
+    public final <T> T deepGetAs(@NotNull String path, T... defaults) {
+        T v = (T) ObjectUtil.getDeepValue(this, path);
         return Objects.nonNull(v) ? v : coalesce(defaults);
     }
 
