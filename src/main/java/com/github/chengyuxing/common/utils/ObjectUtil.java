@@ -104,7 +104,7 @@ public final class ObjectUtil {
             if (obj instanceof Collection || obj instanceof Object[]) {
                 Object[] arr = toArray(obj);
                 if (index < 0 || index >= arr.length) {
-                    throw new IllegalArgumentException("Index out of bounds " + index + " on " + obj);
+                    throw new IndexOutOfBoundsException("Index out of bounds " + index + " on " + obj);
                 }
                 return arr[index];
             }
