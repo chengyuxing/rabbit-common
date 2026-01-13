@@ -152,6 +152,23 @@ public class RabbitScriptParser {
     }
 
     /**
+     * Evaluates a condition based on the provided context, e.g.
+     * <blockquote><pre>
+     * #if !(:id >= 0 || :name <> blank) && :age<=21
+     * </pre></blockquote>
+     *
+     * @param context the map containing the context parameters used for evaluation
+     * @return true if the condition is met, false otherwise
+     */
+    public boolean evaluateCondition(Map<String, Object> context) {
+        if (tokens.isEmpty()) {
+            return false;
+        }
+        Parser parser = new Parser(tokens.subList(1, tokens.size()), context);
+        return parser.evaluateCondition();
+    }
+
+    /**
      * Verify scripts syntax.
      */
     public void verify() {
