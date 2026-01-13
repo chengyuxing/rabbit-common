@@ -1,5 +1,6 @@
 package tests;
 
+import com.github.chengyuxing.common.script.parser.RabbitScriptParser;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -14,14 +15,15 @@ public class ExpressionTests {
     public static void init() {
         args.put("id", -1);
         args.put("NAME", null);
-        args.put("AGE", 17);
+        args.put("age", 17);
     }
 
     @Test
     public void fast() throws Exception {
-//        FastExpression expression = FastExpression.of(exp);
-//        System.out.println(expression.calc(args));
+        RabbitScriptParser parser = new RabbitScriptParser("#if !(:id >= 0 || :name <> blank) && :age<=21");
+        boolean res = parser.evaluateCondition(args);
+        boolean res1 = parser.evaluateCondition(args);
+        System.out.println(res);
+        System.out.println(res1);
     }
-
-
 }
