@@ -100,26 +100,17 @@ public final class ObjectUtil {
             return null;
         }
         if (key.matches("\\d+")) {
-            int idx = Integer.parseInt(key);
-            if (obj instanceof Collection) {
-                int i = 0;
-                for (Object v : (Collection<?>) obj) {
-                    if (i++ == idx) {
-                        return v;
-                    }
+            int index = Integer.parseInt(key);
+            if (obj instanceof Collection || obj instanceof Object[]) {
+                Object[] arr = toArray(obj);
+                if (index < 0 || index >= arr.length) {
+                    throw new IllegalArgumentException("Index out of bounds " + index + " on " + obj);
                 }
-            }
-            if (obj instanceof Object[]) {
-                return ((Object[]) obj)[idx];
+                return arr[index];
             }
         }
-        if (obj instanceof Map) {
-            //noinspection unchecked
-            Map<String, ?> map = (Map<String, ?>) obj;
-            if (map.containsKey(key)) {
-                return map.get(key);
-            }
-            return null;
+        if (obj instanceof Map<?, ?>) {
+            return ((Map<?, ?>) obj).get(key);
         }
         Class<?> clazz = obj.getClass();
         Method m = null;
@@ -132,9 +123,9 @@ public final class ObjectUtil {
         } catch (IllegalAccessException | InvocationTargetException e) {
             throw new IllegalArgumentException("Invoke " + clazz.getName() + "#" + m.getName() + " error.", e);
         } catch (NoSuchFieldException e) {
-            throw new IllegalArgumentException("No such field on " + obj, e);
+            throw new IllegalArgumentException("No such field '" + key + "' on " + obj, e);
         } catch (NoSuchMethodException e) {
-            throw new IllegalArgumentException("No such method on " + obj, e);
+            throw new IllegalArgumentException("No such getter method of '" + key + "' on " + obj, e);
         }
     }
 
@@ -157,20 +148,21 @@ public final class ObjectUtil {
             throw new IllegalArgumentException("Path expression syntax error, must startsWith '/', for example '/" + path + "'");
         }
         String paths = path.substring(1);
-        if (!paths.contains("/")) {
+        int pathIndex = paths.indexOf("/");
+        if (pathIndex == -1) {
             return getValue(obj, paths);
         }
-        String key = paths.substring(0, paths.indexOf("/"));
-        String tail = paths.substring(paths.indexOf("/"));
+        String key = paths.substring(0, pathIndex);
+        String tail = paths.substring(pathIndex);
         return walkDeepValue(getValue(obj, key), tail);
     }
 
     /**
-     * Get value of nested object.
+     * Retrieves a value from a nested object structure based on the provided property chains.
      *
-     * @param obj            nested object
-     * @param propertyChains property chains（{@code user.name}）
-     * @return value
+     * @param obj            the object to search within. Can be a collection, array, map, or any object.
+     * @param propertyChains the dot-separated property chains used to access the value. For example, "{@code user.name}" would access the "{@code name}" property of the "{@code user}" object.
+     * @return the value found at the specified property chains, or null if the property chains are invalid, the object is null, or the value does not exist at the given path.
      */
     public static @Nullable Object getDeepValue(Object obj, @NotNull String propertyChains) {
         if (propertyChains.contains(".")) {
