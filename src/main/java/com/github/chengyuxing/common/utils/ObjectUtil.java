@@ -19,27 +19,14 @@ import java.util.function.Function;
  */
 public final class ObjectUtil {
     /**
-     * Decode values,
-     * logic following:
-     * <blockquote>
-     * <pre>
-     *         if(a == b)
-     *            return v1;
-     *         else if(a == c)
-     *            return v2;
-     *         else if(a == d)
-     *            return v3;
-     *         # optional default value.
-     *         else
-     *            return v4;
-     *     </pre>
-     * </blockquote>
+     * Decodes the given value by comparing it with a series of equal-value pairs and returns the corresponding result.
      *
-     * @param value  value
-     * @param equal  compare target value
-     * @param result equal result
-     * @param more   more above.
-     * @return result
+     * @param value  The value to decode.
+     * @param equal  The first comparison value.
+     * @param result The result to return if the value matches the first comparison value.
+     * @param more   Additional pairs of equal-value and result. These must be provided in pairs, where the first
+     *               element is the comparison value and the second is the result to return on a match.
+     * @return The decoded value matching the input value, or the last provided result if no match is found.
      */
     public static @Nullable Object decode(Object value, Object equal, Object result, Object... more) {
         Object[] objs = new Object[more.length + 2];
@@ -64,11 +51,11 @@ public final class ObjectUtil {
     }
 
     /**
-     * Get a value until not null.
+     * Returns the first non-null value from the given array of values.
      *
-     * @param values values
-     * @param <T>    value type
-     * @return value or null
+     * @param <T>    the type of the values
+     * @param values an array of values to be checked for the first non-null value
+     * @return the first non-null value in the array, or null if all values are null
      */
     @SafeVarargs
     public static @Nullable <T> T coalesce(T... values) {
@@ -81,11 +68,11 @@ public final class ObjectUtil {
     }
 
     /**
-     * Returns null if a equals b
+     * Compares two objects and returns null if they are equal, otherwise returns the first object.
      *
-     * @param a value a
-     * @param b value b
-     * @return null or a
+     * @param a the first object to compare
+     * @param b the second object to compare
+     * @return the first object if it is not equal to the second, or null if both are equal
      */
     public static @Nullable Object nullif(Object a, Object b) {
         if (Objects.equals(a, b)) {
@@ -95,12 +82,15 @@ public final class ObjectUtil {
     }
 
     /**
-     * Get value of object.
+     * Retrieves the value associated with the specified key from the given object.
+     * The method supports accessing values in collections, arrays, and maps using an index or key.
+     * It also supports invoking getter methods on objects to retrieve property values.
      *
-     * @param obj object or array
-     * @param key key or index
-     * @return value
-     * @throws IllegalArgumentException if java bean access error
+     * @param obj The object from which to retrieve the value. Can be a collection, array, map, or any object.
+     * @param key The key or index used to access the value. If {@code obj} is a collection or array, {@code key} should be a numeric string representing the index.
+     *            For maps, it should be the key as a string. For objects, it should be the name of the getter method (e.g., "{@code name}" for a method named "{@code getName}").
+     * @return The value associated with the key, or null if the key does not exist, the object is null, or the object is of a basic type.
+     * @throws IllegalArgumentException If the index is out of bounds for a collection or array, or if there is no corresponding getter method or field for an object.
      */
     public static @Nullable Object getValue(Object obj, @NotNull String key) {
         if (Objects.isNull(obj)) {
@@ -149,12 +139,15 @@ public final class ObjectUtil {
     }
 
     /**
-     * Get value of nested object.
+     * Recursively retrieves a value from a nested object structure based on the provided path.
      *
-     * @param obj  nested object.
-     * @param path path expression（{@code /a/b/0/name}）
-     * @return value
-     * @throws IllegalArgumentException if java bean access error
+     * @param obj  The object to search within. Can be a collection, array, map, or any object.
+     * @param path The path expression to the desired value, starting with a '{@code /}'. Each segment of the path
+     *             should be separated by a '{@code /}'. For example, "{@code /user/name}" would access the "name" property
+     *             of the "user" object.
+     * @return The value found at the specified path, or null if the path is invalid, the object is null,
+     * or the value does not exist at the given path.
+     * @throws IllegalArgumentException If the path expression syntax is incorrect (does not start with a '{@code /}').
      */
     public static @Nullable Object walkDeepValue(Object obj, @NotNull String path) {
         if (Objects.isNull(obj)) {
@@ -188,10 +181,14 @@ public final class ObjectUtil {
     }
 
     /**
-     * Convert collection to array.
+     * Converts the given object into an array.
+     * If the object is null, returns an empty array.
+     * If the object is already an array, it casts and returns it.
+     * If the object is a Collection, it converts the collection to an array.
+     * Otherwise, it wraps the object in an array.
      *
-     * @param obj boxed type array or collection
-     * @return object array
+     * @param obj the object to be converted into an array
+     * @return an Object array representing the input object
      */
     @SuppressWarnings("unchecked")
     public static Object[] toArray(Object obj) {
@@ -288,8 +285,15 @@ public final class ObjectUtil {
         return Float.parseFloat(obj.toString());
     }
 
+    /**
+     * Converts the given value to the specified target type.
+     *
+     * @param targetType The class of the type to which the value should be converted.
+     * @param value      The value to convert. If null, the method returns null.
+     * @return The converted value in the target type, or the original value if conversion is not supported.
+     */
     public static Object convertValue(Class<?> targetType, Object value) {
-        if(Objects.isNull(value)) {
+        if (Objects.isNull(value)) {
             return null;
         }
         Class<?> vt = value.getClass();
