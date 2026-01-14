@@ -181,6 +181,18 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
     }
 
     /**
+     * Get first value and applies a function to transform
+     * the value to type {@code T}.
+     *
+     * @param transformer a function that takes the retrieved object and returns a transformed value of type {@code T}
+     * @param <T>         the type of the transformed value
+     * @return the transformed value of type T after applying transformer to the retrieved value
+     */
+    public <T> T getFirstAs(Function<Object, T> transformer) {
+        return transformer.apply(getByIndex(0));
+    }
+
+    /**
      * Get value and cast to type {@code T} by key.
      *
      * @param key      key
@@ -193,6 +205,47 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
     public final <T> T getAs(String key, T... defaults) {
         T v = (T) get(key);
         return Objects.nonNull(v) ? v : coalesce(defaults);
+    }
+
+    /**
+     * Get value and applies a function to transform
+     * * the value to type {@code T} by key.
+     *
+     * @param key         key
+     * @param transformer a function that takes the retrieved object and returns a transformed value of type {@code T}
+     * @param <T>         the type of the transformed value
+     * @return the transformed value of type T after applying transformer to the retrieved value
+     */
+    public <T> T getAs(String key, Function<Object, T> transformer) {
+        return transformer.apply(get(key));
+    }
+
+    /**
+     * Get value and cast to type {@code T} by index.
+     *
+     * @param index    index
+     * @param defaults default values, detect get first non-null value
+     * @param <T>      the type of the value
+     * @return value or null
+     */
+    @SuppressWarnings("unchecked")
+    @SafeVarargs
+    public final <T> T getAs(int index, T... defaults) {
+        T v = (T) getByIndex(index);
+        return Objects.nonNull(v) ? v : coalesce(defaults);
+    }
+
+    /**
+     * Get value and applies a function to transform
+     * * the value to type {@code T} by index.
+     *
+     * @param index       index
+     * @param transformer a function that takes the retrieved object and returns a transformed value of type {@code T}
+     * @param <T>         the type of the transformed value
+     * @return the transformed value of type T after applying transformer to the retrieved value
+     */
+    public <T> T getAs(int index, Function<Object, T> transformer) {
+        return transformer.apply(getByIndex(index));
     }
 
     /**
@@ -226,29 +279,33 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
     }
 
     /**
-     * Get value and cast to type {@code T} by index.
+     * Get deep nest object value and applies a function to transform
+     * the value to type {@code T} by key path expression.
      *
-     * @param index    index
-     * @param defaults default values, detect get first non-null value
-     * @param <T>      the type of the value
-     * @return value or null
+     * @param <T>         the type of the transformed value
+     * @param path        key path expression
+     * @param transformer a function that takes the retrieved object and returns a transformed value of type {@code T}
+     * @return the transformed value of type T after applying transformer to the retrieved value
+     * @see #deepGetAs(String, Object[])
      */
-    @SuppressWarnings("unchecked")
-    @SafeVarargs
-    public final <T> T getAs(int index, T... defaults) {
-        T v = (T) getByIndex(index);
-        return Objects.nonNull(v) ? v : coalesce(defaults);
+    public <T> T deepGetAs(String path, Function<Object, T> transformer) {
+        Object value;
+        if (path.indexOf('.') >= 0) {
+            value = ObjectUtil.getDeepValue(this, path);
+        } else {
+            value = get(path);
+        }
+        return transformer.apply(value);
     }
 
     /**
      * Get optional value and cast to type {@code T} by key.
      *
      * @param key key
-     * @param <T> the type of the value
      * @return value or null
      */
-    public <T> Optional<T> getOptional(String key) {
-        return Optional.ofNullable(getAs(key));
+    public Optional<Object> getOptional(String key) {
+        return Optional.ofNullable(get(key));
     }
 
     /**
@@ -257,8 +314,8 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
      * @param index index
      * @return optional value
      */
-    public <T> Optional<T> getOptional(int index) {
-        return Optional.ofNullable(getAs(index));
+    public Optional<Object> getOptional(int index) {
+        return Optional.ofNullable(getByIndex(index));
     }
 
     /**

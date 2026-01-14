@@ -5,7 +5,7 @@ import com.github.chengyuxing.common.script.parser.RabbitScriptParser;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.util.Arrays;
+import java.util.*;
 
 public class ExpressionTests {
     static String exp = "!(:id >= 0 || :name <> blank) && :age<=21";
@@ -31,6 +31,14 @@ public class ExpressionTests {
     @Test
     public void testD() {
         DataRow row = DataRow.of("user", DataRow.of("address", Arrays.asList("a", "b", "c")));
-        System.out.println(row.<String>deepGetAs("user.address.0"));
+        Set<String> sets = row.deepGetAs("user.address", v -> {
+            if (v instanceof List) {
+                return new HashSet<>((Collection<String>) v);
+            }
+            return Collections.emptySet();
+        });
+        System.out.println(row.<String>deepGetAs("user.address.2"));
+        System.out.println(sets);
+        System.out.println(sets.getClass());
     }
 }
