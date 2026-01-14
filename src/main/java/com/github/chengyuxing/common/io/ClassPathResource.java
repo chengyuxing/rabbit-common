@@ -1,6 +1,5 @@
 package com.github.chengyuxing.common.io;
 
-import org.intellij.lang.annotations.Pattern;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
@@ -29,7 +28,7 @@ public class ClassPathResource {
      *
      * @param path file path
      */
-    public ClassPathResource(@NotNull @Pattern("[^/].*") String path) {
+    public ClassPathResource(@NotNull String path) {
         this.path = cleanPath(path);
         this.classLoader = getClassLoader();
         this.bufferSize = DEFAULT_BUFFER_SIZE;
@@ -41,7 +40,7 @@ public class ClassPathResource {
      * @param path       file path
      * @param bufferSize buffer size
      */
-    public ClassPathResource(@NotNull @Pattern("[^/].*") String path, int bufferSize) {
+    public ClassPathResource(@NotNull String path, int bufferSize) {
         this.path = cleanPath(path);
         this.classLoader = getClassLoader();
         this.bufferSize = bufferSize;

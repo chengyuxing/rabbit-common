@@ -1,8 +1,7 @@
 package com.github.chengyuxing.common.io;
 
 import com.github.chengyuxing.common.DataRow;
-import org.intellij.lang.annotations.Language;
-import org.intellij.lang.annotations.Subst;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
@@ -28,7 +27,6 @@ import java.util.function.Supplier;
  * </ul>
  */
 public class FileResource extends ClassPathResource {
-    @Language("Regexp")
     private final static String SCHEMAS_PATTERN = "(file|http|https|ftp)://.+";
     public static final String HTTP_PROP_CONNECTION_TIMEOUT = "connectTimeout";
     public static final String HTTP_PROP_READ_TIMEOUT = "readTimeout";
@@ -42,7 +40,7 @@ public class FileResource extends ClassPathResource {
      * @param path file path
      * @see FileResource
      */
-    public FileResource(@Subst("uri or classpath") String path) {
+    public FileResource(@NotNull String path) {
         super(path);
     }
 
@@ -53,7 +51,7 @@ public class FileResource extends ClassPathResource {
      * @param bufferSize buffer size
      * @see FileResource
      */
-    public FileResource(@Subst("uri or classpath") String path, int bufferSize) {
+    public FileResource(@NotNull String path, int bufferSize) {
         super(path, bufferSize);
     }
 
