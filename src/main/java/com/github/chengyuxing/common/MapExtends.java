@@ -21,7 +21,7 @@ public interface MapExtends<SELF extends MapExtends<SELF, V>, V> extends Map<Str
      * @return SELF
      */
     default SELF removeIfAbsent() {
-        entrySet().removeIf(stringVEntry -> stringVEntry.getValue() == null);
+        entrySet().removeIf(e -> e.getValue() == null);
         //noinspection unchecked
         return (SELF) this;
     }
@@ -46,7 +46,7 @@ public interface MapExtends<SELF extends MapExtends<SELF, V>, V> extends Map<Str
      * @return SELF
      */
     default SELF removeIf(BiPredicate<String, V> predicate) {
-        entrySet().removeIf(next -> predicate.test(next.getKey(), next.getValue()));
+        entrySet().removeIf(e -> predicate.test(e.getKey(), e.getValue()));
         //noinspection unchecked
         return (SELF) this;
     }

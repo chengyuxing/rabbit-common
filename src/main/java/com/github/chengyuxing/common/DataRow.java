@@ -15,16 +15,6 @@ import static com.github.chengyuxing.common.utils.ObjectUtil.coalesce;
  * Represents a row of data, similar to a database table row, with key-value pairs.
  * <p>
  * Provides various methods for creating, manipulating, and converting DataRow instances.
- * <p>
- * All '{@code getXXX}' methods implements by DataRow supports object path expression ('{@code user.name}') to
- * retrieves the deep nest object value, e.g.
- * <blockquote><pre>
- *     {user: {age: 18, hobby: ["swim", "hiking", "sleep"]}}
- * </pre></blockquote>
- * <blockquote><pre>
- *     &lt;String&gt;getAs("user.hobby.0"); // "swim"
- *     getInt("user.age"); // 18
- * </pre></blockquote>
  */
 public class DataRow extends LinkedHashMap<String, Object> implements MapExtends<DataRow, Object> {
     /**
@@ -201,11 +191,35 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
     @SuppressWarnings("unchecked")
     @SafeVarargs
     public final <T> T getAs(String key, T... defaults) {
+        T v = (T) get(key);
+        return Objects.nonNull(v) ? v : coalesce(defaults);
+    }
+
+    /**
+     * Get deep nest object value and cast to type {@code T} by key path expression.
+     * <p>
+     * The method interprets the key as a path expression, the path is separated by '{@code .}', if
+     * actual map keys contain '{@code .}', the behavior is undefined.
+     * <blockquote><pre>
+     *     {user: {age: 18, hobby: ["swim", "hiking", "sleep"]}}
+     * </pre></blockquote>
+     * <blockquote><pre>
+     *     &lt;String&gt;deepGetAs("user.hobby.0"); // "swim"
+     * </pre></blockquote>
+     *
+     * @param path     key path expression
+     * @param defaults default values, detect get first non-null value
+     * @param <T>      the type of the value
+     * @return value or null
+     */
+    @SuppressWarnings("unchecked")
+    @SafeVarargs
+    public final <T> T deepGetAs(String path, T... defaults) {
         Object value;
-        if (key.indexOf('.') > 0) {
-            value = ObjectUtil.getDeepValue(this, key);
+        if (path.indexOf('.') >= 0) {
+            value = ObjectUtil.getDeepValue(this, path);
         } else {
-            value = get(key);
+            value = get(path);
         }
         T v = (T) value;
         return Objects.nonNull(v) ? v : coalesce(defaults);
@@ -243,9 +257,8 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
      * @param index index
      * @return optional value
      */
-    @SuppressWarnings("unchecked")
     public <T> Optional<T> getOptional(int index) {
-        return Optional.ofNullable((T) getByIndex(index));
+        return Optional.ofNullable(getAs(index));
     }
 
     /**
@@ -256,7 +269,7 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
      * @return value or null
      */
     public String getString(String key, String... defaults) {
-        return Objects.toString(getAs(key, defaults), null);
+        return Objects.toString(get(key), coalesce(defaults));
     }
 
     /**
@@ -278,7 +291,8 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
      * @return value or null
      */
     public Integer getInt(String key, Integer... defaults) {
-        return ObjectUtil.toInteger(getAs(key, defaults));
+        Integer v = ObjectUtil.toInteger(get(key));
+        return Objects.nonNull(v) ? v : coalesce(defaults);
     }
 
     /**
@@ -301,7 +315,8 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
      * @return value or null
      */
     public Double getDouble(String key, Double... defaults) {
-        return ObjectUtil.toDouble(getAs(key, defaults));
+        Double v = ObjectUtil.toDouble(get(key));
+        return Objects.nonNull(v) ? v : coalesce(defaults);
     }
 
     /**
@@ -324,7 +339,8 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
      * @return value or null
      */
     public Long getLong(String key, Long... defaults) {
-        return ObjectUtil.toLong(getAs(key, defaults));
+        Long v = ObjectUtil.toLong(get(key));
+        return Objects.nonNull(v) ? v : coalesce(defaults);
     }
 
     /**
