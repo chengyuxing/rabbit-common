@@ -1,7 +1,9 @@
 package com.github.chengyuxing.common;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
@@ -31,7 +33,8 @@ public interface MapExtends<SELF extends MapExtends<SELF, V>, V> extends Map<Str
      * @return SELF
      */
     default SELF removeIfAbsentExclude(String... keys) {
-        entrySet().removeIf(e -> e.getValue() == null && !Arrays.asList(keys).contains(e.getKey()));
+        Set<String> excludeKeys = new HashSet<>(Arrays.asList(keys));
+        entrySet().removeIf(e -> e.getValue() == null && !excludeKeys.contains(e.getKey()));
         //noinspection unchecked
         return (SELF) this;
     }
