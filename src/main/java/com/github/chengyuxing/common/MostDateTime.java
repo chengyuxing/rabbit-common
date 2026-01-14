@@ -13,7 +13,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Datetime util.
+ * The MostDateTime class provides a comprehensive set of functionalities for handling date and time.
+ * It supports various operations such as conversion between different date-time formats, adding or subtracting
+ * temporal units, and comparison. This class is designed to be flexible, allowing creation from multiple sources
+ * including LocalDateTime, Date, String, and timestamp values, and can convert its state into several other
+ * Java date-time types.
  */
 public final class MostDateTime {
     //language=RegExp
