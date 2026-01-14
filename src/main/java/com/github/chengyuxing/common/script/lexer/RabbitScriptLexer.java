@@ -15,7 +15,6 @@ public class RabbitScriptLexer {
     public static final String[] DIRECTIVES = new String[]{
             IF, ELSE, FI, CHOOSE, WHEN, SWITCH, CASE, DEFAULT, BREAK, END, FOR, DONE, GUARD, THROW, CHECK, VAR
     };
-    // language=RegExp
     public static final String DIRECTIVES_PATTERN = "(?i)\\s*(?:" + String.join("|", DIRECTIVES) + ")(?:\\s+.*|$)";
 
     private final String[] lines;
@@ -29,12 +28,13 @@ public class RabbitScriptLexer {
     }
 
     /**
-     * Trim line to valid expression.
+     * Trims the specified line to a valid expression by removing any unnecessary
+     * leading or trailing characters.
      * <p> e.g
      * {@code [ #if :id > 0 ]} -&gt; {@code #if :id > 0}</p>
      *
-     * @param line content line
-     * @return expression line
+     * @param line the content line to be trimmed
+     * @return the trimmed expression line
      */
     protected String trimExpressionLine(String line) {
         return line;
