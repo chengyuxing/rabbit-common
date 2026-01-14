@@ -13,7 +13,18 @@ import static com.github.chengyuxing.common.utils.ObjectUtil.coalesce;
 
 /**
  * Represents a row of data, similar to a database table row, with key-value pairs.
+ * <p>
  * Provides various methods for creating, manipulating, and converting DataRow instances.
+ * <p>
+ * All '{@code getXXX}' methods implements by DataRow supports object path expression ('{@code user.name}') to
+ * retrieves the deep nest object value, e.g.
+ * <blockquote><pre>
+ *     {user: {age: 18, hobby: ["swim", "hiking", "sleep"]}}
+ * </pre></blockquote>
+ * <blockquote><pre>
+ *     &lt;String&gt;getAs("user.hobby.0"); // "swim"
+ *     getInt("user.age"); // 18
+ * </pre></blockquote>
  */
 public class DataRow extends LinkedHashMap<String, Object> implements MapExtends<DataRow, Object> {
     /**
@@ -68,7 +79,7 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
             }
             return row;
         }
-        throw new IllegalArgumentException("names and values length not equal!");
+        throw new IllegalArgumentException("keys and values length not equal!");
     }
 
     /**
@@ -112,24 +123,24 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
         if (rows.isEmpty()) {
             return new DataRow(0);
         }
-        Set<String> names = rows.iterator().next().keySet();
-        DataRow res = new DataRow(names.size());
-        for (String name : names) {
-            res.put(name, new ArrayList<>());
+        Set<String> keys = rows.iterator().next().keySet();
+        DataRow res = new DataRow(keys.size());
+        for (String key : keys) {
+            res.put(key, new ArrayList<>());
         }
         for (Map<String, Object> row : rows) {
-            for (String name : names) {
+            for (String key : keys) {
                 //noinspection unchecked
-                ((List<Object>) res.get(name)).add(row.get(name));
+                ((List<Object>) res.get(key)).add(row.get(key));
             }
         }
         return res;
     }
 
     /**
-     * Get names.
+     * Get keys.
      *
-     * @return name list
+     * @return key list
      */
     public List<String> names() {
         return new ArrayList<>(keySet());
@@ -141,7 +152,7 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
      * @param index index
      * @return value or null
      */
-    private Object _getByIndex(int index) {
+    protected Object getByIndex(int index) {
         if (index < 0 || index >= size()) {
             return null;
         }
@@ -153,28 +164,25 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
     }
 
     /**
-     * Retrieves the first element of the collection.
-     * If the collection is empty, it returns the first non-null value from the provided defaults.
-     * If no non-null default is found, it returns null.
+     * Get first value.
      *
-     * @param defaults variable number of arguments that serve as fallback values if the collection is empty
-     * @return the first element of the collection or the first non-null value from the defaults if the collection is empty
+     * @param defaults default values, detect get first non-null value
+     * @return the type of the value
      */
     public Object getFirst(Object... defaults) {
         if (isEmpty()) {
             return coalesce(defaults);
         }
-        Object v = _getByIndex(0);
+        Object v = getByIndex(0);
         return Objects.nonNull(v) ? v : coalesce(defaults);
     }
 
     /**
-     * Retrieves the first element from the provided varargs and casts it to the specified type.
-     * If no elements are provided, it will return null.
+     * Get first value and cast to type {@code T}.
      *
-     * @param <T>      the type of the elements in the varargs
-     * @param defaults the varargs of elements to retrieve the first from
-     * @return the first element cast to the specified type, or null if the array is empty
+     * @param defaults default values, detect get first non-null value
+     * @param <T>      the type of the value
+     * @return value or null
      */
     @SuppressWarnings("unchecked")
     @SafeVarargs
@@ -183,87 +191,72 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
     }
 
     /**
-     * Retrieves the value associated with the given name, or returns the first non-null default value if the key does not exist or its value is null.
+     * Get value and cast to type {@code T} by key.
      *
-     * @param <T>      the type of the value to retrieve
-     * @param name     the name of the value to be retrieved
-     * @param defaults a variable number of arguments representing the default values
-     * @return the value associated with the given name, or the first non-null value from the defaults if the original value is null or not found
+     * @param key      key
+     * @param defaults default values, detect get first non-null value
+     * @param <T>      the type of the value
+     * @return value or null
      */
     @SuppressWarnings("unchecked")
     @SafeVarargs
-    public final <T> T getAs(String name, T... defaults) {
-        T v = (T) get(name);
-        return Objects.nonNull(v) ? v : coalesce(defaults);
-    }
-
-    /**
-     * Retrieves a deeply nested value from the object based on the provided path.
-     * If the value is not found, it returns the first non-null default value provided.
-     *
-     * @param <T>      The type of the value to retrieve.
-     * @param path     The path to the value, using dot notation for nested properties.
-     * @param defaults Variable length argument list of default values to return if the
-     *                 requested value is null. The first non-null value in this list will
-     *                 be returned.
-     * @return The value found at the specified path, or the first non-null value from
-     * the defaults if the path does not resolve to a non-null value.
-     */
-    @SuppressWarnings("unchecked")
-    @SafeVarargs
-    public final <T> T deepGetAs(@NotNull String path, T... defaults) {
-        if (!path.contains(".")) {
-            return getAs(path, defaults);
+    public final <T> T getAs(String key, T... defaults) {
+        Object value;
+        if (key.indexOf('.') > 0) {
+            value = ObjectUtil.getDeepValue(this, key);
+        } else {
+            value = get(key);
         }
-        T v = (T) ObjectUtil.getDeepValue(this, path);
+        T v = (T) value;
         return Objects.nonNull(v) ? v : coalesce(defaults);
     }
 
     /**
-     * Convert value and get by index.
+     * Get value and cast to type {@code T} by index.
      *
      * @param index    index
      * @param defaults default values, detect get first non-null value
-     * @param <T>      result type
+     * @param <T>      the type of the value
      * @return value or null
      */
     @SuppressWarnings("unchecked")
     @SafeVarargs
     public final <T> T getAs(int index, T... defaults) {
-        T v = (T) _getByIndex(index);
+        T v = (T) getByIndex(index);
         return Objects.nonNull(v) ? v : coalesce(defaults);
     }
 
     /**
-     * Get optional value by name.
+     * Get optional value and cast to type {@code T} by key.
      *
-     * @param name key
-     * @return optional value
+     * @param key key
+     * @param <T> the type of the value
+     * @return value or null
      */
-    public Optional<Object> getOptional(String name) {
-        return Optional.ofNullable(getAs(name));
+    public <T> Optional<T> getOptional(String key) {
+        return Optional.ofNullable(getAs(key));
     }
 
     /**
-     * Get optional value by index.
+     * Get optional value and cast to type {@code T} by index.
      *
      * @param index index
      * @return optional value
      */
-    public Optional<Object> getOptional(int index) {
-        return Optional.ofNullable(getAs(index));
+    @SuppressWarnings("unchecked")
+    public <T> Optional<T> getOptional(int index) {
+        return Optional.ofNullable((T) getByIndex(index));
     }
 
     /**
-     * Get string value by name.
+     * Get string value by key.
      *
-     * @param name     key
+     * @param key      key
      * @param defaults default values, detect get first non-null value
      * @return value or null
      */
-    public String getString(String name, String... defaults) {
-        Object v = get(name);
-        return Objects.nonNull(v) ? v.toString() : coalesce(defaults);
+    public String getString(String key, String... defaults) {
+        return Objects.toString(getAs(key, defaults), null);
     }
 
     /**
@@ -274,20 +267,18 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
      * @return value or null
      */
     public String getString(int index, String... defaults) {
-        Object v = _getByIndex(index);
-        return Objects.nonNull(v) ? v.toString() : coalesce(defaults);
+        return Objects.toString(getByIndex(index), coalesce(defaults));
     }
 
     /**
-     * Get int value by name.
+     * Get int value by key.
      *
-     * @param name     key
+     * @param key      key
      * @param defaults default values, detect get first non-null value
      * @return value or null
      */
-    public Integer getInt(String name, Integer... defaults) {
-        Integer v = ObjectUtil.toInteger(get(name));
-        return Objects.nonNull(v) ? v : coalesce(defaults);
+    public Integer getInt(String key, Integer... defaults) {
+        return ObjectUtil.toInteger(getAs(key, defaults));
     }
 
     /**
@@ -298,20 +289,19 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
      * @return value or null
      */
     public Integer getInt(int index, Integer... defaults) {
-        Integer v = ObjectUtil.toInteger(_getByIndex(index));
+        Integer v = ObjectUtil.toInteger(getByIndex(index));
         return Objects.nonNull(v) ? v : coalesce(defaults);
     }
 
     /**
-     * Get double value by name.
+     * Get double value by key.
      *
-     * @param name     key
+     * @param key      key
      * @param defaults default values, detect get first non-null value
      * @return value or null
      */
-    public Double getDouble(String name, Double... defaults) {
-        Double v = ObjectUtil.toDouble(get(name));
-        return Objects.nonNull(v) ? v : coalesce(defaults);
+    public Double getDouble(String key, Double... defaults) {
+        return ObjectUtil.toDouble(getAs(key, defaults));
     }
 
     /**
@@ -322,20 +312,19 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
      * @return value or null
      */
     public Double getDouble(int index, Double... defaults) {
-        Double v = ObjectUtil.toDouble(_getByIndex(index));
+        Double v = ObjectUtil.toDouble(getByIndex(index));
         return Objects.nonNull(v) ? v : coalesce(defaults);
     }
 
     /**
-     * Get long value by name.
+     * Get long value by key.
      *
-     * @param name     key
+     * @param key      key
      * @param defaults default values, detect get first non-null value
      * @return value or null
      */
-    public Long getLong(String name, Long... defaults) {
-        Long v = ObjectUtil.toLong(get(name));
-        return Objects.nonNull(v) ? v : coalesce(defaults);
+    public Long getLong(String key, Long... defaults) {
+        return ObjectUtil.toLong(getAs(key, defaults));
     }
 
     /**
@@ -346,20 +335,20 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
      * @return value or null
      */
     public Long getLong(int index, Long... defaults) {
-        Long v = ObjectUtil.toLong(_getByIndex(index));
+        Long v = ObjectUtil.toLong(getByIndex(index));
         return Objects.nonNull(v) ? v : coalesce(defaults);
     }
 
     /**
-     * Pick some names to create a new DataRow.
+     * Pick some keys to create a new DataRow.
      *
-     * @param name key
+     * @param key  key
      * @param more more keys
      * @return new DataRow instance
      */
-    public DataRow pick(String name, String... more) {
+    public DataRow pick(String key, String... more) {
         DataRow row = new DataRow(more.length + 1);
-        row.put(name, get(name));
+        row.put(key, get(key));
         for (String n : more) {
             row.put(n, get(n));
         }
@@ -367,12 +356,16 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
     }
 
     /**
-     * Reduce.
+     * Applies a function to each entry of the map, reducing the entries to a single value.
+     * The reduction is performed by applying the given function to an accumulator and each
+     * map entry (key and value), updating the accumulator with the result.
      *
-     * @param init   initial accumulator value
-     * @param mapper (accumulator, key, value) -&gt; accumulator
-     * @param <T>    result type
-     * @return any type result
+     * @param <T>    the type of the accumulator and the return type
+     * @param init   the initial value for the accumulator
+     * @param mapper a function that takes three arguments: the current accumulator value,
+     *               the key, and the value of the current entry, and returns the new
+     *               accumulator value
+     * @return the reduced value after applying the function to all entries
      */
     public <T> T reduce(T init, TiFunction<T, String, Object, T> mapper) {
         T acc = init;
@@ -425,9 +418,9 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
     }
 
     /**
-     * Convert each entry to key value list.
+     * Convert each entry to key-value list.
      *
-     * @return key value list
+     * @return key-value list
      */
     public List<KeyValue> toKeyValue() {
         List<KeyValue> kvs = new ArrayList<>(size());

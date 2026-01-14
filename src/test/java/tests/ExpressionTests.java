@@ -1,10 +1,14 @@
 package tests;
 
+import com.github.chengyuxing.common.DataRow;
 import com.github.chengyuxing.common.script.parser.RabbitScriptParser;
+import org.intellij.lang.annotations.Subst;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class ExpressionTests {
@@ -25,5 +29,12 @@ public class ExpressionTests {
         boolean res1 = parser.evaluateCondition(args);
         System.out.println(res);
         System.out.println(res1);
+    }
+
+    @Test
+    public void testD() {
+        DataRow row = DataRow.of("user", DataRow.of("address", Arrays.asList("a", "b", "c")));
+        String a = row.<String>getOptional("user.address.0").orElse("");
+        System.out.println(a);
     }
 }
