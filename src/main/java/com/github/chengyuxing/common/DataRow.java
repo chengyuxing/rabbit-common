@@ -153,10 +153,12 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
     }
 
     /**
-     * Get first value.
+     * Retrieves the first element of the collection.
+     * If the collection is empty, it returns the first non-null value from the provided defaults.
+     * If no non-null default is found, it returns null.
      *
-     * @param defaults default values, detect get first non-null value
-     * @return value or null
+     * @param defaults variable number of arguments that serve as fallback values if the collection is empty
+     * @return the first element of the collection or the first non-null value from the defaults if the collection is empty
      */
     public Object getFirst(Object... defaults) {
         if (isEmpty()) {
@@ -167,11 +169,12 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
     }
 
     /**
-     * Convert first value and get.
+     * Retrieves the first element from the provided varargs and casts it to the specified type.
+     * If no elements are provided, it will return null.
      *
-     * @param defaults default values, detect get first non-null value
-     * @param <T>      result type
-     * @return value or null
+     * @param <T>      the type of the elements in the varargs
+     * @param defaults the varargs of elements to retrieve the first from
+     * @return the first element cast to the specified type, or null if the array is empty
      */
     @SuppressWarnings("unchecked")
     @SafeVarargs
@@ -180,12 +183,12 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
     }
 
     /**
-     * Convert value and get by name.
+     * Retrieves the value associated with the given name, or returns the first non-null default value if the key does not exist or its value is null.
      *
-     * @param name     key
-     * @param defaults default values, detect get first non-null value
-     * @param <T>      result type
-     * @return value or null
+     * @param <T>      the type of the value to retrieve
+     * @param name     the name of the value to be retrieved
+     * @param defaults a variable number of arguments representing the default values
+     * @return the value associated with the given name, or the first non-null value from the defaults if the original value is null or not found
      */
     @SuppressWarnings("unchecked")
     @SafeVarargs
@@ -209,6 +212,9 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
     @SuppressWarnings("unchecked")
     @SafeVarargs
     public final <T> T deepGetAs(@NotNull String path, T... defaults) {
+        if (!path.contains(".")) {
+            return getAs(path, defaults);
+        }
         T v = (T) ObjectUtil.getDeepValue(this, path);
         return Objects.nonNull(v) ? v : coalesce(defaults);
     }
