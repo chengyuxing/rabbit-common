@@ -117,7 +117,7 @@ public class Test2 {
 
     @Test
     public void dtTest() throws Exception {
-        System.out.println(MostDateTime.toLocalDateTime("20210201092132"));
+        System.out.println(MostDateTime.toLocalDateTime("20210201092132999"));
         System.out.println("20210201092100".length());
     }
 
@@ -128,8 +128,10 @@ public class Test2 {
         System.out.println(MostDateTime.createISODateTime("2019-09-25T18:00:14"));
         System.out.println(MostDateTime.createISODateTime("2019-09-25T18:00:14z"));
         System.out.println(111);
-        System.out.println(MostDateTime.createISODateTime("2019-09-25 18:00:14"));
+        System.out.println(MostDateTime.toLocalDateTime("2019-09-25 18:00:14.999"));
         System.out.println(222);
+        System.out.println(LocalDateTime.parse("2019-09-25T18:00:14.1"));
+        System.out.println(333);
 
         System.out.println(LocalDateTime.now());
 
