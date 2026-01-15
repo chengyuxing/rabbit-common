@@ -102,9 +102,8 @@ public class StringFormatter {
             if (value == null) {
                 return "";
             }
-            Object[] values = ObjectUtil.toArray(value);
             StringJoiner sb = new StringJoiner(", ");
-            for (Object v : values) {
+            for (Object v : ObjectUtil.asIterable(value)) {
                 if (v != null) {
                     String s = v.toString();
                     if (isSpecial) {

@@ -853,14 +853,11 @@ public class RabbitScriptParser {
                 close = NEW_LINE + close;
             }
 
-            Object listObject = calcValue(listName, pipes);
-            Object[] iterator = ObjectUtil.toArray(listObject);
+            Object obj = calcValue(listName, pipes);
 
             CleanStringJoiner result = new CleanStringJoiner(delimiter + NEW_LINE);
-
-            for (int i = 0, j = iterator.length; i < j; i++) {
-                Object item = iterator[i];
-
+            int i = 0;
+            for (Object item : ObjectUtil.asIterable(obj)) {
                 Map<String, Object> eachLoopVars = new HashMap<>();
 
                 if (!itemName.isEmpty()) {
@@ -927,6 +924,7 @@ public class RabbitScriptParser {
                 Parser parser = new Parser(newForContent, eachLoopContext);
                 String forContentResult = parser.doParse();
                 result.add(forContentResult);
+                i++;
             }
             forIndex++;
             String resultFor = result.toString();
