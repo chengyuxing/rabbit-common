@@ -51,6 +51,6 @@ public class DataRowTests {
         DataRow dataRow = DataRow.of("x", 10, "y", 20);
         Coord coord = dataRow.toEntity(Coord.class, dataRow.get("x"), dataRow.get("y"));
         System.out.println(coord);
-        System.out.println(ObjectUtil.getValue(coord, "x"));
+        System.out.println(ObjectUtil.accessValue(coord, "x"));
     }
 }
