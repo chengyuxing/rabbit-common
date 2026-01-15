@@ -20,7 +20,7 @@ public class ReflectTests {
     public void r2e() throws Exception {
         int x = 10, y = 18;
         DataRow row = DataRow.of("x", x, "y", y, "name", "昆明市")
-                .updateKey("","")
+                .updateKey("", "")
                 .removeIfAbsent();
         System.out.println(row);
         System.out.println(row.toEntity(Coord.class, row.get("x"), row.get("y")));
@@ -42,10 +42,10 @@ public class ReflectTests {
 
     @Test
     public void beanTest() throws Exception {
-        ReflectUtil.getRWMethods(User.class).getItem2()
-                .forEach(method -> {
+        ReflectUtil.getBeanPropertyMetas(User.class)
+                .forEach((method, meta) -> {
                     // set方法的第一个参数类型
-                    Type pType = method.getGenericParameterTypes()[0];
+                    Type pType = meta.getSetter().getGenericParameterTypes()[0];
                     // 如果类型是泛型类型
                     if (pType instanceof ParameterizedType) {
                         ParameterizedType pt = (ParameterizedType) pType;
@@ -71,9 +71,9 @@ public class ReflectTests {
 
     @Test
     public void convert() throws Exception {
-        ReflectUtil.getRWMethods(User.class).getItem1()
-                .forEach(m -> {
-                    System.out.println(m.getReturnType() == Class.class);
+        ReflectUtil.getBeanPropertyMetas(User.class)
+                .forEach((p, m) -> {
+                    System.out.println(m.getGetter().getReturnType() == Class.class);
                 });
     }
 }

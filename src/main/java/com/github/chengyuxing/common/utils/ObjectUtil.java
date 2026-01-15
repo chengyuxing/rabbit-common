@@ -4,7 +4,10 @@ import com.github.chengyuxing.common.MostDateTime;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -60,7 +63,7 @@ public final class ObjectUtil {
     @SafeVarargs
     public static @Nullable <T> T coalesce(T... values) {
         for (T v : values) {
-            if (Objects.nonNull(v)) {
+            if (v != null) {
                 return v;
             }
         }
@@ -113,19 +116,20 @@ public final class ObjectUtil {
             return ((Map<?, ?>) obj).get(key);
         }
         Class<?> clazz = obj.getClass();
-        Method m = null;
         try {
-            m = ReflectUtil.getGetMethod(clazz, key);
-            if (!m.isAccessible()) {
-                m.setAccessible(true);
+            BeanInfo beanInfo = Introspector.getBeanInfo(clazz, Object.class);
+            for (PropertyDescriptor p : beanInfo.getPropertyDescriptors()) {
+                if (Objects.equals(p.getName(), key)) {
+                    Method getter = p.getReadMethod();
+                    if (getter != null) {
+                        return getter.invoke(obj);
+                    }
+                    break;
+                }
             }
-            return m.invoke(obj);
-        } catch (IllegalAccessException | InvocationTargetException e) {
-            throw new IllegalArgumentException("Invoke " + clazz.getName() + "#" + m.getName() + " error.", e);
-        } catch (NoSuchFieldException e) {
-            throw new IllegalArgumentException("No such field '" + key + "' on " + obj, e);
-        } catch (NoSuchMethodException e) {
-            throw new IllegalArgumentException("No such getter method of '" + key + "' on " + obj, e);
+            throw new IllegalArgumentException("No such getter method associates to the property '" + key + "' on " + clazz.getName());
+        } catch (IllegalAccessException | InvocationTargetException | IntrospectionException e) {
+            throw new IllegalArgumentException("Invoke " + clazz.getName() + "." + key + " failed", e);
         }
     }
 
@@ -141,7 +145,7 @@ public final class ObjectUtil {
      * @throws IllegalArgumentException If the path expression syntax is incorrect (does not start with a '{@code /}').
      */
     public static @Nullable Object walkDeepValue(Object obj, @NotNull String path) {
-        if (Objects.isNull(obj)) {
+        if (obj == null) {
             return null;
         }
         if (!path.startsWith("/")) {
@@ -372,25 +376,26 @@ public final class ObjectUtil {
         if (entity == null) return mapBuilder.apply(0);
         try {
             Class<?> clazz = entity.getClass();
-            List<Method> getters = ReflectUtil.getRWMethods(entity.getClass()).getItem1();
-            T map = mapBuilder.apply(getters.size());
-            for (Method getter : getters) {
-                Field get;
-                try {
-                    get = ReflectUtil.getGetterField(clazz, getter);
-                } catch (NoSuchFieldException e) {
+            Map<String, ReflectUtil.PropertyMeta> metas = ReflectUtil.getBeanPropertyMetas(clazz);
+            T map = mapBuilder.apply(metas.size());
+            for (Map.Entry<String, ReflectUtil.PropertyMeta> e : metas.entrySet()) {
+                ReflectUtil.PropertyMeta meta = e.getValue();
+                Method getter = meta.getGetter();
+                if (getter == null) {
                     continue;
                 }
-                if (Objects.isNull(get)) {
-                    continue;
-                }
+
+                String name = meta.getField() == null
+                        ? e.getKey()
+                        : fieldMapper.apply(meta.getField());
+
                 Object value = getter.invoke(entity);
-                String name = fieldMapper.apply(get);
+
                 map.put(name, value);
             }
             return map;
         } catch (IllegalAccessException | IntrospectionException | InvocationTargetException e) {
-            throw new RuntimeException("convert to map error.", e);
+            throw new IllegalStateException("convert to map error", e);
         }
     }
 
@@ -419,41 +424,33 @@ public final class ObjectUtil {
      */
     public static <T> T mapToEntity(Map<String, Object> source, @NotNull Class<T> targetType, @NotNull Function<Field, String> fieldMapper, @Nullable BiFunction<Field, Object, Object> valueMapper, Object... constructorParameters) {
         try {
-            if (Objects.isNull(source)) return null;
+            if (source == null) return null;
             T entity = ReflectUtil.getInstance(targetType, constructorParameters);
             if (source.isEmpty()) return entity;
-            for (Method setter : ReflectUtil.getRWMethods(targetType).getItem2()) {
-                Field set;
-                try {
-                    set = ReflectUtil.getSetterField(targetType, setter);
-                } catch (NoSuchFieldException e) {
-                    continue;
-                }
-                if (Objects.isNull(set)) {
-                    continue;
-                }
-                if (setter.getParameterCount() != 1) {
+            Map<String, ReflectUtil.PropertyMeta> metas = ReflectUtil.getBeanPropertyMetas(targetType);
+            for (Map.Entry<String, ReflectUtil.PropertyMeta> e : metas.entrySet()) {
+                ReflectUtil.PropertyMeta meta = e.getValue();
+                Method setter = meta.getSetter();
+                if (setter == null) {
                     continue;
                 }
 
-                String name = fieldMapper.apply(set);
-                Object value = source.get(name);
+                boolean hasField = meta.getField() != null;
 
-                if (Objects.isNull(value)) {
-                    setter.invoke(entity, (Object) null);
-                    continue;
-                }
-                if (Objects.nonNull(valueMapper)) {
-                    Object mapperValue = valueMapper.apply(set, value);
-                    setter.invoke(entity, mapperValue);
-                    continue;
-                }
-                setter.invoke(entity, convertValue(setter.getParameterTypes()[0], value));
+                String name = hasField
+                        ? fieldMapper.apply(meta.getField())
+                        : e.getKey();
+
+                Object value = hasField && valueMapper != null
+                        ? valueMapper.apply(meta.getField(), source.get(name))
+                        : convertValue(setter.getParameterTypes()[0], source.get(name));
+
+                setter.invoke(entity, value);
             }
             return entity;
         } catch (NoSuchMethodException | InstantiationException | InvocationTargetException | IntrospectionException |
                  IllegalAccessException e) {
-            throw new RuntimeException("convert to " + targetType.getTypeName() + " error.", e);
+            throw new IllegalStateException("convert to " + targetType.getTypeName() + " error", e);
         }
     }
 

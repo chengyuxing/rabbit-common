@@ -1,7 +1,6 @@
 package com.github.chengyuxing.common.utils;
 
 import com.github.chengyuxing.common.MethodReference;
-import com.github.chengyuxing.common.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 
 import java.beans.BeanInfo;
@@ -9,10 +8,7 @@ import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.invoke.SerializedLambda;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import java.lang.reflect.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -22,21 +18,85 @@ import java.util.concurrent.ConcurrentHashMap;
 public final class ReflectUtil {
     private static final Map<String, String> METHOD_REF_CACHE = new ConcurrentHashMap<>();
 
-    public static String initGetMethod(String field, Class<?> type) {
+    /**
+     * Generates the standard getter method name for a given field name and its type.
+     *
+     * @param name the name of the field
+     * @param type the type of the field
+     * @return the name of the getter method corresponding to the provided field name and type
+     */
+    public static String getGetterName(String name, Class<?> type) {
         String prefix = "get";
         if (type == boolean.class)
             prefix = "is";
-        return prefix + field.substring(0, 1).toUpperCase().concat(field.substring(1));
+        char[] chars = name.toCharArray();
+        chars[0] = Character.toUpperCase(chars[0]);
+        return prefix + new String(chars);
     }
 
-    public static String initSetMethod(String field) {
-        return "set" + field.substring(0, 1).toUpperCase().concat(field.substring(1));
+    /**
+     * Generates the standard setter method name for a given field name.
+     *
+     * @param name the name of the field
+     * @return the name of the setter method corresponding to the provided field name
+     */
+    public static String getSetterName(String name) {
+        char[] chars = name.toCharArray();
+        chars[0] = Character.toUpperCase(chars[0]);
+        return "set" + new String(chars);
+    }
+
+    /**
+     * Determines if the given method is a getter method.
+     *
+     * @param method the method to check
+     * @return true if the method is a getter, false otherwise
+     */
+    public static boolean isGetter(Method method) {
+        if (!Modifier.isPublic(Modifier.methodModifiers())) return false;
+        if (method.getParameterCount() != 0) return false;
+        if (method.getReturnType() == void.class) return false;
+
+        String name = method.getName();
+        if (name.startsWith("get") && name.length() > 3) return true;
+        return name.startsWith("is") && name.length() > 2 && method.getReturnType() == boolean.class;
+    }
+
+    /**
+     * Determines if the given method is a setter method.
+     *
+     * @param method the method to check
+     * @return true if the method is a setter, false otherwise
+     */
+    public static boolean isSetter(Method method) {
+        if (!Modifier.isPublic(Modifier.methodModifiers())) return false;
+        if (method.getParameterCount() != 1) return false;
+        if (method.getReturnType() != void.class) return false;
+
+        String name = method.getName();
+        return name.startsWith("set") && name.length() > 3;
+    }
+
+    /**
+     * Determines the property name from a given getter or is method.
+     *
+     * @param m the method to extract the property name from, which should be a getter (get) or is (is) method
+     * @return the inferred property name based on the method's name
+     * @throws IllegalStateException if the provided method is not recognized as a valid getter or is method
+     */
+    public static String propertyName(Method m) {
+        String name = m.getName();
+        if (name.startsWith("get") && name.length() > 3)
+            return Introspector.decapitalize(name.substring(3));
+        if (name.startsWith("is") && name.length() > 2)
+            return Introspector.decapitalize(name.substring(2));
+        throw new IllegalStateException("Invalid getter method: " + m.getName());
     }
 
     /**
      * Get field name from Lambda method reference.
      *
-     * @param methodRef method reference e.g. User::getName
+     * @param methodRef method reference e.g. {@code User::getName}
      * @param <T>       class type
      * @return field name
      */
@@ -58,128 +118,32 @@ public final class ReflectUtil {
     }
 
     /**
-     * Get setter field.
+     * Retrieves a map of property names to their corresponding metadata for the given class.
+     * The method inspects the provided class using Java's introspection capabilities to
+     * gather information about its properties, including their fields, getter, and setter methods.
      *
-     * @param clazz  class
-     * @param method setter
-     * @return field
-     * @throws NoSuchFieldException if field not exists
+     * @param clazz the class to inspect for property metadata
+     * @return a map where keys are property names and values are instances of PropertyMeta containing
+     * detailed information about each property
+     * @throws IntrospectionException if an exception occurs during introspection
      */
-    public static Field getSetterField(Class<?> clazz, Method method) throws NoSuchFieldException {
-        String mName = method.getName();
-        if (mName.startsWith("set") && mName.length() > 3) {
-            String name = mName.substring(3);
-            name = name.substring(0, 1).toLowerCase().concat(name.substring(1));
-            return clazz.getDeclaredField(name);
-        }
-        return null;
-    }
-
-    /**
-     * Get getter field.
-     *
-     * @param clazz  class
-     * @param method getter
-     * @return field
-     * @throws NoSuchFieldException if field not exists
-     */
-    public static Field getGetterField(Class<?> clazz, Method method) throws NoSuchFieldException {
-        String mName = method.getName();
-        if (mName.equals("getClass")) {
-            return null;
-        }
-        String name = null;
-        if (mName.startsWith("get")) {
-            name = mName.substring(3);
-        } else if (mName.startsWith("is")) {
-            name = mName.substring(2);
-        }
-        if (Objects.nonNull(name) && !name.isEmpty()) {
-            name = name.substring(0, 1).toLowerCase().concat(name.substring(1));
-            return clazz.getDeclaredField(name);
-        }
-        return null;
-    }
-
-    /**
-     * Get standard java bean all getters and setters.
-     *
-     * @param clazz class
-     * @return pair of getters and setters
-     * @throws IntrospectionException ex
-     */
-    public static Pair<List<Method>, List<Method>> getRWMethods(Class<?> clazz) throws IntrospectionException {
-        List<Method> rs = new ArrayList<>();
-        List<Method> ws = new ArrayList<>();
-        BeanInfo beanInfo = Introspector.getBeanInfo(clazz);
+    public static Map<String, PropertyMeta> getBeanPropertyMetas(Class<?> clazz) throws IntrospectionException {
+        Map<String, PropertyMeta> map = new HashMap<>();
+        BeanInfo beanInfo = Introspector.getBeanInfo(clazz, Object.class);
         for (PropertyDescriptor p : beanInfo.getPropertyDescriptors()) {
-            Method w = p.getWriteMethod();
-            Method r = p.getReadMethod();
-            if (Objects.nonNull(w)) {
-                ws.add(w);
+            String name = p.getName();
+            PropertyMeta pm = new PropertyMeta(name);
+            try {
+                // field is not required.
+                pm.setField(clazz.getDeclaredField(name));
+            } catch (NoSuchFieldException ignore) {
+                continue;
             }
-            if (Objects.nonNull(r)) {
-                if (r.getName().equals("getClass")) {
-                    continue;
-                }
-                rs.add(r);
-            }
+            pm.setGetter(p.getReadMethod());
+            pm.setSetter(p.getWriteMethod());
+            map.put(name, pm);
         }
-        return Pair.of(rs, ws);
-    }
-
-    /**
-     * Get getter method.
-     *
-     * @param clazz class
-     * @param field field
-     * @return getter
-     * @throws NoSuchMethodException if method not exists
-     */
-    public static Method getGetMethod(Class<?> clazz, Field field) throws NoSuchMethodException {
-        String methodName = initGetMethod(field.getName(), field.getType());
-        return clazz.getDeclaredMethod(methodName);
-    }
-
-    /**
-     * Get getter method.
-     *
-     * @param clazz class
-     * @param field field name
-     * @return getter
-     * @throws NoSuchFieldException  if field not exists
-     * @throws NoSuchMethodException if method not exists
-     */
-    public static Method getGetMethod(Class<?> clazz, String field) throws NoSuchFieldException, NoSuchMethodException {
-        Field f = clazz.getDeclaredField(field);
-        return getGetMethod(clazz, f);
-    }
-
-    /**
-     * Get setter method.
-     *
-     * @param clazz class
-     * @param field field
-     * @return setter
-     * @throws NoSuchMethodException if method not exists
-     */
-    public static Method getSetMethod(Class<?> clazz, Field field) throws NoSuchMethodException {
-        String methodName = initSetMethod(field.getName());
-        return clazz.getDeclaredMethod(methodName, field.getType());
-    }
-
-    /**
-     * Get setter method.
-     *
-     * @param clazz class
-     * @param field field name
-     * @return setter
-     * @throws NoSuchFieldException  if field not exists
-     * @throws NoSuchMethodException if method not exists
-     */
-    public static Method getSetMethod(Class<?> clazz, String field) throws NoSuchFieldException, NoSuchMethodException {
-        Field f = clazz.getDeclaredField(field);
-        return getSetMethod(clazz, f);
+        return map;
     }
 
     /**
@@ -217,7 +181,7 @@ public final class ReflectUtil {
      */
     public static <T> T getInstance(Class<T> clazz, Object... constructorParameters) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         if (constructorParameters.length > 0) {
-            @SuppressWarnings("unchecked") Constructor<T>[] constructors = (Constructor<T>[]) clazz.getDeclaredConstructors();
+            @SuppressWarnings("unchecked") Constructor<T>[] constructors = (Constructor<T>[]) clazz.getConstructors();
             for (Constructor<T> constructor : constructors) {
                 Class<?>[] paramClasses = constructor.getParameterTypes();
                 if (paramClasses.length != constructorParameters.length) {
@@ -227,7 +191,7 @@ public final class ReflectUtil {
                 for (int i = 0; i < paramClasses.length; i++) {
                     Class<?> paramClass = paramClasses[i];
                     Object value = constructorParameters[i];
-                    if (Objects.isNull(value)) {
+                    if (value == null) {
                         continue;
                     }
                     Class<?> valueClass = value.getClass();
@@ -238,9 +202,6 @@ public final class ReflectUtil {
                 }
                 if (!match) {
                     continue;
-                }
-                if (!constructor.isAccessible()) {
-                    constructor.setAccessible(true);
                 }
                 return constructor.newInstance(constructorParameters);
             }
@@ -254,10 +215,46 @@ public final class ReflectUtil {
             }
             throw new NoSuchMethodException(clazz.getName() + "<init>(" + sb + ")");
         }
-        Constructor<T> constructor = clazz.getDeclaredConstructor();
-        if (!constructor.isAccessible()) {
-            constructor.setAccessible(true);
-        }
+        Constructor<T> constructor = clazz.getConstructor();
         return constructor.newInstance();
+    }
+
+    public static final class PropertyMeta {
+        private final String name;
+        private Field field;
+        private Method getter;
+        private Method setter;
+
+        public PropertyMeta(String name) {
+            this.name = name;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public Field getField() {
+            return field;
+        }
+
+        public void setField(Field field) {
+            this.field = field;
+        }
+
+        public Method getGetter() {
+            return getter;
+        }
+
+        public void setGetter(Method getter) {
+            this.getter = getter;
+        }
+
+        public Method getSetter() {
+            return setter;
+        }
+
+        public void setSetter(Method setter) {
+            this.setter = setter;
+        }
     }
 }
