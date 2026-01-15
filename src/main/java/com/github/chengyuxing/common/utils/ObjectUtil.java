@@ -4,10 +4,7 @@ import com.github.chengyuxing.common.MostDateTime;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.beans.BeanInfo;
-import java.beans.IntrospectionException;
-import java.beans.Introspector;
-import java.beans.PropertyDescriptor;
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -95,42 +92,41 @@ public final class ObjectUtil {
      * @return The value associated with the key, or null if the key does not exist, the object is null, or the object is of a basic type.
      * @throws IllegalArgumentException If the index is out of bounds for a collection or array, or if there is no corresponding getter method or field for an object.
      */
-    public static @Nullable Object getValue(Object obj, @NotNull String key) {
+    public static @Nullable Object accessValue(Object obj, @NotNull String key) {
         if (obj == null) {
             return null;
         }
-        if (ReflectUtil.isBasicType(obj)) {
-            return null;
-        }
-        if (key.matches("\\d+")) {
+        if (StringUtil.isDigit(key)) {
             int index = Integer.parseInt(key);
-            if (obj instanceof Collection || obj instanceof Object[]) {
-                Object[] arr = toArray(obj);
-                if (index < 0 || index >= arr.length) {
-                    throw new IndexOutOfBoundsException("Index out of bounds " + index + " on " + obj);
+            if (obj.getClass().isArray()) {
+                return Array.get(obj, index);
+            }
+            if (obj instanceof List<?>) {
+                return ((List<?>) obj).get(index);
+            }
+            if (obj instanceof Iterable<?>) {
+                int i = 0;
+                for (Object e : ((Iterable<?>) obj)) {
+                    if (i++ == index) {
+                        return e;
+                    }
                 }
-                return arr[index];
+                throw new IndexOutOfBoundsException("Index " + index + " out of bounds on " + obj);
             }
         }
         if (obj instanceof Map<?, ?>) {
             return ((Map<?, ?>) obj).get(key);
         }
         Class<?> clazz = obj.getClass();
-        try {
-            BeanInfo beanInfo = Introspector.getBeanInfo(clazz, Object.class);
-            for (PropertyDescriptor p : beanInfo.getPropertyDescriptors()) {
-                if (Objects.equals(p.getName(), key)) {
-                    Method getter = p.getReadMethod();
-                    if (getter != null) {
-                        return getter.invoke(obj);
-                    }
-                    break;
-                }
+        ReflectUtil.PropertyMeta meta = ReflectUtil.getBeanPropertyMetas(clazz).get(key);
+        if (meta != null && meta.getGetter() != null) {
+            try {
+                return meta.getGetter().invoke(obj);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw new IllegalStateException("Failed to invoke getter '" + key + "' on " + clazz.getName(), e);
             }
-            throw new IllegalArgumentException("No such getter method associates to the property '" + key + "' on " + clazz.getName());
-        } catch (IllegalAccessException | InvocationTargetException | IntrospectionException e) {
-            throw new IllegalArgumentException("Invoke " + clazz.getName() + "." + key + " failed", e);
         }
+        throw new NoSuchElementException("No readable property '" + key + "' on " + clazz.getName());
     }
 
     /**
@@ -154,11 +150,11 @@ public final class ObjectUtil {
         String paths = path.substring(1);
         int pathIndex = paths.indexOf("/");
         if (pathIndex == -1) {
-            return getValue(obj, paths);
+            return accessValue(obj, paths);
         }
         String key = paths.substring(0, pathIndex);
         String tail = paths.substring(pathIndex);
-        return walkDeepValue(getValue(obj, key), tail);
+        return walkDeepValue(accessValue(obj, key), tail);
     }
 
     /**
@@ -173,33 +169,43 @@ public final class ObjectUtil {
             String path = '/' + propertyChains.replace('.', '/');
             return walkDeepValue(obj, path);
         }
-        return getValue(obj, propertyChains);
+        return accessValue(obj, propertyChains);
     }
 
     /**
-     * Converts the given object into an array.
-     * If the object is null, returns an empty array.
-     * If the object is already an array, it casts and returns it.
-     * If the object is a Collection, it converts the collection to an array.
-     * Otherwise, it wraps the object in an array.
+     * Converts the given object into an Iterable.
      *
-     * @param obj the object to be converted into an array
-     * @return an Object array representing the input object
+     * @param obj the object to be converted into an Iterable. This can be null, an instance of Iterable, an array, or any other object.
+     * @return an Iterable representation of the input object. Returns an empty list if the input is null, casts the object to Iterable if it is one, wraps the object in a singleton if it is not
+     * an Iterable or an array, and provides an Iterable view backed by the array if the object is an array.
      */
-    @SuppressWarnings("unchecked")
-    public static Object[] toArray(Object obj) {
+    public static Iterable<?> asIterable(Object obj) {
         if (obj == null) {
-            return new Object[0];
+            return Collections.emptyList();
         }
-        Object[] values;
-        if (obj instanceof Object[]) {
-            values = (Object[]) obj;
-        } else if (obj instanceof Collection) {
-            values = ((Collection<Object>) obj).toArray();
-        } else {
-            values = new Object[]{obj};
+        if (obj instanceof Iterable<?>) {
+            return (Iterable<?>) obj;
         }
-        return values;
+        if (obj.getClass().isArray()) {
+            return () -> new Iterator<Object>() {
+                int i = 0;
+                final int len = Array.getLength(obj);
+
+                @Override
+                public boolean hasNext() {
+                    return i < len;
+                }
+
+                @Override
+                public Object next() {
+                    if (i >= len) {
+                        throw new NoSuchElementException();
+                    }
+                    return Array.get(obj, i++);
+                }
+            };
+        }
+        return Collections.singletonList(obj);
     }
 
     /**
@@ -394,7 +400,7 @@ public final class ObjectUtil {
                 map.put(name, value);
             }
             return map;
-        } catch (IllegalAccessException | IntrospectionException | InvocationTargetException e) {
+        } catch (IllegalAccessException | InvocationTargetException e) {
             throw new IllegalStateException("convert to map error", e);
         }
     }
@@ -448,7 +454,7 @@ public final class ObjectUtil {
                 setter.invoke(entity, value);
             }
             return entity;
-        } catch (NoSuchMethodException | InstantiationException | InvocationTargetException | IntrospectionException |
+        } catch (NoSuchMethodException | InstantiationException | InvocationTargetException |
                  IllegalAccessException e) {
             throw new IllegalStateException("convert to " + targetType.getTypeName() + " error", e);
         }

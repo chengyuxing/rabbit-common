@@ -323,6 +323,21 @@ public final class StringUtil {
         return count;
     }
 
+    /**
+     * Checks if the provided key is composed entirely of digits, indicating it could be used as an index.
+     *
+     * @param key the string to check
+     * @return true if the key is a non-empty string and all characters are digits, false otherwise
+     */
+    public static boolean isDigit(String key) {
+        int len = key.length();
+        if (len == 0) return false;
+        for (int i = 0; i < len; i++) {
+            if (!Character.isDigit(key.charAt(i))) return false;
+        }
+        return true;
+    }
+
     public static String removeEmptyLine(String content) {
         return content.replaceAll("\\s*\r?\n", NEW_LINE);
     }

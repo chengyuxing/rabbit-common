@@ -17,6 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public final class ReflectUtil {
     private static final Map<String, String> METHOD_REF_CACHE = new ConcurrentHashMap<>();
+    private static final Map<Class<?>, Map<String, PropertyMeta>> BEAN_PROPERTY_CACHE = new ConcurrentHashMap<>();
 
     /**
      * Generates the standard getter method name for a given field name and its type.
@@ -125,25 +126,30 @@ public final class ReflectUtil {
      * @param clazz the class to inspect for property metadata
      * @return a map where keys are property names and values are instances of PropertyMeta containing
      * detailed information about each property
-     * @throws IntrospectionException if an exception occurs during introspection
      */
-    public static Map<String, PropertyMeta> getBeanPropertyMetas(Class<?> clazz) throws IntrospectionException {
-        Map<String, PropertyMeta> map = new HashMap<>();
-        BeanInfo beanInfo = Introspector.getBeanInfo(clazz, Object.class);
-        for (PropertyDescriptor p : beanInfo.getPropertyDescriptors()) {
-            String name = p.getName();
-            PropertyMeta pm = new PropertyMeta(name);
+    public static Map<String, PropertyMeta> getBeanPropertyMetas(Class<?> clazz) {
+        return BEAN_PROPERTY_CACHE.computeIfAbsent(clazz, c -> {
             try {
-                // field is not required.
-                pm.setField(clazz.getDeclaredField(name));
-            } catch (NoSuchFieldException ignore) {
-                continue;
+                Map<String, PropertyMeta> map = new HashMap<>();
+                BeanInfo beanInfo = Introspector.getBeanInfo(c, Object.class);
+                for (PropertyDescriptor p : beanInfo.getPropertyDescriptors()) {
+                    String name = p.getName();
+                    PropertyMeta pm = new PropertyMeta(name);
+                    try {
+                        // field is not required.
+                        pm.setField(c.getDeclaredField(name));
+                    } catch (NoSuchFieldException ignore) {
+                        continue;
+                    }
+                    pm.setGetter(p.getReadMethod());
+                    pm.setSetter(p.getWriteMethod());
+                    map.put(name, pm);
+                }
+                return map;
+            } catch (IntrospectionException e) {
+                throw new IllegalStateException("Unable to introspect " + c.getName());
             }
-            pm.setGetter(p.getReadMethod());
-            pm.setSetter(p.getWriteMethod());
-            map.put(name, pm);
-        }
-        return map;
+        });
     }
 
     /**
