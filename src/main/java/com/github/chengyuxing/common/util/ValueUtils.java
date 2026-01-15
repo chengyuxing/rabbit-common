@@ -1,6 +1,7 @@
-package com.github.chengyuxing.common.utils;
+package com.github.chengyuxing.common.util;
 
 import com.github.chengyuxing.common.MostDateTime;
+import com.github.chengyuxing.common.PropertyMeta;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -17,7 +18,29 @@ import java.util.function.Function;
 /**
  * Object util.
  */
-public final class ObjectUtil {
+public final class ValueUtils {
+    private static final Map<Class<?>, Function<@NotNull Object, @Nullable Object>> VALUE_ADAPTORS = new HashMap<>();
+
+    static {
+        VALUE_ADAPTORS.put(String.class, Object::toString);
+        VALUE_ADAPTORS.put(Character.class, o -> {
+            String s = o.toString();
+            if (s.length() != 1) {
+                throw new IllegalArgumentException("Cannot convert to char: " + s);
+            }
+            return s.charAt(0);
+        });
+        VALUE_ADAPTORS.put(char.class, VALUE_ADAPTORS.get(Character.class));
+        VALUE_ADAPTORS.put(Integer.class, ValueUtils::toInteger);
+        VALUE_ADAPTORS.put(int.class, ValueUtils::toInteger);
+        VALUE_ADAPTORS.put(Double.class, ValueUtils::toDouble);
+        VALUE_ADAPTORS.put(double.class, ValueUtils::toDouble);
+        VALUE_ADAPTORS.put(Long.class, ValueUtils::toLong);
+        VALUE_ADAPTORS.put(long.class, ValueUtils::toLong);
+        VALUE_ADAPTORS.put(Float.class, ValueUtils::toFloat);
+        VALUE_ADAPTORS.put(float.class, ValueUtils::toFloat);
+    }
+
     /**
      * Decodes the given value by comparing it with a series of equal-value pairs and returns the corresponding result.
      *
@@ -29,25 +52,17 @@ public final class ObjectUtil {
      * @return The decoded value matching the input value, or the last provided result if no match is found.
      */
     public static @Nullable Object decode(Object value, Object equal, Object result, Object... more) {
-        Object[] objs = new Object[more.length + 2];
-        objs[0] = equal;
-        objs[1] = result;
-        System.arraycopy(more, 0, objs, 2, more.length);
-
-        Object res = null;
-        int i = 0;
-        while (i < objs.length) {
-            if (Objects.equals(value, objs[i])) {
-                res = objs[i + 1];
-                break;
-            }
-            if (i == objs.length - 1) {
-                res = objs[i];
-                break;
-            }
-            i += 2;
+        if (Objects.equals(value, equal)) {
+            return result;
         }
-        return res;
+        for (int i = 0; i + 1 < more.length; i += 2) {
+            if (Objects.equals(value, more[i])) {
+                return more[i + 1];
+            }
+        }
+        return (more.length & 1) == 1
+                ? more[more.length - 1]
+                : null;
     }
 
     /**
@@ -96,7 +111,7 @@ public final class ObjectUtil {
         if (obj == null) {
             return null;
         }
-        if (StringUtil.isDigit(key)) {
+        if (StringUtils.isDigit(key)) {
             int index = Integer.parseInt(key);
             if (obj.getClass().isArray()) {
                 return Array.get(obj, index);
@@ -118,7 +133,7 @@ public final class ObjectUtil {
             return ((Map<?, ?>) obj).get(key);
         }
         Class<?> clazz = obj.getClass();
-        ReflectUtil.PropertyMeta meta = ReflectUtil.getBeanPropertyMetas(clazz).get(key);
+        PropertyMeta meta = ReflectUtils.getBeanPropertyMetas(clazz).get(key);
         if (meta != null && meta.getGetter() != null) {
             try {
                 return meta.getGetter().invoke(obj);
@@ -288,64 +303,59 @@ public final class ObjectUtil {
     }
 
     /**
-     * Converts the given value to the specified target type.
+     * Adapts the given value to the specified target type.
      *
-     * @param targetType The class of the type to which the value should be converted.
-     * @param value      The value to convert. If null, the method returns null.
-     * @return The converted value in the target type, or the original value if conversion is not supported.
+     * @param targetType The target type to which the value should be adapted. Must not be null.
+     * @param value      The value to adapt. Can be null.
+     * @param <T>        The type of the target.
+     * @return The adapted value, or null if the input value is null and no conversion can be applied.
+     * @throws IllegalArgumentException If the conversion from the value's type to the target type is unsupported.
      */
-    public static Object convertValue(Class<?> targetType, Object value) {
+    @SuppressWarnings("unchecked")
+    public static @Nullable <T> T adaptValue(@NotNull Class<T> targetType, Object value) {
         if (value == null) {
             return null;
         }
-        Class<?> vt = value.getClass();
-        if (targetType.isAssignableFrom(vt)) {
-            return value;
+        Class<?> valueType = value.getClass();
+        if (targetType.isAssignableFrom(valueType)) {
+            return (T) value;
         }
-        if (targetType == String.class) {
-            return value.toString();
+        Function<Object, Object> f = VALUE_ADAPTORS.get(targetType);
+        if (f != null) {
+            return (T) f.apply(value);
         }
-        if (targetType == Character.class || targetType == char.class) {
-            return value.toString().charAt(0);
-        }
-        if (targetType == Integer.class || targetType == int.class) {
-            return toInteger(value);
-        }
-        if (targetType == Long.class || targetType == long.class) {
-            return toLong(value);
-        }
-        if (targetType == Double.class || targetType == double.class) {
-            return toDouble(value);
-        }
-        if (targetType == Float.class || targetType == float.class) {
-            return toFloat(value);
-        }
-        if (targetType == Date.class) {
-            return MostDateTime.toDate(value.toString());
+        if (Date.class.isAssignableFrom(targetType)) {
+            return (T) MostDateTime.toDate(value.toString());
         }
         if (Temporal.class.isAssignableFrom(targetType)) {
-            @SuppressWarnings("unchecked") Class<? extends Temporal> j8DateTypeClass = (Class<? extends Temporal>) targetType;
-            if (Date.class.isAssignableFrom(vt)) {
-                return toTemporal(j8DateTypeClass, (Date) value);
+            if (Date.class.isAssignableFrom(valueType)) {
+                return (T) toTemporal((Class<? extends Temporal>) targetType, (Date) value);
             }
-            if (vt == String.class) {
-                Date date = MostDateTime.toDate(value.toString());
-                return toTemporal(j8DateTypeClass, date);
+            if (valueType == String.class) {
+                return (T) toTemporal((Class<? extends Temporal>) targetType, MostDateTime.toDate(value.toString()));
+            }
+            if (valueType == Long.class || value == long.class) {
+                return (T) toTemporal((Class<? extends Temporal>) targetType, MostDateTime.of((long) value).toDate());
             }
         }
         // array to collection
         if (Collection.class.isAssignableFrom(targetType)) {
             // object array parsing to collection exclude blob
-            if (vt != byte[].class && value instanceof Object[]) {
+            if (valueType != byte[].class) {
+                Iterable<?> it = asIterable(value);
                 if (List.class.isAssignableFrom(targetType)) {
-                    return new ArrayList<>(Arrays.asList((Object[]) value));
+                    List<Object> list = new ArrayList<>();
+                    it.forEach(list::add);
+                    return (T) list;
                 }
                 if (Set.class.isAssignableFrom(targetType)) {
-                    return new HashSet<>(Arrays.asList((Object[]) value));
+                    Set<Object> set = new HashSet<>();
+                    it.forEach(set::add);
+                    return (T) set;
                 }
             }
         }
-        return value;
+        throw new IllegalArgumentException("unsupported conversion from " + value.getClass().getName() + " to " + targetType.getName() + ", value=" + value);
     }
 
     /**
@@ -357,7 +367,7 @@ public final class ObjectUtil {
      * @return map
      */
     public static <T extends Map<String, Object>> T pairsToMap(@NotNull Function<Integer, T> mapBuilder, Object... input) {
-        if ((input.length & 1) != 0) {
+        if ((input.length & 1) == 1) {
             throw new IllegalArgumentException("key value are not a pair.");
         }
         int capacity = input.length >> 1;
@@ -382,10 +392,10 @@ public final class ObjectUtil {
         if (entity == null) return mapBuilder.apply(0);
         try {
             Class<?> clazz = entity.getClass();
-            Map<String, ReflectUtil.PropertyMeta> metas = ReflectUtil.getBeanPropertyMetas(clazz);
+            Map<String, PropertyMeta> metas = ReflectUtils.getBeanPropertyMetas(clazz);
             T map = mapBuilder.apply(metas.size());
-            for (Map.Entry<String, ReflectUtil.PropertyMeta> e : metas.entrySet()) {
-                ReflectUtil.PropertyMeta meta = e.getValue();
+            for (Map.Entry<String, PropertyMeta> e : metas.entrySet()) {
+                PropertyMeta meta = e.getValue();
                 Method getter = meta.getGetter();
                 if (getter == null) {
                     continue;
@@ -423,19 +433,19 @@ public final class ObjectUtil {
      * @param source                map
      * @param targetType            entity class
      * @param fieldMapper           setter field mapping to the source map key
-     * @param valueMapper           invoke setter to set the mapping value (entity field, map value) -&gt; (new value)
+     * @param valueAdaptor          invoke setter to set the mapping value (entity field, map value) -&gt; (new value)
      * @param constructorParameters constructor parameters
      * @param <T>                   entity type
      * @return entity
      */
-    public static <T> T mapToEntity(Map<String, Object> source, @NotNull Class<T> targetType, @NotNull Function<Field, String> fieldMapper, @Nullable BiFunction<Field, Object, Object> valueMapper, Object... constructorParameters) {
+    public static <T> T mapToEntity(Map<String, Object> source, @NotNull Class<T> targetType, @NotNull Function<Field, String> fieldMapper, @Nullable BiFunction<Field, Object, Object> valueAdaptor, Object... constructorParameters) {
         try {
             if (source == null) return null;
-            T entity = ReflectUtil.getInstance(targetType, constructorParameters);
+            T entity = ReflectUtils.getInstance(targetType, constructorParameters);
             if (source.isEmpty()) return entity;
-            Map<String, ReflectUtil.PropertyMeta> metas = ReflectUtil.getBeanPropertyMetas(targetType);
-            for (Map.Entry<String, ReflectUtil.PropertyMeta> e : metas.entrySet()) {
-                ReflectUtil.PropertyMeta meta = e.getValue();
+            Map<String, PropertyMeta> metas = ReflectUtils.getBeanPropertyMetas(targetType);
+            for (Map.Entry<String, PropertyMeta> e : metas.entrySet()) {
+                PropertyMeta meta = e.getValue();
                 Method setter = meta.getSetter();
                 if (setter == null) {
                     continue;
@@ -447,9 +457,9 @@ public final class ObjectUtil {
                         ? fieldMapper.apply(meta.getField())
                         : e.getKey();
 
-                Object value = hasField && valueMapper != null
-                        ? valueMapper.apply(meta.getField(), source.get(name))
-                        : convertValue(setter.getParameterTypes()[0], source.get(name));
+                Object value = hasField && valueAdaptor != null
+                        ? valueAdaptor.apply(meta.getField(), source.get(name))
+                        : adaptValue(setter.getParameterTypes()[0], source.get(name));
 
                 setter.invoke(entity, value);
             }
