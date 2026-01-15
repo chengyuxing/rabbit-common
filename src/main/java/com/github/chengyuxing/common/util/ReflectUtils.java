@@ -1,4 +1,4 @@
-package com.github.chengyuxing.common.utils;
+package com.github.chengyuxing.common.util;
 
 import com.github.chengyuxing.common.MethodReference;
 import org.jetbrains.annotations.NotNull;
@@ -15,7 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Reflect util.
  */
-public final class ReflectUtil {
+public final class ReflectUtils {
     private static final Map<String, String> METHOD_REF_CACHE = new ConcurrentHashMap<>();
     private static final Map<Class<?>, Map<String, PropertyMeta>> BEAN_PROPERTY_CACHE = new ConcurrentHashMap<>();
 

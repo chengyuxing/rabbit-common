@@ -3,7 +3,7 @@ package com.github.chengyuxing.common.script.pipe.builtin;
 import com.github.chengyuxing.common.DataRow;
 import com.github.chengyuxing.common.KeyValue;
 import com.github.chengyuxing.common.script.pipe.IPipe;
-import com.github.chengyuxing.common.utils.ReflectUtil;
+import com.github.chengyuxing.common.util.ReflectUtils;
 
 import java.util.*;
 
@@ -13,7 +13,7 @@ import java.util.*;
 public class Kv implements IPipe<List<KeyValue>> {
     @Override
     public List<KeyValue> transform(Object value, Object... params) {
-        if (value == null || ReflectUtil.isBasicType(value)) {
+        if (value == null || ReflectUtils.isBasicType(value)) {
             return Collections.emptyList();
         }
         Map<?, ?> map = value instanceof Map ? (Map<?, ?>) value : DataRow.ofEntity(value);

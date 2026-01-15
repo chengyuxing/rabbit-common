@@ -1,6 +1,6 @@
 package com.github.chengyuxing.common.script;
 
-import com.github.chengyuxing.common.utils.StringUtil;
+import com.github.chengyuxing.common.util.StringUtils;
 
 import java.util.Collection;
 import java.util.Map;
@@ -70,7 +70,7 @@ public final class Comparators {
      * @return true or false
      */
     public static boolean compareNumber(Object a, String op, Object b) {
-        if (StringUtil.isNumeric(a) && StringUtil.isNumeric(b)) {
+        if (StringUtils.isNumeric(a) && StringUtils.isNumeric(b)) {
             double aN = Double.parseDouble(a.toString());
             double bN = Double.parseDouble(b.toString());
             switch (op) {

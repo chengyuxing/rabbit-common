@@ -1,6 +1,6 @@
 package com.github.chengyuxing.common;
 
-import com.github.chengyuxing.common.utils.ObjectUtil;
+import com.github.chengyuxing.common.util.ValueUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -103,7 +103,7 @@ public class StringFormatter {
                 return "";
             }
             StringJoiner sb = new StringJoiner(", ");
-            for (Object v : ObjectUtil.asIterable(value)) {
+            for (Object v : ValueUtils.asIterable(value)) {
                 if (v != null) {
                     String s = v.toString();
                     if (isSpecial) {
@@ -154,7 +154,7 @@ public class StringFormatter {
                 try {
                     String value;
                     if (isKeyPath) {
-                        value = valueFormatter.apply(ObjectUtil.getDeepValue(data, key), isSpecial);
+                        value = valueFormatter.apply(ValueUtils.getDeepValue(data, key), isSpecial);
                     } else {
                         value = valueFormatter.apply(data.get(key), isSpecial);
                     }

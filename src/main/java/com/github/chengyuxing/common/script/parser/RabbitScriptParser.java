@@ -13,14 +13,14 @@ import com.github.chengyuxing.common.script.TokenType;
 import com.github.chengyuxing.common.script.exception.ScriptSyntaxException;
 import com.github.chengyuxing.common.script.Comparators;
 import com.github.chengyuxing.common.tuple.Pair;
-import com.github.chengyuxing.common.utils.ObjectUtil;
+import com.github.chengyuxing.common.util.ValueUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.*;
 import java.util.function.BiConsumer;
 
-import static com.github.chengyuxing.common.utils.StringUtil.NEW_LINE;
+import static com.github.chengyuxing.common.util.StringUtils.NEW_LINE;
 
 /**
  * <h2>Rabbit script parser.</h2>
@@ -487,7 +487,7 @@ public class RabbitScriptParser {
                 if (definedVars.containsKey(key)) {
                     value = definedVars.get(key);
                 } else {
-                    value = ObjectUtil.getDeepValue(context, key);
+                    value = ValueUtils.getDeepValue(context, key);
                 }
                 if (!pipes.isEmpty()) {
                     value = calcPipedValue(value, pipes);
@@ -538,7 +538,7 @@ public class RabbitScriptParser {
                     if (definedVars.containsKey(key)) {
                         return definedVars.get(key);
                     }
-                    return ObjectUtil.getDeepValue(context, key);
+                    return ValueUtils.getDeepValue(context, key);
                 default:
                     throw new ScriptSyntaxException("Unexpected token: " + token + ", expected: " + TokenType.IDENTIFIER + " / " + TokenType.STRING + " / " + TokenType.NUMBER + " / " + TokenType.VARIABLE_NAME);
             }
@@ -857,7 +857,7 @@ public class RabbitScriptParser {
 
             CleanStringJoiner result = new CleanStringJoiner(delimiter + NEW_LINE);
             int i = 0;
-            for (Object item : ObjectUtil.asIterable(obj)) {
+            for (Object item : ValueUtils.asIterable(obj)) {
                 Map<String, Object> eachLoopVars = new HashMap<>();
 
                 if (!itemName.isEmpty()) {

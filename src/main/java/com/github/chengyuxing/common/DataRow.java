@@ -1,6 +1,6 @@
 package com.github.chengyuxing.common;
 
-import com.github.chengyuxing.common.utils.ObjectUtil;
+import com.github.chengyuxing.common.util.ValueUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -9,7 +9,7 @@ import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-import static com.github.chengyuxing.common.utils.ObjectUtil.coalesce;
+import static com.github.chengyuxing.common.util.ValueUtils.coalesce;
 
 /**
  * Represents a row of data, similar to a database table row, with key-value pairs.
@@ -48,7 +48,7 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
      * @return DataRow instance
      */
     public static DataRow of(Object... input) {
-        return ObjectUtil.pairsToMap(DataRow::new, input);
+        return ValueUtils.pairsToMap(DataRow::new, input);
     }
 
     /**
@@ -79,7 +79,7 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
      * @return DataRow instance
      */
     public static DataRow ofEntity(Object entity) {
-        return ObjectUtil.entityToMap(entity, DataRow::new);
+        return ValueUtils.entityToMap(entity, DataRow::new);
     }
 
     /**
@@ -90,7 +90,7 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
      * @return DataRow instance
      */
     public static DataRow ofEntity(Object entity, @NotNull Function<Field, String> fieldMapper) {
-        return ObjectUtil.entityToMap(entity, fieldMapper, DataRow::new);
+        return ValueUtils.entityToMap(entity, fieldMapper, DataRow::new);
     }
 
     /**
@@ -270,7 +270,7 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
     public final <T> T deepGetAs(String path, T... defaults) {
         Object value;
         if (path.indexOf('.') >= 0) {
-            value = ObjectUtil.getDeepValue(this, path);
+            value = ValueUtils.getDeepValue(this, path);
         } else {
             value = get(path);
         }
@@ -291,7 +291,7 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
     public <T> T deepGetAs(String path, Function<Object, T> transformer) {
         Object value;
         if (path.indexOf('.') >= 0) {
-            value = ObjectUtil.getDeepValue(this, path);
+            value = ValueUtils.getDeepValue(this, path);
         } else {
             value = get(path);
         }
@@ -348,7 +348,7 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
      * @return value or null
      */
     public Integer getInt(String key, Integer... defaults) {
-        Integer v = ObjectUtil.toInteger(get(key));
+        Integer v = ValueUtils.toInteger(get(key));
         return v != null ? v : coalesce(defaults);
     }
 
@@ -360,7 +360,7 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
      * @return value or null
      */
     public Integer getInt(int index, Integer... defaults) {
-        Integer v = ObjectUtil.toInteger(getByIndex(index));
+        Integer v = ValueUtils.toInteger(getByIndex(index));
         return v != null ? v : coalesce(defaults);
     }
 
@@ -372,7 +372,7 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
      * @return value or null
      */
     public Double getDouble(String key, Double... defaults) {
-        Double v = ObjectUtil.toDouble(get(key));
+        Double v = ValueUtils.toDouble(get(key));
         return v != null ? v : coalesce(defaults);
     }
 
@@ -384,7 +384,7 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
      * @return value or null
      */
     public Double getDouble(int index, Double... defaults) {
-        Double v = ObjectUtil.toDouble(getByIndex(index));
+        Double v = ValueUtils.toDouble(getByIndex(index));
         return v != null ? v : coalesce(defaults);
     }
 
@@ -396,7 +396,7 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
      * @return value or null
      */
     public Long getLong(String key, Long... defaults) {
-        Long v = ObjectUtil.toLong(get(key));
+        Long v = ValueUtils.toLong(get(key));
         return v != null ? v : coalesce(defaults);
     }
 
@@ -408,7 +408,7 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
      * @return value or null
      */
     public Long getLong(int index, Long... defaults) {
-        Long v = ObjectUtil.toLong(getByIndex(index));
+        Long v = ValueUtils.toLong(getByIndex(index));
         return v != null ? v : coalesce(defaults);
     }
 
@@ -463,7 +463,7 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
      * @return entity
      */
     public <T> T toEntity(@NotNull Class<T> clazz, Object... constructorParameters) {
-        return ObjectUtil.mapToEntity(this, clazz, constructorParameters);
+        return ValueUtils.mapToEntity(this, clazz, constructorParameters);
     }
 
     /**
@@ -487,7 +487,7 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
      * @return entity
      */
     public <T> T toEntity(@NotNull Class<T> clazz, @NotNull Function<Field, String> fieldMapper, @Nullable BiFunction<Field, Object, Object> valueMapper, Object... constructorParameters) {
-        return ObjectUtil.mapToEntity(this, clazz, fieldMapper, valueMapper, constructorParameters);
+        return ValueUtils.mapToEntity(this, clazz, fieldMapper, valueMapper, constructorParameters);
     }
 
     /**

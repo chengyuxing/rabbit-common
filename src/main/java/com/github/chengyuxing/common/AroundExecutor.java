@@ -5,6 +5,17 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Function;
 
+/**
+ * The AroundExecutor class is an abstract class designed to provide a framework for executing
+ * operations with before and after actions. It is generic, allowing for the use of any type T as
+ * an identifier for these operations.
+ * <p>
+ * Subclasses must implement the onStart and onStop methods, which are called before and after the
+ * execution of a function, respectively. The call method is used to execute a provided function,
+ * encapsulating it with the start and stop logic.
+ *
+ * @param <T> the type of the identifier used for tracking or identifying the operation
+ */
 public abstract class AroundExecutor<T> {
     protected abstract void onStart(@NotNull T identifier);
 

@@ -1,9 +1,10 @@
-package com.github.chengyuxing.common.utils;
+package com.github.chengyuxing.common.util;
 
 
 import com.github.chengyuxing.common.StringFormatter;
 import com.github.chengyuxing.common.tuple.Pair;
 import org.intellij.lang.annotations.Language;
+import org.jetbrains.annotations.NotNull;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -16,7 +17,7 @@ import java.util.regex.Pattern;
 /**
  * String util.
  */
-public final class StringUtil {
+public final class StringUtils {
     //language=RegExp
     /**
      * e.g. {@code 1, -1, 3.14}
@@ -329,7 +330,7 @@ public final class StringUtil {
      * @param key the string to check
      * @return true if the key is a non-empty string and all characters are digits, false otherwise
      */
-    public static boolean isDigit(String key) {
+    public static boolean isDigit(@NotNull String key) {
         int len = key.length();
         if (len == 0) return false;
         for (int i = 0; i < len; i++) {
@@ -368,6 +369,13 @@ public final class StringUtil {
         return camelize(content);
     }
 
+    /**
+     * Encrypts or decrypts the given content using XOR operation with the provided key.
+     *
+     * @param content the string to be encrypted or decrypted
+     * @param key     the key used for encryption or decryption, which should be a non-empty string
+     * @return the encrypted or decrypted string based on the input content and key
+     */
     public static String xorEncryptDecrypt(String content, String key) {
         char[] keys = key.toCharArray();
         char[] contentChars = content.toCharArray();
@@ -378,10 +386,24 @@ public final class StringUtil {
         return new String(result);
     }
 
+    /**
+     * Computes the hash of the given content using the specified algorithm.
+     *
+     * @param content   the string to be hashed
+     * @param algorithm the name of the hashing algorithm (e.g., "MD5", "SHA-256")
+     * @return a string representing the hexadecimal value of the hash
+     */
     public static String hash(String content, String algorithm) {
         return hash(content.getBytes(StandardCharsets.UTF_8), algorithm);
     }
 
+    /**
+     * Computes the hash of the given content using the specified algorithm.
+     *
+     * @param content   the byte array to be hashed
+     * @param algorithm the name of the hashing algorithm (e.g., "MD5", "SHA-256")
+     * @return a string representing the hexadecimal value of the hash
+     */
     public static String hash(byte[] content, String algorithm) {
         try {
             MessageDigest digest = MessageDigest.getInstance(algorithm);
@@ -396,7 +418,7 @@ public final class StringUtil {
             }
             return hexString.toString();
         } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
+            throw new IllegalArgumentException(e);
         }
     }
 }

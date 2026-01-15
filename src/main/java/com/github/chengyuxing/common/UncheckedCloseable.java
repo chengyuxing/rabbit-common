@@ -3,6 +3,7 @@ package com.github.chengyuxing.common;
 /**
  * Unchecked closeable interface support nest closeable.
  */
+@FunctionalInterface
 public interface UncheckedCloseable extends Runnable, AutoCloseable {
     @Override
     default void run() {
