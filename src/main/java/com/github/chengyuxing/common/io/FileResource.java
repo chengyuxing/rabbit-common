@@ -66,11 +66,11 @@ public class FileResource extends ClassPathResource {
 
     @Override
     public InputStream getInputStream() {
-        if (Objects.nonNull(requestInterceptor)) {
+        if (requestInterceptor != null) {
             return requestInterceptor.apply(path);
         }
         Supplier<InputStream> interceptor = requestIntercept(path);
-        if (Objects.nonNull(interceptor)) {
+        if (interceptor != null) {
             return interceptor.get();
         }
         if (isURI()) {
@@ -181,7 +181,7 @@ public class FileResource extends ClassPathResource {
      * @param properties properties e.g. http(s) request property {@code headers}:{@link Map}
      */
     public void setProperties(Map<String, Object> properties) {
-        if (Objects.nonNull(properties)) {
+        if (properties != null) {
             this.properties.putAll(properties);
         }
     }

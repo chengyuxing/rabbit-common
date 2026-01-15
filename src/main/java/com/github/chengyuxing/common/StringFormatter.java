@@ -52,7 +52,7 @@ public class StringFormatter {
      * @return formatted string template
      */
     public String format(final String template, final Map<String, ?> data, BiFunction<Object, Boolean, String> valueFormatter) {
-        if (Objects.isNull(template)) {
+        if (template == null) {
             return "";
         }
         if (template.trim().isEmpty()) {
@@ -61,7 +61,7 @@ public class StringFormatter {
         if (!template.contains("${")) {
             return template;
         }
-        if (Objects.isNull(data) || data.isEmpty()) {
+        if (data == null || data.isEmpty()) {
             return template;
         }
         return doFormat(template, data, valueFormatter, 0);

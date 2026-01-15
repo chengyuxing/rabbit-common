@@ -734,7 +734,7 @@ public class RabbitScriptParser {
                     List<Token> caseContent = collectBranchBlock();
                     eat(TokenType.BREAK);
 
-                    if (Objects.isNull(matchedBranch)) {
+                    if (matchedBranch == null) {
                         for (Object caseValue : caseValues) {
                             if (Comparators.compare(variableValue, "=", caseValue)) {
                                 matchedBranch = caseContent;
@@ -771,7 +771,7 @@ public class RabbitScriptParser {
                     List<Token> whenContent = collectBranchBlock();
                     eat(TokenType.BREAK);
 
-                    if (matched && Objects.isNull(matchedBranch)) {
+                    if (matched && matchedBranch == null) {
                         matchedBranch = whenContent;
                     }
                 } else if (currentToken.getType() == TokenType.DEFAULT) {
@@ -789,7 +789,7 @@ public class RabbitScriptParser {
         }
 
         private String parseMatchedBranch(List<Token> matchedBranch, List<Token> defaultBranch) {
-            matchedBranch = Objects.isNull(matchedBranch) ? defaultBranch : matchedBranch;
+            matchedBranch = matchedBranch == null ? defaultBranch : matchedBranch;
 
             if (matchedBranch.isEmpty()) {
                 return "";

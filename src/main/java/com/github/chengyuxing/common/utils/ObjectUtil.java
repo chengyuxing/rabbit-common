@@ -93,7 +93,7 @@ public final class ObjectUtil {
      * @throws IllegalArgumentException If the index is out of bounds for a collection or array, or if there is no corresponding getter method or field for an object.
      */
     public static @Nullable Object getValue(Object obj, @NotNull String key) {
-        if (Objects.isNull(obj)) {
+        if (obj == null) {
             return null;
         }
         if (ReflectUtil.isBasicType(obj)) {
@@ -184,7 +184,7 @@ public final class ObjectUtil {
      */
     @SuppressWarnings("unchecked")
     public static Object[] toArray(Object obj) {
-        if (Objects.isNull(obj)) {
+        if (obj == null) {
             return new Object[0];
         }
         Object[] values;
@@ -246,7 +246,7 @@ public final class ObjectUtil {
     }
 
     public static @Nullable Integer toInteger(Object obj) {
-        if (Objects.isNull(obj)) return null;
+        if (obj == null) return null;
         if (obj instanceof Integer) {
             return (Integer) obj;
         }
@@ -254,7 +254,7 @@ public final class ObjectUtil {
     }
 
     public static @Nullable Long toLong(Object obj) {
-        if (Objects.isNull(obj)) return null;
+        if (obj == null) return null;
         if (obj instanceof Long) {
             return (Long) obj;
         }
@@ -262,7 +262,7 @@ public final class ObjectUtil {
     }
 
     public static @Nullable Double toDouble(Object obj) {
-        if (Objects.isNull(obj)) return null;
+        if (obj == null) return null;
         if (obj instanceof Double) {
             return (Double) obj;
         }
@@ -270,7 +270,7 @@ public final class ObjectUtil {
     }
 
     public static @Nullable Float toFloat(Object obj) {
-        if (Objects.isNull(obj)) return null;
+        if (obj == null) return null;
         if (obj instanceof Float) {
             return (Float) obj;
         }
@@ -285,7 +285,7 @@ public final class ObjectUtil {
      * @return The converted value in the target type, or the original value if conversion is not supported.
      */
     public static Object convertValue(Class<?> targetType, Object value) {
-        if (Objects.isNull(value)) {
+        if (value == null) {
             return null;
         }
         Class<?> vt = value.getClass();
@@ -369,7 +369,7 @@ public final class ObjectUtil {
      * @return map
      */
     public static <T extends Map<String, Object>> T entityToMap(Object entity, @NotNull Function<Field, String> fieldMapper, @NotNull Function<Integer, T> mapBuilder) {
-        if (Objects.isNull(entity)) return mapBuilder.apply(0);
+        if (entity == null) return mapBuilder.apply(0);
         try {
             Class<?> clazz = entity.getClass();
             List<Method> getters = ReflectUtil.getRWMethods(entity.getClass()).getItem1();

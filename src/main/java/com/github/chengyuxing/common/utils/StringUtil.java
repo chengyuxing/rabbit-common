@@ -10,7 +10,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -286,7 +285,7 @@ public final class StringUtil {
      * @return true or false
      */
     public static boolean isEmpty(String str) {
-        return Objects.isNull(str) || str.trim().isEmpty();
+        return str == null || str.trim().isEmpty();
     }
 
     /**
@@ -296,7 +295,7 @@ public final class StringUtil {
      * @return true or false
      */
     public static boolean isNumeric(Object numeric) {
-        if (Objects.isNull(numeric)) {
+        if (numeric == null) {
             return false;
         }
         return numeric.toString().matches(NUMBER_REGEX);

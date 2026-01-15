@@ -13,13 +13,13 @@ import java.util.*;
 public class Kv implements IPipe<List<KeyValue>> {
     @Override
     public List<KeyValue> transform(Object value, Object... params) {
-        if (Objects.isNull(value) || ReflectUtil.isBasicType(value)) {
+        if (value == null || ReflectUtil.isBasicType(value)) {
             return Collections.emptyList();
         }
         Map<?, ?> map = value instanceof Map ? (Map<?, ?>) value : DataRow.ofEntity(value);
         List<KeyValue> keyValues = new ArrayList<>(map.size());
         map.forEach((k, v) -> {
-            if (Objects.nonNull(k)) {
+            if (k != null) {
                 keyValues.add(new KeyValue(k.toString(), v));
             }
         });

@@ -164,7 +164,7 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
             return coalesce(defaults);
         }
         Object v = getByIndex(0);
-        return Objects.nonNull(v) ? v : coalesce(defaults);
+        return v != null ? v : coalesce(defaults);
     }
 
     /**
@@ -204,7 +204,7 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
     @SafeVarargs
     public final <T> T getAs(String key, T... defaults) {
         T v = (T) get(key);
-        return Objects.nonNull(v) ? v : coalesce(defaults);
+        return v != null ? v : coalesce(defaults);
     }
 
     /**
@@ -232,7 +232,7 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
     @SafeVarargs
     public final <T> T getAs(int index, T... defaults) {
         T v = (T) getByIndex(index);
-        return Objects.nonNull(v) ? v : coalesce(defaults);
+        return v != null ? v : coalesce(defaults);
     }
 
     /**
@@ -275,7 +275,7 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
             value = get(path);
         }
         T v = (T) value;
-        return Objects.nonNull(v) ? v : coalesce(defaults);
+        return v != null ? v : coalesce(defaults);
     }
 
     /**
@@ -349,7 +349,7 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
      */
     public Integer getInt(String key, Integer... defaults) {
         Integer v = ObjectUtil.toInteger(get(key));
-        return Objects.nonNull(v) ? v : coalesce(defaults);
+        return v != null ? v : coalesce(defaults);
     }
 
     /**
@@ -361,7 +361,7 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
      */
     public Integer getInt(int index, Integer... defaults) {
         Integer v = ObjectUtil.toInteger(getByIndex(index));
-        return Objects.nonNull(v) ? v : coalesce(defaults);
+        return v != null ? v : coalesce(defaults);
     }
 
     /**
@@ -373,7 +373,7 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
      */
     public Double getDouble(String key, Double... defaults) {
         Double v = ObjectUtil.toDouble(get(key));
-        return Objects.nonNull(v) ? v : coalesce(defaults);
+        return v != null ? v : coalesce(defaults);
     }
 
     /**
@@ -385,7 +385,7 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
      */
     public Double getDouble(int index, Double... defaults) {
         Double v = ObjectUtil.toDouble(getByIndex(index));
-        return Objects.nonNull(v) ? v : coalesce(defaults);
+        return v != null ? v : coalesce(defaults);
     }
 
     /**
@@ -397,7 +397,7 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
      */
     public Long getLong(String key, Long... defaults) {
         Long v = ObjectUtil.toLong(get(key));
-        return Objects.nonNull(v) ? v : coalesce(defaults);
+        return v != null ? v : coalesce(defaults);
     }
 
     /**
@@ -409,7 +409,7 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
      */
     public Long getLong(int index, Long... defaults) {
         Long v = ObjectUtil.toLong(getByIndex(index));
-        return Objects.nonNull(v) ? v : coalesce(defaults);
+        return v != null ? v : coalesce(defaults);
     }
 
     /**

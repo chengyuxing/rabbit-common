@@ -246,7 +246,7 @@ public final class ReflectUtil {
             }
             StringJoiner sb = new StringJoiner(", ");
             for (Object param : constructorParameters) {
-                if (Objects.isNull(param)) {
+                if (param == null) {
                     sb.add("null");
                     continue;
                 }

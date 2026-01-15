@@ -87,8 +87,6 @@ public class ExpTests {
     @Test
     public void test5() throws Exception {
         DataRow row = DataRow.of("a.b", DataRow.of("b", "cyx"));
-        System.out.println(ObjectUtil.walkDeepValue(row, "/a.b/b"));
+        System.out.println(ObjectUtil.walkDeepValue(row, "/a.b/#isEmpty"));
     }
-
-
 }
