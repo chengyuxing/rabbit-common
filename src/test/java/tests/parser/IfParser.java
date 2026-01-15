@@ -8,7 +8,7 @@ import java.util.*;
 
 import static com.github.chengyuxing.common.script.Directives.FI;
 import static com.github.chengyuxing.common.script.Directives.IF;
-import static com.github.chengyuxing.common.utils.StringUtil.*;
+import static com.github.chengyuxing.common.util.StringUtils.*;
 
 public class IfParser {
     @Test

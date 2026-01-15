@@ -2,6 +2,7 @@ package tests;
 
 import com.github.chengyuxing.common.DataRow;
 import com.github.chengyuxing.common.script.parser.RabbitScriptParser;
+import com.github.chengyuxing.common.util.ValueUtils;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import tests.entity.User;
@@ -43,8 +44,15 @@ public class ExpressionTests {
 //            }
 //            return Collections.emptySet();
 //        });
-        System.out.println(row.<Object>deepGetAs("user.info.name"));
+        System.out.println(row.<Object>deepGetAs("user.address.1"));
 //        System.out.println(sets);
 //        System.out.println(sets.getClass());
+    }
+
+    @Test
+    public void testF() {
+        Integer[] ints = new Integer[]{1, 2, 3};
+        List<Integer> list = ValueUtils.adaptValue(List.class, ints);
+        System.out.println(list);
     }
 }

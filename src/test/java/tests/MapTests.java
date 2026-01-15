@@ -2,7 +2,7 @@ package tests;
 
 import com.github.chengyuxing.common.DataRow;
 import com.github.chengyuxing.common.MapExtends;
-import com.github.chengyuxing.common.utils.StringUtil;
+import com.github.chengyuxing.common.util.StringUtils;
 import org.junit.Test;
 
 import java.util.*;
@@ -35,7 +35,7 @@ public class MapTests {
 
     @Test
     public void testss() throws Exception {
-        System.out.println(StringUtil.containsIgnoreCase("axjHd7DugC", "jhd"));
+        System.out.println(StringUtils.containsIgnoreCase("axjHd7DugC", "jhd"));
     }
 
     @Test

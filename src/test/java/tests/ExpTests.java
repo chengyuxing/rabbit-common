@@ -2,8 +2,8 @@ package tests;
 
 import com.github.chengyuxing.common.DataRow;
 import com.github.chengyuxing.common.script.Comparators;
-import com.github.chengyuxing.common.utils.ObjectUtil;
-import com.github.chengyuxing.common.utils.StringUtil;
+import com.github.chengyuxing.common.util.ValueUtils;
+import com.github.chengyuxing.common.util.StringUtils;
 import org.junit.Test;
 import tests.entity.Coord;
 
@@ -62,7 +62,7 @@ public class ExpTests {
 
     @Test
     public void starts() throws Exception {
-        System.out.println(StringUtil.startsWithsIgnoreCase("aaaaaaa", new String[0]));
+        System.out.println(StringUtils.startsWithsIgnoreCase("aaaaaaa", new String[0]));
         System.out.println("aaaa".startsWith(""));
     }
 
@@ -81,12 +81,12 @@ public class ExpTests {
 
         String props = "/0/COORD/x";
 
-        System.out.println(ObjectUtil.walkDeepValue(list, props));
+        System.out.println(ValueUtils.walkDeepValue(list, props));
     }
 
     @Test
     public void test5() throws Exception {
         DataRow row = DataRow.of("a.b", DataRow.of("b", "cyx"));
-        System.out.println(ObjectUtil.walkDeepValue(row, "/a.b/#isEmpty"));
+        System.out.println(ValueUtils.walkDeepValue(row, "/a.b/#isEmpty"));
     }
 }

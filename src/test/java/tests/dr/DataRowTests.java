@@ -1,7 +1,7 @@
 package tests.dr;
 
 import com.github.chengyuxing.common.DataRow;
-import com.github.chengyuxing.common.utils.ObjectUtil;
+import com.github.chengyuxing.common.util.ValueUtils;
 import org.junit.Test;
 import org.postgresql.util.PGobject;
 import tests.entity.Coord;
@@ -51,6 +51,6 @@ public class DataRowTests {
         DataRow dataRow = DataRow.of("x", 10, "y", 20);
         Coord coord = dataRow.toEntity(Coord.class, dataRow.get("x"), dataRow.get("y"));
         System.out.println(coord);
-        System.out.println(ObjectUtil.accessValue(coord, "x"));
+        System.out.println(ValueUtils.accessValue(coord, "x"));
     }
 }

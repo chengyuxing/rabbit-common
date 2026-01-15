@@ -9,8 +9,8 @@ import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import com.github.chengyuxing.common.DataRow;
 import com.github.chengyuxing.common.MostDateTime;
 import com.github.chengyuxing.common.io.FileResource;
-import com.github.chengyuxing.common.utils.ObjectUtil;
-import com.github.chengyuxing.common.utils.StringUtil;
+import com.github.chengyuxing.common.util.ValueUtils;
+import com.github.chengyuxing.common.util.StringUtils;
 import org.junit.Test;
 import tests.entity.DateEntity;
 
@@ -216,7 +216,7 @@ public class Test2 {
 
     @Test
     public void StrTests() throws Exception {
-        System.out.println(StringUtil.startsWithIgnoreCase("Select * from Test.user", "SELECT"));
+        System.out.println(StringUtils.startsWithIgnoreCase("Select * from Test.user", "SELECT"));
         System.out.println(FileResource.getFileExtension("wwww.docx"));
     }
 
@@ -229,10 +229,10 @@ public class Test2 {
     @Test
     public void IdxOfI() throws Exception {
         String str = "Select * from Test.user";
-        System.out.println(StringUtil.containsIgnoreCase(str, "TEST"));
-        System.out.println(StringUtil.charEqualIgnoreCase('S', 's'));
-        System.out.println(!StringUtil.containsAllIgnoreCase(str, "from", "user"));
-        System.out.println(StringUtil.containsIgnoreCase(str, "我的"));
+        System.out.println(StringUtils.containsIgnoreCase(str, "TEST"));
+        System.out.println(StringUtils.charEqualIgnoreCase('S', 's'));
+        System.out.println(!StringUtils.containsAllIgnoreCase(str, "from", "user"));
+        System.out.println(StringUtils.containsIgnoreCase(str, "我的"));
     }
 
     @Test
@@ -308,10 +308,10 @@ public class Test2 {
     @Test
     public void testDt() {
         DataRow row = DataRow.of("now", "2022-12-23T09:54:00", "dt", new Date());
-        DateEntity dateEntity = ObjectUtil.mapToEntity(row, DateEntity.class);
+        DateEntity dateEntity = ValueUtils.mapToEntity(row, DateEntity.class);
         System.out.println(dateEntity);
 
-        Instant instant = ObjectUtil.toTemporal(Instant.class, new Date());
+        Instant instant = ValueUtils.toTemporal(Instant.class, new Date());
         System.out.println(instant);
     }
 

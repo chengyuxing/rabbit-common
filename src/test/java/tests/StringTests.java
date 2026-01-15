@@ -9,8 +9,8 @@ import com.github.chengyuxing.common.script.parser.RabbitScriptParser;
 import com.github.chengyuxing.common.script.Comparators;
 import com.github.chengyuxing.common.script.pipe.builtin.Kv;
 import com.github.chengyuxing.common.tuple.Pair;
-import com.github.chengyuxing.common.utils.ObjectUtil;
-import com.github.chengyuxing.common.utils.StringUtil;
+import com.github.chengyuxing.common.util.ValueUtils;
+import com.github.chengyuxing.common.util.StringUtils;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -26,14 +26,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.github.chengyuxing.common.utils.StringUtil.FMT;
+import static com.github.chengyuxing.common.util.StringUtils.FMT;
 
 public class StringTests {
     static String sql = "${   a   } ${!a.d} insert into ${  Table  } ${tables.fields} values (${  VALUES.1.f }), (${values.0}), (${  Values   })${b}";
 
     @Test
     public void testHash() {
-        System.out.println(StringUtil.hash(sql, "MD5"));
+        System.out.println(StringUtils.hash(sql, "MD5"));
     }
 
     @Test
@@ -241,8 +241,8 @@ public class StringTests {
     public void test35() {
 //        System.out.println(StringUtil.replaceIgnoreCase("abcO", "o", "D"));
         String s = "curl -T /Volumes/TU280Pro/work/word/word4.zip ftp://ftpuser:skynet123456@221.3.220.93:6021";
-        System.out.println(StringUtil.replaceAll(s, "word|skynet|220|280|330", "<b>$0</b>"));
-        System.out.println(StringUtil.replaceAll("Hello world!", "ll|o", "#$0#"));
+        System.out.println(StringUtils.replaceAll(s, "word|skynet|220|280|330", "<b>$0</b>"));
+        System.out.println(StringUtils.replaceAll("Hello world!", "ll|o", "#$0#"));
         System.out.println("Hello worls".replaceAll("(?i)d|s$", "$0$0"));
         System.out.println("abc123".replaceAll("\\d+", "$0$0"));
     }
@@ -430,7 +430,7 @@ public class StringTests {
 
             @Override
             protected String forLoopBodyFormatter(int forIndex, int itemIndex, String body, Map<String, Object> args) {
-                String formatted = StringUtil.FMT.format(body, args);
+                String formatted = StringUtils.FMT.format(body, args);
                 return formatted;
             }
         };
@@ -440,7 +440,7 @@ public class StringTests {
 
         Map<String, Object> vars = parser.getForGeneratedVars();
         System.out.println(vars);
-        System.out.println(ObjectUtil.getDeepValue(vars, "item_6_0.value"));
+        System.out.println(ValueUtils.getDeepValue(vars, "item_6_0.value"));
     }
 
     @Test
@@ -448,7 +448,7 @@ public class StringTests {
         DataRow r = DataRow.of(
                 "_for", DataRow.of("pair_6_3", Pair.of("name", "chengyuxing"))
         );
-        Object value = ObjectUtil.getDeepValue(r, "_for.pair_6_3.item2");
+        Object value = ValueUtils.getDeepValue(r, "_for.pair_6_3.item2");
         System.out.println(value);
     }
 

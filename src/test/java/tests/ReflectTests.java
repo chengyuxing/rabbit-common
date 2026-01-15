@@ -1,7 +1,7 @@
 package tests;
 
 import com.github.chengyuxing.common.DataRow;
-import com.github.chengyuxing.common.utils.ReflectUtil;
+import com.github.chengyuxing.common.util.ReflectUtils;
 import org.junit.Test;
 import tests.entity.*;
 import tests.entity.User;
@@ -42,7 +42,7 @@ public class ReflectTests {
 
     @Test
     public void beanTest() throws Exception {
-        ReflectUtil.getBeanPropertyMetas(User.class)
+        ReflectUtils.getBeanPropertyMetas(User.class)
                 .forEach((method, meta) -> {
                     // set方法的第一个参数类型
                     Type pType = meta.getSetter().getGenericParameterTypes()[0];
@@ -61,17 +61,17 @@ public class ReflectTests {
 
     @Test
     public void testF() throws IntrospectionException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
-        Coord coord = ReflectUtil.getInstance(Coord.class, 1, 13);
+        Coord coord = ReflectUtils.getInstance(Coord.class, 1, 13);
         System.out.println(coord);
 
         DataRow row = DataRow.of("a", 1, "b", "cyx");
-        Your your = ReflectUtil.getInstance(Your.class, row);
+        Your your = ReflectUtils.getInstance(Your.class, row);
         System.out.println(your);
     }
 
     @Test
     public void convert() throws Exception {
-        ReflectUtil.getBeanPropertyMetas(User.class)
+        ReflectUtils.getBeanPropertyMetas(User.class)
                 .forEach((p, m) -> {
                     System.out.println(m.getGetter().getReturnType() == Class.class);
                 });

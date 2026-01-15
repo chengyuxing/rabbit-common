@@ -4,7 +4,7 @@ import com.github.chengyuxing.common.DataRow;
 import com.github.chengyuxing.common.io.FileResource;
 import com.github.chengyuxing.common.script.lexer.IdentifierLexer;
 import com.github.chengyuxing.common.script.parser.RabbitScriptParser;
-import com.github.chengyuxing.common.utils.StringUtil;
+import com.github.chengyuxing.common.util.StringUtils;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -57,7 +57,7 @@ public class LanguageTests {
 
             @Override
             protected String forLoopBodyFormatter(int forIndex, int itemIndex, String body, Map<String, Object> args) {
-                String formatted = StringUtil.FMT.format(body, args);
+                String formatted = StringUtils.FMT.format(body, args);
                 return formatted;
             }
         };

@@ -4,17 +4,15 @@ import com.github.chengyuxing.common.DataRow;
 import com.github.chengyuxing.common.ImmutableList;
 import com.github.chengyuxing.common.io.FileResource;
 import com.github.chengyuxing.common.script.TokenType;
-import com.github.chengyuxing.common.script.pipe.IPipe;
 import com.github.chengyuxing.common.script.pipe.builtin.Type;
 import com.github.chengyuxing.common.tuple.Quintuple;
 import com.github.chengyuxing.common.tuple.Triple;
 import com.github.chengyuxing.common.tuple.Tuples;
-import com.github.chengyuxing.common.utils.ObjectUtil;
+import com.github.chengyuxing.common.util.ValueUtils;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -168,8 +166,8 @@ public class MyTest {
 
     @Test
     public void decodeTest() throws Exception {
-        int money = 10;
-        Object v = ObjectUtil.decode(money, 11, "穷光蛋",
+        int money = 10000;
+        Object v = ValueUtils.decode(money, 11, "穷光蛋",
                 100, "西北风",
                 1000, "打工族",
                 10000, "小康生活",
