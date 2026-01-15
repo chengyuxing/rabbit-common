@@ -136,14 +136,12 @@ public final class ReflectUtils {
                 for (PropertyDescriptor p : beanInfo.getPropertyDescriptors()) {
                     String name = p.getName();
                     PropertyMeta pm = new PropertyMeta(name);
-                    try {
-                        // field is not required.
-                        pm.setField(c.getDeclaredField(name));
-                    } catch (NoSuchFieldException ignore) {
-                        continue;
-                    }
                     pm.setGetter(p.getReadMethod());
                     pm.setSetter(p.getWriteMethod());
+                    try {
+                        pm.setField(c.getDeclaredField(name));
+                    } catch (NoSuchFieldException ignore) {
+                    }
                     map.put(name, pm);
                 }
                 return map;
