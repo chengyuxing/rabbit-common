@@ -3,6 +3,8 @@ package com.github.chengyuxing.common.util;
 import com.github.chengyuxing.common.MethodReference;
 import com.github.chengyuxing.common.PropertyMeta;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
@@ -17,6 +19,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * Reflect util.
  */
 public final class ReflectUtils {
+    private static final Logger log = LoggerFactory.getLogger(ReflectUtils.class);
+
     private static final Map<String, String> METHOD_REF_CACHE = new ConcurrentHashMap<>();
     private static final Map<Class<?>, Map<String, PropertyMeta>> BEAN_PROPERTY_CACHE = new ConcurrentHashMap<>();
 
@@ -140,7 +144,8 @@ public final class ReflectUtils {
                     pm.setSetter(p.getWriteMethod());
                     try {
                         pm.setField(c.getDeclaredField(name));
-                    } catch (NoSuchFieldException ignore) {
+                    } catch (Exception e) {
+                        log.debug("Cannot access field '{}'", name, e);
                     }
                     map.put(name, pm);
                 }
