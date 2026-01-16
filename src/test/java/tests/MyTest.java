@@ -1,7 +1,6 @@
 package tests;
 
 import com.github.chengyuxing.common.DataRow;
-import com.github.chengyuxing.common.ImmutableList;
 import com.github.chengyuxing.common.io.FileResource;
 import com.github.chengyuxing.common.script.TokenType;
 import com.github.chengyuxing.common.script.pipe.builtin.Type;
@@ -145,20 +144,6 @@ public class MyTest {
     }
 
     @Test
-    public void ImmutableTest() throws Exception {
-        List<String> list = new ArrayList<>();
-        list.add("a");
-        list.add("b");
-        list.add("c");
-
-        ImmutableList<String> immutableList = ImmutableList.of(list);
-
-        list.add("d");
-
-        immutableList.tail().foreach(System.out::println);
-    }
-
-    @Test
     public void pairTest() throws Exception {
         Quintuple<Integer, Integer, Integer, Integer, String> quintuple = Tuples.of(1, 2, 3, 4, "jackson");
         System.out.println(quintuple.getItem5());
@@ -176,13 +161,6 @@ public class MyTest {
         System.out.println(v);
 
 //        System.out.println(ObjectUtil.nullable("null", "asd"));
-    }
-
-    @Test
-    public void listIm() throws Exception {
-        long i = ImmutableList.of(1, 2, 3, 4, 5, 6).product(item -> item);
-        System.out.println(i);
-
     }
 
     @Test

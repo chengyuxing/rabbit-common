@@ -51,7 +51,7 @@ public class ExpressionTests {
 
     @Test
     public void testF() {
-        Integer[] ints = new Integer[]{1, 2, 3};
+        int[] ints = new int[]{1, 2, 3};
         List<Integer> list = ValueUtils.adaptValue(List.class, ints);
         System.out.println(list);
     }
