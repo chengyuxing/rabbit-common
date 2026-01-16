@@ -154,7 +154,7 @@ public class RabbitScriptParser {
     /**
      * Evaluates a condition based on the provided context, e.g.
      * <blockquote><pre>
-     * #if !(:id >= 0 || :name <> blank) && :age<=21
+     * {@code #if !(:id >= 0 || :name <> blank) && :age<=21}
      * </pre></blockquote>
      *
      * @param context the map containing the context parameters used for evaluation

@@ -122,6 +122,7 @@ public class StringFormatter {
      * @param template       string template
      * @param data           variables
      * @param valueFormatter value formatter
+     * @param depth          recursive depth
      * @return formatted string template
      */
     protected String doFormat(final String template, final Map<String, ?> data, BiFunction<Object, Boolean, String> valueFormatter, int depth) {
