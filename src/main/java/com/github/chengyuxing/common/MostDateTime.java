@@ -1,6 +1,7 @@
 package com.github.chengyuxing.common;
 
 import com.github.chengyuxing.common.util.StringUtils;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.*;
@@ -69,7 +70,8 @@ public final class MostDateTime {
      * @param zoneId   zoneId
      * @return MostDateTime instance
      */
-    public static MostDateTime of(Temporal temporal, ZoneId zoneId) {
+    @Contract("null, _ -> fail")
+    public static @NotNull MostDateTime of(Temporal temporal, ZoneId zoneId) {
         if (temporal instanceof LocalDateTime) {
             return new MostDateTime((LocalDateTime) temporal);
         }
@@ -100,7 +102,8 @@ public final class MostDateTime {
      * @param temporal temporal
      * @return MostDateTime instance
      */
-    public static MostDateTime of(Temporal temporal) {
+    @Contract("null -> fail")
+    public static @NotNull MostDateTime of(Temporal temporal) {
         return of(temporal, ZoneId.systemDefault());
     }
 
@@ -111,7 +114,8 @@ public final class MostDateTime {
      * @param zoneId zoneId
      * @return MostDateTime instance
      */
-    public static MostDateTime of(Date date, ZoneId zoneId) {
+    @Contract("_, _ -> new")
+    public static @NotNull MostDateTime of(@NotNull Date date, ZoneId zoneId) {
         return new MostDateTime(date.toInstant().atZone(zoneId).toLocalDateTime());
     }
 
@@ -121,7 +125,8 @@ public final class MostDateTime {
      * @param date date
      * @return MostDateTime instance
      */
-    public static MostDateTime of(Date date) {
+    @Contract("_ -> new")
+    public static @NotNull MostDateTime of(Date date) {
         return of(date, ZoneId.systemDefault());
     }
 
@@ -132,7 +137,7 @@ public final class MostDateTime {
      * @return MostDateTime instance
      * @see #toLocalDateTime(String)
      */
-    public static MostDateTime of(String datetime) {
+    public static @NotNull MostDateTime of(String datetime) {
         LocalDateTime ldt = toLocalDateTime(datetime);
         return of(ldt);
     }
@@ -144,7 +149,7 @@ public final class MostDateTime {
      * @param pattern  datetime pattern
      * @return MostDateTime instance
      */
-    public static MostDateTime of(String datetime, String pattern) {
+    public static @NotNull MostDateTime of(String datetime, String pattern) {
         LocalDateTime ldt = LocalDateTime.parse(datetime, DateTimeFormatter.ofPattern(pattern));
         return of(ldt);
     }
@@ -155,7 +160,8 @@ public final class MostDateTime {
      * @param date timestamp
      * @return MostDateTime instance
      */
-    public static MostDateTime of(long date) {
+    @Contract("_ -> new")
+    public static @NotNull MostDateTime of(long date) {
         return of(new Date(date));
     }
 
@@ -167,7 +173,7 @@ public final class MostDateTime {
      * @return a new MostDateTime
      * @see java.time.temporal.ChronoUnit ChronoUnit
      */
-    public MostDateTime minus(long amount, TemporalUnit unit) {
+    public @NotNull MostDateTime minus(long amount, TemporalUnit unit) {
         return of(dateTime.minus(amount, unit));
     }
 
@@ -179,7 +185,7 @@ public final class MostDateTime {
      * @return a new MostDateTime
      * @see java.time.temporal.ChronoUnit ChronoUnit
      */
-    public MostDateTime plus(long amount, TemporalUnit unit) {
+    public @NotNull MostDateTime plus(long amount, TemporalUnit unit) {
         return of(dateTime.plus(amount, unit));
     }
 
@@ -200,7 +206,7 @@ public final class MostDateTime {
      * @param other the other date-time to compare to, not null
      * @return the comparator value, negative if less, positive if greater
      */
-    public int compareTo(MostDateTime other) {
+    public int compareTo(@NotNull MostDateTime other) {
         return dateTime.compareTo(other.dateTime);
     }
 
@@ -275,7 +281,7 @@ public final class MostDateTime {
      * @param format format
      * @return string datetime
      */
-    public String toString(String format) {
+    public @NotNull String toString(@NotNull String format) {
         return dateTime.format(DateTimeFormatter.ofPattern(format.trim()));
     }
 

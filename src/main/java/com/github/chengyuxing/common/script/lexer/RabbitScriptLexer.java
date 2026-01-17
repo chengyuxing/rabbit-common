@@ -2,6 +2,7 @@ package com.github.chengyuxing.common.script.lexer;
 
 import com.github.chengyuxing.common.script.Token;
 import com.github.chengyuxing.common.script.TokenType;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +22,7 @@ public class RabbitScriptLexer {
     private int position;
     private final int length;
 
-    public RabbitScriptLexer(String input) {
+    public RabbitScriptLexer(@NotNull String input) {
         this.lines = input.split("\n");
         this.length = this.lines.length;
         this.position = 0;

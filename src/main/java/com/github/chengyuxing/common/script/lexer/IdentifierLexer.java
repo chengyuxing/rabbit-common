@@ -2,6 +2,7 @@ package com.github.chengyuxing.common.script.lexer;
 
 import com.github.chengyuxing.common.script.Token;
 import com.github.chengyuxing.common.script.TokenType;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +19,7 @@ public class IdentifierLexer {
     private int position;
     private final int length;
 
-    public IdentifierLexer(String input, int line) {
+    public IdentifierLexer(@NotNull String input, int line) {
         this.input = input;
         this.line = line;
         this.position = 0;

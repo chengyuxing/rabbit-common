@@ -192,7 +192,7 @@ public class FileResource extends ClassPathResource {
      * @param filename file name
      * @return file extension
      */
-    public static String getFileExtension(String filename) {
+    public static @Nullable String getFileExtension(@NotNull String filename) {
         int dotIdx = filename.lastIndexOf(".");
         if (dotIdx != -1) {
             return filename.substring(dotIdx + 1);
@@ -207,7 +207,7 @@ public class FileResource extends ClassPathResource {
      * @param withExtension with extension or not
      * @return file short name
      */
-    public static String getFileName(String fullFileName, boolean withExtension) {
+    public static @NotNull String getFileName(String fullFileName, boolean withExtension) {
         String name = fullFileName;
         if (name.matches(SCHEMAS_PATTERN)) {
             name = URI.create(name).getPath();

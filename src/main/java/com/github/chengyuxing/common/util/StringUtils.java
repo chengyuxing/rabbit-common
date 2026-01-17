@@ -43,7 +43,7 @@ public final class StringUtils {
      * @param groupName regex splitter group name
      * @return [each parts, splitters]
      */
-    public static Pair<List<String>, List<String>> regexSplit(final String s, @Language("Regexp") final String regex, final String groupName) {
+    public static @NotNull Pair<List<String>, List<String>> regexSplit(@NotNull String s, @Language("Regexp") @NotNull String regex, @NotNull String groupName) {
         Pattern p = Pattern.compile(regex);
         Matcher m = p.matcher(s);
         int splitIndex = 0;
@@ -73,7 +73,7 @@ public final class StringUtils {
      * @param replacement replacement
      * @return [new string, founded terms]
      */
-    public static Pair<String, List<String>> replaceAll(final String s, @Language("Regexp") final String regex, final String replacement) {
+    public static @NotNull Pair<String, List<String>> replaceAll(@NotNull String s, @Language("Regexp") @NotNull String regex, @NotNull String replacement) {
         Pattern p = Pattern.compile(regex);
         Matcher m = p.matcher(s);
         List<String> found = new ArrayList<>();
@@ -93,11 +93,11 @@ public final class StringUtils {
     /**
      * Checks if the given string starts with any of the specified keywords.
      *
-     * @param str The string to check.
+     * @param str      The string to check.
      * @param keywords The keywords to look for at the beginning of the string.
      * @return true if the string starts with any of the keywords, false otherwise.
      */
-    public static boolean startsWiths(String str, String... keywords) {
+    public static boolean startsWiths(@NotNull String str, String @NotNull ... keywords) {
         for (String keyword : keywords) {
             if (str.startsWith(keyword)) {
                 return true;
@@ -109,11 +109,11 @@ public final class StringUtils {
     /**
      * Checks if the given string ends with any of the specified keywords.
      *
-     * @param str The string to check.
+     * @param str      The string to check.
      * @param keywords The keywords to look for at the end of the string.
      * @return true if the string ends with any of the keywords, false otherwise.
      */
-    public static boolean endsWiths(String str, String... keywords) {
+    public static boolean endsWiths(@NotNull String str, String @NotNull ... keywords) {
         for (String keyword : keywords) {
             if (str.endsWith(keyword)) {
                 return true;
@@ -123,58 +123,49 @@ public final class StringUtils {
     }
 
     /**
-     * Determines if the given string starts with the specified prefix, ignoring case.
+     * Checks if the given string starts with the specified prefix, ignoring case.
      *
-     * @param str The string to check.
-     * @param starts The prefix to look for at the beginning of the string.
-     * @return true if the string starts with the specified prefix, ignoring case, false otherwise.
+     * @param str    the string to check
+     * @param prefix the prefix to look for
+     * @return true if the string starts with the prefix, ignoring case, false otherwise
      */
-    public static boolean startsWithIgnoreCase(String str, String starts) {
-        if (starts.length() > str.length()) {
+    public static boolean startsWithIgnoreCase(@NotNull String str, @NotNull String prefix) {
+        int len = prefix.length();
+        if (len == 0) {
+            return true;
+        }
+        if (len > str.length()) {
             return false;
         }
-        char[] startsChars = starts.toCharArray();
-        for (int i = 0; i < startsChars.length; i++) {
-            char c = startsChars[i];
-            char s = str.charAt(i);
-            if (!charEqualIgnoreCase(c, s)) {
-                return false;
-            }
-        }
-        return true;
+        return str.regionMatches(true, 0, prefix, 0, len);
     }
 
     /**
      * Determines if the given string ends with the specified suffix, ignoring case.
      *
-     * @param str The string to check.
-     * @param ends The suffix to look for at the end of the string.
+     * @param str    The string to check.
+     * @param suffix The suffix to look for at the end of the string.
      * @return true if the string ends with the specified suffix, ignoring case, false otherwise.
      */
-    public static boolean endsWithIgnoreCase(String str, String ends) {
-        if (ends.length() > str.length()) {
+    public static boolean endsWithIgnoreCase(@NotNull String str, @NotNull String suffix) {
+        int len = suffix.length();
+        if (len == 0) {
+            return true;
+        }
+        if (len > str.length()) {
             return false;
         }
-        char[] endsChars = ends.toCharArray();
-        char[] strChars = str.substring(str.length() - endsChars.length).toCharArray();
-        for (int i = endsChars.length - 1; i >= 0; i--) {
-            char c = endsChars[i];
-            char s = strChars[i];
-            if (!charEqualIgnoreCase(c, s)) {
-                return false;
-            }
-        }
-        return true;
+        return str.regionMatches(true, str.length() - len, suffix, 0, len);
     }
 
     /**
      * Checks if the given string starts with any of the specified keywords, ignoring case.
      *
-     * @param str The string to check.
+     * @param str      The string to check.
      * @param keywords The keywords to look for at the beginning of the string.
      * @return true if the string starts with any of the keywords, ignoring case, false otherwise.
      */
-    public static boolean startsWithsIgnoreCase(String str, String... keywords) {
+    public static boolean startsWithsIgnoreCase(@NotNull String str, String @NotNull ... keywords) {
         for (String keyword : keywords) {
             if (startsWithIgnoreCase(str, keyword)) {
                 return true;
@@ -186,11 +177,11 @@ public final class StringUtils {
     /**
      * Checks if the given string ends with any of the specified keywords, ignoring case.
      *
-     * @param str The string to check.
+     * @param str      The string to check.
      * @param keywords The keywords to look for at the end of the string.
      * @return true if the string ends with any of the keywords, ignoring case, false otherwise.
      */
-    public static boolean endsWithsIgnoreCase(String str, String... keywords) {
+    public static boolean endsWithsIgnoreCase(@NotNull String str, String @NotNull ... keywords) {
         for (String keyword : keywords) {
             if (endsWithIgnoreCase(str, keyword)) {
                 return true;
@@ -200,41 +191,40 @@ public final class StringUtils {
     }
 
     /**
-     * Searches for the first occurrence of the specified target string within the source string, ignoring case.
+     * Searches for the first occurrence of the specified target string, ignoring case,
+     * within the source string starting from a specified index.
      *
-     * @param source The string to search within.
-     * @param target The string to search for.
-     * @return The index of the first occurrence of the target string within the source string, or -1 if not found.
+     * @param source    The string to be searched.
+     * @param target    The string to search for.
+     * @param fromIndex The index from which to start the search.
+     * @return The index of the first occurrence of the target string, or -1 if not found.
      */
-    public static int indexOfIgnoreCase(String source, String target) {
-        char[] sourceChars = source.toCharArray();
-        char[] targetChars = target.toCharArray();
-        int targetCount = targetChars.length;
-        int sourceCount = sourceChars.length;
-        if (targetCount > sourceCount) {
-            return -1;
-        }
-        if (targetCount == 0) {
-            return 0;
-        }
-        char first = targetChars[0];
-        int max = sourceCount - targetCount;
-        for (int i = 0; i <= max; i++) {
-            if (!charEqualIgnoreCase(sourceChars[i], first)) {
-                //noinspection StatementWithEmptyBody
-                while (++i <= max && !charEqualIgnoreCase(sourceChars[i], first)) ;
-            }
-            if (i <= max) {
-                int j = i + 1;
-                int end = j + targetCount - 1;
-                //noinspection StatementWithEmptyBody
-                for (int k = 1; j < end && charEqualIgnoreCase(sourceChars[j], targetChars[k]); j++, k++) ;
-                if (j == end) {
-                    return i;
-                }
+    public static int indexOfIgnoreCase(@NotNull String source, @NotNull String target, int fromIndex) {
+        int srcLen = source.length();
+        int tgtLen = target.length();
+
+        if (fromIndex < 0) fromIndex = 0;
+        if (tgtLen == 0) return fromIndex;
+        if (tgtLen > srcLen) return -1;
+
+        int max = srcLen - tgtLen;
+        for (int i = fromIndex; i <= max; i++) {
+            if (source.regionMatches(true, i, target, 0, tgtLen)) {
+                return i;
             }
         }
         return -1;
+    }
+
+    /**
+     * Searches for the first occurrence of the specified target string within the source string, ignoring case.
+     *
+     * @param source the string to be searched
+     * @param target the string to search for
+     * @return the index of the first occurrence of the target string in the source string, or -1 if the target is not found
+     */
+    public static int indexOfIgnoreCase(String source, String target) {
+        return indexOfIgnoreCase(source, target, 0);
     }
 
     /**
@@ -255,10 +245,7 @@ public final class StringUtils {
      * @param targets The strings to search for within the source string.
      * @return true if any of the target strings are found within the source string, ignoring case; false otherwise.
      */
-    public static boolean containsAnyIgnoreCase(String source, String... targets) {
-        if (targets.length < 1) {
-            return false;
-        }
+    public static boolean containsAnyIgnoreCase(@NotNull String source, String @NotNull ... targets) {
         for (String target : targets) {
             if (containsIgnoreCase(source, target)) {
                 return true;
@@ -274,10 +261,7 @@ public final class StringUtils {
      * @param targets The strings to search for within the source string.
      * @return true if any of the target strings are found within the source string; false otherwise.
      */
-    public static boolean containsAny(String source, String... targets) {
-        if (targets.length < 1) {
-            return false;
-        }
+    public static boolean containsAny(@NotNull String source, String @NotNull ... targets) {
         for (String target : targets) {
             if (source.contains(target)) {
                 return true;
@@ -290,13 +274,10 @@ public final class StringUtils {
      * Checks if the source string is equal to any of the target strings, ignoring case.
      *
      * @param source the string to compare against the targets
-     * * @param targets an array of strings to be compared with the source
+     *               * @param targets an array of strings to be compared with the source
      * @return true if the source string matches any of the target strings, ignoring case; false otherwise
      */
-    public static boolean equalsAnyIgnoreCase(String source, String... targets) {
-        if (targets.length < 1) {
-            return false;
-        }
+    public static boolean equalsAnyIgnoreCase(@NotNull String source, String @NotNull ... targets) {
         for (String target : targets) {
             if (source.equalsIgnoreCase(target)) {
                 return true;
@@ -308,14 +289,11 @@ public final class StringUtils {
     /**
      * Checks if the source string is equal to any of the target strings provided.
      *
-     * @param source the string to be compared against the targets
+     * @param source  the string to be compared against the targets
      * @param targets variable number of strings to compare with the source
      * @return true if the source string matches any of the target strings, false otherwise
      */
-    public static boolean equalsAny(String source, String... targets) {
-        if (targets.length < 1) {
-            return false;
-        }
+    public static boolean equalsAny(@NotNull String source, String @NotNull ... targets) {
         for (String target : targets) {
             if (source.equals(target)) {
                 return true;
@@ -327,14 +305,11 @@ public final class StringUtils {
     /**
      * Checks if the source string contains all the target strings, ignoring case.
      *
-     * @param source the string to search in
-     * * @param targets variable number of strings to find within the source
+     * @param source  the string to search in
+     * @param targets variable number of strings to find within the source
      * @return true if the source contains all the target strings, ignoring case, false otherwise
      */
-    public static boolean containsAllIgnoreCase(String source, String... targets) {
-        if (targets.length < 1) {
-            return false;
-        }
+    public static boolean containsAllIgnoreCase(@NotNull String source, String @NotNull ... targets) {
         for (String target : targets) {
             if (!containsIgnoreCase(source, target)) {
                 return false;
@@ -347,33 +322,16 @@ public final class StringUtils {
      * Checks if the source string contains all of the target strings.
      *
      * @param source the string to be searched
-     * * @param targets variable number of strings that are expected to be found within the source string
+     *               * @param targets variable number of strings that are expected to be found within the source string
      * @return true if the source string contains all of the target strings, false otherwise
      */
-    public static boolean containsAll(String source, String... targets) {
-        if (targets.length < 1) {
-            return false;
-        }
+    public static boolean containsAll(@NotNull String source, String @NotNull ... targets) {
         for (String target : targets) {
             if (!source.contains(target)) {
                 return false;
             }
         }
         return true;
-    }
-
-    /**
-     * Checks if two characters are equal ignoring their case.
-     *
-     * @param a the first character to compare
-     * @param b the second character to compare
-     * @return true if both characters are the same when case is ignored, false otherwise
-     */
-    public static boolean charEqualIgnoreCase(char a, char b) {
-        if (((a >= 65 && a <= 90) || (a >= 97 && a <= 122)) && ((b >= 65 && b <= 90) || (b >= 97 && b <= 122)) && a != b) {
-            return Math.abs(a - b) == 32;
-        }
-        return a == b;
     }
 
     /**
@@ -399,24 +357,52 @@ public final class StringUtils {
         return numeric.toString().matches(NUMBER_REGEX);
     }
 
-    public static int countOfContainsIgnoreCase(final String str, final String substr) {
-        String source = str;
+    /**
+     * Counts the number of non-overlapping occurrences of a substring in a given string, ignoring case.
+     *
+     * @param str the string to search within. If null, the method returns 0.
+     * @param sub the substring to search for. If null or an empty string, the method returns 0.
+     * @return the number of times the substring occurs in the string, ignoring case.
+     */
+    public static int countOccurrencesIgnoreCase(@NotNull String str, @NotNull String sub) {
+        if (sub.isEmpty()) {
+            return 0;
+        }
         int count = 0;
-        int idx;
-        while ((idx = indexOfIgnoreCase(source, substr)) != -1) {
+        int fromIndex = 0;
+        while ((fromIndex = indexOfIgnoreCase(str, sub, fromIndex)) != -1) {
             count++;
-            source = source.substring(idx + 1);
+            fromIndex += sub.length();
         }
         return count;
     }
 
-    public static int countOfContains(final String str, final String substr) {
-        String source = str;
+    /**
+     * Counts the number of non-overlapping occurrences of a substring within a given string.
+     *
+     * @param str The string to search within. If null, the method returns 0.
+     * @param sub The substring to search for. If null or an empty string, the method returns 0.
+     * @return The number of non-overlapping occurrences of the substring in the given string.
+     */
+    public static int countOccurrences(@NotNull String str, @NotNull String sub) {
+        if (sub.isEmpty()) {
+            return 0;
+        }
         int count = 0;
-        int idx;
-        while ((idx = source.indexOf(substr)) != -1) {
+        if (sub.length() == 1) {
+            char c = sub.charAt(0);
+            for (int i = 0; i < str.length(); i++) {
+                if (str.charAt(i) == c) {
+                    count++;
+                }
+            }
+            return count;
+        }
+
+        int fromIndex = 0;
+        while ((fromIndex = str.indexOf(sub, fromIndex)) != -1) {
             count++;
-            source = source.substring(idx + 1);
+            fromIndex += sub.length();
         }
         return count;
     }
@@ -442,7 +428,7 @@ public final class StringUtils {
      * @param content the string from which empty lines will be removed
      * @return a new string with all empty lines removed
      */
-    public static String removeEmptyLine(String content) {
+    public static String removeEmptyLine(@NotNull String content) {
         return content.replaceAll("\\s*\r?\n", NEW_LINE);
     }
 
@@ -450,11 +436,11 @@ public final class StringUtils {
      * Repeats the given string a specified number of times.
      * If the number of times is less than or equal to 0, an empty string is returned.
      *
-     * @param str the string to be repeated
+     * @param str   the string to be repeated
      * @param times the number of times to repeat the string
      * @return a new string consisting of the original string repeated multiple times
      */
-    public static String repeat(String str, int times) {
+    public static String repeat(@NotNull String str, int times) {
         if (times <= 0) {
             return "";
         }
@@ -466,28 +452,13 @@ public final class StringUtils {
     }
 
     /**
-     * Convert kebab-case to camel-case.
-     *
-     * @param content kebab-case content
-     * @return camel-case content
-     */
-    public static String camelize(String content) {
-        int idx = content.indexOf("-");
-        if (idx == -1) return content;
-        if (idx + 1 >= content.length()) return content;
-        String p = content.substring(idx, idx + 2);
-        content = content.replace(p, p.substring(1).toUpperCase());
-        return camelize(content);
-    }
-
-    /**
      * Encrypts or decrypts the given content using XOR operation with the provided key.
      *
      * @param content the string to be encrypted or decrypted
      * @param key     the key used for encryption or decryption, which should be a non-empty string
      * @return the encrypted or decrypted string based on the input content and key
      */
-    public static String xorEncryptDecrypt(String content, String key) {
+    public static String xorEncryptDecrypt(@NotNull String content, @NotNull String key) {
         char[] keys = key.toCharArray();
         char[] contentChars = content.toCharArray();
         char[] result = new char[content.length()];
@@ -504,7 +475,7 @@ public final class StringUtils {
      * @param algorithm the name of the hashing algorithm (e.g., "MD5", "SHA-256")
      * @return a string representing the hexadecimal value of the hash
      */
-    public static String hash(String content, String algorithm) {
+    public static @NotNull String hash(@NotNull String content, String algorithm) {
         return hash(content.getBytes(StandardCharsets.UTF_8), algorithm);
     }
 
@@ -515,7 +486,7 @@ public final class StringUtils {
      * @param algorithm the name of the hashing algorithm (e.g., "MD5", "SHA-256")
      * @return a string representing the hexadecimal value of the hash
      */
-    public static String hash(byte[] content, String algorithm) {
+    public static @NotNull String hash(byte[] content, String algorithm) {
         try {
             MessageDigest digest = MessageDigest.getInstance(algorithm);
             byte[] digestBytes = digest.digest(content);

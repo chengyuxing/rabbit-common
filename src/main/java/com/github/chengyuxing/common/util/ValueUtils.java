@@ -73,13 +73,32 @@ public final class ValueUtils {
      * @return the first non-null value in the array, or null if all values are null
      */
     @SafeVarargs
-    public static @Nullable <T> T coalesce(T... values) {
+    public static @Nullable <T> T coalesce(T @NotNull ... values) {
         for (T v : values) {
             if (v != null) {
                 return v;
             }
         }
         return null;
+    }
+
+    /**
+     * Returns the first non-null value from the given array of values.
+     * If all values are null, a NullPointerException is thrown.
+     *
+     * @param <T>    the type of the values
+     * @param values an array of values to check for the first non-null element
+     * @return the first non-null value in the array
+     * @throws NullPointerException if all provided values are null
+     */
+    @SafeVarargs
+    public static @NotNull <T> T coalesceNonNull(T @NotNull ... values) {
+        for (T v : values) {
+            if (v != null) {
+                return v;
+            }
+        }
+        throw new NullPointerException("All values are null");
     }
 
     /**
@@ -126,7 +145,7 @@ public final class ValueUtils {
                         return e;
                     }
                 }
-                throw new IndexOutOfBoundsException("Index " + index + " out of bounds on " + obj);
+                throw new IndexOutOfBoundsException("Index " + index + " out of bounds for length " + (i + 1) + " on " + obj);
             }
         }
         if (obj instanceof Map<?, ?>) {
@@ -224,16 +243,17 @@ public final class ValueUtils {
     }
 
     /**
-     * Convert date to java8 temporal.
+     * Converts a given Date object to a specified Temporal type.
      *
-     * @param clazz  java8 temporal implementation
-     * @param date   date
-     * @param zoneId zone id
-     * @param <T>    result type
-     * @return java8 temporal implementation
+     * @param clazz  The class of the target Temporal type to which the Date should be converted. Supported types include LocalDateTime, ZonedDateTime, OffsetDateTime, LocalDate, LocalTime
+     *               , OffsetTime, and Instant.
+     * @param date   The Date object to convert.
+     * @param zoneId The ZoneId representing the time zone to use for the conversion.
+     * @return An instance of the specified Temporal type.
+     * @throws IllegalArgumentException If the provided class is not one of the supported Temporal types.
      */
     @SuppressWarnings("unchecked")
-    public static @Nullable <T extends Temporal> T toTemporal(Class<T> clazz, Date date, ZoneId zoneId) {
+    public static <T extends Temporal> T toTemporal(Class<T> clazz, Date date, ZoneId zoneId) {
         if (clazz == LocalDateTime.class) {
             return (T) date.toInstant().atZone(zoneId).toLocalDateTime();
         }
@@ -255,7 +275,7 @@ public final class ValueUtils {
         if (clazz == Instant.class) {
             return (T) date.toInstant();
         }
-        return null;
+        throw new IllegalArgumentException("Cannot convert " + date.getClass() + " to " + clazz);
     }
 
     /**
@@ -266,7 +286,7 @@ public final class ValueUtils {
      * @param <T>   result type
      * @return java8 temporal implementation
      */
-    public static @Nullable <T extends Temporal> T toTemporal(Class<T> clazz, Date date) {
+    public static <T extends Temporal> T toTemporal(Class<T> clazz, Date date) {
         return toTemporal(clazz, date, ZoneId.systemDefault());
     }
 
@@ -366,7 +386,7 @@ public final class ValueUtils {
      * @param <T>        result type
      * @return map
      */
-    public static <T extends Map<String, Object>> T pairsToMap(@NotNull Function<Integer, T> mapBuilder, Object... input) {
+    public static <T extends Map<String, Object>> T pairsToMap(@NotNull Function<Integer, T> mapBuilder, Object @NotNull ... input) {
         if ((input.length & 1) == 1) {
             throw new IllegalArgumentException("key value are not a pair.");
         }
@@ -438,7 +458,7 @@ public final class ValueUtils {
      * @param <T>                   entity type
      * @return entity
      */
-    public static <T> T mapToEntity(Map<String, Object> source, @NotNull Class<T> targetType, @NotNull Function<Field, String> fieldMapper, @Nullable BiFunction<Field, Object, Object> valueAdaptor, Object... constructorParameters) {
+    public static <T> @Nullable T mapToEntity(Map<String, Object> source, @NotNull Class<T> targetType, @NotNull Function<Field, String> fieldMapper, @Nullable BiFunction<Field, Object, Object> valueAdaptor, Object... constructorParameters) {
         try {
             if (source == null) return null;
             T entity = ReflectUtils.getInstance(targetType, constructorParameters);

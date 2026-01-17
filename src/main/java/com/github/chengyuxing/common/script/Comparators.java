@@ -1,6 +1,7 @@
 package com.github.chengyuxing.common.script;
 
 import com.github.chengyuxing.common.util.StringUtils;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.Map;
@@ -35,7 +36,7 @@ public final class Comparators {
      * @return true or false
      * @throws UnsupportedOperationException if operator not exists
      */
-    public static boolean compare(Object a, String op, Object b) {
+    public static boolean compare(Object a, @NotNull String op, Object b) {
         switch (op) {
             case "=":
             case "==":

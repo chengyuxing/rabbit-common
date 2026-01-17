@@ -1,5 +1,7 @@
 package com.github.chengyuxing.common;
 
+import org.jetbrains.annotations.NotNull;
+
 /**
  * Unchecked closeable interface support nest closeable.
  */
@@ -20,7 +22,7 @@ public interface UncheckedCloseable extends Runnable, AutoCloseable {
      * @param closeable 　closeable
      * @return UncheckedCloseable
      */
-    static UncheckedCloseable wrap(AutoCloseable closeable) {
+    static UncheckedCloseable wrap(@NotNull AutoCloseable closeable) {
         return closeable::close;
     }
 

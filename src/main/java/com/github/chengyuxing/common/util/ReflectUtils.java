@@ -31,7 +31,7 @@ public final class ReflectUtils {
      * @param type the type of the field
      * @return the name of the getter method corresponding to the provided field name and type
      */
-    public static String getGetterName(String name, Class<?> type) {
+    public static @NotNull String getGetterName(@NotNull String name, Class<?> type) {
         String prefix = "get";
         if (type == boolean.class)
             prefix = "is";
@@ -46,7 +46,7 @@ public final class ReflectUtils {
      * @param name the name of the field
      * @return the name of the setter method corresponding to the provided field name
      */
-    public static String getSetterName(String name) {
+    public static @NotNull String getSetterName(@NotNull String name) {
         char[] chars = name.toCharArray();
         chars[0] = Character.toUpperCase(chars[0]);
         return "set" + new String(chars);
@@ -58,8 +58,8 @@ public final class ReflectUtils {
      * @param method the method to check
      * @return true if the method is a getter, false otherwise
      */
-    public static boolean isGetter(Method method) {
-        if (!Modifier.isPublic(Modifier.methodModifiers())) return false;
+    public static boolean isGetter(@NotNull Method method) {
+        if (!Modifier.isPublic(method.getModifiers())) return false;
         if (method.getParameterCount() != 0) return false;
         if (method.getReturnType() == void.class) return false;
 
@@ -74,8 +74,8 @@ public final class ReflectUtils {
      * @param method the method to check
      * @return true if the method is a setter, false otherwise
      */
-    public static boolean isSetter(Method method) {
-        if (!Modifier.isPublic(Modifier.methodModifiers())) return false;
+    public static boolean isSetter(@NotNull Method method) {
+        if (!Modifier.isPublic(method.getModifiers())) return false;
         if (method.getParameterCount() != 1) return false;
         if (method.getReturnType() != void.class) return false;
 
@@ -90,7 +90,7 @@ public final class ReflectUtils {
      * @return the inferred property name based on the method's name
      * @throws IllegalStateException if the provided method is not recognized as a valid getter or is method
      */
-    public static String propertyName(Method m) {
+    public static String propertyName(@NotNull Method m) {
         String name = m.getName();
         if (name.startsWith("get") && name.length() > 3)
             return Introspector.decapitalize(name.substring(3));
@@ -162,7 +162,7 @@ public final class ReflectUtils {
      * @param value value
      * @return true or false
      */
-    public static boolean isBasicType(Object value) {
+    public static boolean isBasicType(@NotNull Object value) {
         if (value.getClass().isPrimitive()) {
             return true;
         }
@@ -189,7 +189,7 @@ public final class ReflectUtils {
      * @throws InstantiationException    if construct error.
      * @throws IllegalAccessException    if access error.
      */
-    public static <T> T getInstance(Class<T> clazz, Object... constructorParameters) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+    public static <T> @NotNull T getInstance(Class<T> clazz, Object @NotNull ... constructorParameters) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         if (constructorParameters.length > 0) {
             @SuppressWarnings("unchecked") Constructor<T>[] constructors = (Constructor<T>[]) clazz.getConstructors();
             for (Constructor<T> constructor : constructors) {

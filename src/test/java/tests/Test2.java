@@ -33,13 +33,14 @@ public class Test2 {
     //    @BeforeClass
     @Test
     public void init() {
-        for (int i = 0; i < 10000; i++) {
+        for (int i = 0; i < 100; i++) {
             DataRow row = DataRow.of(
                     new String[]{"a", "b", "c", "d", "e"},
                     new Object[]{1, 2, 3, 4, 5}
             );
             rows.add(row);
         }
+        System.out.println(rows.get(999));
     }
 
     public static class Now {
@@ -218,8 +219,8 @@ public class Test2 {
 
     @Test
     public void StrTests() throws Exception {
-        System.out.println(StringUtils.startsWithIgnoreCase("Select * from Test.user", "SELECT"));
-        System.out.println(FileResource.getFileExtension("wwww.docx"));
+        System.out.println(StringUtils.endsWithIgnoreCase("Select * from Test.user", "USER"));
+//        System.out.println(FileResource.getFileExtension("wwww.docx"));
     }
 
     @Test
@@ -232,7 +233,6 @@ public class Test2 {
     public void IdxOfI() throws Exception {
         String str = "Select * from Test.user";
         System.out.println(StringUtils.containsIgnoreCase(str, "TEST"));
-        System.out.println(StringUtils.charEqualIgnoreCase('S', 's'));
         System.out.println(!StringUtils.containsAllIgnoreCase(str, "from", "user"));
         System.out.println(StringUtils.containsIgnoreCase(str, "我的"));
     }

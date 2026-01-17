@@ -2,6 +2,8 @@ package tests;
 
 import com.github.chengyuxing.common.DataRow;
 import com.github.chengyuxing.common.script.parser.RabbitScriptParser;
+import com.github.chengyuxing.common.util.NamingUtils;
+import com.github.chengyuxing.common.util.StringUtils;
 import com.github.chengyuxing.common.util.ValueUtils;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -54,5 +56,9 @@ public class ExpressionTests {
         int[] ints = new int[]{1, 2, 3};
         List<Integer> list = ValueUtils.adaptValue(List.class, ints);
         System.out.println(list);
+        System.out.println(ValueUtils.coalesceNonNull(null, "abc").length());
+        System.out.println(StringUtils.countOccurrencesIgnoreCase("user.address.1", "Ss"));
+        System.out.println(NamingUtils.kebabToCamel("a-b-user-dd"));
+        System.out.println("mmm".indexOf(null));
     }
 }

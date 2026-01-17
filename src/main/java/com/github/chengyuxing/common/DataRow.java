@@ -1,6 +1,7 @@
 package com.github.chengyuxing.common;
 
 import com.github.chengyuxing.common.util.ValueUtils;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -58,7 +59,7 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
      * @param values values array
      * @return DataRow instance
      */
-    public static DataRow of(@NotNull String[] keys, @NotNull Object[] values) {
+    public static @NotNull DataRow of(String @NotNull [] keys, Object @NotNull [] values) {
         if (keys.length == values.length) {
             if (keys.length == 0) {
                 return new DataRow(0);
@@ -99,7 +100,8 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
      * @param map map
      * @return DataRow instance
      */
-    public static DataRow ofMap(@NotNull Map<String, Object> map) {
+    @Contract("_ -> new")
+    public static @NotNull DataRow ofMap(@NotNull Map<String, Object> map) {
         return new DataRow(map);
     }
 
@@ -109,7 +111,7 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
      * @param rows collection of map
      * @return columns struct data
      */
-    public static DataRow zip(Collection<? extends Map<String, Object>> rows) {
+    public static @NotNull DataRow zip(@NotNull Collection<? extends Map<String, Object>> rows) {
         if (rows.isEmpty()) {
             return new DataRow(0);
         }
@@ -144,7 +146,7 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
      */
     protected Object getByIndex(int index) {
         if (index < 0 || index >= size()) {
-            return null;
+            throw new IndexOutOfBoundsException("Index " + index + " out of bounds for length " + size());
         }
         Iterator<Map.Entry<String, Object>> it = entrySet().iterator();
         for (int i = 0; i < index; i++) {
@@ -188,7 +190,7 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
      * @param <T>         the type of the transformed value
      * @return the transformed value of type T after applying transformer to the retrieved value
      */
-    public <T> T getFirstAs(Function<Object, T> transformer) {
+    public <T> T getFirstAs(@NotNull Function<Object, T> transformer) {
         return transformer.apply(getByIndex(0));
     }
 
@@ -216,7 +218,7 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
      * @param <T>         the type of the transformed value
      * @return the transformed value of type T after applying transformer to the retrieved value
      */
-    public <T> T getAs(String key, Function<Object, T> transformer) {
+    public <T> T getAs(String key, @NotNull Function<Object, T> transformer) {
         return transformer.apply(get(key));
     }
 
@@ -244,7 +246,7 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
      * @param <T>         the type of the transformed value
      * @return the transformed value of type T after applying transformer to the retrieved value
      */
-    public <T> T getAs(int index, Function<Object, T> transformer) {
+    public <T> T getAs(int index, @NotNull Function<Object, T> transformer) {
         return transformer.apply(getByIndex(index));
     }
 
@@ -267,7 +269,7 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
      */
     @SuppressWarnings("unchecked")
     @SafeVarargs
-    public final <T> T deepGetAs(String path, T... defaults) {
+    public final <T> T deepGetAs(@NotNull String path, T... defaults) {
         Object value;
         if (path.indexOf('.') >= 0) {
             value = ValueUtils.getDeepValue(this, path);
@@ -288,7 +290,7 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
      * @return the transformed value of type T after applying transformer to the retrieved value
      * @see #deepGetAs(String, Object[])
      */
-    public <T> T deepGetAs(String path, Function<Object, T> transformer) {
+    public <T> T deepGetAs(@NotNull String path, @NotNull Function<Object, T> transformer) {
         Object value;
         if (path.indexOf('.') >= 0) {
             value = ValueUtils.getDeepValue(this, path);
@@ -419,7 +421,7 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
      * @param more more keys
      * @return new DataRow instance
      */
-    public DataRow pick(String key, String... more) {
+    public DataRow pick(String key, String @NotNull ... more) {
         DataRow row = new DataRow(more.length + 1);
         row.put(key, get(key));
         for (String n : more) {

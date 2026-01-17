@@ -493,7 +493,7 @@ public class StringTests {
         rows.add(DataRow.of("a", 5, "b", "x4"));
 
         System.out.println(rows.get(0).<Integer>getFirstAs());
-        System.out.println(rows.get(0).<Integer>getAs(0));
+        System.out.println(rows.get(0).<Integer>getAs(90));
         System.out.println(rows.get(0).<String>getAs("b"));
 
         System.out.println(DataRow.ofEntity(true));
