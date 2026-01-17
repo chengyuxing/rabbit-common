@@ -127,8 +127,8 @@ public class RabbitScriptParser {
     public RabbitScriptParser(String input) {
         RabbitScriptLexer lexer = new RabbitScriptLexer(input) {
             @Override
-            protected String trimExpressionLine(String line) {
-                return RabbitScriptParser.this.trimExpressionLine(line);
+            protected String normalizeDirectiveLine(String line) {
+                return RabbitScriptParser.this.normalizeDirectiveLine(line);
             }
         };
         this.tokens = lexer.tokenize();
@@ -204,12 +204,12 @@ public class RabbitScriptParser {
     }
 
     /**
-     * Trim each line for search prefix {@code #} to detect expression.
+     * Normalizes a directive line prefix {@code #} to detect expression.
      *
-     * @param line current line
-     * @return expression or normal line
+     * @param line the line to be normalized
+     * @return the normalized line
      */
-    protected String trimExpressionLine(String line) {
+    protected String normalizeDirectiveLine(String line) {
         return line;
     }
 

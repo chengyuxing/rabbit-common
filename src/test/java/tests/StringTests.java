@@ -417,7 +417,7 @@ public class StringTests {
             public static final String VAR_PREFIX = FOR_VARS_KEY + ".";
 
             @Override
-            protected String trimExpressionLine(String line) {
+            protected String normalizeDirectiveLine(String line) {
                 String tl = line.trim();
                 if (tl.startsWith("--")) {
                     String ss = tl.substring(2).trim();

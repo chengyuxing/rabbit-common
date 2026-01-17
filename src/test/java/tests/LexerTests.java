@@ -63,7 +63,7 @@ public class LexerTests {
     public void testLexer() {
         RabbitScriptLexer lexer = new RabbitScriptLexer(query) {
             @Override
-            protected String trimExpressionLine(String line) {
+            protected String normalizeDirectiveLine(String line) {
                 if (line.trim().startsWith("--")) {
                     return line.trim().substring(2);
                 }
@@ -77,7 +77,7 @@ public class LexerTests {
     public void test7() {
         RabbitScriptParser parser = new RabbitScriptParser(query) {
             @Override
-            protected String trimExpressionLine(String line) {
+            protected String normalizeDirectiveLine(String line) {
                 String tl = line.trim();
                 if (tl.startsWith("--")) {
                     return tl.substring(2).trim();

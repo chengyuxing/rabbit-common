@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import static com.github.chengyuxing.common.script.Directives.*;
 
@@ -16,7 +17,7 @@ public class RabbitScriptLexer {
     public static final String[] DIRECTIVES = new String[]{
             IF, ELSE, FI, CHOOSE, WHEN, SWITCH, CASE, DEFAULT, BREAK, END, FOR, DONE, GUARD, THROW, CHECK, VAR
     };
-    public static final String DIRECTIVES_PATTERN = "(?i)\\s*(?:" + String.join("|", DIRECTIVES) + ")(?:\\s+.*|$)";
+    public static final Pattern DIRECTIVES_PATTERN = Pattern.compile("(?i)\\s*(?:" + String.join("|", DIRECTIVES) + ")(?:\\s+.*|$)");
 
     private final String[] lines;
     private int position;
@@ -29,15 +30,15 @@ public class RabbitScriptLexer {
     }
 
     /**
-     * Trims the specified line to a valid expression by removing any unnecessary
-     * leading or trailing characters.
+     * Normalizes a given directive line by potentially trimming or adjusting it to ensure
+     * it conforms to the expected format for directives.
      * <p> e.g
      * {@code [ #if :id > 0 ]} -&gt; {@code #if :id > 0}</p>
      *
-     * @param line the content line to be trimmed
-     * @return the trimmed expression line
+     * @param line the line containing the directive to be normalized
+     * @return the normalized directive line
      */
-    protected String trimExpressionLine(String line) {
+    protected String normalizeDirectiveLine(String line) {
         return line;
     }
 
@@ -63,9 +64,9 @@ public class RabbitScriptLexer {
             if (current.equals("\0")) {
                 break;
             }
-            String tl = trimExpressionLine(current);
-            if (tl.matches(DIRECTIVES_PATTERN)) {
-                IdentifierLexer lexer = new IdentifierLexer(tl, position);
+            String dl = normalizeDirectiveLine(current);
+            if (DIRECTIVES_PATTERN.matcher(dl).matches()) {
+                IdentifierLexer lexer = new IdentifierLexer(dl, position);
                 tokens.addAll(lexer.tokenize());
             } else {
                 tokens.add(new Token(TokenType.PLAIN_TEXT, current, position, 0));
