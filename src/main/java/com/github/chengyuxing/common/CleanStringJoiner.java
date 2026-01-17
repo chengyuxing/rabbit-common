@@ -1,5 +1,6 @@
 package com.github.chengyuxing.common;
 
+import com.github.chengyuxing.common.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.StringJoiner;
@@ -25,7 +26,7 @@ public final class CleanStringJoiner {
     }
 
     public CleanStringJoiner add(String element) {
-        if (element != null && !element.trim().isEmpty()) {
+        if (!StringUtils.isEmpty(element)) {
             joiner.add(element);
         }
         return this;

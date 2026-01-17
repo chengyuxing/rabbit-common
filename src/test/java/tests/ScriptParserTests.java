@@ -7,6 +7,7 @@ import com.github.chengyuxing.common.script.parser.RabbitScriptParser;
 import com.github.chengyuxing.common.KeyValue;
 import com.github.chengyuxing.common.script.pipe.builtin.Kv;
 import com.github.chengyuxing.common.util.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
 import java.lang.reflect.Field;
@@ -86,7 +87,7 @@ public class ScriptParserTests {
                 public static final String VAR_PREFIX = FOR_VARS_KEY + ".";
 
                 @Override
-                protected String forLoopBodyFormatter(int forIndex, int itemIndex, String body, Map<String, Object> args) {
+                protected String forLoopBodyFormatter(int forIndex, int itemIndex, @NotNull String body, @NotNull Map<String, Object> args) {
                     String formatted = StringUtils.FMT.format(body, args);
                     return formatted;
                 }

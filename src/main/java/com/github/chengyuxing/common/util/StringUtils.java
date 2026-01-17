@@ -335,13 +335,30 @@ public final class StringUtils {
     }
 
     /**
-     * Check str is null or trimmed str has length or not.
+     * Checks if the provided string is empty or null.
      *
-     * @param str string
-     * @return true or false
+     * @param str the string to check
+     * @return true if the string is null, blank, or only contains whitespace; false otherwise
      */
     public static boolean isEmpty(String str) {
-        return str == null || str.trim().isEmpty();
+        return str == null || isBlank(str);
+    }
+
+    /**
+     * Checks if the provided string is blank, meaning it contains only whitespace characters or is empty.
+     * Whitespace characters include spaces, tabs, and line breaks.
+     *
+     * @param s the string to check, must not be null
+     * @return true if the string is blank (contains only whitespace or is empty), false otherwise
+     */
+    public static boolean isBlank(@NotNull String s) {
+        int len = s.length();
+        for (int i = 0; i < len; i++) {
+            if (!Character.isWhitespace(s.charAt(i))) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**

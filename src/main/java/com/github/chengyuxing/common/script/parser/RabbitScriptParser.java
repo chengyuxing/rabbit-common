@@ -13,6 +13,7 @@ import com.github.chengyuxing.common.script.TokenType;
 import com.github.chengyuxing.common.script.exception.ScriptSyntaxException;
 import com.github.chengyuxing.common.script.Comparators;
 import com.github.chengyuxing.common.tuple.Pair;
+import com.github.chengyuxing.common.util.StringUtils;
 import com.github.chengyuxing.common.util.ValueUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
@@ -245,7 +246,7 @@ public class RabbitScriptParser {
      * @return formatted content
      * @see #getForGeneratedVars()
      */
-    protected String forLoopBodyFormatter(int forIndex, int itemIndex, String body, Map<String, Object> context) {
+    protected String forLoopBodyFormatter(int forIndex, int itemIndex, @NotNull String body, @NotNull Map<String, Object> context) {
         return body;
     }
 
@@ -928,7 +929,7 @@ public class RabbitScriptParser {
             }
             forIndex++;
             String resultFor = result.toString();
-            if (resultFor.trim().isEmpty()) {
+            if (StringUtils.isBlank(resultFor)) {
                 return "";
             }
             return open + resultFor + close;

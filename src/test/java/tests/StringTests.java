@@ -11,6 +11,7 @@ import com.github.chengyuxing.common.script.pipe.builtin.Kv;
 import com.github.chengyuxing.common.tuple.Pair;
 import com.github.chengyuxing.common.util.ValueUtils;
 import com.github.chengyuxing.common.util.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -429,7 +430,7 @@ public class StringTests {
             }
 
             @Override
-            protected String forLoopBodyFormatter(int forIndex, int itemIndex, String body, Map<String, Object> args) {
+            protected String forLoopBodyFormatter(int forIndex, int itemIndex, @NotNull String body, @NotNull Map<String, Object> args) {
                 String formatted = StringUtils.FMT.format(body, args);
                 return formatted;
             }
