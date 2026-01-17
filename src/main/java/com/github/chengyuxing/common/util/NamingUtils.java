@@ -2,6 +2,9 @@ package com.github.chengyuxing.common.util;
 
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * Utility class for converting between different naming conventions such as kebab-case, snake_case, and camelCase.
+ */
 public class NamingUtils {
     /**
      * Converts a kebab-case string to camelCase.
