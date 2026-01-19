@@ -2,6 +2,7 @@ package com.github.chengyuxing.common.script.lexer;
 
 import com.github.chengyuxing.common.script.Token;
 import com.github.chengyuxing.common.script.TokenType;
+import com.github.chengyuxing.common.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -51,7 +52,7 @@ public class RabbitScriptLexer {
     }
 
     private void skipEmptyLine() {
-        while (currentLine().trim().isEmpty() && !currentLine().equals("\0")) {
+        while (StringUtils.isBlank(currentLine()) && !currentLine().equals("\0")) {
             advance();
         }
     }

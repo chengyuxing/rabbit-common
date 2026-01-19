@@ -1,5 +1,6 @@
 package com.github.chengyuxing.common;
 
+import com.github.chengyuxing.common.util.StringUtils;
 import com.github.chengyuxing.common.util.ValueUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,7 +56,7 @@ public class StringFormatter {
         if (template == null) {
             return "";
         }
-        if (template.trim().isEmpty()) {
+        if (StringUtils.isBlank(template)) {
             return template;
         }
         if (!template.contains("${")) {
