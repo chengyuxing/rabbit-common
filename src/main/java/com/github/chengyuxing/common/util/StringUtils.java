@@ -228,6 +228,62 @@ public final class StringUtils {
     }
 
     /**
+     * Finds the index of the first non-whitespace character in the source string where the target string starts.
+     * If the target string is not found starting from any non-whitespace character, returns -1.
+     *
+     * @param source The source string to search within.
+     * @param target The target string to find in the source.
+     * @return The index of the first non-whitespace character in the source where the target starts, or -1 if not found.
+     */
+    public static int indexOfNonWhitespace(@NotNull String source, @NotNull String target) {
+        int len = source.length();
+        int i = 0;
+
+        while (i < len) {
+            char c = source.charAt(i);
+            if (c != ' ' && c != '\t' && !Character.isWhitespace(c)) {
+                break;
+            }
+            i++;
+        }
+        if (i + target.length() > len) {
+            return -1;
+        }
+        return source.startsWith(target, i) ? i : -1;
+    }
+
+    /**
+     * Searches for the last occurrence of a non-whitespace substring within a given string.
+     * This method first finds the last non-whitespace character in the source string and then
+     * checks if the target substring matches at that position or before it. If a match is found,
+     * the starting index of the match is returned; otherwise, -1 is returned.
+     *
+     * @param source The string to search within. Must not be null.
+     * @param target The substring to search for. Must not be null.
+     * @return The starting index of the last occurrence of the target substring within the source,
+     * ignoring any trailing whitespace in the source. Returns -1 if the target is not found.
+     */
+    public static int lastIndexOfNonWhitespace(@NotNull String source, @NotNull String target) {
+        int len = source.length();
+        int tgtLen = target.length();
+
+        int i = len - 1;
+        while (i >= 0) {
+            char c = source.charAt(i);
+            if (c != ' ' && c != '\t' && !Character.isWhitespace(c)) {
+                break;
+            }
+            i--;
+        }
+
+        int start = i - tgtLen + 1;
+        if (start < 0) {
+            return -1;
+        }
+        return source.regionMatches(start, target, 0, tgtLen) ? start : -1;
+    }
+
+    /**
      * Checks if the target string is contained within the source string, ignoring case.
      *
      * @param source The string to search within.
