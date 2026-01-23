@@ -71,7 +71,7 @@ public final class Comparators {
      * @return true or false
      */
     public static boolean compareNumber(Object a, String op, Object b) {
-        if (StringUtils.isNumeric(a) && StringUtils.isNumeric(b)) {
+        if (StringUtils.isNumber(a) && StringUtils.isNumber(b)) {
             double aN = Double.parseDouble(a.toString());
             double bN = Double.parseDouble(b.toString());
             switch (op) {
