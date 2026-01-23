@@ -18,11 +18,10 @@ import java.util.regex.Pattern;
  * String util.
  */
 public final class StringUtils {
-    //language=RegExp
     /**
      * e.g. {@code 1, -1, 3.14}
      */
-    public static final String NUMBER_REGEX = "-?(0|[1-9]\\d*)(\\.\\d+)?";
+    public static final Pattern NUMBER_PATTERN = Pattern.compile("[-+]?(0|[1-9]\\d*)(\\.\\d+)?");
     public static final String NEW_LINE = "\n";
     /**
      * String formatter.
@@ -418,16 +417,16 @@ public final class StringUtils {
     }
 
     /**
-     * Check string literal value is numeric or not.
+     * Check string literal value is number or not.
      *
-     * @param numeric string literal value
+     * @param s string literal
      * @return true or false
      */
-    public static boolean isNumeric(Object numeric) {
-        if (numeric == null) {
+    public static boolean isNumber(Object s) {
+        if (s == null) {
             return false;
         }
-        return numeric.toString().matches(NUMBER_REGEX);
+        return NUMBER_PATTERN.matcher(s.toString()).matches();
     }
 
     /**
