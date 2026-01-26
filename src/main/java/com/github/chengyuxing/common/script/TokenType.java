@@ -15,7 +15,6 @@ public enum TokenType {
 
     // Other tokens
     IDENTIFIER("<identifier>"), STRING("'<string>'"), NUMBER("<number>"),
-    VARIABLE_NAME(":<variable name>"),
     NEWLINE("\\n"), EOF(""), UNKNOWN("<unknow>"), PLAIN_TEXT("<plain text>"),
     COMMA(","), COLON(":"),
     PIPE_SYMBOL("|"),
@@ -26,10 +25,15 @@ public enum TokenType {
     LOGIC_AND("&&"),
     LOGIC_NOT("!"),
     OPERATOR(">, <, >=, <=, =, ==, !=, <>, ~, !~, @, !@"),
+    ADD_SYMBOL("+"),
+    SUB_SYMBOL("-"),
     LPAREN("("),
     RPAREN(")"),
     LBRACE("{"),
-    RBRACE("}");
+    RBRACE("}"),
+    LBRACKET("["),
+    RBRACKET("]"),
+    DOT(".");
 
     private final String displayName;
 

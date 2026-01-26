@@ -2,6 +2,7 @@ package com.github.chengyuxing.common.script.lexer;
 
 import com.github.chengyuxing.common.script.Token;
 import com.github.chengyuxing.common.script.TokenType;
+import com.github.chengyuxing.common.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -200,16 +201,26 @@ public class IdentifierLexer {
             } else if (current == '}') {
                 tokens.add(new Token(TokenType.RBRACE, "}", line, position));
                 advance();
-            } else if (current == ':') {
+            } else if (current == '[') {
+                tokens.add(new Token(TokenType.LBRACKET, "[", line, position));
                 advance();
-                String str = readWhile(c -> Character.isLetterOrDigit(c) || c == '_' || c == '.');
-                if (!str.isEmpty()) {
-                    tokens.add(new Token(TokenType.VARIABLE_NAME, ':' + str, line, position));
-                } else {
-                    tokens.add(new Token(TokenType.COLON, ":", line, position));
-                }
+            } else if (current == ']') {
+                tokens.add(new Token(TokenType.RBRACKET, "]", line, position));
+                advance();
+            } else if (current == '.') {
+                tokens.add(new Token(TokenType.DOT, ".", line, position));
+                advance();
+            } else if (current == ':') {
+                tokens.add(new Token(TokenType.COLON, ":", line, position));
+                advance();
+            } else if (current == '+') {
+                tokens.add(new Token(TokenType.ADD_SYMBOL, "+", line, position));
+                advance();
+            } else if (current == '-') {
+                tokens.add(new Token(TokenType.SUB_SYMBOL, "-", line, position));
+                advance();
             } else if (Character.isAlphabetic(current)) {
-                String identifier = readWhile(c -> Character.isLetterOrDigit(c) || c == '_' || c == '.');
+                String identifier = readWhile(c -> Character.isAlphabetic(c) || Character.isDigit(c) || c == '_');
                 switch (identifier.toLowerCase()) {
                     case "of":
                         tokens.add(new Token(TokenType.FOR_OF, identifier, line, position));
@@ -230,12 +241,12 @@ public class IdentifierLexer {
                         tokens.add(new Token(TokenType.IDENTIFIER, identifier, line, position));
                         break;
                 }
-            } else if (Character.isDigit(current)) {
-                String number = readWhile(c -> Character.isDigit(c) || c == '.');
+            } else if (StringUtils.isAsciiDigit(current)) {
+                String number = readWhile(StringUtils::isAsciiDigit);
                 tokens.add(new Token(TokenType.NUMBER, number, line, position));
             } else {
-                String identifier = readWhile(c -> !Character.isWhitespace(c));
-                tokens.add(new Token(TokenType.UNKNOWN, identifier, line, position));
+                String str = readWhile(c -> !Character.isWhitespace(c));
+                tokens.add(new Token(TokenType.UNKNOWN, str, line, position));
             }
         }
         tokens.add(new Token(TokenType.NEWLINE, "\n", line, position));
