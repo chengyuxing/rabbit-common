@@ -417,19 +417,6 @@ public final class StringUtils {
     }
 
     /**
-     * Check string literal value is number or not.
-     *
-     * @param s string literal
-     * @return true or false
-     */
-    public static boolean isNumber(Object s) {
-        if (s == null) {
-            return false;
-        }
-        return NUMBER_PATTERN.matcher(s.toString()).matches();
-    }
-
-    /**
      * Counts the number of non-overlapping occurrences of a substring in a given string, ignoring case.
      *
      * @param str the string to search within. If null, the method returns 0.
@@ -480,18 +467,54 @@ public final class StringUtils {
     }
 
     /**
-     * Checks if the provided key is composed entirely of digits, indicating it could be used as an index.
+     * Check if provided object string literal is number or not.
      *
-     * @param key the string to check
-     * @return true if the key is a non-empty string and all characters are digits, false otherwise
+     * @param o string literal
+     * @return true or false
      */
-    public static boolean isDigit(@NotNull String key) {
-        int len = key.length();
+    public static boolean isNumber(Object o) {
+        if (o == null) {
+            return false;
+        }
+        return NUMBER_PATTERN.matcher(o.toString()).matches();
+    }
+
+    /**
+     * Check if the provided str is integer which {@code >= 0} .
+     *
+     * @param str the string to check
+     * @return true if str {@code >= 0} ,false otherwise
+     */
+    public static boolean isNonNegativeInteger(String str) {
+        if (str.equals("0")) {
+            return true;
+        }
+        return isAsciiDigits(str);
+    }
+
+    /**
+     * Checks if the provided str includes 0 - 9 only.
+     *
+     * @param str the string to check
+     * @return true if the str is a non-empty string and all characters are 0 - 9, false otherwise
+     */
+    public static boolean isAsciiDigits(@NotNull String str) {
+        int len = str.length();
         if (len == 0) return false;
         for (int i = 0; i < len; i++) {
-            if (!Character.isDigit(key.charAt(i))) return false;
+            if (!isAsciiDigit(str.charAt(i))) return false;
         }
         return true;
+    }
+
+    /**
+     * Check the char is 0 - 9 or not.
+     *
+     * @param c the char to check
+     * @return if 0 -9 true, false otherwise
+     */
+    public static boolean isAsciiDigit(char c) {
+        return c >= '0' && c <= '9';
     }
 
     /**

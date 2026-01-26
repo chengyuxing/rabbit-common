@@ -316,7 +316,7 @@ public final class MostDateTime {
      */
     public static LocalDateTime toLocalDateTime(@NotNull String datetime) {
         datetime = datetime.trim();
-        boolean isDigit = StringUtils.isDigit(datetime);
+        boolean isDigit = StringUtils.isAsciiDigits(datetime);
         int len = datetime.length();
         if (isDigit) {
             if (len == 17) {
