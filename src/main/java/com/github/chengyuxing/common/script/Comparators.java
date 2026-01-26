@@ -3,6 +3,7 @@ package com.github.chengyuxing.common.script;
 import com.github.chengyuxing.common.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
+import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
@@ -50,13 +51,13 @@ public final class Comparators {
             case "<=":
                 return compareNumber(a, op, b);
             case "~":
-                return regexPass(a, b, false);
+                return regexTest(a, b, false);
             case "!~":
-                return !regexPass(a, b, false);
+                return !regexTest(a, b, false);
             case "@":
-                return regexPass(a, b, true);
+                return regexTest(a, b, true);
             case "!@":
-                return !regexPass(a, b, true);
+                return !regexTest(a, b, true);
             default:
                 throw new UnsupportedOperationException(String.format("unknown operation for compare: %s %s %s", a, op, b));
         }
@@ -72,17 +73,17 @@ public final class Comparators {
      */
     public static boolean compareNumber(Object a, String op, Object b) {
         if (StringUtils.isNumber(a) && StringUtils.isNumber(b)) {
-            double aN = Double.parseDouble(a.toString());
-            double bN = Double.parseDouble(b.toString());
+            BigDecimal aN = new BigDecimal(a.toString());
+            BigDecimal bN = new BigDecimal(b.toString());
             switch (op) {
                 case ">":
-                    return aN > bN;
+                    return aN.compareTo(bN) > 0;
                 case ">=":
-                    return aN >= bN;
+                    return aN.compareTo(bN) >= 0;
                 case "<":
-                    return aN < bN;
+                    return aN.compareTo(bN) < 0;
                 case "<=":
-                    return aN <= bN;
+                    return aN.compareTo(bN) <= 0;
                 default:
                     throw new IllegalArgumentException("Unsupported operator: " + op);
             }
@@ -98,7 +99,7 @@ public final class Comparators {
      * @param fullMatch true: {@link Matcher#matches()}, false: {@link Matcher#find()}
      * @return true or false
      */
-    public static boolean regexPass(Object content, Object regex, boolean fullMatch) {
+    public static boolean regexTest(Object content, Object regex, boolean fullMatch) {
         if (isString(content) && isString(regex)) {
             Pattern p = Pattern.compile(regex.toString());
             Matcher m = p.matcher(content.toString());
@@ -121,7 +122,7 @@ public final class Comparators {
         if (isBlank(a) && isBlank(b)) {
             return true;
         }
-        return Objects.equals(a, b);
+        return Objects.equals(a.toString(), b.toString());
     }
 
     public static boolean isString(Object value) {
@@ -138,13 +139,16 @@ public final class Comparators {
         if (value instanceof String) {
             return StringUtils.isBlank((String) value);
         }
-        if (value instanceof Collection) {
+        if (value instanceof Collection<?>) {
             return ((Collection<?>) value).isEmpty();
+        }
+        if (value instanceof Iterable<?>) {
+            return ((Iterable<?>) value).iterator().hasNext();
         }
         if (value instanceof Object[]) {
             return ((Object[]) value).length == 0;
         }
-        if (value instanceof Map) {
+        if (value instanceof Map<?, ?>) {
             return ((Map<?, ?>) value).isEmpty();
         }
         return false;
