@@ -1,0 +1,8 @@
+#switch :user.addresses[0].name
+  #case blank
+  It's blank
+  #break
+  #case 'kunming'
+  It's kunming
+  #break
+#end

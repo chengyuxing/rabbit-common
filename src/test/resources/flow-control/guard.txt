@@ -1,5 +1,5 @@
 #guard :id != null
-#throw 22
+#throw '22'
 select 1 from table t where
     #guard :id > 10
      #if :id = 90

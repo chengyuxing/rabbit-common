@@ -6,7 +6,7 @@ import com.github.chengyuxing.common.script.Token;
 import com.github.chengyuxing.common.script.TokenType;
 import com.github.chengyuxing.common.script.lexer.IdentifierLexer;
 import com.github.chengyuxing.common.script.lexer.RabbitScriptLexer;
-import com.github.chengyuxing.common.script.parser.RabbitScriptParser;
+import com.github.chengyuxing.common.script.parser.RabbitScriptEngine;
 import org.junit.Test;
 
 import java.nio.charset.StandardCharsets;
@@ -24,13 +24,22 @@ public class LexerTests {
     static String check = new FileResource("flow-control/check.txt").readString(StandardCharsets.UTF_8);
     static String pipes = new FileResource("flow-control/pipes.txt").readString(StandardCharsets.UTF_8);
     static String query = new FileResource("query.txt").readString(StandardCharsets.UTF_8);
+    static String var = new FileResource("flow-control/var.txt").readString(StandardCharsets.UTF_8);
+
+    @Test
+    public void testVar() {
+        RabbitScriptEngine engine = new RabbitScriptEngine(var);
+        String res = engine.evaluate(DataRow.of(
+                "user", DataRow.of("addresses", Arrays.asList("a", DataRow.of("name", "kunming"), "c"))));
+        System.out.println(res);
+    }
 
     @Test
     public void testPipes() {
-        RabbitScriptParser parser = new RabbitScriptParser(pipes);
+        RabbitScriptEngine parser = new RabbitScriptEngine(pipes);
         parser.setPipes(Collections.singletonMap("x", new X()));
         parser.verify();
-        String res = parser.parse(
+        String res = parser.evaluate(
                 DataRow.of("name", "cyx",
                         "address", "kunming",
                         "id", 5,
@@ -45,17 +54,16 @@ public class LexerTests {
 
     @Test
     public void testCheck() {
-        RabbitScriptParser parser = new RabbitScriptParser(check);
+        RabbitScriptEngine parser = new RabbitScriptEngine(check);
         parser.verify();
-        System.out.println(parser.parse(DataRow.of("id", 90)));
+        System.out.println(parser.evaluate(DataRow.of("id", 90)));
     }
 
     @Test
     public void testGuard() {
-        System.out.println(new Token(TokenType.IF, "#if", 0, 0));
-        RabbitScriptParser parser = new RabbitScriptParser(guard);
+        RabbitScriptEngine parser = new RabbitScriptEngine(guard);
         parser.verify();
-        String res = parser.parse(DataRow.of("id", 10));
+        String res = parser.evaluate(DataRow.of("id", 90));
         System.out.println(res);
     }
 
@@ -75,7 +83,7 @@ public class LexerTests {
 
     @Test
     public void test7() {
-        RabbitScriptParser parser = new RabbitScriptParser(query) {
+        RabbitScriptEngine parser = new RabbitScriptEngine(query) {
             @Override
             protected String normalizeDirectiveLine(String line) {
                 String tl = line.trim();
@@ -86,7 +94,7 @@ public class LexerTests {
             }
         };
         parser.verify();
-        System.out.println(parser.parse(DataRow.of(
+        System.out.println(parser.evaluate(DataRow.of(
                 "username", "cyx",
                 "password", "123456"
         )));
@@ -94,18 +102,18 @@ public class LexerTests {
 
     @Test
     public void test6() {
-        RabbitScriptParser parser = new RabbitScriptParser(choose);
+        RabbitScriptEngine parser = new RabbitScriptEngine(choose);
         parser.verify();
-        String res = parser.parse(DataRow.of(
+        String res = parser.evaluate(DataRow.of(
                 "id", "B"));
         System.out.println(res);
     }
 
     @Test
     public void test5() {
-        RabbitScriptParser parser = new RabbitScriptParser(If);
+        RabbitScriptEngine parser = new RabbitScriptEngine(If);
         parser.verify();
-        String res = parser.parse(DataRow.of(
+        String res = parser.evaluate(DataRow.of(
                 "jssj", "nubll",
                 "kssj", "2022-12-12",
                 "name", "cyx",
@@ -115,22 +123,22 @@ public class LexerTests {
 
     @Test
     public void test1() {
-        RabbitScriptParser lexer = new RabbitScriptParser(If);
+        RabbitScriptEngine lexer = new RabbitScriptEngine(If);
         lexer.verify();
     }
 
     @Test
     public void test2() {
-        RabbitScriptParser parser = new RabbitScriptParser(Switch);
-        String res = parser.parse(DataRow.of("name", "ak"));
+        RabbitScriptEngine parser = new RabbitScriptEngine(Switch);
+        String res = parser.evaluate(DataRow.of("name", "ak"));
         System.out.println(res);
     }
 
     @Test
     public void test3() {
-        RabbitScriptParser parser = new RabbitScriptParser(for1);
+        RabbitScriptEngine parser = new RabbitScriptEngine(for1);
         parser.verify();
-        String res = parser.parse(DataRow.of("names", Arrays.asList('a', 'b', 'c')));
+        String res = parser.evaluate(DataRow.of("names", Arrays.asList('a', 'b', 'c')));
         System.out.println(res);
     }
 

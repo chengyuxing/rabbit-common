@@ -5,7 +5,7 @@ import com.github.chengyuxing.common.StringFormatter;
 import com.github.chengyuxing.common.io.ClassPathResource;
 import com.github.chengyuxing.common.io.FileResource;
 import com.github.chengyuxing.common.io.TypedProperties;
-import com.github.chengyuxing.common.script.parser.RabbitScriptParser;
+import com.github.chengyuxing.common.script.parser.RabbitScriptEngine;
 import com.github.chengyuxing.common.script.Comparators;
 import com.github.chengyuxing.common.script.pipe.builtin.Kv;
 import com.github.chengyuxing.common.tuple.Pair;
@@ -30,7 +30,7 @@ import java.util.regex.Pattern;
 import static com.github.chengyuxing.common.util.StringUtils.FMT;
 
 public class StringTests {
-    static String sql = "${   a   } ${!a.d} insert into ${  Table  } ${tables.fields} values (${  VALUES.1.f }), (${values.0}), (${  Values   })${b}";
+    static String sql = "${   a   } ${!a_d} insert into ${  Table  } ${tables.fields} values (${  VALUES[1]f }), (${values[0]}), (${  Values   })${b}";
 
     @Test
     public void testHash() {
@@ -44,7 +44,7 @@ public class StringTests {
         args.put("values", Arrays.asList("a", "b", "c"));
         args.put("VALUES", Arrays.asList(DataRow.of("f", "c,d,f"), DataRow.of("f", "x,v,z")));
         args.put("a", LocalDateTime.now());
-        args.put("a.d", "LocalDateTime.now()");
+        args.put("a_d", "LocalDateTime.now()");
         args.put("tables", DataRow.of("fields", "id,name,age"));
 
         String s = new FileResource("file:/Users/chengyuxing/Downloads/bbb.sql").readString(StandardCharsets.UTF_8);
@@ -70,7 +70,7 @@ public class StringTests {
         args.put("values", Arrays.asList("a", "b", "c"));
         args.put("VALUES", Arrays.asList(DataRow.of("f", "c,d,f"), DataRow.of("f", "x,v,z")));
         args.put("a", LocalDateTime.now());
-        args.put("a.d", "LocalDateTime.now()");
+        args.put("a_d", "LocalDateTime.now()");
         args.put("tables", DataRow.of("fields", "id,name,age"));
         String res = new StringFormatter().format(sql, args);
         System.out.println(res);
@@ -211,7 +211,7 @@ public class StringTests {
     @Test
     public void test9() {
         System.out.println(Comparators.equals("", "\"\""));
-        System.out.println(Comparators.regexPass(true, "\"\\w+\"", false));
+        System.out.println(Comparators.regexTest(true, "\"\\w+\"", false));
     }
 
     @Test
@@ -413,7 +413,7 @@ public class StringTests {
                         "E")
         );
 
-        RabbitScriptParser parser = new RabbitScriptParser(s) {
+        RabbitScriptEngine parser = new RabbitScriptEngine(s) {
             public static final String FOR_VARS_KEY = "_for";
             public static final String VAR_PREFIX = FOR_VARS_KEY + ".";
 
@@ -436,7 +436,7 @@ public class StringTests {
             }
         };
 
-        String res = parser.parse(d);
+        String res = parser.evaluate(d);
         System.out.println(res);
 
         Map<String, Object> vars = parser.getForGeneratedVars();
@@ -451,6 +451,11 @@ public class StringTests {
         );
         Object value = ValueUtils.getDeepValue(r, "_for.pair_6_3.item2");
         System.out.println(value);
+    }
+
+    @Test
+    public void testDeepValueArray() {
+        System.out.println("user.addresses[0].location[1][34].name".replaceAll("\\[(\\d+)]", ".$1"));
     }
 
     @Test

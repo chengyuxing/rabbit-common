@@ -3,10 +3,11 @@ package tests;
 import com.github.chengyuxing.common.DataRow;
 import com.github.chengyuxing.common.script.Token;
 import com.github.chengyuxing.common.script.lexer.IdentifierLexer;
-import com.github.chengyuxing.common.script.parser.RabbitScriptParser;
+import com.github.chengyuxing.common.script.parser.RabbitScriptEngine;
 import com.github.chengyuxing.common.KeyValue;
 import com.github.chengyuxing.common.script.pipe.builtin.Kv;
 import com.github.chengyuxing.common.util.StringUtils;
+import com.github.chengyuxing.common.util.ValueUtils;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
@@ -20,6 +21,16 @@ public class ScriptParserTests {
         IdentifierLexer lexer = new IdentifierLexer(":{id|date('yyyy-mm-dd',12)|upper|trim}", 0);
         List<Token> tokens = lexer.tokenize();
         tokens.forEach(System.out::println);
+    }
+
+    @Test
+    public void testSSS() {
+        System.out.println(ValueUtils.VAR_PATH_EXPRESSION_PATTERN.matcher("user.names[39].home[44].id").matches());
+    }
+
+    @Test
+    public void testxxx() {
+        System.out.println(Double.parseDouble("+3818.1"));
     }
 
     @Test
@@ -82,7 +93,7 @@ public class ScriptParserTests {
                 " #done";
         List<Map<String, Object>> data = new ArrayList<>();
         for (int i = 0; i < 200; i++) {
-            RabbitScriptParser parser = new RabbitScriptParser(sql) {
+            RabbitScriptEngine parser = new RabbitScriptEngine(sql) {
                 public static final String FOR_VARS_KEY = "_for";
                 public static final String VAR_PREFIX = FOR_VARS_KEY + ".";
 
@@ -93,7 +104,7 @@ public class ScriptParserTests {
                 }
             };
             parser.verify();
-            String res = parser.parse(DataRow.of("ids", Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 1 + i, 11, 23, 45, 55, 67),
+            String res = parser.evaluate(DataRow.of("ids", Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 1 + i, 11, 23, 45, 55, 67),
                     "address", Arrays.asList("a", "b", "c")));
             data.add(parser.getForGeneratedVars());
             if (i == 1) {

@@ -65,9 +65,9 @@ public class RabbitScriptLexer {
             if (current.equals("\0")) {
                 break;
             }
-            String dl = normalizeDirectiveLine(current);
-            if (DIRECTIVES_PATTERN.matcher(dl).matches()) {
-                IdentifierLexer lexer = new IdentifierLexer(dl, position);
+            String line = normalizeDirectiveLine(current);
+            if (DIRECTIVES_PATTERN.matcher(line).matches()) {
+                IdentifierLexer lexer = new IdentifierLexer(line, position);
                 tokens.addAll(lexer.tokenize());
             } else {
                 tokens.add(new Token(TokenType.PLAIN_TEXT, current, position, 0));
