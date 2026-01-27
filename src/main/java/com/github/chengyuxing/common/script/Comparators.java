@@ -122,6 +122,9 @@ public final class Comparators {
         if (isBlank(a) && isBlank(b)) {
             return true;
         }
+        if (a == null || b == null) {
+            return false;
+        }
         return Objects.equals(a.toString(), b.toString());
     }
 

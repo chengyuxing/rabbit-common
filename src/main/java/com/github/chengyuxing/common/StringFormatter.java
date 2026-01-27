@@ -20,7 +20,7 @@ public class StringFormatter {
     private static final char DEFAULT_HOLDER_PREFIX = '$';
     @SuppressWarnings("UnnecessaryUnicodeEscape")
     private static final char TEMP_HOLDER_PREFIX = '\u0c32';
-    private static final Pattern pattern = Pattern.compile("\\$\\{\\s*(?<key>!?" + Patterns.VAR_KEY_PATTERN + ")\\s*}");
+    private static final Pattern pattern = Pattern.compile("\\$\\{\\s*(?<key>!?" + ValueUtils.VAR_PATH_EXPRESSION_PATTERN.pattern() + ")\\s*}");
 
     /**
      * Format string template with a variable map.
@@ -147,23 +147,14 @@ public class StringFormatter {
             if (isSpecial) {
                 key = key.substring(1);
             }
-            boolean isKeyPath = key.contains(".") && !data.containsKey(key);
-            String dataKey = isKeyPath ? key.substring(0, key.indexOf(".")) : key;
 
-            if (!data.containsKey(dataKey)) {
+            List<String> keys = ValueUtils.decodeKeyPathExpression(key);
+
+            if (!data.containsKey(keys.get(0))) {
                 m.appendReplacement(sb, Matcher.quoteReplacement(TEMP_HOLDER_PREFIX + holder.substring(1)));
             } else {
-                try {
-                    String value;
-                    if (isKeyPath) {
-                        value = valueFormatter.apply(ValueUtils.getDeepValue(data, key), isSpecial);
-                    } else {
-                        value = valueFormatter.apply(data.get(key), isSpecial);
-                    }
-                    m.appendReplacement(sb, Matcher.quoteReplacement(value));
-                } catch (Exception e) {
-                    throw new IllegalArgumentException(e);
-                }
+                String value = valueFormatter.apply(ValueUtils.accessDeepValue(data, keys), isSpecial);
+                m.appendReplacement(sb, Matcher.quoteReplacement(value));
             }
         }
         m.appendTail(sb);

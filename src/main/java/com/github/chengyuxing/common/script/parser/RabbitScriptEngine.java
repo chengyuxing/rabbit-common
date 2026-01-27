@@ -18,13 +18,14 @@ import com.github.chengyuxing.common.util.ValueUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.function.BiConsumer;
 
 import static com.github.chengyuxing.common.util.StringUtils.NEW_LINE;
 
 /**
- * <h2>Rabbit script parser.</h2>
+ * <h2>Rabbit script engine.</h2>
  * <p>check statement:</p>
  * <blockquote>
  * <pre>
@@ -110,7 +111,7 @@ import static com.github.chengyuxing.common.util.StringUtils.NEW_LINE;
  *
  * @see Comparators
  */
-public class RabbitScriptParser {
+public class RabbitScriptEngine {
     private static final Map<String, IPipe<?>> builtinPipes = BuiltinPipes.getAll();
     private Map<String, IPipe<?>> pipes = new HashMap<>();
 
@@ -121,52 +122,35 @@ public class RabbitScriptParser {
     private Map<String, Object> definedVars = new HashMap<>();
 
     /**
-     * Construct a new RabbitScriptParser with input content.
+     * Construct a new RabbitScriptEngine with input content.
      *
      * @param input content with flow-control scripts
      */
-    public RabbitScriptParser(String input) {
+    public RabbitScriptEngine(String input) {
         RabbitScriptLexer lexer = new RabbitScriptLexer(input) {
             @Override
             protected String normalizeDirectiveLine(String line) {
-                return RabbitScriptParser.this.normalizeDirectiveLine(line);
+                return RabbitScriptEngine.this.normalizeDirectiveLine(line);
             }
         };
         this.tokens = lexer.tokenize();
     }
 
     /**
-     * Parse content with scripts.
+     * Evaluate content with scripts.
      *
      * @param context context params
      * @return parsed content
      */
-    public String parse(Map<String, Object> context) {
+    public String evaluate(Map<String, Object> context) {
         if (tokens.isEmpty()) {
             return "";
         }
         forIndex = 0;
         forGeneratedVars = new HashMap<>();
         definedVars = new HashMap<>();
-        Parser parser = new Parser(tokens, context);
-        return parser.doParse();
-    }
-
-    /**
-     * Evaluates a condition based on the provided context, e.g.
-     * <blockquote><pre>
-     * {@code #if !(:id >= 0 || :name <> blank) && :age<=21}
-     * </pre></blockquote>
-     *
-     * @param context the map containing the context parameters used for evaluation
-     * @return true if the condition is met, false otherwise
-     */
-    public boolean evaluateCondition(Map<String, Object> context) {
-        if (tokens.isEmpty()) {
-            return false;
-        }
-        Parser parser = new Parser(tokens.subList(1, tokens.size()), context);
-        return parser.evaluateCondition();
+        Interpreter interpreter = new Interpreter(tokens, context);
+        return interpreter.doParse();
     }
 
     /**
@@ -315,15 +299,15 @@ public class RabbitScriptParser {
     }
 
     /**
-     * Parser implementation.
+     * Interpreter implementation.
      */
-    final class Parser {
+    public final class Interpreter {
         private final List<Token> tokens;
         private int currentTokenIndex;
         private Token currentToken;
         private final Map<String, Object> context;
 
-        public Parser(List<Token> tokens, Map<String, Object> context) {
+        public Interpreter(List<Token> tokens, Map<String, Object> context) {
             this.tokens = tokens;
             this.context = context;
             this.currentTokenIndex = 0;
@@ -385,33 +369,14 @@ public class RabbitScriptParser {
                 return !evaluateCompare();
             }
 
-            Token left = getValueHolderToken();
-            advance();
-            List<Pair<String, List<Object>>> leftPipes = collectPipes();
+            Object a = extractValueWithPipes();
 
             String operator = currentToken.getValue();
             eat(TokenType.OPERATOR);
 
-            Token right = getValueHolderToken();
-            advance();
-            List<Pair<String, List<Object>>> rightPipes = collectPipes();
-
-            Object a = calcValue(left, leftPipes);
-            Object b = calcValue(right, rightPipes);
+            Object b = extractValueWithPipes();
 
             return Comparators.compare(a, operator, b);
-        }
-
-        private Token getValueHolderToken() {
-            switch (currentToken.getType()) {
-                case IDENTIFIER:
-                case STRING:
-                case NUMBER:
-                case VARIABLE_NAME:
-                    return currentToken;
-                default:
-                    throw new ScriptSyntaxException("Unexpected token: " + currentToken + ", expected: " + TokenType.IDENTIFIER + " / " + TokenType.STRING + " / " + TokenType.NUMBER + " / " + TokenType.VARIABLE_NAME);
-            }
         }
 
         private List<Pair<String, List<Object>>> collectPipes() {
@@ -435,8 +400,7 @@ public class RabbitScriptParser {
             if (currentToken.getType() == TokenType.LPAREN) {
                 advance();
                 while (nonEndToken(currentToken, TokenType.RPAREN, TokenType.NEWLINE)) {
-                    params.add(getLiteralValue(currentToken));
-                    advance();
+                    params.add(extractValue());
                     if (currentToken.getType() == TokenType.COMMA) {
                         advance();
                         if (currentToken.getType() == TokenType.RPAREN) {
@@ -455,12 +419,11 @@ public class RabbitScriptParser {
          * Returns the piped value.
          *
          * @param value value
-         * @param pipes pipes
          * @return boxed value
          */
-        private Object calcPipedValue(Object value, List<Pair<String, List<Object>>> pipes) {
+        private Object calcPipedValue(Object value) {
             Object res = value;
-            for (Pair<String, List<Object>> pipe : pipes) {
+            for (Pair<String, List<Object>> pipe : collectPipes()) {
                 String pipeName = pipe.getItem1();
                 List<Object> pipeParams = pipe.getItem2();
                 if (getPipes().containsKey(pipeName)) {
@@ -475,89 +438,137 @@ public class RabbitScriptParser {
         }
 
         /**
-         * Returns the piped value.
+         * Extract variable keys by provided key path expression, e.g. {@code user.addresses[0]}
          *
-         * @param token literal value or variable token
-         * @param pipes pipes
-         * @return piped value
+         * @return keys list
          */
-        private Object calcValue(Token token, List<Pair<String, List<Object>>> pipes) {
-            if (token.getType() == TokenType.VARIABLE_NAME) {
-                String key = token.getValue().substring(1);
-                Object value;
-                if (definedVars.containsKey(key)) {
-                    value = definedVars.get(key);
+        private List<String> extractVariableKeys() {
+            List<String> paths = new ArrayList<>();
+            paths.add(currentToken.getValue());
+            eat(TokenType.IDENTIFIER);
+            while (nonEndToken(currentToken, TokenType.NEWLINE)) {
+                if (currentToken.getType() == TokenType.DOT) {
+                    advance();
+                    paths.add(currentToken.getValue());
+                    if (currentToken.getType() == TokenType.IDENTIFIER || currentToken.getType() == TokenType.NUMBER) {
+                        advance();
+                    } else {
+                        throw new ScriptSyntaxException("Unexpected token: " + currentToken + ", expected: " + TokenType.IDENTIFIER + " / " + TokenType.NUMBER);
+                    }
+                } else if (currentToken.getType() == TokenType.LBRACKET) {
+                    advance();
+                    if (!StringUtils.isNonNegativeInteger(currentToken.getValue())) {
+                        throw new ScriptSyntaxException("Index must be a non-negative integer: " + currentToken.getValue());
+                    }
+                    paths.add(currentToken.getValue());
+                    advance();
+                    eat(TokenType.RBRACKET);
                 } else {
-                    value = ValueUtils.getDeepValue(context, key);
+                    break;
                 }
-                if (!pipes.isEmpty()) {
-                    value = calcPipedValue(value, pipes);
-                }
-                return value;
             }
-            // string literal value
-            Object value = getLiteralValue(token);
-            if (!pipes.isEmpty()) {
-                value = calcPipedValue(value, pipes);
+            return paths;
+        }
+
+        private Object parseNumberLiteralValue(String sign) {
+            String number = sign + currentToken.getValue();
+            eat(TokenType.NUMBER);
+            if (currentToken.getType() == TokenType.DOT) {
+                number += ".";
+                advance();
+                number += currentToken.getValue();
+                eat(TokenType.NUMBER);
+            }
+            return new BigDecimal(number);
+        }
+
+        private Object parseIdentifierLiteralValue() {
+            String literal = currentToken.getValue();
+            Object value;
+            switch (literal.toLowerCase()) {
+                case "null":
+                    value = null;
+                    break;
+                case "blank":
+                    value = "";
+                    break;
+                case "true":
+                case "false":
+                    value = Boolean.parseBoolean(literal);
+                    break;
+                default:
+                    // other identifier tokens as string type e.g: a1, user_id
+                    value = literal;
+                    break;
+            }
+            advance();
+            return value;
+        }
+
+        private Object extractValueWithPipes() {
+            Object value = extractValue();
+            return calcPipedValue(value);
+        }
+
+        private Object extractValue() {
+            String literal = currentToken.getValue();
+            Object value;
+            switch (currentToken.getType()) {
+                case IDENTIFIER:
+                    value = parseIdentifierLiteralValue();
+                    break;
+                case STRING:
+                case UNKNOWN:
+                    value = literal;
+                    advance();
+                    break;
+                case NUMBER:
+                    value = parseNumberLiteralValue("+");
+                    break;
+                case ADD_SYMBOL:
+                case SUB_SYMBOL:
+                    String sign = currentToken.getValue();
+                    advance();
+                    switch (currentToken.getType()) {
+                        case NUMBER:
+                            value = parseNumberLiteralValue(sign);
+                            break;
+                        case IDENTIFIER:
+                        case STRING:
+                        case UNKNOWN:
+                            value = sign + literal;
+                            advance();
+                            break;
+                        default:
+                            throw new ScriptSyntaxException("Symbol '" + sign + "' cannot at the start of " + currentToken);
+                    }
+                    break;
+                case COLON:
+                    advance();
+                    List<String> keys = extractVariableKeys();
+                    if (definedVars.containsKey(keys.get(0))) {
+                        value = ValueUtils.accessDeepValue(definedVars, keys);
+                    } else {
+                        value = ValueUtils.accessDeepValue(context, keys);
+                    }
+                    break;
+                default:
+                    throw new ScriptSyntaxException("Unexpected token: " + currentToken + ", expected: " + TokenType.IDENTIFIER + " / " + TokenType.STRING + " / " + TokenType.NUMBER + " / :<variable> e.g. user, user.name, books[0]");
             }
             return value;
         }
 
         /**
-         * Convert and get the literal value.
-         *
-         * @return object value
-         */
-        private Object getLiteralValue(Token token) {
-            String literal = token.getValue();
-            switch (token.getType()) {
-                case IDENTIFIER:
-                    switch (literal.toLowerCase()) {
-                        case "null":
-                            return null;
-                        case "blank":
-                            return "";
-                        case "true":
-                        case "false":
-                            return Boolean.parseBoolean(literal);
-                    }
-                    // other identifier tokens as string type e.g: a1, user_id
-                    return literal;
-                case STRING:
-                    return literal;
-                case NUMBER:
-                    if (literal.contains(".")) {
-                        return Double.parseDouble(literal);
-                    }
-                    long value = Long.parseLong(literal);
-                    if (value >= Integer.MIN_VALUE && value <= Integer.MAX_VALUE) {
-                        return (int) value;
-                    }
-                    return value;
-                case VARIABLE_NAME:
-                    String key = token.getValue().substring(1);
-                    if (definedVars.containsKey(key)) {
-                        return definedVars.get(key);
-                    }
-                    return ValueUtils.getDeepValue(context, key);
-                default:
-                    throw new ScriptSyntaxException("Unexpected token: " + token + ", expected: " + TokenType.IDENTIFIER + " / " + TokenType.STRING + " / " + TokenType.NUMBER + " / " + TokenType.VARIABLE_NAME);
-            }
-        }
-
-        /**
          * For switch's case values.
          *
-         * @return string literal values
+         * @return multiple case values
          */
-        private List<Object> collectCaseLiteralValues() {
+        private List<Object> collectCaseValues() {
             List<Object> values = new ArrayList<>();
-            values.add(getLiteralValue(currentToken));
-            advance();
+            values.add(extractValueWithPipes());
             while (nonEndToken(currentToken, TokenType.NEWLINE)) {
                 eat(TokenType.COMMA);
-                values.add(getLiteralValue(currentToken));
-                advance();
+                values.add(extractValueWithPipes());
             }
             return values;
         }
@@ -628,8 +639,8 @@ public class RabbitScriptParser {
             if (matchedContent.isEmpty()) {
                 return "";
             }
-            Parser parser = new Parser(matchedContent, context);
-            return parser.doParse();
+            Interpreter interpreter = new Interpreter(matchedContent, context);
+            return interpreter.doParse();
         }
 
         private String parseGuardStatement() {
@@ -664,8 +675,8 @@ public class RabbitScriptParser {
             if (matchedContent.isEmpty()) {
                 return "";
             }
-            Parser parser = new Parser(matchedContent, context);
-            return parser.doParse();
+            Interpreter interpreter = new Interpreter(matchedContent, context);
+            return interpreter.doParse();
         }
 
         private void parseCheckStatement() {
@@ -704,11 +715,8 @@ public class RabbitScriptParser {
             eat(TokenType.IDENTIFIER);
             if (currentToken.getType() == TokenType.OPERATOR && currentToken.getValue().equals("=")) {
                 advance();
-                Token variable = getValueHolderToken();
-                advance();
-                List<Pair<String, List<Object>>> pipes = collectPipes();
+                Object value = extractValueWithPipes();
                 eat(TokenType.NEWLINE);
-                Object value = calcValue(variable, pipes);
                 varConsumer.accept(varName, value);
             } else {
                 throw new ScriptSyntaxException("Unexcepted token: " + currentToken + ", excepted: '=' operator");
@@ -717,12 +725,8 @@ public class RabbitScriptParser {
 
         private String parseSwitchStatement() {
             eat(TokenType.SWITCH);
-            Token variable = getValueHolderToken();
-            advance();
-            List<Pair<String, List<Object>>> pipes = collectPipes();
+            Object variableValue = extractValueWithPipes();
             eat(TokenType.NEWLINE);
-
-            Object variableValue = calcValue(variable, pipes);
 
             List<Token> matchedBranch = null;
             List<Token> defaultBranch = new ArrayList<>();
@@ -730,7 +734,7 @@ public class RabbitScriptParser {
             while (nonEndToken(currentToken, TokenType.END)) {
                 if (currentToken.getType() == TokenType.CASE) {
                     advance();
-                    List<Object> caseValues = collectCaseLiteralValues();
+                    List<Object> caseValues = collectCaseValues();
                     eat(TokenType.NEWLINE);
                     List<Token> caseContent = collectBranchBlock();
                     eat(TokenType.BREAK);
@@ -795,8 +799,8 @@ public class RabbitScriptParser {
             if (matchedBranch.isEmpty()) {
                 return "";
             }
-            Parser parser = new Parser(matchedBranch, context);
-            return parser.doParse();
+            Interpreter interpreter = new Interpreter(matchedBranch, context);
+            return interpreter.doParse();
         }
 
         private String parseForStatement() {
@@ -814,10 +818,8 @@ public class RabbitScriptParser {
                 }
             }
             eat(TokenType.FOR_OF);
-            Token listName = getValueHolderToken();
-            advance();
 
-            List<Pair<String, List<Object>>> pipes = collectPipes();
+            Object obj = extractValueWithPipes();
 
             String delimiter = ", ";
             String open = "";
@@ -854,8 +856,6 @@ public class RabbitScriptParser {
                 close = NEW_LINE + close;
             }
 
-            Object obj = calcValue(listName, pipes);
-
             CleanStringJoiner result = new CleanStringJoiner(delimiter + NEW_LINE);
             int i = 0;
             for (Object item : ValueUtils.asIterable(obj)) {
@@ -891,8 +891,8 @@ public class RabbitScriptParser {
                         // the #var value probably need input context e.g. #var a = :id
                         Map<String, Object> eachLoopContext = new HashMap<>(context);
                         eachLoopContext.putAll(eachLoopVars);
-                        Parser parser = new Parser(varTokens, eachLoopContext);
-                        parser.parseVarStatement((varName, value) -> {
+                        Interpreter interpreter = new Interpreter(varTokens, eachLoopContext);
+                        interpreter.parseVarStatement((varName, value) -> {
                             // def vars in the #for, then as the #for context vars
                             if (context.containsKey(varName)) {
                                 throw new IllegalArgumentException("Variable already defined in the context '" + varName + "' of " + token);
@@ -918,12 +918,12 @@ public class RabbitScriptParser {
                     }
                     newForContent.add(token);
                 }
-                // the next parser is a new complete start
+                // the next interpreter is a new complete start
                 // the content of #for block always need the input context
                 Map<String, Object> eachLoopContext = new HashMap<>(context);
                 eachLoopContext.putAll(eachLoopVars);
-                Parser parser = new Parser(newForContent, eachLoopContext);
-                String forContentResult = parser.doParse();
+                Interpreter interpreter = new Interpreter(newForContent, eachLoopContext);
+                String forContentResult = interpreter.doParse();
                 result.add(forContentResult);
                 i++;
             }
@@ -1052,27 +1052,11 @@ public class RabbitScriptParser {
                 verifyCompare();
                 return;
             }
-            verifyValueHolderItem();
-            advance();
-            verifyPipes();
+            verifyValueWithPipes();
 
             eat(TokenType.OPERATOR);
 
-            verifyValueHolderItem();
-            advance();
-            verifyPipes();
-        }
-
-        private void verifyValueHolderItem() {
-            switch (currentToken.getType()) {
-                case IDENTIFIER:
-                case STRING:
-                case NUMBER:
-                case VARIABLE_NAME:
-                    break;
-                default:
-                    throw new ScriptSyntaxException("Unexpected token: " + currentToken + ", expected: " + TokenType.IDENTIFIER + " / " + TokenType.STRING + " / " + TokenType.NUMBER + " / " + TokenType.VARIABLE_NAME);
-            }
+            verifyValueWithPipes();
         }
 
         private void verifyPipes() {
@@ -1091,8 +1075,7 @@ public class RabbitScriptParser {
             if (currentToken.getType() == TokenType.LPAREN) {
                 advance();
                 while (nonEndToken(currentToken, TokenType.RPAREN, TokenType.NEWLINE)) {
-                    verifyLiteralValue();
-                    advance();
+                    verifyValue();
                     if (currentToken.getType() == TokenType.COMMA) {
                         advance();
                         if (currentToken.getType() == TokenType.RPAREN) {
@@ -1106,25 +1089,83 @@ public class RabbitScriptParser {
             }
         }
 
-        private void verifyLiteralValue() {
-            switch (currentToken.getType()) {
-                case IDENTIFIER:
-                case STRING:
-                case NUMBER:
-                case VARIABLE_NAME:
+        private void verifyVariableKeys() {
+            eat(TokenType.IDENTIFIER);
+            while (nonEndToken(currentToken, TokenType.NEWLINE)) {
+                if (currentToken.getType() == TokenType.DOT) {
+                    advance();
+                    if (currentToken.getType() == TokenType.IDENTIFIER || currentToken.getType() == TokenType.NUMBER) {
+                        advance();
+                    } else {
+                        throw new ScriptSyntaxException("Unexpected token: " + currentToken + ", expected: " + TokenType.IDENTIFIER + " / " + TokenType.NUMBER);
+                    }
+                } else if (currentToken.getType() == TokenType.LBRACKET) {
+                    advance();
+                    if (!StringUtils.isNonNegativeInteger(currentToken.getValue())) {
+                        throw new ScriptSyntaxException("Index must be a non-negative integer: " + currentToken.getValue());
+                    }
+                    advance();
+                    eat(TokenType.RBRACKET);
+                } else {
                     break;
-                default:
-                    throw new ScriptSyntaxException("Unexpected token: " + currentToken + ", expected: " + TokenType.IDENTIFIER + " / " + TokenType.STRING + " / " + TokenType.NUMBER + " / " + TokenType.VARIABLE_NAME);
+                }
             }
         }
 
-        private void verifyCaseLiteralValues() {
-            verifyLiteralValue();
-            advance();
+        private void verifyNumber() {
+            eat(TokenType.NUMBER);
+            if (currentToken.getType() == TokenType.DOT) {
+                advance();
+                eat(TokenType.NUMBER);
+            }
+        }
+
+        private void verifyValueWithPipes() {
+            verifyValue();
+            verifyPipes();
+        }
+
+        private void verifyValue() {
+            switch (currentToken.getType()) {
+                case IDENTIFIER:
+                case STRING:
+                case UNKNOWN:
+                    advance();
+                    break;
+                case NUMBER:
+                    verifyNumber();
+                    break;
+                case ADD_SYMBOL:
+                case SUB_SYMBOL:
+                    String sign = currentToken.getValue();
+                    advance();
+                    switch (currentToken.getType()) {
+                        case NUMBER:
+                            verifyNumber();
+                            break;
+                        case IDENTIFIER:
+                        case STRING:
+                        case UNKNOWN:
+                            advance();
+                            break;
+                        default:
+                            throw new ScriptSyntaxException("Symbol '" + sign + "' cannot at the start of " + currentToken);
+                    }
+                    break;
+                case COLON:
+                    advance();
+                    verifyVariableKeys();
+                    break;
+                default:
+                    throw new ScriptSyntaxException("Unexpected token: " + currentToken + ", expected: " + TokenType.IDENTIFIER + " / " + TokenType.STRING + " / " + TokenType.NUMBER + " / :<variable> e.g. user, user.name, books[0]");
+            }
+        }
+
+        private void verifyCaseValues() {
+            verifyValueWithPipes();
             while (nonEndToken(currentToken, TokenType.NEWLINE)) {
                 eat(TokenType.COMMA);
-                verifyLiteralValue();
-                advance();
+                verifyValueWithPipes();
             }
         }
 
@@ -1172,9 +1213,7 @@ public class RabbitScriptParser {
             eat(TokenType.IDENTIFIER);
             if (currentToken.getType() == TokenType.OPERATOR && currentToken.getValue().equals("=")) {
                 advance();
-                verifyValueHolderItem();
-                advance();
-                verifyPipes();
+                verifyValueWithPipes();
                 eat(TokenType.NEWLINE);
             } else {
                 throw new ScriptSyntaxException("Unexcepted token: " + currentToken + ", excepted: '=' operator");
@@ -1183,15 +1222,13 @@ public class RabbitScriptParser {
 
         private void verifySwitchStatement() {
             eat(TokenType.SWITCH);
-            verifyValueHolderItem();
-            advance();
-            verifyPipes();
+            verifyValueWithPipes();
             eat(TokenType.NEWLINE);
 
             while (nonEndToken(currentToken, TokenType.END)) {
                 if (currentToken.getType() == TokenType.CASE) {
                     advance();
-                    verifyCaseLiteralValues();
+                    verifyCaseValues();
                     eat(TokenType.NEWLINE);
                     doVerify(TokenType.BREAK);
                     eat(TokenType.BREAK);
@@ -1246,9 +1283,7 @@ public class RabbitScriptParser {
                 }
             }
             eat(TokenType.FOR_OF);
-            verifyValueHolderItem();
-            advance();
-            verifyPipes();
+            verifyValueWithPipes();
             if (currentToken.getType() == TokenType.FOR_DELIMITER) {
                 advance();
                 eat(TokenType.STRING);
