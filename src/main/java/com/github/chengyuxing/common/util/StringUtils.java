@@ -485,9 +485,13 @@ public final class StringUtils {
      * @param str the string to check
      * @return true if str {@code >= 0} ,false otherwise
      */
-    public static boolean isNonNegativeInteger(String str) {
-        if (str.equals("0")) {
-            return true;
+    public static boolean isNonNegativeInteger(@NotNull String str) {
+        int len = str.length();
+        if (len == 0) {
+            return false;
+        }
+        if (len > 1 && str.charAt(0) == '0') {
+            return false;
         }
         return isAsciiDigits(str);
     }
