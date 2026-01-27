@@ -4,6 +4,7 @@ import com.github.chengyuxing.common.MostDateTime;
 import com.github.chengyuxing.common.PropertyMeta;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Unmodifiable;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
@@ -14,11 +15,13 @@ import java.time.temporal.Temporal;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 
 /**
- * Object util.
+ * Value util.
  */
 public final class ValueUtils {
+    public static final Pattern VAR_PATH_EXPRESSION_PATTERN = Pattern.compile("[a-zA-Z_]\\w*(\\.\\w+|\\[\\d+])*");
     private static final Map<Class<?>, Function<@NotNull Object, @Nullable Object>> VALUE_ADAPTORS = new HashMap<>();
 
     static {
@@ -130,7 +133,7 @@ public final class ValueUtils {
         if (obj == null) {
             return null;
         }
-        if (StringUtils.isDigit(key)) {
+        if (StringUtils.isNonNegativeInteger(key)) {
             int index = Integer.parseInt(key);
             if (obj.getClass().isArray()) {
                 return Array.get(obj, index);
@@ -164,7 +167,30 @@ public final class ValueUtils {
     }
 
     /**
-     * Recursively retrieves a value from a nested object structure based on the provided path.
+     * Retrieves a value from a nested object structure based on the provided key list.
+     * <p>
+     * Access the value by index if key is number and the value is a collection or array,
+     * otherwise by property name.
+     *
+     * @param obj  The object to search within. Can be a collection, array, map, or any object.
+     * @param keys the key list to access the value
+     * @return The value found at the specified key, or null if the key is invalid, the object is null,
+     * or the value does not exist at the given key.
+     */
+    public static @Nullable Object accessDeepValue(Object obj, @NotNull List<String> keys) {
+        if (obj == null) return null;
+        if (keys.isEmpty()) return obj;
+        Object result = obj;
+        for (String key : keys) {
+            if (key == null) throw new IllegalArgumentException("key is null");
+            result = accessValue(result, key);
+            if (result == null) return null;
+        }
+        return result;
+    }
+
+    /**
+     * Retrieves a value from a nested object structure based on the provided path.
      *
      * @param obj  The object to search within. Can be a collection, array, map, or any object.
      * @param path The path expression to the desired value, starting with a '{@code /}'. Each segment of the path
@@ -181,14 +207,8 @@ public final class ValueUtils {
         if (!path.startsWith("/")) {
             throw new IllegalArgumentException("Path expression syntax error, must startsWith '/', for example '/" + path + "'");
         }
-        String paths = path.substring(1);
-        int pathIndex = paths.indexOf("/");
-        if (pathIndex == -1) {
-            return accessValue(obj, paths);
-        }
-        String key = paths.substring(0, pathIndex);
-        String tail = paths.substring(pathIndex);
-        return walkDeepValue(accessValue(obj, key), tail);
+        String[] keys = path.substring(1).split("/");
+        return accessDeepValue(obj, Arrays.asList(keys));
     }
 
     /**
@@ -199,11 +219,21 @@ public final class ValueUtils {
      * @return the value found at the specified property chains, or null if the property chains are invalid, the object is null, or the value does not exist at the given path.
      */
     public static @Nullable Object getDeepValue(Object obj, @NotNull String propertyChains) {
-        if (propertyChains.contains(".")) {
-            String path = '/' + propertyChains.replace('.', '/');
-            return walkDeepValue(obj, path);
+        if (VAR_PATH_EXPRESSION_PATTERN.matcher(propertyChains).matches()) {
+            return accessDeepValue(obj, decodeKeyPathExpression(propertyChains));
         }
-        return accessValue(obj, propertyChains);
+        throw new IllegalArgumentException("Property chains '" + propertyChains + "' is invalid");
+    }
+
+    /**
+     * Decode var key path expression to key list.
+     *
+     * @param keyPath key path expression
+     * @return key list
+     */
+    public static @NotNull @Unmodifiable List<String> decodeKeyPathExpression(String keyPath) {
+        String[] keys = keyPath.replaceAll("\\[(\\d+)]", ".$1").split("\\.");
+        return Arrays.asList(keys);
     }
 
     /**
