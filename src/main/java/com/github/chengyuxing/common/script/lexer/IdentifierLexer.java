@@ -219,7 +219,7 @@ public class IdentifierLexer {
             } else if (current == '-') {
                 tokens.add(new Token(TokenType.SUB_SYMBOL, "-", line, position));
                 advance();
-            } else if (Character.isAlphabetic(current)) {
+            } else if (Character.isAlphabetic(current) || current == '_') {
                 String identifier = readWhile(c -> Character.isAlphabetic(c) || Character.isDigit(c) || c == '_');
                 switch (identifier.toLowerCase()) {
                     case "of":
