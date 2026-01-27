@@ -6,8 +6,8 @@ import org.junit.Test;
 
 import java.util.*;
 
-import static com.github.chengyuxing.common.script.Directives.FI;
-import static com.github.chengyuxing.common.script.Directives.IF;
+import static com.github.chengyuxing.common.script.lang.Directives.FI;
+import static com.github.chengyuxing.common.script.lang.Directives.IF;
 import static com.github.chengyuxing.common.util.StringUtils.*;
 
 public class IfParser {

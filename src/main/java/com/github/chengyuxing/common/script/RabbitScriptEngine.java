@@ -1,17 +1,17 @@
-package com.github.chengyuxing.common.script.parser;
+package com.github.chengyuxing.common.script;
 
 import com.github.chengyuxing.common.CleanStringJoiner;
-import com.github.chengyuxing.common.script.Directives;
+import com.github.chengyuxing.common.script.lang.Comparators;
+import com.github.chengyuxing.common.script.lang.Directives;
 import com.github.chengyuxing.common.script.exception.CheckViolationException;
 import com.github.chengyuxing.common.script.exception.GuardViolationException;
 import com.github.chengyuxing.common.script.exception.PipeNotFoundException;
 import com.github.chengyuxing.common.script.pipe.BuiltinPipes;
 import com.github.chengyuxing.common.script.pipe.IPipe;
 import com.github.chengyuxing.common.script.lexer.RabbitScriptLexer;
-import com.github.chengyuxing.common.script.Token;
-import com.github.chengyuxing.common.script.TokenType;
+import com.github.chengyuxing.common.script.lang.Token;
+import com.github.chengyuxing.common.script.lang.TokenType;
 import com.github.chengyuxing.common.script.exception.ScriptSyntaxException;
-import com.github.chengyuxing.common.script.Comparators;
 import com.github.chengyuxing.common.tuple.Pair;
 import com.github.chengyuxing.common.util.StringUtils;
 import com.github.chengyuxing.common.util.ValueUtils;

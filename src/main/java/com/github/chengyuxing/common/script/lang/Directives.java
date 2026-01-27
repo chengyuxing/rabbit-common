@@ -1,4 +1,4 @@
-package com.github.chengyuxing.common.script;
+package com.github.chengyuxing.common.script.lang;
 
 /**
  * Rabbit Script directives.

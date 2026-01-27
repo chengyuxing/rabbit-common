@@ -21,7 +21,7 @@ import java.util.regex.Pattern;
  * Value util.
  */
 public final class ValueUtils {
-    public static final Pattern VAR_PATH_EXPRESSION_PATTERN = Pattern.compile("[a-zA-Z_]\\w*(\\.\\w+|\\[\\d+])*");
+    public static final Pattern VAR_PATH_EXPRESSION_PATTERN = Pattern.compile("^[a-zA-Z_]\\w*(\\.\\w+|\\[\\d+])*$");
     private static final Map<Class<?>, Function<@NotNull Object, @Nullable Object>> VALUE_ADAPTORS = new HashMap<>();
 
     static {

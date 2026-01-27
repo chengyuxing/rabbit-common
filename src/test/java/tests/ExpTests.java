@@ -1,7 +1,7 @@
 package tests;
 
 import com.github.chengyuxing.common.DataRow;
-import com.github.chengyuxing.common.script.Comparators;
+import com.github.chengyuxing.common.script.lang.Comparators;
 import com.github.chengyuxing.common.util.ValueUtils;
 import com.github.chengyuxing.common.util.StringUtils;
 import org.junit.Test;

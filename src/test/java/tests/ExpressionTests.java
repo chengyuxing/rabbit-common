@@ -1,11 +1,10 @@
 package tests;
 
 import com.github.chengyuxing.common.DataRow;
-import com.github.chengyuxing.common.script.Comparators;
-import com.github.chengyuxing.common.script.Token;
-import com.github.chengyuxing.common.script.TokenType;
+import com.github.chengyuxing.common.script.lang.Comparators;
+import com.github.chengyuxing.common.script.lang.Token;
+import com.github.chengyuxing.common.script.lang.TokenType;
 import com.github.chengyuxing.common.script.lexer.IdentifierLexer;
-import com.github.chengyuxing.common.script.parser.RabbitScriptEngine;
 import com.github.chengyuxing.common.util.NamingUtils;
 import com.github.chengyuxing.common.util.StringUtils;
 import com.github.chengyuxing.common.util.ValueUtils;
@@ -94,7 +93,7 @@ public class ExpressionTests {
 //            }
 //            return Collections.emptySet();
 //        });
-        System.out.println(row.<Object>deepGetAs("user.address.1"));
+        System.out.println(row.<Object>deepGetAs("user.address[1]"));
 //        System.out.println(sets);
 //        System.out.println(sets.getClass());
     }

@@ -2,11 +2,9 @@ package tests;
 
 import com.github.chengyuxing.common.DataRow;
 import com.github.chengyuxing.common.io.FileResource;
-import com.github.chengyuxing.common.script.Token;
-import com.github.chengyuxing.common.script.TokenType;
 import com.github.chengyuxing.common.script.lexer.IdentifierLexer;
 import com.github.chengyuxing.common.script.lexer.RabbitScriptLexer;
-import com.github.chengyuxing.common.script.parser.RabbitScriptEngine;
+import com.github.chengyuxing.common.script.RabbitScriptEngine;
 import org.junit.Test;
 
 import java.nio.charset.StandardCharsets;

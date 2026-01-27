@@ -1,9 +1,9 @@
 package tests;
 
 import com.github.chengyuxing.common.DataRow;
-import com.github.chengyuxing.common.script.Token;
+import com.github.chengyuxing.common.script.lang.Token;
 import com.github.chengyuxing.common.script.lexer.IdentifierLexer;
-import com.github.chengyuxing.common.script.parser.RabbitScriptEngine;
+import com.github.chengyuxing.common.script.RabbitScriptEngine;
 import com.github.chengyuxing.common.KeyValue;
 import com.github.chengyuxing.common.script.pipe.builtin.Kv;
 import com.github.chengyuxing.common.util.StringUtils;

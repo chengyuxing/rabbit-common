@@ -1,4 +1,4 @@
-package com.github.chengyuxing.common.script;
+package com.github.chengyuxing.common.script.lang;
 
 import com.github.chengyuxing.common.util.StringUtils;
 import org.jetbrains.annotations.NotNull;

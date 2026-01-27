@@ -150,7 +150,7 @@ public class StringFormatter {
 
             List<String> keys = ValueUtils.decodeKeyPathExpression(key);
 
-            if (!data.containsKey(keys.get(0))) {
+            if (!keys.isEmpty() && !data.containsKey(keys.get(0))) {
                 m.appendReplacement(sb, Matcher.quoteReplacement(TEMP_HOLDER_PREFIX + holder.substring(1)));
             } else {
                 String value = valueFormatter.apply(ValueUtils.accessDeepValue(data, keys), isSpecial);

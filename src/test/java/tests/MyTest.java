@@ -2,7 +2,7 @@ package tests;
 
 import com.github.chengyuxing.common.DataRow;
 import com.github.chengyuxing.common.io.FileResource;
-import com.github.chengyuxing.common.script.TokenType;
+import com.github.chengyuxing.common.script.lang.TokenType;
 import com.github.chengyuxing.common.script.pipe.builtin.Type;
 import com.github.chengyuxing.common.tuple.Quintuple;
 import com.github.chengyuxing.common.tuple.Triple;

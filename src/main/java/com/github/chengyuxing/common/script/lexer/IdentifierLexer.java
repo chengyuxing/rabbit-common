@@ -1,7 +1,7 @@
 package com.github.chengyuxing.common.script.lexer;
 
-import com.github.chengyuxing.common.script.Token;
-import com.github.chengyuxing.common.script.TokenType;
+import com.github.chengyuxing.common.script.lang.Token;
+import com.github.chengyuxing.common.script.lang.TokenType;
 import com.github.chengyuxing.common.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
-import static com.github.chengyuxing.common.script.Directives.*;
+import static com.github.chengyuxing.common.script.lang.Directives.*;
 
 /**
  * <h2>Identifier Lexer</h2>
