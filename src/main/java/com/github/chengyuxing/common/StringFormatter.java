@@ -150,11 +150,11 @@ public class StringFormatter {
 
             List<String> keys = ValueUtils.decodeKeyPathExpression(key);
 
-            if (!keys.isEmpty() && !data.containsKey(keys.get(0))) {
-                m.appendReplacement(sb, Matcher.quoteReplacement(TEMP_HOLDER_PREFIX + holder.substring(1)));
-            } else {
+            if (!keys.isEmpty() && data.containsKey(keys.get(0))) {
                 String value = valueFormatter.apply(ValueUtils.accessDeepValue(data, keys), isSpecial);
                 m.appendReplacement(sb, Matcher.quoteReplacement(value));
+            } else {
+                m.appendReplacement(sb, Matcher.quoteReplacement(TEMP_HOLDER_PREFIX + holder.substring(1)));
             }
         }
         m.appendTail(sb);
