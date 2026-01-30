@@ -208,14 +208,10 @@ public class ClassPathResource {
      */
     public long getLastModified() throws URISyntaxException {
         URL url = getURL();
-        long dt = 0;
         if (isFileURL(url)) {
-            File f = Paths.get(url.toURI()).toFile();
-            dt = f.lastModified();
-        } else if (isJarURL(url)) {
-            dt = -1;
+            return Paths.get(url.toURI()).toFile().lastModified();
         }
-        return dt;
+        return 0;
     }
 
     /**
