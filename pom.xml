@@ -6,7 +6,7 @@
     <description>A common utils lib.</description>
     <groupId>com.github.chengyuxing</groupId>
     <artifactId>rabbit-common</artifactId>
-    <version>3.1.4</version>
+    <version>3.1.5</version>
     <packaging>jar</packaging>
     <name>rabbit-common</name>
     <url>https://github.com/chengyuxing/rabbit-common</url>
