@@ -9,7 +9,6 @@ import java.net.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -32,7 +31,6 @@ public class FileResource extends ClassPathResource {
     public static final String HTTP_PROP_READ_TIMEOUT = "readTimeout";
     public static final String HTTP_PROP_HEADERS = "headers";
     private final DataRow properties = new DataRow();
-    private Function<String, InputStream> requestInterceptor;
 
     /**
      * Constructs a new FileResource with file path.
@@ -66,9 +64,6 @@ public class FileResource extends ClassPathResource {
 
     @Override
     public InputStream getInputStream() {
-        if (requestInterceptor != null) {
-            return requestInterceptor.apply(path);
-        }
         Supplier<InputStream> interceptor = requestIntercept(path);
         if (interceptor != null) {
             return interceptor.get();
@@ -164,15 +159,6 @@ public class FileResource extends ClassPathResource {
      */
     protected @Nullable Supplier<InputStream> requestIntercept(final String path) {
         return null;
-    }
-
-    /**
-     * Set resource request interceptor.
-     *
-     * @param requestInterceptor request interceptor
-     */
-    public void setRequestInterceptor(Function<String, InputStream> requestInterceptor) {
-        this.requestInterceptor = requestInterceptor;
     }
 
     /**
