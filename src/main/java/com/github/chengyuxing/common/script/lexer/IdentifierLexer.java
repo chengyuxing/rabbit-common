@@ -1,5 +1,6 @@
 package com.github.chengyuxing.common.script.lexer;
 
+import com.github.chengyuxing.common.script.exception.LexerException;
 import com.github.chengyuxing.common.script.lang.Token;
 import com.github.chengyuxing.common.script.lang.TokenType;
 import com.github.chengyuxing.common.util.StringUtils;
@@ -124,12 +125,28 @@ public class IdentifierLexer {
                 }
             } else if (current == '\'') {
                 advance();
-                String str = readWhile(c -> c != '\'');
+                String str = readWhile(c -> {
+                    if (c == '\n' || c == '\r') {
+                        throw new LexerException("Unterminated string literal at: " + position);
+                    }
+                    return c != '\'';
+                });
+                if (currentChar() != '\'') {
+                    throw new LexerException("Unterminated string literal at: " + position);
+                }
                 advance();
                 tokens.add(new Token(TokenType.STRING, str, line, position));
             } else if (current == '"') {
                 advance();
-                String str = readWhile(c -> c != '"');
+                String str = readWhile(c -> {
+                    if (c == '\n' || c == '\r') {
+                        throw new LexerException("Unterminated string literal at: " + position);
+                    }
+                    return c != '"';
+                });
+                if (currentChar() != '"') {
+                    throw new LexerException("Unterminated string literal at: " + position);
+                }
                 advance();
                 tokens.add(new Token(TokenType.STRING, str, line, position));
             } else if (current == ',') {

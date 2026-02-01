@@ -142,7 +142,7 @@ public class LexerTests {
 
     @Test
     public void testLexer1() {
-        IdentifierLexer lexer = new IdentifierLexer("123abc", 0);
+        IdentifierLexer lexer = new IdentifierLexer("#if :id.name = 'aaa'", 0);
         lexer.tokenize().forEach(System.out::println);
     }
 
