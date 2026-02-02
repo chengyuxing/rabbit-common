@@ -11,6 +11,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiConsumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -600,6 +601,32 @@ public final class StringUtils {
             return hexString.toString();
         } catch (NoSuchAlgorithmException e) {
             throw new IllegalArgumentException(e);
+        }
+    }
+
+    /**
+     * Scan the content by regexp to provides the seg and match state.
+     *
+     * @param text     text content
+     * @param p        regexp
+     * @param consumer consumer the seg and match state
+     */
+    public static void scan(
+            String text,
+            Pattern p,
+            BiConsumer<String, Boolean> consumer // true = matched
+    ) {
+        Matcher m = p.matcher(text);
+        int lastEnd = 0;
+        while (m.find()) {
+            if (m.start() > lastEnd) {
+                consumer.accept(text.substring(lastEnd, m.start()), false);
+            }
+            consumer.accept(m.group(), true);
+            lastEnd = m.end();
+        }
+        if (lastEnd < text.length()) {
+            consumer.accept(text.substring(lastEnd), false);
         }
     }
 }
