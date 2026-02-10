@@ -416,9 +416,11 @@ public class RabbitScriptParser {
                 advance();
                 if (peek(TokenType.IDENTIFIER)) {
                     Token propertyToken = currentToken;
-                    String property = propertyToken.getValue(); // index
+                    String propertyName = propertyToken.getValue(); // index
                     advance();
+
                     eat(TokenType.FOR_PROPERTY_AS);  // as
+
                     Token varToken = currentToken;
                     String varName = varToken.getValue();   // i
                     eat(TokenType.IDENTIFIER);
@@ -429,40 +431,14 @@ public class RabbitScriptParser {
                     varNames.add(varName);
 
                     try {
-                        switch (ForContextProperty.valueOf(property)) {
-                            case index:
-                                if (forLoopElement.getIndexName() != null) {
-                                    throw new ScriptSyntaxException("Duplicate 'index' declaration in for statement at: " + varToken);
-                                }
-                                forLoopElement.setIndexName(varName);
-                                break;
-                            case first:
-                                if (forLoopElement.getFirstName() != null) {
-                                    throw new ScriptSyntaxException("Duplicate 'first' declaration in for statement at: " + varToken);
-                                }
-                                forLoopElement.setFirstName(varName);
-                                break;
-                            case last:
-                                if (forLoopElement.getLastName() != null) {
-                                    throw new ScriptSyntaxException("Duplicate 'last' declaration in for statement at: " + varToken);
-                                }
-                                forLoopElement.setLastName(varName);
-                                break;
-                            case odd:
-                                if (forLoopElement.getOddName() != null) {
-                                    throw new ScriptSyntaxException("Duplicate 'odd' declaration in for statement at: " + varToken);
-                                }
-                                forLoopElement.setOddName(varName);
-                                break;
-                            case even:
-                                if (forLoopElement.getEvenName() != null) {
-                                    throw new ScriptSyntaxException("Duplicate 'even' declaration in for statement at: " + varToken);
-                                }
-                                forLoopElement.setEvenName(varName);
-                                break;
+                        ForContextProperty property = ForContextProperty.valueOf(propertyName);
+                        if (forLoopElement.getContextPropertyAlias(property) == null) {
+                            forLoopElement.setContextPropertyAlias(property, varName);
+                        } else {
+                            throw new ScriptSyntaxException("Duplicate '" + propertyName + "' declaration in for statement at: " + propertyToken);
                         }
                     } catch (IllegalArgumentException e) {
-                        throw new ScriptSyntaxException("Property '" + property + "' does not exist on for context at: " + propertyToken);
+                        throw new ScriptSyntaxException("Property '" + propertyName + "' does not exist on for context at: " + propertyToken);
                     }
                 }
             } else {

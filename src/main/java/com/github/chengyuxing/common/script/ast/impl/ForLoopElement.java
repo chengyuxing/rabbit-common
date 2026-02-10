@@ -2,17 +2,16 @@ package com.github.chengyuxing.common.script.ast.impl;
 
 import com.github.chengyuxing.common.script.ast.IElement;
 import com.github.chengyuxing.common.script.ast.IElementVisitor;
+import com.github.chengyuxing.common.script.lang.ForContextProperty;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ForLoopElement implements IElement {
     private final String itemName;
-    private String indexName;
-    private String firstName;
-    private String lastName;
-    private String oddName;
-    private String evenName;
+    private final Map<ForContextProperty, String> contextProperties = new HashMap<>();
     private final ValueExpr valueExpr;
     private List<IElement> loopBlock;
 
@@ -29,48 +28,16 @@ public class ForLoopElement implements IElement {
         return valueExpr;
     }
 
-    public String getIndexName() {
-        return indexName;
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public String getEvenName() {
-        return evenName;
-    }
-
-    public String getOddName() {
-        return oddName;
+    public String getContextPropertyAlias(ForContextProperty contextProperty) {
+        return contextProperties.get(contextProperty);
     }
 
     public List<IElement> getLoopBlock() {
         return loopBlock != null ? loopBlock : Collections.emptyList();
     }
 
-    void setIndexName(String indexName) {
-        this.indexName = indexName;
-    }
-
-    void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
-    void setEvenName(String evenName) {
-        this.evenName = evenName;
-    }
-
-    void setOddName(String oddName) {
-        this.oddName = oddName;
+    void setContextPropertyAlias(ForContextProperty contextProperty, String alias) {
+        contextProperties.put(contextProperty, alias);
     }
 
     void setLoopBlock(List<IElement> loopBlock) {

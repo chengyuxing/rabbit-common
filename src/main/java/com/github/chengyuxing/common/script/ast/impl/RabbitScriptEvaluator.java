@@ -7,6 +7,7 @@ import com.github.chengyuxing.common.script.ast.ScriptAst;
 import com.github.chengyuxing.common.script.exception.CheckViolationException;
 import com.github.chengyuxing.common.script.exception.GuardViolationException;
 import com.github.chengyuxing.common.script.lang.Comparators;
+import com.github.chengyuxing.common.script.lang.ForContextProperty;
 import com.github.chengyuxing.common.tuple.Pair;
 import com.github.chengyuxing.common.util.ValueUtils;
 import org.jetbrains.annotations.NotNull;
@@ -77,21 +78,18 @@ public class RabbitScriptEvaluator implements IElementVisitor<Void> {
             int index = i;
             visitBlock(loopBlock, () -> {
                 defineVars(element.getItemName(), it.next());
-                if (element.getIndexName() != null) {
-                    defineVars(element.getIndexName(), index);
-                }
-                if (element.getFirstName() != null) {
-                    defineVars(element.getFirstName(), index == 0);
-                }
-                if (element.getLastName() != null) {
-                    defineVars(element.getLastName(), !it.hasNext());
-                }
-                if (element.getOddName() != null) {
-                    defineVars(element.getOddName(), (index & 1) == 1);
-                }
-                if (element.getEvenName() != null) {
-                    defineVars(element.getEvenName(), (index & 1) == 0);
-                }
+
+                String indexAlias = element.getContextPropertyAlias(ForContextProperty.index);
+                String firstAlias = element.getContextPropertyAlias(ForContextProperty.first);
+                String lastAlias = element.getContextPropertyAlias(ForContextProperty.last);
+                String oddAlias = element.getContextPropertyAlias(ForContextProperty.odd);
+                String evenAlias = element.getContextPropertyAlias(ForContextProperty.even);
+
+                if (indexAlias != null) defineVars(indexAlias, index);
+                if (firstAlias != null) defineVars(firstAlias, index == 0);
+                if (lastAlias != null) defineVars(lastAlias, !it.hasNext());
+                if (oddAlias != null) defineVars(oddAlias, (index & 1) == 1);
+                if (evenAlias != null) defineVars(evenAlias, (index & 1) == 0);
             });
         }
         return null;
