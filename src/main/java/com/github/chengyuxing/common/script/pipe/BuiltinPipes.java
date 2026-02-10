@@ -12,20 +12,22 @@ import java.util.Map;
  * Built-in pipes.
  */
 public final class BuiltinPipes {
-    private static final Map<String, IPipe<?>> BUILTIN_PIPES = new HashMap<>();
+    private static final Map<String, IPipe<?>> BUILTIN_PIPES;
 
     static {
-        BUILTIN_PIPES.put("length", new Length());
-        BUILTIN_PIPES.put("upper", new Upper());
-        BUILTIN_PIPES.put("lower", new Lower());
-        BUILTIN_PIPES.put("kv", new Kv());
-        BUILTIN_PIPES.put("type", new Type());
-        BUILTIN_PIPES.put("split", new Split());
-        BUILTIN_PIPES.put("nvl", new Nvl());
-        BUILTIN_PIPES.put("in", new In());
+        Map<String, IPipe<?>> pipes = new HashMap<>();
+        pipes.put("length", new Length());
+        pipes.put("upper", new Upper());
+        pipes.put("lower", new Lower());
+        pipes.put("kv", new Kv());
+        pipes.put("type", new Type());
+        pipes.put("split", new Split());
+        pipes.put("nvl", new Nvl());
+        pipes.put("in", new In());
+        BUILTIN_PIPES = Collections.unmodifiableMap(pipes);
     }
 
     public static @NotNull @Unmodifiable Map<String, IPipe<?>> getAll() {
-        return Collections.unmodifiableMap(BUILTIN_PIPES);
+        return BUILTIN_PIPES;
     }
 }
