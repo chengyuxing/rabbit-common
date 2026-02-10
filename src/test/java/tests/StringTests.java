@@ -5,7 +5,7 @@ import com.github.chengyuxing.common.StringFormatter;
 import com.github.chengyuxing.common.io.ClassPathResource;
 import com.github.chengyuxing.common.io.FileResource;
 import com.github.chengyuxing.common.io.TypedProperties;
-import com.github.chengyuxing.common.script.RabbitScriptEngine;
+import com.github.chengyuxing.common.script.RabbitScriptInterpreter;
 import com.github.chengyuxing.common.script.lang.Comparators;
 import com.github.chengyuxing.common.script.pipe.builtin.Kv;
 import com.github.chengyuxing.common.tuple.Pair;
@@ -413,7 +413,7 @@ public class StringTests {
                         "E")
         );
 
-        RabbitScriptEngine parser = new RabbitScriptEngine(s) {
+        RabbitScriptInterpreter parser = new RabbitScriptInterpreter(s) {
             public static final String FOR_VARS_KEY = "_for";
             public static final String VAR_PREFIX = FOR_VARS_KEY + ".";
 

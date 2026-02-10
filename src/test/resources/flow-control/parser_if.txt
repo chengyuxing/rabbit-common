@@ -1,0 +1,46 @@
+#if (:id == 1 || :id > 0 || :addresses | split(',',:sign) | length == 12) && :name | lower != 'a'
+ PLAIN_TEXT
+  #if :name <> null
+    IF_PLAIN_TEXT
+  #else
+    #if :age >= 19
+        AGE_PALIN_TEXT
+    #fi
+    ELSE_PLAIN_TEXT
+  #fi
+  PLAIN_TEXT
+#fi
+PLAIN_TEXT
+
+#var animals = 'a,b,c,d,e' | split(',')
+
+#guard :id != 10
+    #if :id > 10
+        GUARD_IF_TEXT
+    #fi
+#throw 'AAAAAAAAA'
+
+#switch :name
+    #case 'a',c,D
+     CASE_TEXT_A
+    #break
+    #case 'b' | length
+     CASE_TEXT_B
+    #break
+    #default
+    CASE_TEXT_DEFAULT
+    #break
+#end
+
+#choose
+    #when :name <> blank
+    DDDDD
+    #break
+#end
+
+#for itemName of :list delimiter ' and '
+    ABC
+    #if :itemName <> blank
+        BCA
+    #fi
+#done

@@ -3,7 +3,7 @@ package tests;
 import com.github.chengyuxing.common.DataRow;
 import com.github.chengyuxing.common.script.lang.Token;
 import com.github.chengyuxing.common.script.lexer.IdentifierLexer;
-import com.github.chengyuxing.common.script.RabbitScriptEngine;
+import com.github.chengyuxing.common.script.RabbitScriptInterpreter;
 import com.github.chengyuxing.common.KeyValue;
 import com.github.chengyuxing.common.script.pipe.builtin.Kv;
 import com.github.chengyuxing.common.util.StringUtils;
@@ -93,7 +93,7 @@ public class ScriptParserTests {
                 " #done";
         List<Map<String, Object>> data = new ArrayList<>();
         for (int i = 0; i < 200; i++) {
-            RabbitScriptEngine parser = new RabbitScriptEngine(sql) {
+            RabbitScriptInterpreter parser = new RabbitScriptInterpreter(sql) {
                 public static final String FOR_VARS_KEY = "_for";
                 public static final String VAR_PREFIX = FOR_VARS_KEY + ".";
 

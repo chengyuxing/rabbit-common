@@ -1,0 +1,45 @@
+
+#if true
+    #var age1 = 89
+    #if :age
+        AGE_PALIN_TEXT${age}
+        AGE_PALIN_TEXT${age}
+        AGE_PALIN_TEXT${age1}
+        AGE_PALIN_TEXT${age}
+    #fi
+    OTHER_TEXT
+#fi
+
+AGE_PALIN_TEXT${age}
+
+#var id = abcd | length
+
+#var ages = '18,13,24,56,77' | split(',')
+
+#for age1 of :ages; index as i; last as isLast; first as isFirst
+
+    FOR_AGE_TEXT_:age1
+
+    #for name of 'a,b,c' | split(','); last as isNameLast
+
+        NAME_:name
+        #if !:isNameLast
+        ,
+        #fi
+
+    #done
+    #if !:isLast
+    ,
+    #fi
+#done
+
+ABC
+
+#for item of 'cyx,jack,lisa' | split(',')
+    #var length = :item | length
+    LOOP_LENGTH :length
+#done
+
+#var length = 1000
+
+OUT_LENGTH :length
