@@ -21,13 +21,13 @@ public class RabbitScriptLexer {
     public static final Pattern DIRECTIVES_PATTERN = Pattern.compile("(?i)\\s*(?:" + String.join("|", DIRECTIVES) + ")(?:\\s+.*|$)");
 
     private final String[] lines;
-    private int position;
+    private int lineNumber;
     private final int length;
 
     public RabbitScriptLexer(@NotNull String input) {
         this.lines = input.split("\n");
         this.length = this.lines.length;
-        this.position = 0;
+        this.lineNumber = 0;
     }
 
     /**
@@ -44,11 +44,11 @@ public class RabbitScriptLexer {
     }
 
     private String currentLine() {
-        return position < length ? lines[position] : "\0";
+        return lineNumber < length ? lines[lineNumber] : "\0";
     }
 
     private void advance() {
-        position++;
+        lineNumber++;
     }
 
     private void skipEmptyLine() {
@@ -59,7 +59,7 @@ public class RabbitScriptLexer {
 
     public List<Token> tokenize() {
         List<Token> tokens = new ArrayList<>();
-        while (position < length) {
+        while (lineNumber < length) {
             skipEmptyLine();
             String current = currentLine();
             if (current.equals("\0")) {
@@ -67,14 +67,14 @@ public class RabbitScriptLexer {
             }
             String line = normalizeDirectiveLine(current);
             if (DIRECTIVES_PATTERN.matcher(line).matches()) {
-                IdentifierLexer lexer = new IdentifierLexer(line, position);
+                IdentifierLexer lexer = new IdentifierLexer(line, lineNumber);
                 tokens.addAll(lexer.tokenize());
             } else {
-                tokens.add(new Token(TokenType.PLAIN_TEXT, current, position, 0));
+                tokens.add(new Token(TokenType.PLAIN_TEXT, current, lineNumber, 0));
             }
             advance();
         }
-        tokens.add(new Token(TokenType.EOF, "", position, 0));
+        tokens.add(new Token(TokenType.EOF, "", lineNumber, 0));
         return tokens;
     }
 }

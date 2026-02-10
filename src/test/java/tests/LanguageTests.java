@@ -3,7 +3,7 @@ package tests;
 import com.github.chengyuxing.common.DataRow;
 import com.github.chengyuxing.common.io.FileResource;
 import com.github.chengyuxing.common.script.lexer.IdentifierLexer;
-import com.github.chengyuxing.common.script.RabbitScriptEngine;
+import com.github.chengyuxing.common.script.RabbitScriptInterpreter;
 import com.github.chengyuxing.common.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.junit.BeforeClass;
@@ -52,7 +52,7 @@ public class LanguageTests {
 
     @Test
     public void test1() {
-        RabbitScriptEngine parser = new RabbitScriptEngine(input) {
+        RabbitScriptInterpreter parser = new RabbitScriptInterpreter(input) {
             public static final String FOR_VARS_KEY = "_for";
             public static final String VAR_PREFIX = FOR_VARS_KEY + ".";
 

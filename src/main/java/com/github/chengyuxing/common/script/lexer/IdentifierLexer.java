@@ -64,63 +64,64 @@ public class IdentifierLexer {
         while (position < length) {
             skipWhitespace();
             char current = currentChar();
+            int start = position;
             if (current == '\n') {
-                tokens.add(new Token(TokenType.NEWLINE, "\n", line, position));
+                tokens.add(new Token(TokenType.NEWLINE, "\n", line, start));
                 advance();
             } else if (current == '#') {
                 advance();
                 String keyword = readWhile(Character::isAlphabetic);
                 switch (keyword.toLowerCase()) {
                     case "if":
-                        tokens.add(new Token(TokenType.IF, IF, line, position));
+                        tokens.add(new Token(TokenType.IF, IF, line, start));
                         break;
                     case "else":
-                        tokens.add(new Token(TokenType.ELSE, ELSE, line, position));
+                        tokens.add(new Token(TokenType.ELSE, ELSE, line, start));
                         break;
                     case "fi":
-                        tokens.add(new Token(TokenType.END_IF, FI, line, position));
+                        tokens.add(new Token(TokenType.END_IF, FI, line, start));
                         break;
                     case "end":
-                        tokens.add(new Token(TokenType.END, END, line, position));
+                        tokens.add(new Token(TokenType.END, END, line, start));
                         break;
                     case "switch":
-                        tokens.add(new Token(TokenType.SWITCH, SWITCH, line, position));
+                        tokens.add(new Token(TokenType.SWITCH, SWITCH, line, start));
                         break;
                     case "case":
-                        tokens.add(new Token(TokenType.CASE, CASE, line, position));
+                        tokens.add(new Token(TokenType.CASE, CASE, line, start));
                         break;
                     case "default":
-                        tokens.add(new Token(TokenType.DEFAULT, DEFAULT, line, position));
+                        tokens.add(new Token(TokenType.DEFAULT, DEFAULT, line, start));
                         break;
                     case "break":
-                        tokens.add(new Token(TokenType.BREAK, BREAK, line, position));
+                        tokens.add(new Token(TokenType.BREAK, BREAK, line, start));
                         break;
                     case "choose":
-                        tokens.add(new Token(TokenType.CHOOSE, CHOOSE, line, position));
+                        tokens.add(new Token(TokenType.CHOOSE, CHOOSE, line, start));
                         break;
                     case "when":
-                        tokens.add(new Token(TokenType.WHEN, WHEN, line, position));
+                        tokens.add(new Token(TokenType.WHEN, WHEN, line, start));
                         break;
                     case "for":
-                        tokens.add(new Token(TokenType.FOR, FOR, line, position));
+                        tokens.add(new Token(TokenType.FOR, FOR, line, start));
                         break;
                     case "done":
-                        tokens.add(new Token(TokenType.END_FOR, DONE, line, position));
+                        tokens.add(new Token(TokenType.END_FOR, DONE, line, start));
                         break;
                     case "guard":
-                        tokens.add(new Token(TokenType.GUARD, GUARD, line, position));
+                        tokens.add(new Token(TokenType.GUARD, GUARD, line, start));
                         break;
                     case "throw":
-                        tokens.add(new Token(TokenType.END_GUARD, THROW, line, position));
+                        tokens.add(new Token(TokenType.END_GUARD, THROW, line, start));
                         break;
                     case "check":
-                        tokens.add(new Token(TokenType.CHECK, CHECK, line, position));
+                        tokens.add(new Token(TokenType.CHECK, CHECK, line, start));
                         break;
                     case "var":
-                        tokens.add(new Token(TokenType.DEFINE_VAR, VAR, line, position));
+                        tokens.add(new Token(TokenType.DEFINE_VAR, VAR, line, start));
                         break;
                     default:
-                        tokens.add(new Token(TokenType.UNKNOWN, '#' + keyword, line, position));
+                        tokens.add(new Token(TokenType.PLAIN_TEXT, '#' + keyword, line, start));
                         break;
                 }
             } else if (current == '\'') {
@@ -135,7 +136,7 @@ public class IdentifierLexer {
                     throw new LexerException("Unterminated string literal at: " + position);
                 }
                 advance();
-                tokens.add(new Token(TokenType.STRING, str, line, position));
+                tokens.add(new Token(TokenType.STRING, str, line, start));
             } else if (current == '"') {
                 advance();
                 String str = readWhile(c -> {
@@ -148,122 +149,128 @@ public class IdentifierLexer {
                     throw new LexerException("Unterminated string literal at: " + position);
                 }
                 advance();
-                tokens.add(new Token(TokenType.STRING, str, line, position));
+                tokens.add(new Token(TokenType.STRING, str, line, start));
             } else if (current == ',') {
-                tokens.add(new Token(TokenType.COMMA, ",", line, position));
+                tokens.add(new Token(TokenType.COMMA, ",", line, start));
                 advance();
             } else if (current == '|') {
                 if (match("||")) {
-                    tokens.add(new Token(TokenType.LOGIC_OR, "||", line, position));
+                    tokens.add(new Token(TokenType.LOGIC_OR, "||", line, start));
                 } else {
-                    tokens.add(new Token(TokenType.PIPE_SYMBOL, "|", line, position));
+                    tokens.add(new Token(TokenType.PIPE_SYMBOL, "|", line, start));
                     advance();
                 }
             } else if (current == '&') {
                 if (match("&&")) {
-                    tokens.add(new Token(TokenType.LOGIC_AND, "&&", line, position));
+                    tokens.add(new Token(TokenType.LOGIC_AND, "&&", line, start));
                 } else {
-                    tokens.add(new Token(TokenType.AND_SYMBOL, "&", line, position));
+                    tokens.add(new Token(TokenType.AND_SYMBOL, "&", line, start));
                     advance();
                 }
             } else if (current == '!') {
                 if (match("!=")) {
-                    tokens.add(new Token(TokenType.OPERATOR, "!=", line, position));
+                    tokens.add(new Token(TokenType.OPERATOR, "!=", line, start));
                 } else if (match("!~")) {
-                    tokens.add(new Token(TokenType.OPERATOR, "!~", line, position));
+                    tokens.add(new Token(TokenType.OPERATOR, "!~", line, start));
                 } else if (match("!@")) {
-                    tokens.add(new Token(TokenType.OPERATOR, "!@", line, position));
+                    tokens.add(new Token(TokenType.OPERATOR, "!@", line, start));
                 } else {
-                    tokens.add(new Token(TokenType.LOGIC_NOT, "!", line, position));
+                    tokens.add(new Token(TokenType.LOGIC_NOT, "!", line, start));
                     advance();
                 }
             } else if (current == '=') {
                 if (match("==")) {
-                    tokens.add(new Token(TokenType.OPERATOR, "==", line, position));
+                    tokens.add(new Token(TokenType.OPERATOR, "==", line, start));
                 } else {
-                    tokens.add(new Token(TokenType.OPERATOR, "=", line, position));
+                    tokens.add(new Token(TokenType.OPERATOR, "=", line, start));
                     advance();
                 }
             } else if (current == '>') {
                 if (match(">=")) {
-                    tokens.add(new Token(TokenType.OPERATOR, ">=", line, position));
+                    tokens.add(new Token(TokenType.OPERATOR, ">=", line, start));
                 } else {
-                    tokens.add(new Token(TokenType.OPERATOR, ">", line, position));
+                    tokens.add(new Token(TokenType.OPERATOR, ">", line, start));
                     advance();
                 }
             } else if (current == '<') {
                 if (match("<=")) {
-                    tokens.add(new Token(TokenType.OPERATOR, "<=", line, position));
+                    tokens.add(new Token(TokenType.OPERATOR, "<=", line, start));
                 } else if (match("<>")) {
-                    tokens.add(new Token(TokenType.OPERATOR, "<>", line, position));
+                    tokens.add(new Token(TokenType.OPERATOR, "<>", line, start));
                 } else {
-                    tokens.add(new Token(TokenType.OPERATOR, "<", line, position));
+                    tokens.add(new Token(TokenType.OPERATOR, "<", line, start));
                     advance();
                 }
             } else if (current == '~') {
-                tokens.add(new Token(TokenType.OPERATOR, "~", line, position));
+                tokens.add(new Token(TokenType.OPERATOR, "~", line, start));
                 advance();
             } else if (current == '@') {
-                tokens.add(new Token(TokenType.OPERATOR, "@", line, position));
+                tokens.add(new Token(TokenType.OPERATOR, "@", line, start));
                 advance();
             } else if (current == '(') {
-                tokens.add(new Token(TokenType.LPAREN, "(", line, position));
+                tokens.add(new Token(TokenType.LPAREN, "(", line, start));
                 advance();
             } else if (current == ')') {
-                tokens.add(new Token(TokenType.RPAREN, ")", line, position));
+                tokens.add(new Token(TokenType.RPAREN, ")", line, start));
                 advance();
             } else if (current == '{') {
-                tokens.add(new Token(TokenType.LBRACE, "{", line, position));
+                tokens.add(new Token(TokenType.LBRACE, "{", line, start));
                 advance();
             } else if (current == '}') {
-                tokens.add(new Token(TokenType.RBRACE, "}", line, position));
+                tokens.add(new Token(TokenType.RBRACE, "}", line, start));
                 advance();
             } else if (current == '[') {
-                tokens.add(new Token(TokenType.LBRACKET, "[", line, position));
+                tokens.add(new Token(TokenType.LBRACKET, "[", line, start));
                 advance();
             } else if (current == ']') {
-                tokens.add(new Token(TokenType.RBRACKET, "]", line, position));
+                tokens.add(new Token(TokenType.RBRACKET, "]", line, start));
                 advance();
             } else if (current == '.') {
-                tokens.add(new Token(TokenType.DOT, ".", line, position));
+                tokens.add(new Token(TokenType.DOT, ".", line, start));
                 advance();
             } else if (current == ':') {
-                tokens.add(new Token(TokenType.COLON, ":", line, position));
+                tokens.add(new Token(TokenType.COLON, ":", line, start));
+                advance();
+            } else if (current == ';') {
+                tokens.add(new Token(TokenType.SEMICOLON, ";", line, start));
                 advance();
             } else if (current == '+') {
-                tokens.add(new Token(TokenType.ADD_SYMBOL, "+", line, position));
+                tokens.add(new Token(TokenType.ADD_SYMBOL, "+", line, start));
                 advance();
             } else if (current == '-') {
-                tokens.add(new Token(TokenType.SUB_SYMBOL, "-", line, position));
+                tokens.add(new Token(TokenType.SUB_SYMBOL, "-", line, start));
                 advance();
             } else if (Character.isAlphabetic(current) || current == '_') {
                 String identifier = readWhile(c -> Character.isAlphabetic(c) || Character.isDigit(c) || c == '_');
                 switch (identifier.toLowerCase()) {
                     case "of":
-                        tokens.add(new Token(TokenType.FOR_OF, identifier, line, position));
+                        tokens.add(new Token(TokenType.FOR_OF, identifier, line, start));
+                        break;
+                    case "as":
+                        tokens.add(new Token(TokenType.FOR_PROPERTY_AS, identifier, line, start));
                         break;
                     case "delimiter":
-                        tokens.add(new Token(TokenType.FOR_DELIMITER, identifier, line, position));
+                        tokens.add(new Token(TokenType.FOR_DELIMITER, identifier, line, start));
                         break;
                     case "open":
-                        tokens.add(new Token(TokenType.FOR_OPEN, identifier, line, position));
+                        tokens.add(new Token(TokenType.FOR_OPEN, identifier, line, start));
                         break;
                     case "close":
-                        tokens.add(new Token(TokenType.FOR_CLOSE, identifier, line, position));
+                        tokens.add(new Token(TokenType.FOR_CLOSE, identifier, line, start));
                         break;
                     case "throw":
-                        tokens.add(new Token(TokenType.CHECK_THROW, identifier, line, position));
+                        tokens.add(new Token(TokenType.CHECK_THROW, identifier, line, start));
                         break;
                     default:
-                        tokens.add(new Token(TokenType.IDENTIFIER, identifier, line, position));
+                        tokens.add(new Token(TokenType.IDENTIFIER, identifier, line, start));
                         break;
                 }
             } else if (StringUtils.isAsciiDigit(current)) {
                 String number = readWhile(StringUtils::isAsciiDigit);
-                tokens.add(new Token(TokenType.NUMBER, number, line, position));
+                tokens.add(new Token(TokenType.NUMBER, number, line, start));
             } else {
                 String str = readWhile(c -> !Character.isWhitespace(c));
-                tokens.add(new Token(TokenType.UNKNOWN, str, line, position));
+                tokens.add(new Token(TokenType.PLAIN_TEXT, str, line, start));
             }
         }
         tokens.add(new Token(TokenType.NEWLINE, "\n", line, position));
