@@ -32,7 +32,7 @@ public class ParserTests {
         EvalContext context = new EvalContext(DataRow.of("age", 52));
 
         RabbitScriptEvaluator evaluator = new RabbitScriptEvaluator(context);
-        EvalResult res = evaluator.execute(new ScriptAst("", ast, true));
+        EvalResult res = evaluator.execute(new ScriptAst(ast));
         System.out.println(res);
     }
 }

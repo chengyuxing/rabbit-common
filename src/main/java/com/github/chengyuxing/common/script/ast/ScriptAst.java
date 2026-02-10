@@ -1,20 +1,16 @@
 package com.github.chengyuxing.common.script.ast;
 
+import com.github.chengyuxing.common.script.ast.impl.TextElement;
+
 import java.util.List;
 
 public class ScriptAst {
-    private final String source;
     private final List<IElement> elements;
     private final boolean dynamic;
 
-    public ScriptAst(String source, List<IElement> elements, boolean dynamic) {
-        this.source = source;
+    public ScriptAst(List<IElement> elements) {
         this.elements = elements;
-        this.dynamic = dynamic;
-    }
-
-    public String getSource() {
-        return source;
+        this.dynamic = !(elements.isEmpty() || (elements.size() == 1 && elements.get(0) instanceof TextElement));
     }
 
     public List<IElement> getElements() {
