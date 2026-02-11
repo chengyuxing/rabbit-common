@@ -33,7 +33,11 @@ public class EvalContext {
      * @return the formatted text and the scope arguments which used in the formatting
      */
     protected Pair<String, Map<String, Object>> formatScopePlainText(String text, Map<String, Object> inputs, Map<String, VarMeta> scope) {
-        text = StringUtils.FMT.format(text, scope);
+        Map<String, Object> scopeVars = new HashMap<>(scope.size());
+        for (Map.Entry<String, VarMeta> entry : scope.entrySet()) {
+            scopeVars.put(entry.getKey(), entry.getValue().getValue());
+        }
+        text = StringUtils.FMT.format(text, scopeVars);
         text = StringUtils.FMT.format(text, inputs);
         return Pair.of(text, Collections.emptyMap());
     }

@@ -3,7 +3,6 @@ package tests;
 import com.github.chengyuxing.common.DataRow;
 import com.github.chengyuxing.common.script.lang.Token;
 import com.github.chengyuxing.common.script.lexer.IdentifierLexer;
-import com.github.chengyuxing.common.script.RabbitScriptInterpreter;
 import com.github.chengyuxing.common.KeyValue;
 import com.github.chengyuxing.common.script.pipe.builtin.Kv;
 import com.github.chengyuxing.common.util.StringUtils;
@@ -78,42 +77,6 @@ public class ScriptParserTests {
     public void testField() throws NoSuchFieldException {
         Field field = User.class.getDeclaredField("name");
         System.out.println(field.getType());
-    }
-
-    @Test
-    public void testSqlLexer() {
-        String sql = "select * from test.user\n    where id = 1\n" +
-                " #for id of :ids delimiter ', ' open ' or id in (' close ')'\n" +
-                "    #for add of :address\n" +
-                "       :_for.add\n" +
-                "       #if :id == 2\n" +
-                "       :_for.id\n" +
-                "       #fi\n" +
-                "    #done\n" +
-                " #done";
-        List<Map<String, Object>> data = new ArrayList<>();
-        for (int i = 0; i < 200; i++) {
-            RabbitScriptInterpreter parser = new RabbitScriptInterpreter(sql) {
-                public static final String FOR_VARS_KEY = "_for";
-                public static final String VAR_PREFIX = FOR_VARS_KEY + ".";
-
-                @Override
-                protected String forLoopBodyFormatter(int forIndex, int itemIndex, @NotNull String body, @NotNull Map<String, Object> args) {
-                    String formatted = StringUtils.FMT.format(body, args);
-                    return formatted;
-                }
-            };
-            parser.verify();
-            String res = parser.evaluate(DataRow.of("ids", Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 1 + i, 11, 23, 45, 55, 67),
-                    "address", Arrays.asList("a", "b", "c")));
-            data.add(parser.getForGeneratedVars());
-            if (i == 1) {
-                System.out.println(res);
-                System.out.println(parser.getForGeneratedVars().size());
-                System.out.println(parser.getForGeneratedVars());
-            }
-        }
-        System.out.println(data.size());
     }
 
     @Test

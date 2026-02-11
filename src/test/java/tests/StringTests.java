@@ -5,7 +5,6 @@ import com.github.chengyuxing.common.StringFormatter;
 import com.github.chengyuxing.common.io.ClassPathResource;
 import com.github.chengyuxing.common.io.FileResource;
 import com.github.chengyuxing.common.io.TypedProperties;
-import com.github.chengyuxing.common.script.RabbitScriptInterpreter;
 import com.github.chengyuxing.common.script.lang.Comparators;
 import com.github.chengyuxing.common.script.pipe.builtin.Kv;
 import com.github.chengyuxing.common.tuple.Pair;
@@ -387,61 +386,6 @@ public class StringTests {
         }
         System.out.println(Arrays.toString(ss));
         System.out.println(elsePosition);
-    }
-
-    @Test
-    public void testLexer() {
-        String s = new FileResource("me.sql").readString(StandardCharsets.UTF_8);
-
-        DataRow d = DataRow.of(
-                "c", "blank",
-                "c1", "blank",
-                "c2", "blank",
-                "data", DataRow.of(
-                        "name", "chengyuxing",
-                        "age", 30,
-                        "address", "昆明市"
-                ),
-                "ids", Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8),
-                "list", Arrays.asList(
-                        "A",
-                        "B",
-                        DataRow.of(
-                                "nums",
-                                Arrays.asList("1", "2", "3")),
-                        "D",
-                        "E")
-        );
-
-        RabbitScriptInterpreter parser = new RabbitScriptInterpreter(s) {
-            public static final String FOR_VARS_KEY = "_for";
-            public static final String VAR_PREFIX = FOR_VARS_KEY + ".";
-
-            @Override
-            protected String normalizeDirectiveLine(String line) {
-                String tl = line.trim();
-                if (tl.startsWith("--")) {
-                    String ss = tl.substring(2).trim();
-                    if (ss.startsWith("#")) {
-                        return ss;
-                    }
-                }
-                return line;
-            }
-
-            @Override
-            protected String forLoopBodyFormatter(int forIndex, int itemIndex, @NotNull String body, @NotNull Map<String, Object> args) {
-                String formatted = StringUtils.FMT.format(body, args);
-                return formatted;
-            }
-        };
-
-        String res = parser.evaluate(d);
-        System.out.println(res);
-
-        Map<String, Object> vars = parser.getForGeneratedVars();
-        System.out.println(vars);
-        System.out.println(ValueUtils.getDeepValue(vars, "item_6_0.value"));
     }
 
     @Test

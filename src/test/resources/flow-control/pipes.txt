@@ -2,11 +2,11 @@
     ${name}
 #fi
 
-#for item of :list | kv delimiter ','
+#for item of :list | kv
     ${item.key}:${item.value}
 #done
 
-#for user of :users | nvl('a,b,c') | split(',') delimiter '-'
+#for user of :users | nvl('a,b,c') | split(',')
     ${user}
 #done
 

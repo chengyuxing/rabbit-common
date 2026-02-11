@@ -2,14 +2,21 @@ package tests;
 
 import com.github.chengyuxing.common.DataRow;
 import com.github.chengyuxing.common.io.FileResource;
+import com.github.chengyuxing.common.script.RabbitScriptEngine;
+import com.github.chengyuxing.common.script.ast.ScriptAst;
+import com.github.chengyuxing.common.script.ast.ScriptEngine;
+import com.github.chengyuxing.common.script.ast.impl.EvalContext;
+import com.github.chengyuxing.common.script.ast.impl.EvalResult;
 import com.github.chengyuxing.common.script.lexer.IdentifierLexer;
 import com.github.chengyuxing.common.script.lexer.RabbitScriptLexer;
-import com.github.chengyuxing.common.script.RabbitScriptInterpreter;
+import com.github.chengyuxing.common.script.pipe.IPipe;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Map;
 
 public class LexerTests {
 
@@ -26,42 +33,50 @@ public class LexerTests {
 
     @Test
     public void testVar() {
-        RabbitScriptInterpreter engine = new RabbitScriptInterpreter(var);
-        String res = engine.evaluate(DataRow.of(
-                "user", DataRow.of("addresses", Arrays.asList("a", DataRow.of("name", "kunming"), "c"))));
-        System.out.println(res);
+        RabbitScriptEngine engine = new RabbitScriptEngine();
+        ScriptAst ast = engine.compile(var);
+        EvalResult res = engine.execute(ast, new EvalContext(DataRow.of(
+                "user", DataRow.of("addresses", Arrays.asList("a", DataRow.of("name", "kunming"), "c")))));
+        System.out.println(res.getContent());
+        System.out.println(res.getUsedVars());
     }
 
     @Test
     public void testPipes() {
-        RabbitScriptInterpreter parser = new RabbitScriptInterpreter(pipes);
-        parser.setPipes(Collections.singletonMap("x", new X()));
-        parser.verify();
-        String res = parser.evaluate(
-                DataRow.of("name", "cyx",
-                        "address", "kunming",
-                        "id", 5,
-                        "list", DataRow.of("id", 1, "age", 22),
-                        "users", "a,b,c,d",
-                        "home", null)
-        );
+        RabbitScriptEngine engine = new RabbitScriptEngine();
+
+        ScriptAst ast = engine.compile(pipes);
+
+        EvalContext context = new EvalContext(DataRow.of("name", "cyx",
+                "address", "kunming",
+                "id", 5,
+                "list", DataRow.of("id", 1, "age", 22),
+                "users", "a,b,c,d",
+                "home", null)) {
+            @Override
+            protected @NotNull Map<String, IPipe<?>> getPipes() {
+                return Collections.singletonMap("x", new X());
+            }
+        };
+
+        EvalResult res = engine.execute(ast, context);
         System.out.println(res);
-        System.out.println(parser.getForGeneratedVars());
-        System.out.println(parser.getDefinedVars());
+        System.out.println(res.getContent());
+        System.out.println(res.getUsedVars());
     }
 
     @Test
     public void testCheck() {
-        RabbitScriptInterpreter parser = new RabbitScriptInterpreter(check);
-        parser.verify();
-        System.out.println(parser.evaluate(DataRow.of("id", 90)));
+        RabbitScriptEngine engine = new RabbitScriptEngine();
+        ScriptAst ast = engine.compile(check);
+        EvalResult result = engine.execute(ast, new EvalContext(DataRow.of("id", 90)));
+        System.out.println(result);
     }
 
     @Test
     public void testGuard() {
-        RabbitScriptInterpreter parser = new RabbitScriptInterpreter(guard);
-        parser.verify();
-        String res = parser.evaluate(DataRow.of("id", 90));
+        RabbitScriptEngine parser = new RabbitScriptEngine();
+        EvalResult res = parser.run(guard, DataRow.of("id", 90));
         System.out.println(res);
     }
 
@@ -81,37 +96,33 @@ public class LexerTests {
 
     @Test
     public void test7() {
-        RabbitScriptInterpreter parser = new RabbitScriptInterpreter(query) {
-            @Override
-            protected String normalizeDirectiveLine(String line) {
-                String tl = line.trim();
-                if (tl.startsWith("--")) {
-                    return tl.substring(2).trim();
-                }
-                return line;
+        RabbitScriptEngine engine = new RabbitScriptEngine(line -> {
+            String tl = line.trim();
+            if (tl.startsWith("--")) {
+                return tl.substring(2).trim();
             }
-        };
-        parser.verify();
-        System.out.println(parser.evaluate(DataRow.of(
+            return line;
+        });
+        ScriptAst ast = engine.compile(query);
+        EvalResult result = engine.execute(ast, new EvalContext(DataRow.of(
                 "username", "cyx",
                 "password", "123456"
         )));
+        System.out.println(result);
     }
 
     @Test
     public void test6() {
-        RabbitScriptInterpreter parser = new RabbitScriptInterpreter(choose);
-        parser.verify();
-        String res = parser.evaluate(DataRow.of(
+        RabbitScriptEngine engine = new RabbitScriptEngine();
+        EvalResult res = engine.run(choose, DataRow.of(
                 "id", "B"));
         System.out.println(res);
     }
 
     @Test
     public void test5() {
-        RabbitScriptInterpreter parser = new RabbitScriptInterpreter(If);
-        parser.verify();
-        String res = parser.evaluate(DataRow.of(
+        ScriptEngine e = new RabbitScriptEngine();
+        EvalResult res = e.run(If, DataRow.of(
                 "jssj", "nubll",
                 "kssj", "2022-12-12",
                 "name", "cyx",
@@ -120,23 +131,16 @@ public class LexerTests {
     }
 
     @Test
-    public void test1() {
-        RabbitScriptInterpreter lexer = new RabbitScriptInterpreter(If);
-        lexer.verify();
-    }
-
-    @Test
     public void test2() {
-        RabbitScriptInterpreter parser = new RabbitScriptInterpreter(Switch);
-        String res = parser.evaluate(DataRow.of("name", "ak"));
+        ScriptEngine engine = new RabbitScriptEngine();
+        EvalResult res = engine.run(Switch, DataRow.of("name", "ak"));
         System.out.println(res);
     }
 
     @Test
     public void test3() {
-        RabbitScriptInterpreter parser = new RabbitScriptInterpreter(for1);
-        parser.verify();
-        String res = parser.evaluate(DataRow.of("names", Arrays.asList('a', 'b', 'c')));
+        RabbitScriptEngine engine = new RabbitScriptEngine();
+        EvalResult res = engine.run(for1, DataRow.of("names", Arrays.asList('a', 'b', 'c')));
         System.out.println(res);
     }
 

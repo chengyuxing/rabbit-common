@@ -3,7 +3,6 @@ package tests;
 import com.github.chengyuxing.common.DataRow;
 import com.github.chengyuxing.common.io.FileResource;
 import com.github.chengyuxing.common.script.lexer.IdentifierLexer;
-import com.github.chengyuxing.common.script.RabbitScriptInterpreter;
 import com.github.chengyuxing.common.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.junit.BeforeClass;
@@ -48,25 +47,6 @@ public class LanguageTests {
     public void testTokens() {
         IdentifierLexer lexer2 = new IdentifierLexer(input,0);
         lexer2.tokenize().forEach(System.out::println);
-    }
-
-    @Test
-    public void test1() {
-        RabbitScriptInterpreter parser = new RabbitScriptInterpreter(input) {
-            public static final String FOR_VARS_KEY = "_for";
-            public static final String VAR_PREFIX = FOR_VARS_KEY + ".";
-
-            @Override
-            protected String forLoopBodyFormatter(int forIndex, int itemIndex, @NotNull String body, @NotNull Map<String, Object> args) {
-                String formatted = StringUtils.FMT.format(body, args);
-                return formatted;
-            }
-        };
-        parser.verify();
-        String result = parser.evaluate(context);
-        System.out.println("--------------");
-        System.out.println(result);
-        System.out.println(parser.getForGeneratedVars());
     }
 
     @Test

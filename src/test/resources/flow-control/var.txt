@@ -1,4 +1,4 @@
-#switch :user.addresses[0].name
+#switch :user.addresses[1].name
   #case blank
   It's blank
   #break
