@@ -1,4 +1,4 @@
-package com.github.chengyuxing.common.script.parser;
+package com.github.chengyuxing.common.script.ast.impl;
 
 import com.github.chengyuxing.common.script.exception.ScriptSyntaxException;
 import com.github.chengyuxing.common.script.lang.Token;

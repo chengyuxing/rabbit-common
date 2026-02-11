@@ -4,7 +4,6 @@ import com.github.chengyuxing.common.script.ast.IElement;
 import com.github.chengyuxing.common.script.ast.IExpr;
 import com.github.chengyuxing.common.script.exception.ScriptSyntaxException;
 import com.github.chengyuxing.common.script.lang.ForContextProperty;
-import com.github.chengyuxing.common.script.parser.KeyExpressionParser;
 import com.github.chengyuxing.common.script.lang.Token;
 import com.github.chengyuxing.common.script.lang.TokenType;
 import com.github.chengyuxing.common.tuple.Pair;

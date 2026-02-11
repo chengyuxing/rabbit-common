@@ -4,7 +4,7 @@ import com.github.chengyuxing.common.MostDateTime;
 import com.github.chengyuxing.common.PropertyMeta;
 import com.github.chengyuxing.common.script.lang.Token;
 import com.github.chengyuxing.common.script.lang.TokenType;
-import com.github.chengyuxing.common.script.parser.KeyExpressionParser;
+import com.github.chengyuxing.common.script.ast.impl.KeyExpressionParser;
 import com.github.chengyuxing.common.script.lexer.IdentifierLexer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

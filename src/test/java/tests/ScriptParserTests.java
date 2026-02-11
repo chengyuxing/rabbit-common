@@ -1,6 +1,6 @@
 package tests;
 
-import com.github.chengyuxing.common.script.parser.KeyExpressionParser;
+import com.github.chengyuxing.common.script.ast.impl.KeyExpressionParser;
 import com.github.chengyuxing.common.script.lang.Token;
 import com.github.chengyuxing.common.script.lexer.IdentifierLexer;
 import com.github.chengyuxing.common.KeyValue;
