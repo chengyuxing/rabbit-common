@@ -1,5 +1,6 @@
 package com.github.chengyuxing.common;
 
+import com.github.chengyuxing.common.script.parser.KeyExpressionParser;
 import com.github.chengyuxing.common.util.StringUtils;
 import com.github.chengyuxing.common.util.ValueUtils;
 import org.slf4j.Logger;
@@ -20,7 +21,7 @@ public class StringFormatter {
     private static final char DEFAULT_HOLDER_PREFIX = '$';
     @SuppressWarnings("UnnecessaryUnicodeEscape")
     private static final char TEMP_HOLDER_PREFIX = '\u0c32';
-    private static final Pattern pattern = Pattern.compile("\\$\\{\\s*(?<key>!?" + ValueUtils.VAR_PATH_EXPRESSION_PATTERN.pattern() + ")\\s*}");
+    private static final Pattern pattern = Pattern.compile("\\$\\{\\s*(?<key>!?" + KeyExpressionParser.EXPRESSION_PATTERN.pattern() + ")\\s*}");
 
     /**
      * Format string template with a variable map.
@@ -150,7 +151,7 @@ public class StringFormatter {
 
             List<String> keys = ValueUtils.decodeKeyPathExpression(key);
 
-            if (!keys.isEmpty() && data.containsKey(keys.get(0))) {
+            if (data.containsKey(keys.get(0))) {
                 String value = valueFormatter.apply(ValueUtils.accessDeepValue(data, keys), isSpecial);
                 m.appendReplacement(sb, Matcher.quoteReplacement(value));
             } else {

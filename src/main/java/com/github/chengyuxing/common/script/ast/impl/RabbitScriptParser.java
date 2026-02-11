@@ -4,10 +4,10 @@ import com.github.chengyuxing.common.script.ast.IElement;
 import com.github.chengyuxing.common.script.ast.IExpr;
 import com.github.chengyuxing.common.script.exception.ScriptSyntaxException;
 import com.github.chengyuxing.common.script.lang.ForContextProperty;
+import com.github.chengyuxing.common.script.parser.KeyExpressionParser;
 import com.github.chengyuxing.common.script.lang.Token;
 import com.github.chengyuxing.common.script.lang.TokenType;
 import com.github.chengyuxing.common.tuple.Pair;
-import com.github.chengyuxing.common.util.StringUtils;
 import org.jetbrains.annotations.Unmodifiable;
 
 import java.math.BigDecimal;
@@ -117,30 +117,10 @@ public class RabbitScriptParser {
     }
 
     private List<String> parseVariableKeyExpression() {
-        List<String> keys = new ArrayList<>();
-        keys.add(currentToken.getValue());
-        eat(TokenType.IDENTIFIER);
-        while (nonEndToken(currentToken, TokenType.NEWLINE)) {
-            if (peek(TokenType.DOT)) {
-                advance();
-                keys.add(currentToken.getValue());
-                if (peek(TokenType.IDENTIFIER) || peek(TokenType.NUMBER)) {
-                    advance();
-                } else {
-                    throw new ScriptSyntaxException("Unexpected token: " + currentToken + ", expected: " + TokenType.IDENTIFIER + " / " + TokenType.NUMBER);
-                }
-            } else if (peek(TokenType.LBRACKET)) {
-                advance();
-                if (!StringUtils.isNonNegativeInteger(currentToken.getValue())) {
-                    throw new ScriptSyntaxException("Index must be a non-negative integer: " + currentToken.getValue());
-                }
-                keys.add(currentToken.getValue());
-                advance();
-                eat(TokenType.RBRACKET);
-            } else {
-                break;
-            }
-        }
+        KeyExpressionParser keyExpressionParser = new KeyExpressionParser(tokens.subList(currentTokenIndex, tokens.size()));
+        List<String> keys = keyExpressionParser.parse();
+        currentTokenIndex += keyExpressionParser.getConsumedTokenIndex();
+        currentToken = tokens.get(currentTokenIndex);
         return keys;
     }
 

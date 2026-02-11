@@ -1,13 +1,10 @@
 package tests;
 
-import com.github.chengyuxing.common.DataRow;
+import com.github.chengyuxing.common.script.parser.KeyExpressionParser;
 import com.github.chengyuxing.common.script.lang.Token;
 import com.github.chengyuxing.common.script.lexer.IdentifierLexer;
 import com.github.chengyuxing.common.KeyValue;
 import com.github.chengyuxing.common.script.pipe.builtin.Kv;
-import com.github.chengyuxing.common.util.StringUtils;
-import com.github.chengyuxing.common.util.ValueUtils;
-import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
 import java.lang.reflect.Field;
@@ -24,7 +21,10 @@ public class ScriptParserTests {
 
     @Test
     public void testSSS() {
-        System.out.println(ValueUtils.VAR_PATH_EXPRESSION_PATTERN.matcher("user.names[39].home[44].id").matches());
+        String key = "user.names[39].home[44].id";
+        System.out.println(KeyExpressionParser.EXPRESSION_PATTERN.matcher(key).matches());
+        KeyExpressionParser keyExpressionParser = new KeyExpressionParser(new IdentifierLexer(key,0).tokenize());
+        System.out.println(keyExpressionParser.parse());
     }
 
     @Test

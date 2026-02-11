@@ -2,8 +2,7 @@ package tests;
 
 import com.github.chengyuxing.common.DataRow;
 import com.github.chengyuxing.common.script.lang.Comparators;
-import com.github.chengyuxing.common.script.lang.Token;
-import com.github.chengyuxing.common.script.lang.TokenType;
+import com.github.chengyuxing.common.script.parser.KeyExpressionParser;
 import com.github.chengyuxing.common.script.lexer.IdentifierLexer;
 import com.github.chengyuxing.common.util.NamingUtils;
 import com.github.chengyuxing.common.util.StringUtils;
@@ -14,7 +13,6 @@ import tests.entity.User;
 
 import java.math.BigDecimal;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class ExpressionTests {
     static String exp = "!(:id >= 0 || :name <> blank) && :age<=21";
@@ -37,10 +35,12 @@ public class ExpressionTests {
 
     @Test
     public void testLe() {
-        String key = "user.addresses[1].age";
-        if (ValueUtils.VAR_PATH_EXPRESSION_PATTERN.matcher(key).matches()) {
+        String key = "user.addresses[1].name 密密麻麻吗";
+        if (KeyExpressionParser.EXPRESSION_PATTERN.matcher(key).matches()) {
             System.out.println(key.replaceAll("\\[(\\d+)]", ".$1"));
         }
+        KeyExpressionParser parser = new KeyExpressionParser(new IdentifierLexer(key,0).tokenize());
+        System.out.println(parser.parse());
 //        IdentifierLexer lexer = new IdentifierLexer(key, 0);
 //        List<Token> tokens = lexer.tokenize();
 //        tokens.forEach(token -> {
@@ -53,25 +53,23 @@ public class ExpressionTests {
     @Test
     public void testPerf() {
         String key = "user.addresses[1].age";
-        IdentifierLexer lexer = new IdentifierLexer(key, 0);
+        KeyExpressionParser parser = new KeyExpressionParser(new IdentifierLexer(key,0).tokenize());
 
         // warm up
-        for (int i = 0; i < 1_000_000; i++) {
-            key.replaceAll("\\[(\\d+)]", ".$1");
-            lexer.tokenize();
+        for (int i = 0; i < 1_000_00; i++) {
+            Arrays.asList(key.replaceAll("\\[(\\d+)]", ".$1").split("\\."));
+            new KeyExpressionParser(new IdentifierLexer(key,0).tokenize()).parse();
         }
 
         long t1 = System.currentTimeMillis();
-        for (int i = 0; i < 10_000_00; i++) {
-            key.replaceAll("\\[(\\d+)]", ".$1");
+        for (int i = 0; i < 10_000_0; i++) {
+            Arrays.asList(key.replaceAll("\\[(\\d+)]", ".$1").split("\\."));
         }
         long t2 = System.currentTimeMillis();
 
         long t3 = System.currentTimeMillis();
-        for (int i = 0; i < 10_000_00; i++) {
-//            IdentifierLexer lexer = new IdentifierLexer(key, 0);
-            List<Token> tokens = lexer.tokenize().stream().filter(t -> t.getType() == TokenType.IDENTIFIER || t.getType() == TokenType.NUMBER).collect(Collectors.toList());
-
+        for (int i = 0; i < 10_000_0; i++) {
+            new KeyExpressionParser(new IdentifierLexer(key,0).tokenize()).parse();
         }
         long t4 = System.currentTimeMillis();
 

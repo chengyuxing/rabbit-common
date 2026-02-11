@@ -2,6 +2,10 @@ package com.github.chengyuxing.common.util;
 
 import com.github.chengyuxing.common.MostDateTime;
 import com.github.chengyuxing.common.PropertyMeta;
+import com.github.chengyuxing.common.script.lang.Token;
+import com.github.chengyuxing.common.script.lang.TokenType;
+import com.github.chengyuxing.common.script.parser.KeyExpressionParser;
+import com.github.chengyuxing.common.script.lexer.IdentifierLexer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
@@ -15,13 +19,11 @@ import java.time.temporal.Temporal;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-import java.util.regex.Pattern;
 
 /**
  * Value util.
  */
 public final class ValueUtils {
-    public static final Pattern VAR_PATH_EXPRESSION_PATTERN = Pattern.compile("[a-zA-Z_]\\w*(\\.\\w+|\\[\\d+])*");
     private static final Map<Class<?>, Function<@NotNull Object, @Nullable Object>> VALUE_ADAPTORS = new HashMap<>();
 
     static {
@@ -219,10 +221,7 @@ public final class ValueUtils {
      * @return the value found at the specified property chains, or null if the property chains are invalid, the object is null, or the value does not exist at the given path.
      */
     public static @Nullable Object getDeepValue(Object obj, @NotNull String propertyChains) {
-        if (VAR_PATH_EXPRESSION_PATTERN.matcher(propertyChains).matches()) {
-            return accessDeepValue(obj, decodeKeyPathExpression(propertyChains));
-        }
-        throw new IllegalArgumentException("Property chains '" + propertyChains + "' is invalid");
+        return accessDeepValue(obj, decodeKeyPathExpression(propertyChains));
     }
 
     /**
@@ -232,8 +231,15 @@ public final class ValueUtils {
      * @return key list
      */
     public static @NotNull @Unmodifiable List<String> decodeKeyPathExpression(String keyPath) {
-        String[] keys = keyPath.replaceAll("\\[(\\d+)]", ".$1").split("\\.");
-        return Arrays.asList(keys);
+        IdentifierLexer lexer = new IdentifierLexer(keyPath, 0);
+        List<Token> tokens = lexer.tokenize();
+        KeyExpressionParser parser = new KeyExpressionParser(tokens);
+        List<String> keys = parser.parse();
+        int idx = parser.getConsumedTokenIndex();
+        if (tokens.get(idx).getType() != TokenType.NEWLINE) {
+            throw new IllegalArgumentException("Key Expression syntax error on: " + tokens.get(idx));
+        }
+        return keys;
     }
 
     /**
