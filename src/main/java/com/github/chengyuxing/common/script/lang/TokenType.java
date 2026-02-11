@@ -6,9 +6,12 @@ public enum TokenType {
     SWITCH(Directives.SWITCH), CASE(Directives.CASE),
     CHOOSE(Directives.CHOOSE), WHEN(Directives.WHEN),
     DEFAULT(Directives.DEFAULT), BREAK(Directives.BREAK), END(Directives.END),
+
     FOR(Directives.FOR),
-    FOR_OF("of"), FOR_DELIMITER("delimiter"), FOR_OPEN("open"), FOR_CLOSE("close"),
+    FOR_OF("of"),
+    FOR_PROPERTY_AS("as"),
     END_FOR(Directives.DONE),
+
     GUARD(Directives.GUARD), END_GUARD(Directives.THROW),
     CHECK(Directives.CHECK), CHECK_THROW("throw"),
     DEFINE_VAR(Directives.VAR),

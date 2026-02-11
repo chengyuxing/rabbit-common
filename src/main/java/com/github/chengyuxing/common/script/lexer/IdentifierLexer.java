@@ -249,15 +249,6 @@ public class IdentifierLexer {
                     case "as":
                         tokens.add(new Token(TokenType.FOR_PROPERTY_AS, identifier, line, start));
                         break;
-                    case "delimiter":
-                        tokens.add(new Token(TokenType.FOR_DELIMITER, identifier, line, start));
-                        break;
-                    case "open":
-                        tokens.add(new Token(TokenType.FOR_OPEN, identifier, line, start));
-                        break;
-                    case "close":
-                        tokens.add(new Token(TokenType.FOR_CLOSE, identifier, line, start));
-                        break;
                     case "throw":
                         tokens.add(new Token(TokenType.CHECK_THROW, identifier, line, start));
                         break;
