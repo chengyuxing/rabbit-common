@@ -25,7 +25,7 @@ public class EvalContext {
     /**
      * Format the current scope plain text.
      * <p>
-     * If the formatted result is not final form e.g. {@code :name} -> {@code :name_0}, persist the scope arguments to use for the next step.
+     * If the formatted result is not final form e.g. {@code :name} -&gt; {@code :name_0}, persist the scope arguments to use for the next step.
      *
      * @param text   scope text
      * @param inputs input arguments
