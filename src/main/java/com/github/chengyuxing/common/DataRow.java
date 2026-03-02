@@ -49,6 +49,9 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
      * @return DataRow instance
      */
     public static DataRow of(Object... input) {
+        if (input.length == 0) {
+            return new DataRow(0);
+        }
         return ValueUtils.pairsToMap(DataRow::new, input);
     }
 
