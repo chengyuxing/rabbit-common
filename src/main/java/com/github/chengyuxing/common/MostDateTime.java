@@ -326,7 +326,7 @@ public final class MostDateTime {
                 return LocalDateTime.parse(datetime, DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
             }
             if (len == 8) {
-                return LocalDateTime.parse(datetime, DateTimeFormatter.ofPattern("yyyyMMdd"));
+                return LocalDate.parse(datetime, DateTimeFormatter.ofPattern("yyyyMMdd")).atStartOfDay();
             }
             if (len == 13) {
                 return Instant.ofEpochMilli(Long.parseLong(datetime)).atZone(ZoneId.systemDefault()).toLocalDateTime();
