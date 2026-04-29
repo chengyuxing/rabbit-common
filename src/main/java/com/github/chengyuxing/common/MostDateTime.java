@@ -24,21 +24,7 @@ import java.util.regex.Pattern;
  * Java date-time types.
  */
 public final class MostDateTime {
-    // language=regexp
-    public static final Pattern DATE_PATTERN = Pattern.compile("((?<y>\\d{4})[-/.年])?(?<m>\\d{1,2})[-/.月](?<d>\\d{1,2})日?");
-    // language=regexp
-    public static final Pattern EN_TIME_PATTERN = Pattern.compile("(?<h>\\d{1,2}):(?<m>\\d{1,2})(:(?<s>\\d{1,2})(\\.(?<n>\\d{3,9}))?)?");
-    // language=regexp
-    public static final Pattern ZH_TIME_PATTERN = Pattern.compile("((?<h>\\d{1,2})[时点])((?<m>\\d{1,2})分)((?<s>\\d{1,2})秒)?");
-    // language=regexp
-    public static final Pattern ISO_DATE_TIME_PATTERN = Pattern.compile("(?<date>\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d{3,9})?)(?<zone>Z|GMT|UTC|UT|([+-](\\d{1,6}|\\d{2}:\\d{2}(:\\d{2})?)))?", Pattern.CASE_INSENSITIVE);
-    // language=regexp
-    public static final Pattern RFC_1123_DATE_TIME_PATTERN = Pattern.compile("(Mon|Tue|Wed|Thu|Fri|Sat|Sun),\\s+\\d{1,2}\\s+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\\s+\\d{4}\\s+\\d{1,2}:\\d{1,2}:\\d{1,2}\\s+GMT", Pattern.CASE_INSENSITIVE);
-    // language=regexp
-    public static final Pattern RFC_CST_DATE_TIME_PATTERN = Pattern.compile("(Mon|Tue|Wed|Thu|Fri|Sat|Sun)\\s+(?<M>Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\\s+(?<d>\\d{1,2})\\s+(?<time>\\d{1,2}:\\d{1,2}:\\d{1,2})\\s+CST\\s+(?<y>\\d{4})", Pattern.CASE_INSENSITIVE);
-    // language=regexp
-    public static final Pattern RFC_GMT_DATE_TIME_PATTERN = Pattern.compile("(Mon|Tue|Wed|Thu|Fri|Sat|Sun)\\s+(?<M>Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\\s+(?<d>\\d{1,2})\\s+(?<y>\\d{4})\\s+(?<time>\\d{1,2}:\\d{1,2}:\\d{1,2})\\s+GMT(?<zone>Z|GMT|UTC|UT|([+-](\\d{1,6}|\\d{2}:\\d{2}(:\\d{2})?)))", Pattern.CASE_INSENSITIVE);
-    public static final Map<String, Integer> Mon = new HashMap<String, Integer>() {{
+    private static final Map<String, Integer> MONTHS = new HashMap<String, Integer>() {{
         put("Jan", 1);
         put("Feb", 2);
         put("Mar", 3);
@@ -52,6 +38,27 @@ public final class MostDateTime {
         put("Nov", 11);
         put("Dec", 12);
     }};
+    private static final String MONTHS_PATTERN = String.join("|", MONTHS.keySet());
+    private static final String WEEK_PATTERN = "Mon|Tue|Wed|Thu|Fri|Sat|Sun";
+    // language=regexp
+    public static final Pattern DATE_PATTERN = Pattern.compile("((?<y>\\d{4})[-/.年])?(?<m>\\d{1,2})[-/.月](?<d>\\d{1,2})日?");
+    // language=regexp
+    public static final Pattern EN_TIME_PATTERN = Pattern.compile("(?<h>\\d{1,2}):(?<m>\\d{1,2})(:(?<s>\\d{1,2})(\\.(?<n>\\d{3,9}))?)?");
+    // language=regexp
+    public static final Pattern ZH_TIME_PATTERN = Pattern.compile("((?<h>\\d{1,2})[时点])((?<m>\\d{1,2})分)((?<s>\\d{1,2})秒)?");
+    // language=regexp
+    public static final Pattern ISO_DATE_TIME_PATTERN = Pattern.compile("(?<date>\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d{3,9})?)(?<zone>Z|GMT|UTC|UT|([+-](\\d{1,6}|\\d{2}:\\d{2}(:\\d{2})?)))?", Pattern.CASE_INSENSITIVE);
+    // language=regexp
+    public static final Pattern RFC_1123_DATE_TIME_PATTERN = Pattern.compile("(" + WEEK_PATTERN + "),\\s+\\d{1,2}\\s+(" + MONTHS_PATTERN + ")\\s+\\d{4}\\s+\\d{1,2}:\\d{1,2}:\\d{1,2}\\s+GMT", Pattern.CASE_INSENSITIVE);
+    // language=regexp
+    public static final Pattern RFC_CST_DATE_TIME_PATTERN = Pattern.compile("(" + WEEK_PATTERN + ")\\s+(?<M>" + MONTHS_PATTERN + ")\\s+(?<d>\\d{1,2})\\s+(?<time>\\d{1,2}:\\d{1,2}:\\d{1,2})\\s+CST\\s+(?<y>\\d{4})", Pattern.CASE_INSENSITIVE);
+    // language=regexp
+    public static final Pattern RFC_GMT_DATE_TIME_PATTERN = Pattern.compile("(" + WEEK_PATTERN + ")\\s+(?<M>" + MONTHS_PATTERN + ")\\s+(?<d>\\d{1,2})\\s+(?<y>\\d{4})\\s+(?<time>\\d{1,2}:\\d{1,2}:\\d{1,2})\\s+GMT(?<zone>Z|GMT|UTC|UT|([+-](\\d{1,6}|\\d{2}:\\d{2}(:\\d{2})?)))", Pattern.CASE_INSENSITIVE);
+
+    private static final DateTimeFormatter DATE_NUM_FORMAT = DateTimeFormatter.ofPattern("yyyyMMdd");
+    private static final DateTimeFormatter DATE_TIME_NUM_FORMAT = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+    private static final DateTimeFormatter DATE_TIME_MILLS_NUM_FORMAT = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
+
     private final LocalDateTime dateTime;
 
     /**
@@ -320,13 +327,13 @@ public final class MostDateTime {
         int len = datetime.length();
         if (isDigit) {
             if (len == 17) {
-                return LocalDateTime.parse(datetime, DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS"));
+                return LocalDateTime.parse(datetime, DATE_TIME_MILLS_NUM_FORMAT);
             }
             if (len == 14) {
-                return LocalDateTime.parse(datetime, DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+                return LocalDateTime.parse(datetime, DATE_TIME_NUM_FORMAT);
             }
             if (len == 8) {
-                return LocalDate.parse(datetime, DateTimeFormatter.ofPattern("yyyyMMdd")).atStartOfDay();
+                return LocalDate.parse(datetime, DATE_NUM_FORMAT).atStartOfDay();
             }
             if (len == 13) {
                 return Instant.ofEpochMilli(Long.parseLong(datetime)).atZone(ZoneId.systemDefault()).toLocalDateTime();
@@ -490,7 +497,7 @@ public final class MostDateTime {
             if (rfcCSTm.matches()) {
                 match = true;
                 year = Integer.parseInt(rfcCSTm.group("y"));
-                month = Mon.get(rfcCSTm.group("M"));
+                month = MONTHS.get(rfcCSTm.group("M"));
                 day = Integer.parseInt(rfcCSTm.group("d"));
                 time = rfcCSTm.group("time");
                 zoneId = ZoneId.systemDefault();
@@ -500,7 +507,7 @@ public final class MostDateTime {
             if (rfcGMTm.matches()) {
                 match = true;
                 year = Integer.parseInt(rfcGMTm.group("y"));
-                month = Mon.get(rfcGMTm.group("M"));
+                month = MONTHS.get(rfcGMTm.group("M"));
                 day = Integer.parseInt(rfcGMTm.group("d"));
                 time = rfcGMTm.group("time");
                 zoneId = ZoneId.of(rfcGMTm.group("zone").toUpperCase());
