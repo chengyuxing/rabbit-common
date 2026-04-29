@@ -103,7 +103,7 @@ public final class ValueUtils {
                 return v;
             }
         }
-        throw new NullPointerException("The last value cannot be null");
+        throw new NullPointerException("All values are null");
     }
 
     /**
