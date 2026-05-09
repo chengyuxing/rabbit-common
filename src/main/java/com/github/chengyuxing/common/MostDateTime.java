@@ -54,11 +54,11 @@ public final class MostDateTime {
     public static final Pattern RFC_CST_DATE_TIME_PATTERN = Pattern.compile("(" + WEEK_PATTERN + ")\\s+(?<M>" + MONTHS_PATTERN + ")\\s+(?<d>\\d{1,2})\\s+(?<time>\\d{1,2}:\\d{1,2}:\\d{1,2})\\s+CST\\s+(?<y>\\d{4})", Pattern.CASE_INSENSITIVE);
     // language=regexp
     public static final Pattern RFC_GMT_DATE_TIME_PATTERN = Pattern.compile("(" + WEEK_PATTERN + ")\\s+(?<M>" + MONTHS_PATTERN + ")\\s+(?<d>\\d{1,2})\\s+(?<y>\\d{4})\\s+(?<time>\\d{1,2}:\\d{1,2}:\\d{1,2})\\s+GMT(?<zone>Z|GMT|UTC|UT|([+-](\\d{1,6}|\\d{2}:\\d{2}(:\\d{2})?)))", Pattern.CASE_INSENSITIVE);
+    private static final Pattern TIME_CHAR_PATTERN = Pattern.compile("[HhmsS]");
 
     private static final DateTimeFormatter DATE_NUM_FORMAT = DateTimeFormatter.ofPattern("yyyyMMdd");
     private static final DateTimeFormatter DATE_TIME_NUM_FORMAT = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
     private static final DateTimeFormatter DATE_TIME_MILLS_NUM_FORMAT = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
-    private static final Pattern TIME_PATTERN = Pattern.compile("[HhmsS]");
 
     private final LocalDateTime dateTime;
 
@@ -159,7 +159,7 @@ public final class MostDateTime {
      */
     public static @NotNull MostDateTime of(String datetime, String pattern) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
-        if (TIME_PATTERN.matcher(pattern).find()) {
+        if (TIME_CHAR_PATTERN.matcher(pattern).find()) {
             return of(LocalDateTime.parse(datetime, formatter));
         }
         return of(LocalDate.parse(datetime, formatter));
