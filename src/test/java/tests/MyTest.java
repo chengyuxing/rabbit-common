@@ -1,6 +1,7 @@
 package tests;
 
 import com.github.chengyuxing.common.DataRow;
+import com.github.chengyuxing.common.MostDateTime;
 import com.github.chengyuxing.common.io.FileResource;
 import com.github.chengyuxing.common.script.lang.TokenType;
 import com.github.chengyuxing.common.script.pipe.builtin.Type;
@@ -43,6 +44,11 @@ public class MyTest {
         row = DataRow.of("a", 1,
                 "b", 2,
                 "name", "chengyuxing");
+    }
+
+    @Test
+    public void testDt() {
+        System.out.println(MostDateTime.of("20251212","yyyyMMdd"));
     }
 
     @Test

@@ -58,6 +58,7 @@ public final class MostDateTime {
     private static final DateTimeFormatter DATE_NUM_FORMAT = DateTimeFormatter.ofPattern("yyyyMMdd");
     private static final DateTimeFormatter DATE_TIME_NUM_FORMAT = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
     private static final DateTimeFormatter DATE_TIME_MILLS_NUM_FORMAT = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
+    private static final Pattern TIME_PATTERN = Pattern.compile("[HhmsS]");
 
     private final LocalDateTime dateTime;
 
@@ -157,8 +158,11 @@ public final class MostDateTime {
      * @return MostDateTime instance
      */
     public static @NotNull MostDateTime of(String datetime, String pattern) {
-        LocalDateTime ldt = LocalDateTime.parse(datetime, DateTimeFormatter.ofPattern(pattern));
-        return of(ldt);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
+        if (TIME_PATTERN.matcher(pattern).find()) {
+            return of(LocalDateTime.parse(datetime, formatter));
+        }
+        return of(LocalDate.parse(datetime, formatter));
     }
 
     /**
