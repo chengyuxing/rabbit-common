@@ -143,7 +143,8 @@ public final class ReflectUtils {
                     pm.setGetter(p.getReadMethod());
                     pm.setSetter(p.getWriteMethod());
                     try {
-                        pm.setField(c.getDeclaredField(name));
+                        Class<?> dClass = p.getReadMethod().getDeclaringClass();
+                        pm.setField(dClass.getDeclaredField(name));
                     } catch (Exception e) {
                         log.debug("Cannot access field '{}'", name, e);
                     }

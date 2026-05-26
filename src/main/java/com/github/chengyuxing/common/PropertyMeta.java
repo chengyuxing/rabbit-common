@@ -25,6 +25,10 @@ public final class PropertyMeta {
         this.field = field;
     }
 
+    public boolean hasField() {
+        return field != null;
+    }
+
     public Method getGetter() {
         return getter;
     }

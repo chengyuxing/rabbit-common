@@ -457,9 +457,9 @@ public final class ValueUtils {
                     continue;
                 }
 
-                String name = meta.getField() == null
-                        ? e.getKey()
-                        : fieldMapper.apply(meta.getField());
+                String name = meta.hasField()
+                        ? fieldMapper.apply(meta.getField())
+                        : e.getKey();
 
                 Object value = getter.invoke(entity);
 
@@ -507,13 +507,11 @@ public final class ValueUtils {
                     continue;
                 }
 
-                boolean hasField = meta.getField() != null;
-
-                String name = hasField
+                String name = meta.hasField()
                         ? fieldMapper.apply(meta.getField())
                         : e.getKey();
 
-                Object value = hasField && valueAdaptor != null
+                Object value = meta.hasField() && valueAdaptor != null
                         ? valueAdaptor.apply(meta.getField(), source.get(name))
                         : adaptValue(setter.getParameterTypes()[0], source.get(name));
 
