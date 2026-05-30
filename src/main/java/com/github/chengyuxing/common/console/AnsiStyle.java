@@ -4,7 +4,7 @@ package com.github.chengyuxing.common.console;
  * Ansi color
  */
 @FunctionalInterface
-public interface AnsiColor {
+public interface AnsiStyle {
     /**
      * code
      *

@@ -1,6 +1,6 @@
 package tests.ck;
 
-import com.github.chengyuxing.common.console.Color;
+import com.github.chengyuxing.common.console.Style;
 import com.github.chengyuxing.common.console.Printer;
 import org.junit.Test;
 
@@ -22,8 +22,8 @@ public class ExpressionTest {
 
     @Test
     public void num() throws Exception {
-        Printer.println("我喜欢你", Color.PURPLE);
-        System.out.println(Printer.colorful(Printer.colorful("我喜欢你", Color.BLUE), Color.RED) + Printer.colorful("Hello world!", Color.SILVER));
-        System.out.println(Printer.underline(Printer.colorful("abc", Color.RED)));
+        Printer.println("我喜欢你", Style.PURPLE);
+        System.out.println(Printer.colorful("Hello world!", Style.RED, Style.UNDERLINE));
+        System.out.println("\033[2;3;4maskfjfkf\033[0m".replaceAll("", ""));
     }
 }

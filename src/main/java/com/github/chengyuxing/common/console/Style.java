@@ -3,7 +3,7 @@ package com.github.chengyuxing.common.console;
 /**
  * Ansi color enums.
  */
-public enum Color implements AnsiColor {
+public enum Style implements AnsiStyle {
     DARK_RED("31"),
     RED("91"),
     DARK_GREEN("32"),
@@ -17,11 +17,12 @@ public enum Color implements AnsiColor {
     DARK_CYAN("36"),
     CYAN("96"),
     SILVER("37"),
-    WHITE("97");
+    WHITE("97"),
+    UNDERLINE("4");
 
     private final String code;
 
-    Color(String code) {
+    Style(String code) {
         this.code = code;
     }
 
