@@ -8,37 +8,35 @@ import java.nio.file.Paths;
 /**
  * Simple output operation interface.
  */
+@FunctionalInterface
 public interface IOutput {
-    /**
-     * To bytes.
-     *
-     * @return bytes
-     * @throws IOException if io state error
-     */
-    byte[] toBytes() throws IOException;
 
-    default void saveTo(OutputStream outputStream, boolean close) throws IOException {
-        BufferedOutputStream out = new BufferedOutputStream(outputStream);
-        out.write(toBytes());
-        if (close) {
+    void writeTo(OutputStream out) throws IOException;
+
+    default void writeTo(OutputStream out, boolean flush) throws IOException {
+        writeTo(out);
+        if (flush) {
             out.flush();
-            out.close();
         }
     }
 
-    default void saveTo(OutputStream outputStream) throws IOException {
-        saveTo(outputStream, true);
+    default void writeTo(Path path) throws IOException {
+        try (OutputStream out = Files.newOutputStream(path)) {
+            writeTo(out);
+        }
     }
 
-    default void saveTo(String path) throws IOException {
-        saveTo(Files.newOutputStream(Paths.get(path)));
+    default void writeTo(String path) throws IOException {
+        writeTo(Paths.get(path));
     }
 
-    default void saveTo(File file) throws IOException {
-        saveTo(Files.newOutputStream(file.toPath()));
+    default void writeTo(File file) throws IOException {
+        writeTo(file.toPath());
     }
 
-    default void saveTo(Path path) throws IOException {
-        saveTo(Files.newOutputStream(path));
+    default byte[] toBytes() throws IOException {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        writeTo(out);
+        return out.toByteArray();
     }
 }
