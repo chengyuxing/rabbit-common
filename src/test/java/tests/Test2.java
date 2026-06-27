@@ -24,6 +24,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class Test2 {
@@ -138,6 +139,7 @@ public class Test2 {
 
         System.out.println(MostDateTime.toLocalDateTime("2019-09-26T03:45:36.656-0800"));
         System.out.println(MostDateTime.currentTimestamp());
+        System.out.println(System.currentTimeMillis());
 
         System.out.println(MostDateTime.toLocalDateTime("2021年12月23日"));
 
@@ -151,6 +153,16 @@ public class Test2 {
         System.out.println(new Date());
 
 
+    }
+
+    @Test
+    public void testCCdate() {
+        System.out.println(MostDateTime.of("决定书二〇〇一年十二月二十一日的").plus(1, ChronoUnit.DAYS).toLocalDate());
+        Pattern p = Pattern.compile("y");
+        StringUtils.foreachWindow("yyyy.MM.dd_HH.mm.ss", p, 0, 2, (r, i) -> {
+            System.out.println(r + ":" + i);
+            return true;
+        });
     }
 
     @Test

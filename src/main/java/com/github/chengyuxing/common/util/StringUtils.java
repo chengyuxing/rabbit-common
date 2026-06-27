@@ -12,6 +12,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -608,15 +609,15 @@ public final class StringUtils {
      * Scan the content by regexp to provides the seg and match state.
      *
      * @param text     text content
-     * @param p        regexp
+     * @param pattern  regexp
      * @param consumer consumer the seg and match state
      */
     public static void scan(
-            String text,
-            Pattern p,
-            BiConsumer<String, Boolean> consumer // true = matched
+            @NotNull String text,
+            @NotNull Pattern pattern,
+            @NotNull BiConsumer<String, Boolean> consumer // true = matched
     ) {
-        Matcher m = p.matcher(text);
+        Matcher m = pattern.matcher(text);
         int lastEnd = 0;
         while (m.find()) {
             if (m.start() > lastEnd) {
@@ -627,6 +628,53 @@ public final class StringUtils {
         }
         if (lastEnd < text.length()) {
             consumer.accept(text.substring(lastEnd), false);
+        }
+    }
+
+    /**
+     * Foreach the window of the text which includes the pattern's founded group.
+     * <p>
+     * When the consumer returns {@code false} , the first element consumed and break,
+     * otherwise consume all the founded elements.
+     * <blockquote><pre>
+     *     foreachWindow("Hello world!", "w", 0, 1, consumer)
+     *     // Hello [wo]rld! --> "wo"
+     * </pre></blockquote>
+     *
+     * @param content     content
+     * @param pattern     substring pattern
+     * @param leftOffset  the text window left char offset
+     * @param rightOffset the text window right char offset
+     * @param consumer    the substring and the first char index, returns {@code true} to handler next element, otherwise break
+     */
+    public static void foreachWindow(@NotNull String content,
+                                     @NotNull Pattern pattern,
+                                     int leftOffset,
+                                     int rightOffset,
+                                     @NotNull BiFunction<String, Integer, Boolean> consumer
+    ) {
+        Matcher m = pattern.matcher(content);
+        while (m.find()) {
+            int wl = m.group().length();
+            int i = leftOffset < 0
+                    ? Math.max(leftOffset, -wl)
+                    : Math.min(leftOffset, m.start());
+            int j = rightOffset < 0
+                    ? Math.max(rightOffset, -wl)
+                    : Math.min(rightOffset, content.length() - m.end());
+            int begin = m.start() - i;
+            int end = m.end() + j;
+            int temp;
+            if (begin > end) {
+                temp = begin;
+                begin = end;
+                end = temp;
+            }
+            String sub = content.substring(begin, end);
+            boolean next = consumer.apply(sub, m.start());
+            if (!next) {
+                break;
+            }
         }
     }
 }
