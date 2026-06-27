@@ -424,11 +424,13 @@ public final class MostDateTime {
                 year = Integer.parseInt(dateMatcher.group("y"));
             } else {
                 year = LocalDateTime.now().getYear();
+                log.warn("Year part not found, use now year of: {}", datetime);
             }
             month = Integer.parseInt(dateMatcher.group("m"));
             day = Integer.parseInt(dateMatcher.group("d"));
         } else {
             year = LocalDateTime.now().getYear();
+            log.warn("Date part not found, use now year of: {}", datetime);
         }
 
         Matcher timeMatcher = EN_TIME_PATTERN.matcher(datetime);
@@ -665,7 +667,7 @@ public final class MostDateTime {
                 y = Integer.parseInt(ys);
             } else {
                 y = LocalDate.now().getYear();
-                log.warn("Year not found, current year as the default: {}", y);
+                log.warn("Year not found, now year as the default: {}", y);
             }
 
             m = getNumber(month.charAt(0));
