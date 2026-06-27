@@ -381,14 +381,14 @@ public final class ValueUtils {
             return (T) f.apply(value);
         }
         if (Date.class.isAssignableFrom(targetType)) {
-            return (T) MostDateTime.toDate(value.toString());
+            return (T) MostDateTime.of(value.toString()).toDate();
         }
         if (Temporal.class.isAssignableFrom(targetType)) {
             if (Date.class.isAssignableFrom(valueType)) {
                 return (T) toTemporal((Class<? extends Temporal>) targetType, (Date) value);
             }
             if (valueType == String.class) {
-                return (T) toTemporal((Class<? extends Temporal>) targetType, MostDateTime.toDate(value.toString()));
+                return (T) toTemporal((Class<? extends Temporal>) targetType, MostDateTime.of(value.toString()).toDate());
             }
             if (valueType == Long.class || value == long.class) {
                 return (T) toTemporal((Class<? extends Temporal>) targetType, MostDateTime.of((long) value).toDate());

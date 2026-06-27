@@ -3,6 +3,8 @@ package com.github.chengyuxing.common;
 import com.github.chengyuxing.common.util.StringUtils;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.*;
 import java.time.format.DateTimeFormatter;
@@ -24,7 +26,29 @@ import java.util.regex.Pattern;
  * Java date-time types.
  */
 public final class MostDateTime {
-    private static final Map<String, Integer> MONTHS = new HashMap<String, Integer>() {{
+    private static final Logger log = LoggerFactory.getLogger(MostDateTime.class);
+
+    private static final Map<String, Integer> CC_NUMBERS = new HashMap<String, Integer>() {{
+        put("一", 1);
+        put("二", 2);
+        put("三", 3);
+        put("四", 4);
+        put("五", 5);
+        put("六", 6);
+        put("七", 7);
+        put("八", 8);
+        put("九", 9);
+        put("十", 10);
+    }};
+    private static final Map<String, Integer> CC_NUMBERS_WITH_ZERO = new HashMap<String, Integer>() {{
+        put("〇", 0);
+        put("0", 0);
+        put("Ο", 0);
+        put("○", 0);
+        put("Ｏ", 0);
+        putAll(CC_NUMBERS);
+    }};
+    private static final Map<String, Integer> EN_MONTHS = new HashMap<String, Integer>() {{
         put("Jan", 1);
         put("Feb", 2);
         put("Mar", 3);
@@ -38,10 +62,13 @@ public final class MostDateTime {
         put("Nov", 11);
         put("Dec", 12);
     }};
-    private static final String MONTHS_PATTERN = String.join("|", MONTHS.keySet());
+    private static final String MONTHS_PATTERN = String.join("|", EN_MONTHS.keySet());
     private static final String WEEK_PATTERN = "Mon|Tue|Wed|Thu|Fri|Sat|Sun";
+    private static final String CC_NUMBERS_WITH_ZERO_PATTERN = String.join("", CC_NUMBERS_WITH_ZERO.keySet());
+    private static final String CC_NUMBERS_PATTERN = String.join("", CC_NUMBERS.keySet());
     // language=regexp
-    public static final Pattern DATE_PATTERN = Pattern.compile("((?<y>\\d{4})[-/.年])?(?<m>\\d{1,2})[-/.月](?<d>\\d{1,2})日?");
+    public static final Pattern GENERIC_DATE_PATTERN = Pattern.compile("((?<y>\\d{4})[-/.年])?(?<m>\\d{1,2})[-/.月](?<d>\\d{1,2})日?");
+    public static final Pattern CC_DATE_PATTERN = Pattern.compile("((?<y>[" + CC_NUMBERS_WITH_ZERO_PATTERN + "]{4})年)?(?<m>[" + CC_NUMBERS_PATTERN + "]{1,2})月(?<d>[" + CC_NUMBERS_PATTERN + "]{1,3})日?");
     // language=regexp
     public static final Pattern EN_TIME_PATTERN = Pattern.compile("(?<h>\\d{1,2}):(?<m>\\d{1,2})(:(?<s>\\d{1,2})(\\.(?<n>\\d{3,9}))?)?");
     // language=regexp
@@ -54,11 +81,11 @@ public final class MostDateTime {
     public static final Pattern RFC_CST_DATE_TIME_PATTERN = Pattern.compile("(" + WEEK_PATTERN + ")\\s+(?<M>" + MONTHS_PATTERN + ")\\s+(?<d>\\d{1,2})\\s+(?<time>\\d{1,2}:\\d{1,2}:\\d{1,2})\\s+CST\\s+(?<y>\\d{4})", Pattern.CASE_INSENSITIVE);
     // language=regexp
     public static final Pattern RFC_GMT_DATE_TIME_PATTERN = Pattern.compile("(" + WEEK_PATTERN + ")\\s+(?<M>" + MONTHS_PATTERN + ")\\s+(?<d>\\d{1,2})\\s+(?<y>\\d{4})\\s+(?<time>\\d{1,2}:\\d{1,2}:\\d{1,2})\\s+GMT(?<zone>Z|GMT|UTC|UT|([+-](\\d{1,6}|\\d{2}:\\d{2}(:\\d{2})?)))", Pattern.CASE_INSENSITIVE);
-    private static final Pattern TIME_CHAR_PATTERN = Pattern.compile("[HhmsS]");
+    public static final Pattern TIME_CHAR_PATTERN = Pattern.compile("[HhmsS]");
 
-    private static final DateTimeFormatter DATE_NUM_FORMAT = DateTimeFormatter.ofPattern("yyyyMMdd");
-    private static final DateTimeFormatter DATE_TIME_NUM_FORMAT = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
-    private static final DateTimeFormatter DATE_TIME_MILLS_NUM_FORMAT = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
+    public static final DateTimeFormatter DATE_NUM_FORMAT = DateTimeFormatter.ofPattern("yyyyMMdd");
+    public static final DateTimeFormatter DATE_TIME_NUM_FORMAT = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+    public static final DateTimeFormatter DATE_TIME_MILLS_NUM_FORMAT = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
 
     private final LocalDateTime dateTime;
 
@@ -287,6 +314,25 @@ public final class MostDateTime {
     }
 
     /**
+     * Convert to timestamp.
+     *
+     * @param zoneId zoneId
+     * @return timestamp
+     */
+    public long toEpochMilli(ZoneId zoneId) {
+        return toInstant(zoneId).toEpochMilli();
+    }
+
+    /**
+     * Convert to timestamp.
+     *
+     * @return timestamp
+     */
+    public long toEpochMilli() {
+        return toInstant().toEpochMilli();
+    }
+
+    /**
      * Format to string datetime.
      *
      * @param format format
@@ -305,21 +351,23 @@ public final class MostDateTime {
     }
 
     /**
-     * Convert string to local datetime object.<br>
+     * Convert string to local datetime object.
+     * <p>
      * formats：
      * <ul>
      *     <li>13 bit timestamp</li>
      *     <li>10 bit timestamp</li>
-     *     <li>yyyyMMddHHmmssSSS</li>
-     *     <li>yyyyMMddHHmmss</li>
-     *     <li>yyyyMMdd</li>
-     *     <li>yyyy[-/年]MM[-/月]dd[日]</li>
-     *     <li>yyyy年MM月dd日 HH[时点]mm分ss秒</li>
-     *     <li>yyyy[-/]MM[-/]dd HH:mm:ss.[SSS|ffffff|nnnnnnnnn]</li>
-     *     <li>ISO, e.g. 2019-09-26T03:45:36.656+0800</li>
-     *     <li>RFC_1123, e.g. Wed, 04 Jan 2023 09:36:48 GMT</li>
-     *     <li>RFC-like, e.g. Wed Jan 04 2023 17:36:48 GMT+0800</li>
-     *     <li>RFC-like, e.g. Wed Jan 04 18:52:01 CST 2023</li>
+     *     <li>{@code yyyyMMddHHmmssSSS}</li>
+     *     <li>{@code yyyyMMddHHmmss}</li>
+     *     <li>{@code yyyyMMdd}</li>
+     *     <li>{@code yyyy[-/年]MM[-/月]dd[日]}</li>
+     *     <li>{@code yyyy年MM月dd日 HH[时点]mm分ss秒}</li>
+     *     <li>{@code yyyy[-/]MM[-/]dd HH:mm:ss.[SSS|ffffff|nnnnnnnnn]}</li>
+     *     <li>CC_Date, e.g. {@code 二〇二六年六月二十六日}</li>
+     *     <li>ISO, e.g. {@code 2019-09-26T03:45:36.656+0800}</li>
+     *     <li>RFC_1123, e.g. {@code Wed, 04 Jan 2023 09:36:48 GMT}</li>
+     *     <li>RFC-like, e.g. {@code Wed Jan 04 2023 17:36:48 GMT+0800}</li>
+     *     <li>RFC-like, e.g. {@code Wed Jan 04 18:52:01 CST 2023}</li>
      * </ul>
      *
      * @param datetime string datetime
@@ -346,24 +394,30 @@ public final class MostDateTime {
                 return Instant.ofEpochSecond(Long.parseLong(datetime)).atZone(ZoneId.systemDefault()).toLocalDateTime();
             }
         }
-        ISODateTime isoDateTime = createISODateTime(datetime);
-        if (isoDateTime.isMatch()) {
-            return isoDateTime.toLocalDateTime();
-        }
 
         if (RFC_1123_DATE_TIME_PATTERN.matcher(datetime).matches()) {
             return LocalDateTime.parse(datetime, DateTimeFormatter.RFC_1123_DATE_TIME);
         }
 
+        ISODateTime isoDateTime = createISODateTime(datetime);
+        if (isoDateTime.find()) {
+            return isoDateTime.toLocalDateTime();
+        }
+
         RFCLikeDate rfcLikeDate = createRFCLikeDateTime(datetime);
-        if (rfcLikeDate.isMatch()) {
+        if (rfcLikeDate.find()) {
             return rfcLikeDate.toLocalDateTime();
+        }
+
+        CCDate ccDate = createCCDate(datetime);
+        if (ccDate.find()) {
+            return ccDate.toLocalDate().atStartOfDay();
         }
 
         boolean anyMatch = false;
         int year;
         int month = 1, day = 1, hour = 0, minus = 0, second = 0, nanoSeconds = 0;
-        Matcher dateMatcher = DATE_PATTERN.matcher(datetime);
+        Matcher dateMatcher = GENERIC_DATE_PATTERN.matcher(datetime);
         if (dateMatcher.find()) {
             anyMatch = true;
             if (dateMatcher.group("y") != null) {
@@ -414,13 +468,13 @@ public final class MostDateTime {
         if (anyMatch) {
             return LocalDateTime.of(year, month, day, hour, minus, second, nanoSeconds);
         }
-        throw new IllegalArgumentException("unknown date time format." + datetime);
+        throw new IllegalArgumentException("unknown date time format: " + datetime);
     }
 
     /**
      * Create ISO datetime object.
      *
-     * @param datetime e.g. 2019-09-26T03:45:36.656+0800
+     * @param datetime e.g. {@code 2019-09-26T03:45:36.656+0800}
      * @return ISO datetime object
      */
     public static ISODateTime createISODateTime(String datetime) {
@@ -430,7 +484,7 @@ public final class MostDateTime {
     /**
      * Create RFC-like datetime object.
      *
-     * @param datetime e.g. Wed Jan 04 2023 17:36:48 GMT+0800
+     * @param datetime e.g. {@code Wed Jan 04 2023 17:36:48 GMT+0800}
      * @return RFC-like datetime object
      */
     public static RFCLikeDate createRFCLikeDateTime(String datetime) {
@@ -438,17 +492,27 @@ public final class MostDateTime {
     }
 
     /**
+     * Create Chinese capital letters date object.
+     *
+     * @param date e.g. {@code 二〇二六年六月二十六日}
+     * @return Chinese capital letters date object
+     */
+    public static CCDate createCCDate(String date) {
+        return new CCDate(date);
+    }
+
+    /**
      * UTC datetime.
      */
     public static class ISODateTime {
-        private boolean match = false;
+        private boolean find = false;
         private String date;
         private ZoneId zoneId;
 
         public ISODateTime(String stringDate) {
             Matcher m = ISO_DATE_TIME_PATTERN.matcher(stringDate.trim());
-            if (m.matches()) {
-                match = true;
+            if (m.find()) {
+                find = true;
                 date = m.group("date");
                 String zone = m.group("zone");
                 if (zone == null) {
@@ -471,8 +535,8 @@ public final class MostDateTime {
             return zoneId;
         }
 
-        public boolean isMatch() {
-            return match;
+        public boolean find() {
+            return find;
         }
 
         @Override
@@ -488,7 +552,7 @@ public final class MostDateTime {
      * RFC-like date.
      */
     public static class RFCLikeDate {
-        private boolean match = false;
+        private boolean find = false;
         private Integer year;
         private Integer month;
         private Integer day;
@@ -498,20 +562,20 @@ public final class MostDateTime {
         public RFCLikeDate(String stringDate) {
             stringDate = stringDate.trim();
             Matcher rfcCSTm = RFC_CST_DATE_TIME_PATTERN.matcher(stringDate);
-            if (rfcCSTm.matches()) {
-                match = true;
+            if (rfcCSTm.find()) {
+                find = true;
                 year = Integer.parseInt(rfcCSTm.group("y"));
-                month = MONTHS.get(rfcCSTm.group("M"));
+                month = EN_MONTHS.get(rfcCSTm.group("M"));
                 day = Integer.parseInt(rfcCSTm.group("d"));
                 time = rfcCSTm.group("time");
                 zoneId = ZoneId.systemDefault();
                 return;
             }
             Matcher rfcGMTm = RFC_GMT_DATE_TIME_PATTERN.matcher(stringDate);
-            if (rfcGMTm.matches()) {
-                match = true;
+            if (rfcGMTm.find()) {
+                find = true;
                 year = Integer.parseInt(rfcGMTm.group("y"));
-                month = MONTHS.get(rfcGMTm.group("M"));
+                month = EN_MONTHS.get(rfcGMTm.group("M"));
                 day = Integer.parseInt(rfcGMTm.group("d"));
                 time = rfcGMTm.group("time");
                 zoneId = ZoneId.of(rfcGMTm.group("zone").toUpperCase());
@@ -524,8 +588,8 @@ public final class MostDateTime {
             return LocalDateTime.of(localDate, localTime).atZone(zoneId).toLocalDateTime();
         }
 
-        public boolean isMatch() {
-            return match;
+        public boolean find() {
+            return find;
         }
 
         public Integer getYear() {
@@ -561,86 +625,89 @@ public final class MostDateTime {
     }
 
     /**
-     * Convert string to local date object.
-     *
-     * @param datetime string datetime
-     * @return local date
+     * Chinese capital letters date.
      */
-    public static LocalDate toLocalDate(String datetime) {
-        return toLocalDateTime(datetime).toLocalDate();
-    }
+    public static class CCDate {
+        private boolean find = false;
+        private String year;
+        private String month;
+        private String day;
 
-    /**
-     * Convert string to local time object.
-     *
-     * @param datetime string datetime
-     * @return local time
-     */
-    public static LocalTime toLocalTime(String datetime) {
-        return toLocalDateTime(datetime).toLocalTime();
-    }
+        public CCDate(String stringDate) {
+            stringDate = stringDate.trim();
+            Matcher m = CC_DATE_PATTERN.matcher(stringDate);
+            if (m.find()) {
+                find = true;
+                year = m.group("y");
+                month = m.group("m");
+                day = m.group("d");
+            }
+        }
 
-    /**
-     * Convert string to instant object.
-     *
-     * @param datetime string datetime
-     * @param zoneId   zoneId
-     * @return instant
-     */
-    public static Instant toInstant(String datetime, ZoneId zoneId) {
-        return toLocalDateTime(datetime).atZone(zoneId).toInstant();
-    }
+        private Integer getNumber(char c) {
+            String cs = String.valueOf(c);
+            return CC_NUMBERS_WITH_ZERO.get(cs);
+        }
 
-    /**
-     * Convert string to instant object.
-     *
-     * @param datetime string datetime
-     * @return instant
-     */
-    public static Instant toInstant(String datetime) {
-        return toInstant(datetime, ZoneId.systemDefault());
-    }
+        public boolean find() {
+            return find;
+        }
 
-    /**
-     * Convert string to timestamp.
-     *
-     * @param datetime string datetime
-     * @param zoneId   zoneId
-     * @return timestamp
-     */
-    public static long toEpochMilli(String datetime, ZoneId zoneId) {
-        return toInstant(datetime, zoneId).toEpochMilli();
-    }
+        public LocalDate toLocalDate() {
+            int y;
+            int m;
+            int d;
+            if (year != null) {
+                String ys = getNumber(year.charAt(0)).toString() +
+                        getNumber(year.charAt(1)).toString() +
+                        getNumber(year.charAt(2)).toString() +
+                        getNumber(year.charAt(3)).toString();
+                y = Integer.parseInt(ys);
+            } else {
+                y = LocalDate.now().getYear();
+                log.warn("Year not found, current year as the default: {}", y);
+            }
 
-    /**
-     * Convert string to timestamp.
-     *
-     * @param datetime string datetime
-     * @return timestamp
-     */
-    public static long toEpochMilli(String datetime) {
-        return toInstant(datetime).toEpochMilli();
-    }
+            m = getNumber(month.charAt(0));
+            if (month.length() == 2) {
+                m += getNumber(month.charAt(1));
+            }
 
-    /**
-     * Convert string to date object.
-     *
-     * @param datetime string datetime
-     * @param zoneId   zoneId
-     * @return date
-     */
-    public static Date toDate(String datetime, ZoneId zoneId) {
-        return new Date(toEpochMilli(datetime, zoneId));
-    }
+            d = getNumber(day.charAt(0));
+            if (day.length() > 1) {
+                int n = getNumber(day.charAt(1));
+                d = d == 10 ? d : d * 10;
+                if (n != 10) {
+                    d += n;
+                }
+            }
+            if (day.length() == 3) {
+                int n = getNumber(day.charAt(2));
+                d += n;
+            }
+            return LocalDate.of(y, m, d);
+        }
 
-    /**
-     * Convert string to date object.
-     *
-     * @param datetime string datetime
-     * @return date
-     */
-    public static Date toDate(String datetime) {
-        return new Date(toEpochMilli(datetime));
+        public String getYear() {
+            return year;
+        }
+
+        public String getMonth() {
+            return month;
+        }
+
+        public String getDay() {
+            return day;
+        }
+
+        @Override
+        public String toString() {
+            return "CCDate{" +
+                    "day='" + day + '\'' +
+                    ", month='" + month + '\'' +
+                    ", year='" + year + '\'' +
+                    '}';
+        }
     }
 
     /**
