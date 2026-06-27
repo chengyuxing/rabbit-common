@@ -161,7 +161,7 @@ public class Test2 {
         Pattern p = Pattern.compile("y");
         StringUtils.foreachWindow("yyyy.MM.dd_HH.mm.ss", p, 0, 2, (r, i) -> {
             System.out.println(r + ":" + i);
-            return true;
+            return false;
         });
     }
 
