@@ -17,15 +17,19 @@ public class Printer {
         return "\033[" + codes + "m" + str.replaceAll("\033\\[[\\d;]+m", "") + "\033[0m";
     }
 
-    public static void print(String str, AnsiStyle style) {
+    public static void print(String str, AnsiStyle... style) {
         System.err.print(colorful(str, style));
     }
 
-    public static void println(String str, AnsiStyle style) {
+    public static void println(String str, AnsiStyle... style) {
         System.err.println(colorful(str, style));
     }
 
     public static void printf(String str, AnsiStyle style, Object... args) {
+        System.err.printf(colorful(str, style), args);
+    }
+
+    public static void printf(String str, AnsiStyle[] style, Object... args) {
         System.err.printf(colorful(str, style), args);
     }
 }
