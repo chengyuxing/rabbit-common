@@ -655,22 +655,27 @@ public final class StringUtils {
     ) {
         Matcher m = pattern.matcher(content);
         while (m.find()) {
-            int wl = m.group().length();
-            int i = leftOffset < 0
-                    ? Math.max(leftOffset, -wl)
-                    : Math.min(leftOffset, m.start());
-            int j = rightOffset < 0
-                    ? Math.max(rightOffset, -wl)
-                    : Math.min(rightOffset, content.length() - m.end());
-            int begin = m.start() - i;
-            int end = m.end() + j;
-            int temp;
-            if (begin > end) {
-                temp = begin;
-                begin = end;
-                end = temp;
+            String sub;
+            if (leftOffset == 0 && rightOffset == 0) {
+                sub = m.group();
+            } else {
+                int wl = m.group().length();
+                int i = leftOffset < 0
+                        ? Math.max(leftOffset, -wl)
+                        : Math.min(leftOffset, m.start());
+                int j = rightOffset < 0
+                        ? Math.max(rightOffset, -wl)
+                        : Math.min(rightOffset, content.length() - m.end());
+                int begin = m.start() - i;
+                int end = m.end() + j;
+                int temp;
+                if (begin > end) {
+                    temp = begin;
+                    begin = end;
+                    end = temp;
+                }
+                sub = content.substring(begin, end);
             }
-            String sub = content.substring(begin, end);
             boolean next = consumer.apply(sub, m.start());
             if (!next) {
                 break;
