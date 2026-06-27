@@ -638,7 +638,7 @@ public final class StringUtils {
      * otherwise consume all the founded elements.
      * <blockquote><pre>
      *     foreachWindow("Hello world!", "w", 0, 1, consumer)
-     *     // Hello [wo]rld! --> "wo"
+     *     // Hello [wo]rld! --&gt; "wo"
      * </pre></blockquote>
      *
      * @param content     content

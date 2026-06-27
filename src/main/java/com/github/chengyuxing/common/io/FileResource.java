@@ -156,6 +156,8 @@ public class FileResource extends ClassPathResource {
 
     /**
      * Intercept the resource request.
+     *
+     * @param path path
      */
     protected @Nullable Supplier<InputStream> requestIntercept(final String path) {
         return null;
