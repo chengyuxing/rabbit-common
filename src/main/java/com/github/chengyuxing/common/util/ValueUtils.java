@@ -231,6 +231,10 @@ public final class ValueUtils {
      * @return key list
      */
     public static @NotNull @Unmodifiable List<String> decodeKeyPathExpression(String keyPath) {
+        int dotIdx = KeyExpressionParser.getFirstDotIndex(keyPath);
+        if (dotIdx == -1) {
+            return Collections.singletonList(keyPath);
+        }
         IdentifierLexer lexer = new IdentifierLexer(keyPath, 0);
         List<Token> tokens = lexer.tokenize();
         KeyExpressionParser parser = new KeyExpressionParser(tokens);
@@ -239,7 +243,7 @@ public final class ValueUtils {
         if (tokens.get(idx).getType() != TokenType.NEWLINE) {
             throw new IllegalArgumentException("Key Expression syntax error on: " + tokens.get(idx));
         }
-        return keys;
+        return Collections.unmodifiableList(keys);
     }
 
     /**

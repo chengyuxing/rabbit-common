@@ -77,4 +77,25 @@ public class KeyExpressionParser {
         }
         return keys;
     }
+
+    /**
+     * get the expression first dot index.
+     *
+     * @param expression keypath e.g. {@code user.name} or {@code users[0]}
+     * @return first dot index
+     */
+    public static int getFirstDotIndex(String expression) {
+        int idx = -1;
+        for (int i = 0; i < expression.length(); i++) {
+            if (expression.charAt(i) == '.') {
+                idx = i;
+                break;
+            }
+            if (expression.charAt(i) == '[') {
+                idx = i;
+                break;
+            }
+        }
+        return idx;
+    }
 }
