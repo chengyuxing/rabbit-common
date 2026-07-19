@@ -14,7 +14,11 @@ public class Printer {
         for (AnsiStyle style : styles) {
             codes.add(style.code());
         }
-        return "\033[" + codes + "m" + str.replaceAll("\033\\[[\\d;]+m", "") + "\033[0m";
+        return "\033[" + codes + "m" + removeStyle(str) + "\033[0m";
+    }
+
+    public static String removeStyle(String str) {
+        return str.replaceAll("\033\\[[\\d;]+m", "");
     }
 
     public static void print(String str, AnsiStyle... style) {

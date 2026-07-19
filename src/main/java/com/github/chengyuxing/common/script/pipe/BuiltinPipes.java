@@ -20,7 +20,6 @@ public final class BuiltinPipes {
         pipes.put("upper", new Upper());
         pipes.put("lower", new Lower());
         pipes.put("kv", new Kv());
-        pipes.put("type", new Type());
         pipes.put("split", new Split());
         pipes.put("nvl", new Nvl());
         pipes.put("in", new In());
