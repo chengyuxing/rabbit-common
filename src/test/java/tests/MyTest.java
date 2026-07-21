@@ -46,14 +46,14 @@ public class MyTest {
 
     @Test
     public void testDt() {
-        System.out.println(MostDateTime.of("20251212","yyyyMMdd"));
+        System.out.println(MostDateTime.of("20251212", "yyyyMMdd"));
     }
 
     @Test
     public void testResourceIntercept() {
         new FileResource("http://localhost:8080/share/homebrew.md") {
             @Override
-            protected @Nullable Supplier<InputStream> requestIntercept(final String path) {
+            protected @Nullable Supplier<InputStream> resourceIntercept(final String path) {
                 if (!path.endsWith("http:")) {
                     return null;
                 }

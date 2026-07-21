@@ -1,5 +1,6 @@
 package tests;
 
+import com.github.chengyuxing.common.AroundExecutor;
 import com.github.chengyuxing.common.DataRow;
 import com.github.chengyuxing.common.StringFormatter;
 import com.github.chengyuxing.common.io.ClassPathResource;
@@ -11,10 +12,15 @@ import com.github.chengyuxing.common.tuple.Pair;
 import com.github.chengyuxing.common.util.ValueUtils;
 import com.github.chengyuxing.common.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -23,6 +29,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -177,6 +184,36 @@ public class StringTests {
         System.out.println("----");
         String s = new FileResource("https://github.com/chengyuxing/sqlc/raw/master/README.md").readString(StandardCharsets.UTF_8);
         System.out.println(s);
+    }
+
+    @Test
+    public void testFr() {
+        AtomicReference<String> atomicReference = new AtomicReference<>();
+        FileResource fr = new FileResource("https://github.com/chengyuxing/sqlc/raw/master/README.md")
+                .httpInterceptor(new FileResource.ConnectionInterceptor<HttpURLConnection>() {
+                    @Override
+                    public void after(@NotNull HttpURLConnection context) {
+                        try {
+//                            System.out.println(context.getResponseCode());
+//                            System.out.println(context.getResponseMessage());
+                            atomicReference.set(context.getResponseMessage());
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                });
+        System.out.println(fr.readString(StandardCharsets.UTF_8));
+        System.out.println(atomicReference.get());
+    }
+
+    @Test
+    public void testURI() throws IOException {
+        URI uri = URI.create("Users/chengyuxing/Downloads/vuewordcloud-19.0.0.tgz?id=1&name=cyx");
+//        URL url = uri.toURL();
+//        System.out.println(url.openStream().available());
+        System.out.println(uri.getPath());
+        System.out.println(uri.getScheme());
+//        System.out.println(url.getPort());
     }
 
     @Test
