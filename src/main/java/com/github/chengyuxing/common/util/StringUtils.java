@@ -2,6 +2,7 @@ package com.github.chengyuxing.common.util;
 
 
 import com.github.chengyuxing.common.StringFormatter;
+import com.github.chengyuxing.common.TiFunction;
 import com.github.chengyuxing.common.tuple.Pair;
 import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.NotNull;
@@ -645,19 +646,19 @@ public final class StringUtils {
      * @param pattern     substring pattern
      * @param leftOffset  the text window left char offset
      * @param rightOffset the text window right char offset
-     * @param consumer    the substring and the first char index, returns {@code true} to handler next element, otherwise break
+     * @param consumer    (window of substring, founded substring, the founded first char index), returns {@code true} to handler next element, otherwise break
      */
     public static void foreachWindow(@NotNull String content,
                                      @NotNull Pattern pattern,
                                      int leftOffset,
                                      int rightOffset,
-                                     @NotNull BiFunction<String, Integer, Boolean> consumer
+                                     @NotNull TiFunction<String, String, Integer, Boolean> consumer
     ) {
         Matcher m = pattern.matcher(content);
         while (m.find()) {
-            String sub;
+            String window;
             if (leftOffset == 0 && rightOffset == 0) {
-                sub = m.group();
+                window = m.group();
             } else {
                 int wl = m.group().length();
                 int i = leftOffset < 0
@@ -674,9 +675,9 @@ public final class StringUtils {
                     begin = end;
                     end = temp;
                 }
-                sub = content.substring(begin, end);
+                window = content.substring(begin, end);
             }
-            boolean next = consumer.apply(sub, m.start());
+            boolean next = consumer.apply(window, m.group(), m.start());
             if (!next) {
                 break;
             }

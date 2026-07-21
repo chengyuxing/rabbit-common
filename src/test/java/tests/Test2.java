@@ -159,8 +159,9 @@ public class Test2 {
     public void testCCdate() {
         System.out.println(MostDateTime.of("决定书二〇〇一年十二月二十一日的").plus(1, ChronoUnit.DAYS).toLocalDate());
         Pattern p = Pattern.compile("y");
-        StringUtils.foreachWindow("yyyy.MM.dd_HH.mm.ss", p, 0, 2, (r, i) -> {
-            System.out.println(r + ":" + i);
+        StringUtils.foreachWindow("yyyy.MM.dd_HH.mm.ss", p, 0, 2, (w, s, i) -> {
+            System.out.println(w + ":" + i);
+            System.out.println(s);
             return false;
         });
     }
