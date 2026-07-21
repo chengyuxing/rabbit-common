@@ -6,6 +6,7 @@ import com.github.chengyuxing.common.TiFunction;
 import com.github.chengyuxing.common.tuple.Pair;
 import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Range;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -13,7 +14,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -33,31 +33,24 @@ public final class StringUtils {
 
     /**
      * Split content by regex and save the splitters,
-     * e.g. {@code aaa##bbb%%ddd}<br>
-     * RegexResult
+     * e.g. {@code aaa##bbb%%ddd}
+     * <p>
+     * RegexResult:
      * <blockquote>
-     * {@code (?<symbol>##|%%)} symbol :   { [ aaa, bbb, ccc] , [ ## , %% ] } <br>
+     * {@code (##|%%)} -&gt; { {@code [ aaa, bbb, ccc]} , {@code [ ##, %% ]} } <br>
      *
      * </blockquote>
      *
-     * @param s         string
-     * @param regex     regex
-     * @param groupName regex splitter group name
+     * @param s       string
+     * @param pattern regex
+     * @param group   regex splitter group index
      * @return [each parts, splitters]
      */
-    public static @NotNull Pair<List<String>, List<String>> regexSplit(@NotNull String s, @Language("Regexp") @NotNull String regex, @NotNull String groupName) {
-        Pattern p = Pattern.compile(regex);
-        Matcher m = p.matcher(s);
-        int splitIndex = 0;
+    public static @NotNull Pair<List<String>, List<String>> regexSplit(@NotNull String s, @NotNull Pattern pattern, @Range(from = 0, to = Integer.MAX_VALUE) int group) {
         List<String> items = new ArrayList<>();
-        List<String> splitSymbols = new ArrayList<>();
-        while (m.find()) {
-            items.add(s.substring(splitIndex, m.start(groupName)));
-            splitSymbols.add(m.group(groupName));
-            splitIndex = m.end(groupName);
-        }
-        items.add(s.substring(splitIndex));
-        return Pair.of(items, splitSymbols);
+        List<String> splitters = new ArrayList<>();
+        scan(s, pattern, group, (seg, hit) -> (hit ? splitters : items).add(seg));
+        return Pair.of(items, splitters);
     }
 
     /**
@@ -611,6 +604,34 @@ public final class StringUtils {
      *
      * @param text     text content
      * @param pattern  regexp
+     * @param group    group index
+     * @param consumer consumer the seg and match state
+     */
+    public static void scan(
+            @NotNull String text,
+            @NotNull Pattern pattern,
+            @Range(from = 0, to = Integer.MAX_VALUE) int group,
+            @NotNull BiConsumer<String, Boolean> consumer // true = matched
+    ) {
+        Matcher m = pattern.matcher(text);
+        int lastEnd = 0;
+        while (m.find()) {
+            if (m.start(group) > lastEnd) {
+                consumer.accept(text.substring(lastEnd, m.start(group)), false);
+            }
+            consumer.accept(m.group(group), true);
+            lastEnd = m.end(group);
+        }
+        if (lastEnd < text.length()) {
+            consumer.accept(text.substring(lastEnd), false);
+        }
+    }
+
+    /**
+     * Scan the content by regexp to provides the seg and match state.
+     *
+     * @param text     text content
+     * @param pattern  regexp
      * @param consumer consumer the seg and match state
      */
     public static void scan(
@@ -618,17 +639,60 @@ public final class StringUtils {
             @NotNull Pattern pattern,
             @NotNull BiConsumer<String, Boolean> consumer // true = matched
     ) {
-        Matcher m = pattern.matcher(text);
-        int lastEnd = 0;
+        scan(text, pattern, 0, consumer);
+    }
+
+    /**
+     * Foreach the window of the text which includes the pattern's founded group.
+     * <p>
+     * When the consumer returns {@code false} , the first element consumed and break,
+     * otherwise consume all the founded elements.
+     * <blockquote><pre>
+     *     foreachWindow("Hello world!", "w", 0, 0, 1, consumer)
+     *     // Hello [wo]rld! --&gt; "wo"
+     * </pre></blockquote>
+     *
+     * @param content     content
+     * @param pattern     substring pattern
+     * @param group       group index
+     * @param leftOffset  the text window left char offset
+     * @param rightOffset the text window right char offset
+     * @param consumer    (window of substring, founded substring, the founded first char index), returns {@code true} to handler next element, otherwise break
+     */
+    public static void foreachWindow(@NotNull String content,
+                                     @NotNull Pattern pattern,
+                                     @Range(from = 0, to = Integer.MAX_VALUE) int group,
+                                     int leftOffset,
+                                     int rightOffset,
+                                     @NotNull TiFunction<String, String, Integer, Boolean> consumer
+    ) {
+        Matcher m = pattern.matcher(content);
         while (m.find()) {
-            if (m.start() > lastEnd) {
-                consumer.accept(text.substring(lastEnd, m.start()), false);
+            String window;
+            if (leftOffset == 0 && rightOffset == 0) {
+                window = m.group(group);
+            } else {
+                int wl = m.group(group).length();
+                int i = leftOffset < 0
+                        ? Math.max(leftOffset, -wl)
+                        : Math.min(leftOffset, m.start(group));
+                int j = rightOffset < 0
+                        ? Math.max(rightOffset, -wl)
+                        : Math.min(rightOffset, content.length() - m.end(group));
+                int begin = m.start(group) - i;
+                int end = m.end(group) + j;
+                int temp;
+                if (begin > end) {
+                    temp = begin;
+                    begin = end;
+                    end = temp;
+                }
+                window = content.substring(begin, end);
             }
-            consumer.accept(m.group(), true);
-            lastEnd = m.end();
-        }
-        if (lastEnd < text.length()) {
-            consumer.accept(text.substring(lastEnd), false);
+            boolean next = consumer.apply(window, m.group(group), m.start(group));
+            if (!next) {
+                break;
+            }
         }
     }
 
@@ -641,6 +705,7 @@ public final class StringUtils {
      *     foreachWindow("Hello world!", "w", 0, 1, consumer)
      *     // Hello [wo]rld! --&gt; "wo"
      * </pre></blockquote>
+     * {@inheritDoc}
      *
      * @param content     content
      * @param pattern     substring pattern
@@ -654,33 +719,6 @@ public final class StringUtils {
                                      int rightOffset,
                                      @NotNull TiFunction<String, String, Integer, Boolean> consumer
     ) {
-        Matcher m = pattern.matcher(content);
-        while (m.find()) {
-            String window;
-            if (leftOffset == 0 && rightOffset == 0) {
-                window = m.group();
-            } else {
-                int wl = m.group().length();
-                int i = leftOffset < 0
-                        ? Math.max(leftOffset, -wl)
-                        : Math.min(leftOffset, m.start());
-                int j = rightOffset < 0
-                        ? Math.max(rightOffset, -wl)
-                        : Math.min(rightOffset, content.length() - m.end());
-                int begin = m.start() - i;
-                int end = m.end() + j;
-                int temp;
-                if (begin > end) {
-                    temp = begin;
-                    begin = end;
-                    end = temp;
-                }
-                window = content.substring(begin, end);
-            }
-            boolean next = consumer.apply(window, m.group(), m.start());
-            if (!next) {
-                break;
-            }
-        }
+        foreachWindow(content, pattern, 0, leftOffset, rightOffset, consumer);
     }
 }
