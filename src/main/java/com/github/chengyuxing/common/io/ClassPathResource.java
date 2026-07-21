@@ -162,9 +162,6 @@ public class ClassPathResource {
      * @return short file name
      */
     public String getFileName() {
-        if (path.isEmpty()) {
-            return null;
-        }
         int index = path.lastIndexOf("/");
         return index != -1 ? path.substring(index + 1) : path;
     }
@@ -175,16 +172,12 @@ public class ClassPathResource {
      * @return file name extension
      */
     public String getFilenameExtension() {
-        if (path.isEmpty()) {
+        int extIndex = path.lastIndexOf(46);
+        if (extIndex == -1) {
             return null;
         } else {
-            int extIndex = path.lastIndexOf(46);
-            if (extIndex == -1) {
-                return null;
-            } else {
-                int folderIndex = path.lastIndexOf("/");
-                return folderIndex > extIndex ? null : path.substring(extIndex + 1);
-            }
+            int folderIndex = path.lastIndexOf("/");
+            return folderIndex > extIndex ? null : path.substring(extIndex + 1);
         }
     }
 
@@ -194,9 +187,6 @@ public class ClassPathResource {
      * @return resource url
      */
     public URL getURL() {
-        if (path.isEmpty()) {
-            return null;
-        }
         return classLoader != null ? classLoader.getResource(path) : ClassLoader.getSystemResource(path);
     }
 
