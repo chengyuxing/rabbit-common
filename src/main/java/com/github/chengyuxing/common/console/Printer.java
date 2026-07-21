@@ -26,7 +26,7 @@ public class Printer {
     }
 
     public static String endStyle() {
-        return "\033[0m";
+        return "\033[" + Style.RESET.code() + "m";
     }
 
     public static String removeStyle(String str) {

@@ -18,7 +18,10 @@ public enum Style implements AnsiStyle {
     CYAN("96"),
     SILVER("37"),
     WHITE("97"),
-    UNDERLINE("4");
+    DEFAULT_FG("39"),
+    DEFAULT_BG("49"),
+    UNDERLINE("4"),
+    RESET("0");
 
     private final String code;
 
