@@ -92,7 +92,7 @@ import java.util.function.Function;
  * </blockquote>
  * <p>Boolean condition expression.</p>
  * <p>Support logic operator: {@code &&, ||, !}, e.g.</p>
- * <blockquote><pre>!(:id &gt;= 0 || :name | {@link com.github.chengyuxing.common.script.pipe.builtin.Nvl nvl('guest')} | {@link com.github.chengyuxing.common.script.pipe.builtin.Length length} &lt;= 3) &amp;&amp; :isHuman
+ * <blockquote><pre>!(:id != {@link com.github.chengyuxing.common.script.lang.Constants blank} || :name | {@link com.github.chengyuxing.common.script.pipe.builtin.Nvl nvl('guest')} | {@link com.github.chengyuxing.common.script.pipe.builtin.Length length} &lt;= 3) &amp;&amp; :isHuman
  * </pre></blockquote>
  * Built-in {@link IPipe pipes}：{@link com.github.chengyuxing.common.script.pipe.BuiltinPipes}
  *

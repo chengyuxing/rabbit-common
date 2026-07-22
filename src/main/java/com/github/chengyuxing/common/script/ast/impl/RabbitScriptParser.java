@@ -3,6 +3,7 @@ package com.github.chengyuxing.common.script.ast.impl;
 import com.github.chengyuxing.common.script.ast.IElement;
 import com.github.chengyuxing.common.script.ast.IExpr;
 import com.github.chengyuxing.common.script.exception.ScriptSyntaxException;
+import com.github.chengyuxing.common.script.lang.Constants;
 import com.github.chengyuxing.common.script.lang.ForContextProperty;
 import com.github.chengyuxing.common.script.lang.Token;
 import com.github.chengyuxing.common.script.lang.TokenType;
@@ -139,14 +140,14 @@ public class RabbitScriptParser {
         String literal = currentToken.getValue();
         Object value;
         switch (literal.toLowerCase()) {
-            case "true":
-            case "false":
+            case Constants.TRUE:
+            case Constants.FALSE:
                 value = Boolean.parseBoolean(literal);
                 break;
-            case "null":
+            case Constants.NULL:
                 value = null;
                 break;
-            case "blank":
+            case Constants.BLANK:
                 value = "";
                 break;
             default:
