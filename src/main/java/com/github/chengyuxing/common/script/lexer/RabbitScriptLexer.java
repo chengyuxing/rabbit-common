@@ -18,6 +18,7 @@ public class RabbitScriptLexer {
     public static final String[] DIRECTIVES = new String[]{
             IF, ELSE, FI, CHOOSE, WHEN, SWITCH, CASE, DEFAULT, BREAK, END, FOR, DONE, GUARD, THROW, CHECK, VAR
     };
+    @SuppressWarnings("RegExpUnnecessaryNonCapturingGroup")
     public static final Pattern DIRECTIVES_PATTERN = Pattern.compile("(?i)\\s*(?:" + String.join("|", DIRECTIVES) + ")(?:\\s+.*|$)");
 
     private final String[] lines;

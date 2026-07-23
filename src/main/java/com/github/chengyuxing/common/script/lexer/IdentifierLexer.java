@@ -32,6 +32,10 @@ public class IdentifierLexer {
         return position < length ? input.charAt(position) : '\n';
     }
 
+    private char peekNextChar() {
+        return position < length - 1 ? input.charAt(position + 1) : '\n';
+    }
+
     private void advance() {
         position++;
     }
@@ -47,6 +51,24 @@ public class IdentifierLexer {
         while (position < length && predicate.test(currentChar())) {
             sb.append(currentChar());
             advance();
+        }
+        return sb.toString();
+    }
+
+    private String readString(char quote) {
+        StringBuilder sb = new StringBuilder();
+        while (position < length && currentChar() != quote) {
+            if (currentChar() == '\n' || currentChar() == '\r') {
+                throw new LexerException("Unterminated string literal at: " + position);
+            }
+            if (currentChar() == '\\' && peekNextChar() == quote) {
+                advance();  // Skip '\' and treat the following quote as a normal character.
+            }
+            sb.append(currentChar());
+            advance();
+        }
+        if (position >= length) {
+            throw new LexerException("Unterminated string literal at: " + position);
         }
         return sb.toString();
     }
@@ -124,30 +146,9 @@ public class IdentifierLexer {
                         tokens.add(new Token(TokenType.PLAIN_TEXT, '#' + keyword, line, start));
                         break;
                 }
-            } else if (current == '\'') {
+            } else if (current == '\'' || current == '"') {
                 advance();
-                String str = readWhile(c -> {
-                    if (c == '\n' || c == '\r') {
-                        throw new LexerException("Unterminated string literal at: " + position);
-                    }
-                    return c != '\'';
-                });
-                if (currentChar() != '\'') {
-                    throw new LexerException("Unterminated string literal at: " + position);
-                }
-                advance();
-                tokens.add(new Token(TokenType.STRING, str, line, start));
-            } else if (current == '"') {
-                advance();
-                String str = readWhile(c -> {
-                    if (c == '\n' || c == '\r') {
-                        throw new LexerException("Unterminated string literal at: " + position);
-                    }
-                    return c != '"';
-                });
-                if (currentChar() != '"') {
-                    throw new LexerException("Unterminated string literal at: " + position);
-                }
+                String str = readString(current);
                 advance();
                 tokens.add(new Token(TokenType.STRING, str, line, start));
             } else if (current == ',') {
@@ -240,8 +241,8 @@ public class IdentifierLexer {
             } else if (current == '-') {
                 tokens.add(new Token(TokenType.SUB_SYMBOL, "-", line, start));
                 advance();
-            } else if (Character.isAlphabetic(current) || current == '_') {
-                String identifier = readWhile(c -> Character.isAlphabetic(c) || Character.isDigit(c) || c == '_');
+            } else if (Character.isLetter(current) || current == '_') {
+                String identifier = readWhile(c -> Character.isLetter(c) || Character.isDigit(c) || c == '_');
                 switch (identifier.toLowerCase()) {
                     case "of":
                         tokens.add(new Token(TokenType.FOR_OF, identifier, line, start));

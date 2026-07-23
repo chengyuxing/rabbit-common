@@ -13,7 +13,10 @@ import java.util.regex.Pattern;
  * Key expression parser.
  */
 public class KeyExpressionParser {
-    public static final Pattern EXPRESSION_PATTERN = Pattern.compile("[a-zA-Z_]\\w*(\\.\\w+|\\[\\d+])*");
+    public static final Pattern SINGLE_QUOTE_STRING_PATTERN = Pattern.compile("'(?:\\\\'|[^'])*'");
+    public static final Pattern DOUBLE_QUOTE_STRING_PATTERN = Pattern.compile("\"(?:\\\\\"|[^\"])*\"");
+    public static final Pattern VAR_KEY_PATTERN = Pattern.compile("[\\p{L}_][\\p{L}\\p{N}_]*");
+    public static final Pattern EXPRESSION_PATTERN = Pattern.compile(VAR_KEY_PATTERN + "(?:\\." + VAR_KEY_PATTERN + "|\\[(?:\\d+|" + SINGLE_QUOTE_STRING_PATTERN + "|" + DOUBLE_QUOTE_STRING_PATTERN + ")])*");
     private final List<Token> tokens;
     private int index;
     private Token currentToken;
@@ -58,15 +61,19 @@ public class KeyExpressionParser {
             if (peek(TokenType.DOT)) {
                 advance();
                 keys.add(currentToken.getValue());
-                if (peek(TokenType.IDENTIFIER) || peek(TokenType.NUMBER)) {
+                if (peek(TokenType.IDENTIFIER)) {
                     advance();
                 } else {
-                    throw new ScriptSyntaxException("Unexpected token: " + currentToken + ", expected: " + TokenType.IDENTIFIER + " / " + TokenType.NUMBER);
+                    throw new ScriptSyntaxException("Unexpected token: " + currentToken + ", expected: " + TokenType.IDENTIFIER);
                 }
             } else if (peek(TokenType.LBRACKET)) {
                 advance();
-                if (!StringUtils.isNonNegativeInteger(currentToken.getValue())) {
-                    throw new ScriptSyntaxException("Index must be a non-negative integer: " + currentToken.getValue());
+                if (peek(TokenType.NUMBER)) {
+                    if (!StringUtils.isNonNegativeInteger(currentToken.getValue())) {
+                        throw new ScriptSyntaxException("Index must be a non-negative integer: " + currentToken.getValue());
+                    }
+                } else if (!peek(TokenType.STRING)) {
+                    throw new ScriptSyntaxException("Unexpected token: " + currentToken + ", expected: " + TokenType.STRING + " / " + TokenType.NUMBER);
                 }
                 keys.add(currentToken.getValue());
                 advance();
