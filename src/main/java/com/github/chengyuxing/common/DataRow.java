@@ -45,7 +45,7 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
     /**
      * Returns a new DataRow from pairs.
      *
-     * @param input key-value pairs: k v，k v...
+     * @param input key-value pairs: k v，k v, ...
      * @return DataRow instance
      */
     public static DataRow of(Object... input) {
@@ -120,13 +120,10 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
         }
         Set<String> keys = rows.iterator().next().keySet();
         DataRow res = new DataRow(keys.size());
-        for (String key : keys) {
-            res.put(key, new ArrayList<>());
-        }
         for (Map<String, Object> row : rows) {
             for (String key : keys) {
                 //noinspection unchecked
-                ((List<Object>) res.get(key)).add(row.get(key));
+                ((List<Object>) res.computeIfAbsent(key, k -> new ArrayList<>())).add(row.get(key));
             }
         }
         return res;
@@ -180,8 +177,7 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
      * @return value or null
      */
     @SuppressWarnings("unchecked")
-    @SafeVarargs
-    public final <T> T getFirstAs(T... defaults) {
+    public <T> T getFirstAs(T... defaults) {
         return (T) getFirst((Object[]) defaults);
     }
 
@@ -206,8 +202,7 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
      * @return value or null
      */
     @SuppressWarnings("unchecked")
-    @SafeVarargs
-    public final <T> T getAs(String key, T... defaults) {
+    public <T> T getAs(String key, T... defaults) {
         T v = (T) get(key);
         return v != null ? v : coalesce(defaults);
     }
@@ -234,8 +229,7 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
      * @return value or null
      */
     @SuppressWarnings("unchecked")
-    @SafeVarargs
-    public final <T> T getAs(int index, T... defaults) {
+    public <T> T getAs(int index, T... defaults) {
         T v = (T) getByIndex(index);
         return v != null ? v : coalesce(defaults);
     }
@@ -262,25 +256,23 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
      *     {user: {age: 18, hobby: ["swim", "hiking", "sleep"]}}
      * </pre></blockquote>
      * <blockquote><pre>
-     *     &lt;String&gt;deepGetAs("user.hobby.0"); // "swim"
+     *     &lt;String&gt;deepGetAs("user.hobby[0]"); // "swim"
      * </pre></blockquote>
      *
-     * @param path     key path expression
-     * @param defaults default values, detect get first non-null value
-     * @param <T>      the type of the value
+     * @param expression key path expression
+     * @param defaults   default values, detect get first non-null value
+     * @param <T>        the type of the value
      * @return value or null
      */
     @SuppressWarnings("unchecked")
-    @SafeVarargs
-    public final <T> T deepGetAs(@NotNull String path, T... defaults) {
+    public <T> T deepGetAs(@NotNull String expression, T... defaults) {
         Object value;
-        if (path.indexOf('.') >= 0) {
-            value = ValueUtils.getDeepValue(this, path);
+        if (expression.indexOf('.') >= 0) {
+            value = ValueUtils.getDeepValue(this, expression);
         } else {
-            value = get(path);
+            value = get(expression);
         }
-        T v = (T) value;
-        return v != null ? v : coalesce(defaults);
+        return value != null ? (T) value : coalesce(defaults);
     }
 
     /**
@@ -288,18 +280,55 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
      * the value to type {@code T} by key path expression.
      *
      * @param <T>         the type of the transformed value
-     * @param path        key path expression
+     * @param expression  key path expression
      * @param transformer a function that takes the retrieved object and returns a transformed value of type {@code T}
      * @return the transformed value of type T after applying transformer to the retrieved value
      * @see #deepGetAs(String, Object[])
      */
-    public <T> T deepGetAs(@NotNull String path, @NotNull Function<Object, T> transformer) {
+    public <T> T deepGetAs(@NotNull String expression, @NotNull Function<Object, T> transformer) {
         Object value;
-        if (path.indexOf('.') >= 0) {
-            value = ValueUtils.getDeepValue(this, path);
+        if (expression.indexOf('.') >= 0) {
+            value = ValueUtils.getDeepValue(this, expression);
         } else {
-            value = get(path);
+            value = get(expression);
         }
+        return transformer.apply(value);
+    }
+
+    /**
+     * Get deep nest object value and cast to type {@code T} by dir path.
+     * <p>
+     * The method interprets the key as a dir path, the path is separated by '{@code /}'
+     * <blockquote><pre>
+     *     {user: {age: 18, hobby: ["swim", "hiking", "sleep"]}}
+     * </pre></blockquote>
+     * <blockquote><pre>
+     *     &lt;String&gt;deepGetAs("/user/hobby/0"); // "swim"
+     * </pre></blockquote>
+     *
+     * @param path     dir path format
+     * @param defaults default values, detect get first non-null value
+     * @param <T>      the type of the value
+     * @return value or null
+     */
+    @SuppressWarnings("unchecked")
+    public <T> T walkAs(@NotNull String path, T... defaults) {
+        Object value = ValueUtils.walkDeepValue(this, path);
+        return value != null ? (T) value : coalesce(defaults);
+    }
+
+    /**
+     * Get deep nest object value and applies a function to transform
+     * the value to type {@code T} by dir path.
+     *
+     * @param path        dir path format
+     * @param transformer a function that takes the retrieved object and returns a transformed value of type {@code T}
+     * @param <T>         the type of the value
+     * @return the transformed value of type T after applying transformer to the retrieved value
+     * @see #walkAs(String, Object[])
+     */
+    public <T> T walkAs(@NotNull String path, @NotNull Function<Object, T> transformer) {
+        Object value = ValueUtils.walkDeepValue(this, path);
         return transformer.apply(value);
     }
 

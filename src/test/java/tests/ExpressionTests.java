@@ -41,7 +41,7 @@ public class ExpressionTests {
         if (KeyExpressionParser.EXPRESSION_PATTERN.matcher(key).matches()) {
             System.out.println(key.replaceAll("\\[(\\d+)]", ".$1"));
         }
-        KeyExpressionParser parser = new KeyExpressionParser(new IdentifierLexer(key,0).tokenize());
+        KeyExpressionParser parser = new KeyExpressionParser(new IdentifierLexer(key, 0).tokenize());
         System.out.println(parser.parse());
 //        IdentifierLexer lexer = new IdentifierLexer(key, 0);
 //        List<Token> tokens = lexer.tokenize();
@@ -79,12 +79,12 @@ public class ExpressionTests {
     @Test
     public void testPerf() {
         String key = "user.addresses[1].age";
-        KeyExpressionParser parser = new KeyExpressionParser(new IdentifierLexer(key,0).tokenize());
+        KeyExpressionParser parser = new KeyExpressionParser(new IdentifierLexer(key, 0).tokenize());
 
         // warm up
         for (int i = 0; i < 1_000_00; i++) {
             Arrays.asList(key.replaceAll("\\[(\\d+)]", ".$1").split("\\."));
-            new KeyExpressionParser(new IdentifierLexer(key,0).tokenize()).parse();
+            new KeyExpressionParser(new IdentifierLexer(key, 0).tokenize()).parse();
         }
 
         long t1 = System.currentTimeMillis();
@@ -95,7 +95,7 @@ public class ExpressionTests {
 
         long t3 = System.currentTimeMillis();
         for (int i = 0; i < 10_000_0; i++) {
-            new KeyExpressionParser(new IdentifierLexer(key,0).tokenize()).parse();
+            new KeyExpressionParser(new IdentifierLexer(key, 0).tokenize()).parse();
         }
         long t4 = System.currentTimeMillis();
 
@@ -118,6 +118,7 @@ public class ExpressionTests {
 //            return Collections.emptySet();
 //        });
         System.out.println(row.<Object>deepGetAs("user.address[1]"));
+        System.out.println(row.<String>walkAs("/user/address/0"));
 //        System.out.println(sets);
 //        System.out.println(sets.getClass());
     }
