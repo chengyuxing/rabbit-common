@@ -3,6 +3,7 @@ package tests;
 import com.github.chengyuxing.common.DataRow;
 import com.github.chengyuxing.common.script.lang.Comparators;
 import com.github.chengyuxing.common.script.ast.impl.KeyExpressionParser;
+import com.github.chengyuxing.common.script.lang.Token;
 import com.github.chengyuxing.common.script.lexer.IdentifierLexer;
 import com.github.chengyuxing.common.util.NamingUtils;
 import com.github.chengyuxing.common.util.StringUtils;
@@ -13,6 +14,7 @@ import tests.entity.User;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.regex.Matcher;
 
 public class ExpressionTests {
     static String exp = "!(:id >= 0 || :name <> blank) && :age<=21";
@@ -48,6 +50,30 @@ public class ExpressionTests {
 //                System.out.println(token.getValue());
 //            }
 //        });
+    }
+
+    @Test
+    public void expTest1() {
+        String key = "user.地址[1]['it\\'s\\n\" ok']['我的啊卡']";
+        System.out.println(key);
+        List<Token> tokens = new IdentifierLexer(key, 0).tokenize();
+        KeyExpressionParser parser = new KeyExpressionParser(tokens);
+        System.out.println(parser.parse());
+        System.out.println(KeyExpressionParser.EXPRESSION_PATTERN.matcher(key).matches());
+        System.out.println(KeyExpressionParser.EXPRESSION_PATTERN.pattern());
+        System.out.println(".xm".matches("\\.[\\p{L}_][\\p{L}\\p{N}_]*"));
+        System.out.println("A".matches("\\p{L}"));
+    }
+
+    @Test
+    public void expTest2() {
+        String text = "\"Hi\\\"hello\\\"wor\\ld\"";
+        System.out.println(text);
+        System.out.println(text.replace("\\\"", "\""));
+        Matcher matcher = KeyExpressionParser.DOUBLE_QUOTE_STRING_PATTERN.matcher(text);
+        if (matcher.find()) {
+            System.out.println(matcher.group(0));
+        }
     }
 
     @Test
