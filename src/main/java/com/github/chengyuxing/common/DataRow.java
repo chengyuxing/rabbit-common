@@ -266,12 +266,9 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
      */
     @SuppressWarnings("unchecked")
     public <T> T deepGetAs(@NotNull String expression, T... defaults) {
-        Object value;
-        if (expression.indexOf('.') >= 0) {
-            value = ValueUtils.getDeepValue(this, expression);
-        } else {
-            value = get(expression);
-        }
+        Object value = expression.indexOf('.') >= 0
+                ? ValueUtils.getDeepValue(this, expression)
+                : get(expression);
         return value != null ? (T) value : coalesce(defaults);
     }
 
@@ -286,12 +283,9 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
      * @see #deepGetAs(String, Object[])
      */
     public <T> T deepGetAs(@NotNull String expression, @NotNull Function<Object, T> transformer) {
-        Object value;
-        if (expression.indexOf('.') >= 0) {
-            value = ValueUtils.getDeepValue(this, expression);
-        } else {
-            value = get(expression);
-        }
+        Object value = expression.indexOf('.') >= 0
+                ? ValueUtils.getDeepValue(this, expression)
+                : get(expression);
         return transformer.apply(value);
     }
 
