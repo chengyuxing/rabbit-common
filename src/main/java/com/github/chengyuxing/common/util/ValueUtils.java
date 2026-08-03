@@ -515,6 +515,10 @@ public final class ValueUtils {
                         ? fieldMapper.apply(meta.getField())
                         : e.getKey();
 
+                if (!source.containsKey(name)) {
+                    continue;
+                }
+
                 Object value = meta.hasField() && valueAdaptor != null
                         ? valueAdaptor.apply(meta.getField(), source.get(name))
                         : adaptValue(setter.getParameterTypes()[0], source.get(name));
