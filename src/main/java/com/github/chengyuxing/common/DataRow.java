@@ -312,6 +312,27 @@ public class DataRow extends LinkedHashMap<String, Object> implements MapExtends
     }
 
     /**
+     * Get deep nest object value and cast to type {@code T} by key arrays.
+     *
+     * @param key  first key
+     * @param keys more than one keys
+     * @param <T>  the type of the value
+     * @return value or null
+     */
+    @SuppressWarnings("unchecked")
+    public <T> T accessAsIgnoreCase(@NotNull String key, String... keys) {
+        Object first = ValueUtils.accessValue(this, key, true);
+        if (first == null) {
+            return null;
+        }
+        if (keys.length == 0) {
+            return (T) first;
+        }
+        Object value = ValueUtils.accessDeepValue(first, Arrays.asList(keys), true);
+        return (T) value;
+    }
+
+    /**
      * Get deep nest object value and applies a function to transform
      * the value to type {@code T} by dir path.
      *

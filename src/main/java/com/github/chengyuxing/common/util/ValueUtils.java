@@ -121,6 +121,22 @@ public final class ValueUtils {
     }
 
     /**
+     * Get a value by key ignore case.
+     *
+     * @param key key
+     * @param map map
+     * @return value
+     */
+    public static @Nullable Object getValueIgnoreCase(String key, Map<String, ?> map) {
+        for (Map.Entry<String, ?> entry : map.entrySet()) {
+            if (entry.getKey().equalsIgnoreCase(key)) {
+                return entry.getValue();
+            }
+        }
+        return null;
+    }
+
+    /**
      * Retrieves the value associated with the specified key from the given object.
      * The method supports accessing values in collections, arrays, and maps using an index or key.
      * It also supports invoking getter methods on objects to retrieve property values.
@@ -131,7 +147,7 @@ public final class ValueUtils {
      * @return The value associated with the key, or null if the key does not exist, the object is null, or the object is of a basic type.
      * @throws IllegalArgumentException If the index is out of bounds for a collection or array, or if there is no corresponding getter method or field for an object.
      */
-    public static @Nullable Object accessValue(Object obj, @NotNull String key) {
+    public static @Nullable Object accessValue(Object obj, @NotNull String key, boolean ignoreCase) {
         if (obj == null) {
             return null;
         }
@@ -154,10 +170,15 @@ public final class ValueUtils {
             }
         }
         if (obj instanceof Map<?, ?>) {
+            if (ignoreCase) {
+                //noinspection unchecked
+                return getValueIgnoreCase(key, (Map<String, Object>) obj);
+            }
             return ((Map<?, ?>) obj).get(key);
         }
         Class<?> clazz = obj.getClass();
-        PropertyMeta meta = ReflectUtils.getBeanPropertyMetas(clazz).get(key);
+        Map<String, PropertyMeta> metas = ReflectUtils.getBeanPropertyMetas(clazz);
+        PropertyMeta meta = ignoreCase ? (PropertyMeta) getValueIgnoreCase(key, metas) : metas.get(key);
         if (meta != null && meta.getGetter() != null) {
             try {
                 return meta.getGetter().invoke(obj);
@@ -174,21 +195,37 @@ public final class ValueUtils {
      * Access the value by index if key is number and the value is a collection or array,
      * otherwise by property name.
      *
+     * @param obj        The object to search within. Can be a collection, array, map, or any object.
+     * @param keys       the key list to access the value
+     * @param ignoreCase ignore case of the key
+     * @return The value found at the specified key, or null if the key is invalid, the object is null,
+     * or the value does not exist at the given key.
+     */
+    public static @Nullable Object accessDeepValue(Object obj, @NotNull List<String> keys, boolean ignoreCase) {
+        if (obj == null) return null;
+        if (keys.isEmpty()) return obj;
+        Object result = obj;
+        for (String key : keys) {
+            if (key == null) throw new IllegalArgumentException("key is null");
+            result = accessValue(result, key, ignoreCase);
+            if (result == null) return null;
+        }
+        return result;
+    }
+
+    /**
+     * Retrieves a value from a nested object structure based on the provided key list.
+     * <p>
+     * Access the value by index if key is number and the value is a collection or array,
+     * otherwise by property name.
+     *
      * @param obj  The object to search within. Can be a collection, array, map, or any object.
      * @param keys the key list to access the value
      * @return The value found at the specified key, or null if the key is invalid, the object is null,
      * or the value does not exist at the given key.
      */
     public static @Nullable Object accessDeepValue(Object obj, @NotNull List<String> keys) {
-        if (obj == null) return null;
-        if (keys.isEmpty()) return obj;
-        Object result = obj;
-        for (String key : keys) {
-            if (key == null) throw new IllegalArgumentException("key is null");
-            result = accessValue(result, key);
-            if (result == null) return null;
-        }
-        return result;
+        return accessDeepValue(obj, keys, false);
     }
 
     /**
