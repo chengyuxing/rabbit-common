@@ -160,22 +160,32 @@ public final class ReflectUtils {
     /**
      * Check is java basic data type(includes boxed type) or not.
      *
+     * @param clazz value type
+     * @return true or false
+     */
+    public static boolean isBasicType(@NotNull Class<?> clazz) {
+        if (clazz.isPrimitive()) {
+            return true;
+        }
+        return clazz == String.class ||
+                clazz == Boolean.class ||
+                clazz == Integer.class ||
+                clazz == Long.class ||
+                clazz == Short.class ||
+                clazz == Double.class ||
+                clazz == Float.class ||
+                clazz == Byte.class ||
+                clazz == Character.class;
+    }
+
+    /**
+     * Check is java basic data type(includes boxed type) or not.
+     *
      * @param value value
      * @return true or false
      */
     public static boolean isBasicType(@NotNull Object value) {
-        if (value.getClass().isPrimitive()) {
-            return true;
-        }
-        return value instanceof String ||
-                value instanceof Boolean ||
-                value instanceof Integer ||
-                value instanceof Long ||
-                value instanceof Short ||
-                value instanceof Double ||
-                value instanceof Character ||
-                value instanceof Float ||
-                value instanceof Byte;
+        return isBasicType(value.getClass());
     }
 
     /**
