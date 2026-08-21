@@ -23,6 +23,6 @@ public class CheckElement implements IElement {
 
     @Override
     public <R> R accept(IElementVisitor<R> visitor) {
-        return  visitor.visitCheck(this);
+        return visitor.visitCheck(this);
     }
 }
