@@ -26,7 +26,7 @@ public final class CleanStringJoiner {
     }
 
     public CleanStringJoiner add(String element) {
-        if (!StringUtils.isEmpty(element)) {
+        if (!StringUtils.isBlank(element)) {
             joiner.add(element);
         }
         return this;

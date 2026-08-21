@@ -140,7 +140,7 @@ public final class Comparators {
             return true;
         }
         if (value instanceof String) {
-            return StringUtils.isBlank((String) value);
+            return StringUtils.isEmpty((String) value);
         }
         if (value instanceof Collection<?>) {
             return ((Collection<?>) value).isEmpty();

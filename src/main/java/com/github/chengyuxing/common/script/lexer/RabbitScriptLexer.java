@@ -53,7 +53,7 @@ public class RabbitScriptLexer {
     }
 
     private void skipEmptyLine() {
-        while (StringUtils.isBlank(currentLine()) && !currentLine().equals("\0")) {
+        while (StringUtils.isEmpty(currentLine()) && !currentLine().equals("\0")) {
             advance();
         }
     }
