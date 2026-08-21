@@ -119,7 +119,7 @@ public class ExpressionTests {
 //        });
         System.out.println(row.<Object>deepGetAs("user.address[1]"));
         System.out.println(row.<String>walkAs("/user/address/0"));
-        System.out.println(row.<Object>accessAsIgnoreCase("User", "addREss", "0"));
+        System.out.println(row.<Object>accessAsIgnoreCase("User", "INFO", "name"));
 //        System.out.println(sets);
 //        System.out.println(sets.getClass());
     }

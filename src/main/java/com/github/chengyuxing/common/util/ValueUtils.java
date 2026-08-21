@@ -176,6 +176,9 @@ public final class ValueUtils {
             }
             return ((Map<?, ?>) obj).get(key);
         }
+        if (obj instanceof Iterable<?>) {
+            throw new IllegalStateException("Cannot access value from iterable of key '" + key + "', number is required");
+        }
         Class<?> clazz = obj.getClass();
         Map<String, PropertyMeta> metas = ReflectUtils.getBeanPropertyMetas(clazz);
         PropertyMeta meta = ignoreCase ? (PropertyMeta) getValueIgnoreCase(key, metas) : metas.get(key);
