@@ -6,6 +6,7 @@ import com.github.chengyuxing.common.TiFunction;
 import com.github.chengyuxing.common.tuple.Pair;
 import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
 
 import java.nio.charset.StandardCharsets;
@@ -386,23 +387,15 @@ public final class StringUtils {
     }
 
     /**
-     * Checks if the provided string is empty or null.
+     * Checks if the provided string is null, empty or whitespaces.
      *
      * @param str the string to check
-     * @return true if the string is null, blank, or only contains whitespace; false otherwise
+     * @return true if the string is null or only contains whitespace, false otherwise
      */
-    public static boolean isBlank(String str) {
-        return str == null || isEmpty(str);
-    }
-
-    /**
-     * Checks if the provided string is empty, meaning it contains only whitespace characters or is empty.
-     * Whitespace characters include spaces, tabs, and line breaks.
-     *
-     * @param str the string to check, must not be null
-     * @return true if the string is blank (contains only whitespace or is empty), false otherwise
-     */
-    public static boolean isEmpty(@NotNull String str) {
+    public static boolean isBlank(@Nullable String str) {
+        if (str == null) {
+            return true;
+        }
         int len = str.length();
         for (int i = 0; i < len; i++) {
             if (!Character.isWhitespace(str.charAt(i))) {

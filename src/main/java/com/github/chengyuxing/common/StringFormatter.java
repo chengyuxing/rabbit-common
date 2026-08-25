@@ -57,7 +57,7 @@ public class StringFormatter {
         if (template == null) {
             return "";
         }
-        if (StringUtils.isEmpty(template)) {
+        if (StringUtils.isBlank(template)) {
             return template;
         }
         if (!template.contains("${")) {
