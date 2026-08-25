@@ -3,6 +3,7 @@ package com.github.chengyuxing.common.script.lang;
 import com.github.chengyuxing.common.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
+import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Map;
@@ -140,16 +141,16 @@ public final class Comparators {
             return true;
         }
         if (value instanceof String) {
-            return StringUtils.isEmpty((String) value);
+            return StringUtils.isBlank((String) value);
         }
         if (value instanceof Collection<?>) {
             return ((Collection<?>) value).isEmpty();
         }
         if (value instanceof Iterable<?>) {
-            return ((Iterable<?>) value).iterator().hasNext();
+            return !((Iterable<?>) value).iterator().hasNext();
         }
-        if (value instanceof Object[]) {
-            return ((Object[]) value).length == 0;
+        if (value.getClass().isArray()) {
+            return Array.getLength(value) == 0;
         }
         if (value instanceof Map<?, ?>) {
             return ((Map<?, ?>) value).isEmpty();
