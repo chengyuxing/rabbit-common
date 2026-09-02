@@ -1,6 +1,8 @@
 package tests;
 
 import com.github.chengyuxing.common.DataRow;
+import com.github.chengyuxing.common.script.RabbitScriptEngine;
+import com.github.chengyuxing.common.script.ast.impl.EvalContext;
 import com.github.chengyuxing.common.script.lang.Comparators;
 import com.github.chengyuxing.common.script.ast.impl.KeyExpressionParser;
 import com.github.chengyuxing.common.script.lang.Token;
@@ -27,6 +29,13 @@ public class ExpressionTests {
         args.put("age", 17);
         args.put("name", "cyx");
         args.put("user", DataRow.of("name", "cyx", "addresses", Arrays.asList("a", DataRow.of("age", 88), Arrays.asList(1, 2, 3), "d", "e")));
+    }
+
+    @Test
+    public void test2() {
+        RabbitScriptEngine engine = new RabbitScriptEngine();
+        boolean result = engine.eval(":NAME", new EvalContext(args));
+        System.out.println(result);
     }
 
     @Test

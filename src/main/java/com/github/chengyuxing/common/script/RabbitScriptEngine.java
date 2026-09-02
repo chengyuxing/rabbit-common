@@ -11,6 +11,10 @@ import com.github.chengyuxing.common.script.pipe.IPipe;
 import java.util.List;
 import java.util.function.Function;
 
+import static com.github.chengyuxing.common.script.lang.Directives.FI;
+import static com.github.chengyuxing.common.script.lang.Directives.IF;
+import static com.github.chengyuxing.common.util.StringUtils.NEW_LINE;
+
 /**
  * <h2>Rabbit script engine.</h2>
  * <p>check statement:</p>
@@ -131,5 +135,17 @@ public final class RabbitScriptEngine implements ScriptEngine {
     public EvalResult execute(ScriptAst ast, EvalContext context) {
         RabbitScriptEvaluator evaluator = new RabbitScriptEvaluator(context);
         return evaluator.execute(ast);
+    }
+
+    @Override
+    public boolean eval(String booleanExpression, EvalContext context) {
+        String ifExpression = IF + " " + booleanExpression + NEW_LINE + FI;
+        ScriptAst ast = compile(ifExpression);
+        List<IElement> elements = ast.getElements();
+        if (elements.isEmpty()) {
+            return false;
+        }
+        IfElement element = (IfElement) elements.get(0);
+        return element.getExpr().eval(context);
     }
 }

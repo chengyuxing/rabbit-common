@@ -10,6 +10,8 @@ public interface ScriptEngine {
 
     EvalResult execute(ScriptAst ast, EvalContext context);
 
+    boolean eval(String booleanExpression, EvalContext context);
+
     default EvalResult run(String script, EvalContext context) {
         ScriptAst ast = compile(script);
         return execute(ast, context);
