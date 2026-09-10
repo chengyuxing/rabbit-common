@@ -87,14 +87,14 @@ public final class MostDateTime {
     public static final DateTimeFormatter DATE_TIME_NUM_FORMAT = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
     public static final DateTimeFormatter DATE_TIME_MILLS_NUM_FORMAT = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
 
-    private final LocalDateTime dateTime;
+    private final ZonedDateTime dateTime;
 
     /**
      * Constructs a new MostDateTime with temporal.
      *
      * @param dateTime dateTime
      */
-    MostDateTime(LocalDateTime dateTime) {
+    MostDateTime(ZonedDateTime dateTime) {
         this.dateTime = dateTime;
     }
 
@@ -107,26 +107,26 @@ public final class MostDateTime {
      */
     @Contract("null, _ -> fail")
     public static @NotNull MostDateTime of(Temporal temporal, ZoneId zoneId) {
-        if (temporal instanceof LocalDateTime) {
-            return new MostDateTime((LocalDateTime) temporal);
-        }
-        if (temporal instanceof LocalDate) {
-            return new MostDateTime(((LocalDate) temporal).atStartOfDay());
+        if (temporal instanceof ZonedDateTime) {
+            return new MostDateTime((ZonedDateTime) temporal);
         }
         if (temporal instanceof OffsetDateTime) {
-            return new MostDateTime(((OffsetDateTime) temporal).toLocalDateTime());
+            return new MostDateTime(((OffsetDateTime) temporal).toZonedDateTime());
         }
-        if (temporal instanceof ZonedDateTime) {
-            return new MostDateTime(((ZonedDateTime) temporal).toLocalDateTime());
-        }
-        if (temporal instanceof LocalTime) {
-            return new MostDateTime(((LocalTime) temporal).atDate(LocalDate.now()));
-        }
-        if (temporal instanceof OffsetTime) {
-            return new MostDateTime(((OffsetTime) temporal).atDate(LocalDate.now()).toLocalDateTime());
+        if (temporal instanceof LocalDateTime) {
+            return new MostDateTime(((LocalDateTime) temporal).atZone(zoneId));
         }
         if (temporal instanceof Instant) {
-            return new MostDateTime(((Instant) temporal).atZone(zoneId).toLocalDateTime());
+            return new MostDateTime(((Instant) temporal).atZone(zoneId));
+        }
+        if (temporal instanceof LocalDate) {
+            return new MostDateTime(((LocalDate) temporal).atStartOfDay(zoneId));
+        }
+        if (temporal instanceof LocalTime) {
+            return new MostDateTime(((LocalTime) temporal).atDate(LocalDate.now()).atZone(zoneId));
+        }
+        if (temporal instanceof OffsetTime) {
+            return new MostDateTime(((OffsetTime) temporal).atDate(LocalDate.now()).toZonedDateTime());
         }
         throw new IllegalArgumentException("Unsupported temporal type: " + temporal.getClass());
     }
@@ -151,7 +151,7 @@ public final class MostDateTime {
      */
     @Contract("_, _ -> new")
     public static @NotNull MostDateTime of(@NotNull Date date, ZoneId zoneId) {
-        return new MostDateTime(date.toInstant().atZone(zoneId).toLocalDateTime());
+        return new MostDateTime(date.toInstant().atZone(zoneId));
     }
 
     /**
@@ -170,10 +170,10 @@ public final class MostDateTime {
      *
      * @param datetime string datetime
      * @return MostDateTime instance
-     * @see #toLocalDateTime(String)
+     * @see #toZonedDateTime(String)
      */
     public static @NotNull MostDateTime of(String datetime) {
-        LocalDateTime ldt = toLocalDateTime(datetime);
+        ZonedDateTime ldt = toZonedDateTime(datetime);
         return of(ldt);
     }
 
@@ -251,30 +251,10 @@ public final class MostDateTime {
     /**
      * Convert to Instant.
      *
-     * @param zoneId zoneId
-     * @return a new Instant
-     */
-    public Instant toInstant(ZoneId zoneId) {
-        return dateTime.atZone(zoneId).toInstant();
-    }
-
-    /**
-     * Convert to Instant.
-     *
      * @return a new Instant
      */
     public Instant toInstant() {
-        return toInstant(ZoneId.systemDefault());
-    }
-
-    /**
-     * Convert to Date.
-     *
-     * @param zoneId zoneId
-     * @return a new Date
-     */
-    public Date toDate(ZoneId zoneId) {
-        return new Date(toInstant(zoneId).toEpochMilli());
+        return dateTime.toInstant();
     }
 
     /**
@@ -283,7 +263,7 @@ public final class MostDateTime {
      * @return a new Date
      */
     public Date toDate() {
-        return toDate(ZoneId.systemDefault());
+        return new Date(toInstant().toEpochMilli());
     }
 
     /**
@@ -291,8 +271,8 @@ public final class MostDateTime {
      *
      * @return a new LocalDateTime
      */
-    public LocalDateTime toLocalDateTime() {
-        return dateTime;
+    public LocalDateTime toZonedDateTime() {
+        return dateTime.toLocalDateTime();
     }
 
     /**
@@ -311,16 +291,6 @@ public final class MostDateTime {
      */
     public LocalTime toLocalTime() {
         return dateTime.toLocalTime();
-    }
-
-    /**
-     * Convert to timestamp.
-     *
-     * @param zoneId zoneId
-     * @return timestamp
-     */
-    public long toEpochMilli(ZoneId zoneId) {
-        return toInstant(zoneId).toEpochMilli();
     }
 
     /**
@@ -373,45 +343,45 @@ public final class MostDateTime {
      * @param datetime string datetime
      * @return LocalDateTime
      */
-    public static LocalDateTime toLocalDateTime(@NotNull String datetime) {
+    public static ZonedDateTime toZonedDateTime(@NotNull String datetime) {
         datetime = datetime.trim();
         boolean isDigit = StringUtils.isAsciiDigits(datetime);
         int len = datetime.length();
         if (isDigit) {
             if (len == 17) {
-                return LocalDateTime.parse(datetime, DATE_TIME_MILLS_NUM_FORMAT);
+                return LocalDateTime.parse(datetime, DATE_TIME_MILLS_NUM_FORMAT).atZone(ZoneId.systemDefault());
             }
             if (len == 14) {
-                return LocalDateTime.parse(datetime, DATE_TIME_NUM_FORMAT);
+                return LocalDateTime.parse(datetime, DATE_TIME_NUM_FORMAT).atZone(ZoneId.systemDefault());
             }
             if (len == 8) {
-                return LocalDate.parse(datetime, DATE_NUM_FORMAT).atStartOfDay();
+                return LocalDate.parse(datetime, DATE_NUM_FORMAT).atStartOfDay(ZoneId.systemDefault());
             }
             if (len == 13) {
-                return Instant.ofEpochMilli(Long.parseLong(datetime)).atZone(ZoneId.systemDefault()).toLocalDateTime();
+                return Instant.ofEpochMilli(Long.parseLong(datetime)).atZone(ZoneId.systemDefault());
             }
             if (len == 10) {
-                return Instant.ofEpochSecond(Long.parseLong(datetime)).atZone(ZoneId.systemDefault()).toLocalDateTime();
+                return Instant.ofEpochSecond(Long.parseLong(datetime)).atZone(ZoneId.systemDefault());
             }
         }
 
         if (RFC_1123_DATE_TIME_PATTERN.matcher(datetime).matches()) {
-            return LocalDateTime.parse(datetime, DateTimeFormatter.RFC_1123_DATE_TIME);
+            return ZonedDateTime.parse(datetime, DateTimeFormatter.RFC_1123_DATE_TIME);
         }
 
         ISODateTime isoDateTime = createISODateTime(datetime);
         if (isoDateTime.find()) {
-            return isoDateTime.toLocalDateTime();
+            return isoDateTime.toZonedDateTime();
         }
 
         RFCLikeDate rfcLikeDate = createRFCLikeDateTime(datetime);
         if (rfcLikeDate.find()) {
-            return rfcLikeDate.toLocalDateTime();
+            return rfcLikeDate.toZonedDateTime();
         }
 
         CCDate ccDate = createCCDate(datetime);
         if (ccDate.find()) {
-            return ccDate.toLocalDate().atStartOfDay();
+            return ccDate.toLocalDate().atStartOfDay().atZone(ZoneId.systemDefault());
         }
 
         boolean anyMatch = false;
@@ -468,7 +438,7 @@ public final class MostDateTime {
             }
         }
         if (anyMatch) {
-            return LocalDateTime.of(year, month, day, hour, minus, second, nanoSeconds);
+            return LocalDateTime.of(year, month, day, hour, minus, second, nanoSeconds).atZone(ZoneId.systemDefault());
         }
         throw new IllegalArgumentException("unknown date time format: " + datetime);
     }
@@ -525,8 +495,8 @@ public final class MostDateTime {
             }
         }
 
-        public LocalDateTime toLocalDateTime() {
-            return LocalDateTime.parse(date).atZone(zoneId).toLocalDateTime();
+        public ZonedDateTime toZonedDateTime() {
+            return LocalDateTime.parse(date).atZone(zoneId);
         }
 
         public String getDate() {
@@ -584,10 +554,10 @@ public final class MostDateTime {
             }
         }
 
-        public LocalDateTime toLocalDateTime() {
+        public ZonedDateTime toZonedDateTime() {
             LocalDate localDate = LocalDate.of(year, month, day);
             LocalTime localTime = LocalTime.parse(time);
-            return LocalDateTime.of(localDate, localTime).atZone(zoneId).toLocalDateTime();
+            return LocalDateTime.of(localDate, localTime).atZone(zoneId);
         }
 
         public boolean find() {
