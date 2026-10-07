@@ -3,8 +3,6 @@ package com.github.chengyuxing.common.util;
 import com.github.chengyuxing.common.MethodReference;
 import com.github.chengyuxing.common.PropertyMeta;
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
@@ -19,8 +17,6 @@ import java.util.concurrent.ConcurrentHashMap;
  * Reflect util.
  */
 public final class ReflectUtils {
-    private static final Logger log = LoggerFactory.getLogger(ReflectUtils.class);
-
     private static final Map<String, String> METHOD_REF_CACHE = new ConcurrentHashMap<>();
     private static final Map<Class<?>, Map<String, PropertyMeta>> BEAN_PROPERTY_CACHE = new ConcurrentHashMap<>();
 
@@ -102,7 +98,7 @@ public final class ReflectUtils {
     /**
      * Get field name from Lambda method reference.
      *
-     * @param methodRef method reference e.g. {@code User::getName}
+     * @param methodRef getter reference e.g. {@code User::getName} or {@code User::isActive}
      * @param <T>       class type
      * @return field name
      */
@@ -116,6 +112,10 @@ public final class ReflectUtils {
                 if (methodName.startsWith("get") && methodName.length() > 3) {
                     return Introspector.decapitalize(methodName.substring(3));
                 }
+                if (methodName.startsWith("is") && methodName.length() > 2 &&
+                        serializedLambda.getImplMethodSignature().equals("()Z")) {
+                    return Introspector.decapitalize(methodName.substring(2));
+                }
                 throw new IllegalArgumentException("Invalid method reference: " + methodName);
             } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
                 throw new RuntimeException("Unable to parse lambda expression", e);
@@ -127,6 +127,7 @@ public final class ReflectUtils {
      * Retrieves a map of property names to their corresponding metadata for the given class.
      * The method inspects the provided class using Java's introspection capabilities to
      * gather information about its properties, including their fields, getter, and setter methods.
+     * Fields are searched from the concrete class through its parents; the nearest declaration wins.
      *
      * @param clazz the class to inspect for property metadata
      * @return a map where keys are property names and values are instances of PropertyMeta containing
@@ -142,11 +143,15 @@ public final class ReflectUtils {
                     PropertyMeta pm = new PropertyMeta(name);
                     pm.setGetter(p.getReadMethod());
                     pm.setSetter(p.getWriteMethod());
-                    try {
-                        Class<?> dClass = p.getReadMethod().getDeclaringClass();
-                        pm.setField(dClass.getDeclaredField(name));
-                    } catch (Exception e) {
-                        log.debug("Cannot access field '{}'", name, e);
+                    // Resolve shadowed fields from the concrete class, including overridden getters.
+                    for (Class<?> declaringClass = c; declaringClass != Object.class && declaringClass != null;
+                         declaringClass = declaringClass.getSuperclass()) {
+                        try {
+                            pm.setField(declaringClass.getDeclaredField(name));
+                            break;
+                        } catch (NoSuchFieldException ignored) {
+                            // Continue searching the parent class.
+                        }
                     }
                     map.put(name, pm);
                 }
