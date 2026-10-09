@@ -207,7 +207,6 @@ public class Test2 {
         System.out.println(another.get(ChronoField.MONTH_OF_YEAR));
         System.out.println(another.toDate());
         System.out.println(another.toInstant());
-        System.out.println(another.toZonedDateTime());
     }
 
     @Test

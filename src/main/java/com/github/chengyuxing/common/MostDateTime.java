@@ -1,6 +1,7 @@
 package com.github.chengyuxing.common;
 
 import com.github.chengyuxing.common.util.StringUtils;
+import com.github.chengyuxing.common.util.ValueUtils;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -8,13 +9,19 @@ import org.slf4j.LoggerFactory;
 
 import java.time.*;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.format.DateTimeParseException;
+import java.time.format.ResolverStyle;
 import java.time.temporal.ChronoField;
 import java.time.temporal.Temporal;
+import java.time.temporal.TemporalAccessor;
 import java.time.temporal.TemporalField;
+import java.time.temporal.TemporalQueries;
 import java.time.temporal.TemporalUnit;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -49,18 +56,18 @@ public final class MostDateTime {
         putAll(CC_NUMBERS);
     }};
     private static final Map<String, Integer> EN_MONTHS = new HashMap<String, Integer>() {{
-        put("Jan", 1);
-        put("Feb", 2);
-        put("Mar", 3);
-        put("Apr", 4);
-        put("May", 5);
-        put("Jun", 6);
-        put("Jul", 7);
-        put("Aug", 8);
-        put("Sep", 9);
-        put("Oct", 10);
-        put("Nov", 11);
-        put("Dec", 12);
+        put("jan", 1);
+        put("feb", 2);
+        put("mar", 3);
+        put("apr", 4);
+        put("may", 5);
+        put("jun", 6);
+        put("jul", 7);
+        put("aug", 8);
+        put("sep", 9);
+        put("oct", 10);
+        put("nov", 11);
+        put("dec", 12);
     }};
     private static final String MONTHS_PATTERN = String.join("|", EN_MONTHS.keySet());
     private static final String WEEK_PATTERN = "Mon|Tue|Wed|Thu|Fri|Sat|Sun";
@@ -70,11 +77,11 @@ public final class MostDateTime {
     public static final Pattern GENERIC_DATE_PATTERN = Pattern.compile("((?<y>\\d{4})[-/.年])?(?<m>\\d{1,2})[-/.月](?<d>\\d{1,2})日?");
     public static final Pattern CC_DATE_PATTERN = Pattern.compile("((?<y>[" + CC_NUMBERS_WITH_ZERO_PATTERN + "]{4})年)?(?<m>[" + CC_NUMBERS_PATTERN + "]{1,2})月(?<d>[" + CC_NUMBERS_PATTERN + "]{1,3})日?");
     // language=regexp
-    public static final Pattern EN_TIME_PATTERN = Pattern.compile("(?<h>\\d{1,2}):(?<m>\\d{1,2})(:(?<s>\\d{1,2})(\\.(?<n>\\d{3,9}))?)?");
+    public static final Pattern EN_TIME_PATTERN = Pattern.compile("(?<h>\\d{1,2}):(?<m>\\d{1,2})(:(?<s>\\d{1,2})(\\.(?<n>\\d{1,9}))?)?");
     // language=regexp
     public static final Pattern ZH_TIME_PATTERN = Pattern.compile("((?<h>\\d{1,2})[时点])((?<m>\\d{1,2})分)((?<s>\\d{1,2})秒)?");
     // language=regexp
-    public static final Pattern ISO_DATE_TIME_PATTERN = Pattern.compile("(?<date>\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d{3,9})?)(?<zone>Z|GMT|UTC|UT|([+-](\\d{1,6}|\\d{2}:\\d{2}(:\\d{2})?)))?", Pattern.CASE_INSENSITIVE);
+    public static final Pattern ISO_DATE_TIME_PATTERN = Pattern.compile("(?<date>\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,9})?)(?<zone>Z|GMT|UTC|UT|([+-](\\d{1,6}|\\d{2}:\\d{2}(:\\d{2})?)))?", Pattern.CASE_INSENSITIVE);
     // language=regexp
     public static final Pattern RFC_1123_DATE_TIME_PATTERN = Pattern.compile("(" + WEEK_PATTERN + "),\\s+\\d{1,2}\\s+(" + MONTHS_PATTERN + ")\\s+\\d{4}\\s+\\d{1,2}:\\d{1,2}:\\d{1,2}\\s+GMT", Pattern.CASE_INSENSITIVE);
     // language=regexp
@@ -83,9 +90,11 @@ public final class MostDateTime {
     public static final Pattern RFC_GMT_DATE_TIME_PATTERN = Pattern.compile("(" + WEEK_PATTERN + ")\\s+(?<M>" + MONTHS_PATTERN + ")\\s+(?<d>\\d{1,2})\\s+(?<y>\\d{4})\\s+(?<time>\\d{1,2}:\\d{1,2}:\\d{1,2})\\s+GMT(?<zone>Z|GMT|UTC|UT|([+-](\\d{1,6}|\\d{2}:\\d{2}(:\\d{2})?)))", Pattern.CASE_INSENSITIVE);
     public static final Pattern TIME_CHAR_PATTERN = Pattern.compile("[HhmsS]");
 
-    public static final DateTimeFormatter DATE_NUM_FORMAT = DateTimeFormatter.ofPattern("yyyyMMdd");
-    public static final DateTimeFormatter DATE_TIME_NUM_FORMAT = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
-    public static final DateTimeFormatter DATE_TIME_MILLS_NUM_FORMAT = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
+    public static final DateTimeFormatter DATE_NUM_FORMAT = DateTimeFormatter.ofPattern("uuuuMMdd").withResolverStyle(ResolverStyle.STRICT);
+    public static final DateTimeFormatter DATE_TIME_NUM_FORMAT = DateTimeFormatter.ofPattern("uuuuMMddHHmmss").withResolverStyle(ResolverStyle.STRICT);
+    public static final DateTimeFormatter DATE_TIME_MILLS_NUM_FORMAT = new DateTimeFormatterBuilder()
+            .appendPattern("uuuuMMddHHmmss").appendValue(ChronoField.MILLI_OF_SECOND, 3)
+            .toFormatter().withResolverStyle(ResolverStyle.STRICT);
 
     private final ZonedDateTime dateTime;
 
@@ -100,18 +109,19 @@ public final class MostDateTime {
 
     /**
      * Returns a new MostDateTime with temporal.
+     * Zoned inputs retain their instant in the target zone; local values are interpreted in that zone.
      *
      * @param temporal temporal
-     * @param zoneId   zoneId
+     * @param zoneId   target zone; zoned inputs retain their instant, local times use today in this zone
      * @return MostDateTime instance
      */
     @Contract("null, _ -> fail")
     public static @NotNull MostDateTime of(Temporal temporal, ZoneId zoneId) {
         if (temporal instanceof ZonedDateTime) {
-            return new MostDateTime((ZonedDateTime) temporal);
+            return new MostDateTime(((ZonedDateTime) temporal).withZoneSameInstant(zoneId));
         }
         if (temporal instanceof OffsetDateTime) {
-            return new MostDateTime(((OffsetDateTime) temporal).toZonedDateTime());
+            return new MostDateTime(((OffsetDateTime) temporal).atZoneSameInstant(zoneId));
         }
         if (temporal instanceof LocalDateTime) {
             return new MostDateTime(((LocalDateTime) temporal).atZone(zoneId));
@@ -123,22 +133,33 @@ public final class MostDateTime {
             return new MostDateTime(((LocalDate) temporal).atStartOfDay(zoneId));
         }
         if (temporal instanceof LocalTime) {
-            return new MostDateTime(((LocalTime) temporal).atDate(LocalDate.now()).atZone(zoneId));
+            return new MostDateTime(((LocalTime) temporal).atDate(LocalDate.now(zoneId)).atZone(zoneId));
         }
         if (temporal instanceof OffsetTime) {
-            return new MostDateTime(((OffsetTime) temporal).atDate(LocalDate.now()).toZonedDateTime());
+            return new MostDateTime(((OffsetTime) temporal).atDate(LocalDate.now(((OffsetTime) temporal).getOffset())).atZoneSameInstant(zoneId));
         }
         throw new IllegalArgumentException("Unsupported temporal type: " + temporal.getClass());
     }
 
     /**
      * Returns a new MostDateTime with temporal.
+     * Zoned inputs retain their zone; values without a zone use the system default.
      *
      * @param temporal temporal
      * @return MostDateTime instance
      */
     @Contract("null -> fail")
     public static @NotNull MostDateTime of(Temporal temporal) {
+        if (temporal instanceof ZonedDateTime) {
+            return new MostDateTime((ZonedDateTime) temporal);
+        }
+        if (temporal instanceof OffsetDateTime) {
+            return new MostDateTime(((OffsetDateTime) temporal).toZonedDateTime());
+        }
+        if (temporal instanceof OffsetTime) {
+            OffsetTime time = (OffsetTime) temporal;
+            return new MostDateTime(time.atDate(LocalDate.now(time.getOffset())).toZonedDateTime());
+        }
         return of(temporal, ZoneId.systemDefault());
     }
 
@@ -151,7 +172,7 @@ public final class MostDateTime {
      */
     @Contract("_, _ -> new")
     public static @NotNull MostDateTime of(@NotNull Date date, ZoneId zoneId) {
-        return new MostDateTime(date.toInstant().atZone(zoneId));
+        return new MostDateTime(ValueUtils.toTemporal(ZonedDateTime.class, date, zoneId));
     }
 
     /**
@@ -179,17 +200,32 @@ public final class MostDateTime {
 
     /**
      * Returns a new MostDateTime with string datetime and specific pattern.
+     * Parses the entire input strictly and retains any zone or offset in the pattern.
      *
      * @param datetime string datetime
      * @param pattern  datetime pattern
      * @return MostDateTime instance
      */
     public static @NotNull MostDateTime of(String datetime, String pattern) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
-        if (TIME_CHAR_PATTERN.matcher(pattern).find()) {
-            return of(LocalDateTime.parse(datetime, formatter));
+        DateTimeFormatter formatter = new DateTimeFormatterBuilder().appendPattern(pattern)
+                .parseDefaulting(ChronoField.ERA, 1).toFormatter().withResolverStyle(ResolverStyle.STRICT);
+        TemporalAccessor parsed = formatter.parse(datetime);
+        ZoneId zone = parsed.query(TemporalQueries.zone());
+        if (zone == null) {
+            zone = ZoneId.systemDefault();
         }
-        return of(LocalDate.parse(datetime, formatter));
+        if (parsed.isSupported(ChronoField.INSTANT_SECONDS)) {
+            return of(Instant.from(parsed), zone);
+        }
+        LocalDate date = parsed.query(TemporalQueries.localDate());
+        LocalTime time = parsed.query(TemporalQueries.localTime());
+        if (date != null) {
+            return of(time == null ? date.atStartOfDay(zone) : LocalDateTime.of(date, time).atZone(zone));
+        }
+        if (time != null) {
+            return of(time, zone);
+        }
+        throw new IllegalArgumentException("Pattern must provide a date or time: " + pattern);
     }
 
     /**
@@ -267,12 +303,19 @@ public final class MostDateTime {
     }
 
     /**
-     * Convert to LocalDateTime.
-     *
-     * @return a new LocalDateTime
+     * Returns the local date-time without its zone.
+     * @return local date-time
      */
-    public LocalDateTime toZonedDateTime() {
+    public LocalDateTime toLocalDateTime() {
         return dateTime.toLocalDateTime();
+    }
+
+    /**
+     * Returns the immutable date-time with its zone.
+     * @return zoned date-time
+     */
+    public ZonedDateTime getZonedDateTime() {
+        return dateTime;
     }
 
     /**
@@ -321,7 +364,7 @@ public final class MostDateTime {
     }
 
     /**
-     * Convert string to local datetime object.
+     * Convert string to zoned datetime object.
      * <p>
      * formats：
      * <ul>
@@ -332,7 +375,7 @@ public final class MostDateTime {
      *     <li>{@code yyyyMMdd}</li>
      *     <li>{@code yyyy[-/年]MM[-/月]dd[日]}</li>
      *     <li>{@code yyyy年MM月dd日 HH[时点]mm分ss秒}</li>
-     *     <li>{@code yyyy[-/]MM[-/]dd HH:mm:ss.[SSS|ffffff|nnnnnnnnn]}</li>
+     *     <li>{@code yyyy[-/]MM[-/]dd HH:mm:ss} with 1 to 9 fractional second digits</li>
      *     <li>CC_Date, e.g. {@code 二〇二六年六月二十六日}</li>
      *     <li>ISO, e.g. {@code 2019-09-26T03:45:36.656+0800}</li>
      *     <li>RFC_1123, e.g. {@code Wed, 04 Jan 2023 09:36:48 GMT}</li>
@@ -340,10 +383,30 @@ public final class MostDateTime {
      *     <li>RFC-like, e.g. {@code Wed Jan 04 18:52:01 CST 2023}</li>
      * </ul>
      *
+     * Extracts recognized date-time parts from text. Use {@link #parse(String)} to validate the complete input.
+     * Missing dates use today and missing years use the current year.
+     *
      * @param datetime string datetime
-     * @return LocalDateTime
+     * @return ZonedDateTime
      */
     public static ZonedDateTime toZonedDateTime(@NotNull String datetime) {
+        return parseDateTime(datetime, true);
+    }
+
+    /**
+     * Parses the complete input, rejecting unrecognized prefixes and suffixes.
+     * Supports the same formats as {@link #of(String)}. Missing dates use today;
+     * missing years use the current year in the system default zone.
+     * @param datetime date-time input
+     * @return parsed date-time, retaining an explicit input zone
+     * @throws IllegalArgumentException if the input cannot be parsed completely
+     * @throws DateTimeException if a recognized date-time or zone is invalid
+     */
+    public static @NotNull MostDateTime parse(@NotNull String datetime) {
+        return of(parseDateTime(datetime, false));
+    }
+
+    private static ZonedDateTime parseDateTime(String datetime, boolean extract) {
         datetime = datetime.trim();
         boolean isDigit = StringUtils.isAsciiDigits(datetime);
         int len = datetime.length();
@@ -366,81 +429,89 @@ public final class MostDateTime {
         }
 
         if (RFC_1123_DATE_TIME_PATTERN.matcher(datetime).matches()) {
-            return ZonedDateTime.parse(datetime, DateTimeFormatter.RFC_1123_DATE_TIME);
+            return ZonedDateTime.parse(datetime, DateTimeFormatter.RFC_1123_DATE_TIME.withResolverStyle(ResolverStyle.STRICT));
         }
 
-        ISODateTime isoDateTime = createISODateTime(datetime);
+        if (datetime.indexOf('T') >= 0 || datetime.indexOf('t') >= 0) {
+            try {
+                Temporal parsed = (Temporal) DateTimeFormatter.ISO_DATE_TIME.parseBest(datetime,
+                        ZonedDateTime::from, LocalDateTime::from);
+                return of(parsed).getZonedDateTime();
+            } catch (DateTimeParseException ignored) {
+                // Legacy inputs also allow compact offsets such as +0800.
+            }
+        }
+
+        ISODateTime isoDateTime = new ISODateTime(datetime, extract);
         if (isoDateTime.find()) {
             return isoDateTime.toZonedDateTime();
         }
 
-        RFCLikeDate rfcLikeDate = createRFCLikeDateTime(datetime);
+        RFCLikeDate rfcLikeDate = new RFCLikeDate(datetime, extract);
         if (rfcLikeDate.find()) {
             return rfcLikeDate.toZonedDateTime();
         }
 
-        CCDate ccDate = createCCDate(datetime);
+        CCDate ccDate = new CCDate(datetime, extract);
         if (ccDate.find()) {
-            return ccDate.toLocalDate().atStartOfDay().atZone(ZoneId.systemDefault());
+            return ccDate.toLocalDate().atStartOfDay(ZoneId.systemDefault());
         }
 
         boolean anyMatch = false;
-        int year;
-        int month = 1, day = 1, hour = 0, minus = 0, second = 0, nanoSeconds = 0;
+        LocalDate today = LocalDate.now();
+        int year = today.getYear(), month = today.getMonthValue(), day = today.getDayOfMonth();
+        int hour = 0, minute = 0, second = 0, nanoSeconds = 0;
+        StringBuilder remaining = new StringBuilder(datetime);
         Matcher dateMatcher = GENERIC_DATE_PATTERN.matcher(datetime);
         if (dateMatcher.find()) {
+            clearMatch(remaining, dateMatcher);
             anyMatch = true;
             if (dateMatcher.group("y") != null) {
                 year = Integer.parseInt(dateMatcher.group("y"));
             } else {
-                year = LocalDateTime.now().getYear();
                 log.warn("Year part not found, use now year of: {}", datetime);
             }
             month = Integer.parseInt(dateMatcher.group("m"));
             day = Integer.parseInt(dateMatcher.group("d"));
         } else {
-            year = LocalDateTime.now().getYear();
-            log.warn("Date part not found, use now year of: {}", datetime);
+            log.warn("Date part not found, use today as default: {}", datetime);
         }
 
         Matcher timeMatcher = EN_TIME_PATTERN.matcher(datetime);
         if (timeMatcher.find()) {
+            clearMatch(remaining, timeMatcher);
             anyMatch = true;
             hour = Integer.parseInt(timeMatcher.group("h"));
-            minus = Integer.parseInt(timeMatcher.group("m"));
+            minute = Integer.parseInt(timeMatcher.group("m"));
             if (timeMatcher.group("s") != null) {
                 second = Integer.parseInt(timeMatcher.group("s"));
             }
             if (timeMatcher.group("n") != null) {
                 String n = timeMatcher.group("n");
-                int nLen = n.length();
-                int ns = Integer.parseInt(n);
-                if (nLen == 3) {
-                    // milliseconds
-                    nanoSeconds = ns * 1_000_000;
-                } else if (nLen == 6) {
-                    // microseconds
-                    nanoSeconds = ns * 1000;
-                } else if (nLen == 9) {
-                    // nanoseconds
-                    nanoSeconds = ns;
-                }
+                nanoSeconds = Integer.parseInt((n + "000000000").substring(0, 9));
             }
         } else {
             Matcher zhTimeMatcher = ZH_TIME_PATTERN.matcher(datetime);
             if (zhTimeMatcher.find()) {
+                clearMatch(remaining, zhTimeMatcher);
                 anyMatch = true;
-                hour = Integer.parseInt(timeMatcher.group("h"));
-                minus = Integer.parseInt(timeMatcher.group("m"));
-                if (timeMatcher.group("s") != null) {
-                    second = Integer.parseInt(timeMatcher.group("s"));
+                hour = Integer.parseInt(zhTimeMatcher.group("h"));
+                minute = Integer.parseInt(zhTimeMatcher.group("m"));
+                if (zhTimeMatcher.group("s") != null) {
+                    second = Integer.parseInt(zhTimeMatcher.group("s"));
                 }
             }
         }
-        if (anyMatch) {
-            return LocalDateTime.of(year, month, day, hour, minus, second, nanoSeconds).atZone(ZoneId.systemDefault());
+        if (anyMatch && (extract || StringUtils.isBlank(remaining.toString()))) {
+            return LocalDateTime.of(year, month, day, hour, minute, second, nanoSeconds).atZone(ZoneId.systemDefault());
         }
         throw new IllegalArgumentException("unknown date time format: " + datetime);
+    }
+
+    private static void clearMatch(StringBuilder remaining, Matcher matcher) {
+        for (int i = matcher.start(); i < matcher.end(); i++) {
+            remaining.setCharAt(i, ' ');
+        }
     }
 
     /**
@@ -482,8 +553,12 @@ public final class MostDateTime {
         private ZoneId zoneId;
 
         public ISODateTime(String stringDate) {
+            this(stringDate, true);
+        }
+
+        private ISODateTime(String stringDate, boolean extract) {
             Matcher m = ISO_DATE_TIME_PATTERN.matcher(stringDate.trim());
-            if (m.find()) {
+            if (extract ? m.find() : m.matches()) {
                 find = true;
                 date = m.group("date");
                 String zone = m.group("zone");
@@ -491,7 +566,7 @@ public final class MostDateTime {
                     zoneId = ZoneId.systemDefault();
                     return;
                 }
-                zoneId = ZoneId.of(zone.toUpperCase());
+                zoneId = ZoneId.of(zone.toUpperCase(Locale.ROOT));
             }
         }
 
@@ -532,25 +607,30 @@ public final class MostDateTime {
         private ZoneId zoneId;
 
         public RFCLikeDate(String stringDate) {
+            this(stringDate, true);
+        }
+
+        private RFCLikeDate(String stringDate, boolean extract) {
             stringDate = stringDate.trim();
             Matcher rfcCSTm = RFC_CST_DATE_TIME_PATTERN.matcher(stringDate);
-            if (rfcCSTm.find()) {
+            if (extract ? rfcCSTm.find() : rfcCSTm.matches()) {
                 find = true;
                 year = Integer.parseInt(rfcCSTm.group("y"));
-                month = EN_MONTHS.get(rfcCSTm.group("M"));
+                month = EN_MONTHS.get(rfcCSTm.group("M").toLowerCase(Locale.ROOT));
                 day = Integer.parseInt(rfcCSTm.group("d"));
                 time = rfcCSTm.group("time");
+                // CST is ambiguous; retain the legacy system-zone interpretation.
                 zoneId = ZoneId.systemDefault();
                 return;
             }
             Matcher rfcGMTm = RFC_GMT_DATE_TIME_PATTERN.matcher(stringDate);
-            if (rfcGMTm.find()) {
+            if (extract ? rfcGMTm.find() : rfcGMTm.matches()) {
                 find = true;
                 year = Integer.parseInt(rfcGMTm.group("y"));
-                month = EN_MONTHS.get(rfcGMTm.group("M"));
+                month = EN_MONTHS.get(rfcGMTm.group("M").toLowerCase(Locale.ROOT));
                 day = Integer.parseInt(rfcGMTm.group("d"));
                 time = rfcGMTm.group("time");
-                zoneId = ZoneId.of(rfcGMTm.group("zone").toUpperCase());
+                zoneId = ZoneId.of(rfcGMTm.group("zone").toUpperCase(Locale.ROOT));
             }
         }
 
@@ -606,9 +686,13 @@ public final class MostDateTime {
         private String day;
 
         public CCDate(String stringDate) {
+            this(stringDate, true);
+        }
+
+        private CCDate(String stringDate, boolean extract) {
             stringDate = stringDate.trim();
             Matcher m = CC_DATE_PATTERN.matcher(stringDate);
-            if (m.find()) {
+            if (extract ? m.find() : m.matches()) {
                 find = true;
                 year = m.group("y");
                 month = m.group("m");

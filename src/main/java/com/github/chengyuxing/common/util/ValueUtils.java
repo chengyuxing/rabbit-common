@@ -324,6 +324,9 @@ public final class ValueUtils {
 
     /**
      * Converts a given Date object to a specified Temporal type.
+     * <p>
+     * SQL Date to LocalDate and SQL Time to LocalTime preserve their calendar values.
+     * Other conversions use epoch time in the supplied zone; Timestamp retains nanoseconds.
      *
      * @param clazz  The class of the target Temporal type to which the Date should be converted. Supported types include LocalDateTime, ZonedDateTime, OffsetDateTime, LocalDate, LocalTime
      *               , OffsetTime, and Instant.
@@ -334,26 +337,35 @@ public final class ValueUtils {
      */
     @SuppressWarnings("unchecked")
     public static <T extends Temporal> T toTemporal(Class<T> clazz, Date date, ZoneId zoneId) {
+        if (clazz == LocalDate.class && date instanceof java.sql.Date) {
+            return (T) ((java.sql.Date) date).toLocalDate();
+        }
+        if (clazz == LocalTime.class && date instanceof java.sql.Time) {
+            return (T) ((java.sql.Time) date).toLocalTime();
+        }
+        Instant instant = date instanceof java.sql.Timestamp
+                ? ((java.sql.Timestamp) date).toInstant()
+                : Instant.ofEpochMilli(date.getTime());
         if (clazz == LocalDateTime.class) {
-            return (T) date.toInstant().atZone(zoneId).toLocalDateTime();
+            return (T) instant.atZone(zoneId).toLocalDateTime();
         }
         if (clazz == ZonedDateTime.class) {
-            return (T) date.toInstant().atZone(zoneId);
+            return (T) instant.atZone(zoneId);
         }
         if (clazz == OffsetDateTime.class) {
-            return (T) date.toInstant().atZone(zoneId).toOffsetDateTime();
+            return (T) instant.atZone(zoneId).toOffsetDateTime();
         }
         if (clazz == LocalDate.class) {
-            return (T) date.toInstant().atZone(zoneId).toLocalDate();
+            return (T) instant.atZone(zoneId).toLocalDate();
         }
         if (clazz == LocalTime.class) {
-            return (T) date.toInstant().atZone(zoneId).toLocalTime();
+            return (T) instant.atZone(zoneId).toLocalTime();
         }
         if (clazz == OffsetTime.class) {
-            return (T) date.toInstant().atZone(zoneId).toOffsetDateTime().toOffsetTime();
+            return (T) instant.atZone(zoneId).toOffsetDateTime().toOffsetTime();
         }
         if (clazz == Instant.class) {
-            return (T) date.toInstant();
+            return (T) instant;
         }
         throw new IllegalArgumentException("Cannot convert " + date.getClass() + " to " + clazz);
     }
@@ -404,6 +416,9 @@ public final class ValueUtils {
 
     /**
      * Adapts the given value to the specified target type.
+     * <p>
+     * Date subclasses mapped to java.util.Date are copied to a plain Date at millisecond precision.
+     * Date and temporal strings must parse completely via MostDateTime.parse; unrecognized text is rejected.
      *
      * @param targetType The target type to which the value should be adapted. Must not be null.
      * @param value      The value to adapt. Can be null.
@@ -417,6 +432,9 @@ public final class ValueUtils {
             return null;
         }
         Class<?> valueType = value.getClass();
+        if (targetType == Date.class && value instanceof Date && valueType != Date.class) {
+            return (T) new Date(((Date) value).getTime());
+        }
         if (targetType.isAssignableFrom(valueType)) {
             return (T) value;
         }
@@ -425,14 +443,31 @@ public final class ValueUtils {
             return (T) f.apply(value);
         }
         if (Date.class.isAssignableFrom(targetType)) {
-            return (T) MostDateTime.of(value.toString()).toDate();
+            if (targetType == java.sql.Timestamp.class && !(value instanceof Date)) {
+                return (T) java.sql.Timestamp.from(MostDateTime.parse(value.toString()).toInstant());
+            }
+            Date date = value instanceof Date ? (Date) value : MostDateTime.parse(value.toString()).toDate();
+            if (targetType == Date.class) {
+                return (T) date;
+            }
+            if (targetType == java.sql.Date.class) {
+                return (T) new java.sql.Date(date.getTime());
+            }
+            if (targetType == java.sql.Time.class) {
+                return (T) new java.sql.Time(date.getTime());
+            }
+            if (targetType == java.sql.Timestamp.class) {
+                return (T) new java.sql.Timestamp(date.getTime());
+            }
+            throw new IllegalArgumentException("Unsupported date type: " + targetType.getName());
         }
         if (Temporal.class.isAssignableFrom(targetType)) {
             if (Date.class.isAssignableFrom(valueType)) {
                 return (T) toTemporal((Class<? extends Temporal>) targetType, (Date) value);
             }
             if (valueType == String.class) {
-                return (T) toTemporal((Class<? extends Temporal>) targetType, MostDateTime.of(value.toString()).toDate());
+                return (T) toTemporal((Class<? extends Temporal>) targetType,
+                        java.sql.Timestamp.from(MostDateTime.parse(value.toString()).toInstant()));
             }
             if (valueType == Long.class || value == long.class) {
                 return (T) toTemporal((Class<? extends Temporal>) targetType, MostDateTime.of((long) value).toDate());
