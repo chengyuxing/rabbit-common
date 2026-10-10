@@ -64,6 +64,69 @@ public class MostDateTimeRegressionTest {
     }
 
     @Test
+    public void sqlStyleDateTimesPreserveOffsetsDuringParsingAndValueAdaptation() {
+        String source = "2026-10-10 10:35:57.672+08";
+        Instant expected = Instant.parse("2026-10-10T02:35:57.672Z");
+        assertEquals(expected, MostDateTime.of(source).toInstant());
+        assertEquals(expected, MostDateTime.parse(source).toInstant());
+        assertEquals(ZoneOffset.ofHours(8), MostDateTime.parse(source).getZonedDateTime().getOffset());
+        assertEquals(expected, ValueUtils.adaptValue(Date.class, source).toInstant());
+        assertEquals(expected, ValueUtils.adaptValue(Timestamp.class, source).toInstant());
+        assertEquals(expected, ValueUtils.adaptValue(Instant.class, source));
+        assertEquals(expected, ValueUtils.adaptValue(OffsetDateTime.class, source).toInstant());
+    }
+
+    @Test
+    public void sqlStyleDateTimesSupportIsoAndCompactOffsetsAndNanoseconds() {
+        String local = "2026-10-10 10:35:57.123456789";
+        for (String offset : new String[]{"+08", "+0800", "+08:00", "-05:30", "Z", "+08:00:53"}) {
+            String source = local + offset;
+            Instant expected = LocalDateTime.of(2026, 10, 10, 10, 35, 57, 123456789)
+                    .toInstant(ZoneOffset.of(offset));
+            assertEquals(expected, MostDateTime.of(source).toInstant());
+            assertEquals(expected, MostDateTime.parse(source).toInstant());
+            assertEquals(expected, ValueUtils.adaptValue(Timestamp.class, source).toInstant());
+            assertEquals(expected.toEpochMilli(), ValueUtils.adaptValue(Date.class, source).getTime());
+        }
+        assertEquals(Instant.parse("2026-10-10T02:35:00Z"),
+                MostDateTime.parse("2026-10-10 10:35+08").toInstant());
+        assertEquals(ZoneId.of("Asia/Shanghai"), MostDateTime.parse(
+                "2026-10-10 10:35:57+08:00[Asia/Shanghai]").getZonedDateTime().getZone());
+    }
+
+    @Test
+    public void extractionAndIsoHelperPreserveCompleteSqlStyleOffsets() {
+        LocalDateTime local = LocalDateTime.of(2026, 10, 10, 10, 35, 57, 672000000);
+        for (String separator : new String[]{" ", "T"}) {
+            for (String gap : new String[]{"", " "}) {
+                for (String offset : new String[]{"+08", "+0800", "+08:30", "-05:30", "+08:30:53", "-053053", "Z"}) {
+                    String source = "2026-10-10" + separator + "10:35:57.672" + gap + offset;
+                    Instant expected = local.toInstant(ZoneOffset.of(offset));
+                    assertEquals(source, expected, MostDateTime.of("created at " + source + " (record)").toInstant());
+                    assertEquals(source, expected, MostDateTime.createISODateTime(source).toZonedDateTime().toInstant());
+                    assertEquals(source, expected, MostDateTime.parse(source).toInstant());
+                    assertEquals(source, expected, ValueUtils.adaptValue(Instant.class, source));
+                }
+            }
+        }
+        assertEquals(Instant.parse("2026-10-10T02:35:00Z"),
+                MostDateTime.of("created at 2026-10-10 10:35+08 (record)").toInstant());
+        assertEquals(Instant.parse("2026-10-10T02:35:00Z"),
+                MostDateTime.createISODateTime("2026-10-10 10:35+08").toZonedDateTime().toInstant());
+    }
+
+    @Test
+    public void sqlStyleDateTimeCompatibilityRetainsStrictValidation() {
+        for (String invalid : new String[]{"2026-10-10 10:35:57.672+08 junk",
+                "prefix 2026-10-10 10:35:57.672+08", "2026-10-10 10:35:57.672+99",
+                "2026-10-10 10:35:57.672+08:99", "2026-02-30 10:35:57+08",
+                "2026-10-10 25:35:57+08", "2026-10-10 10:35:57.1234567890+08"}) {
+            reject(() -> MostDateTime.parse(invalid));
+            reject(() -> ValueUtils.adaptValue(Date.class, invalid));
+        }
+    }
+
+    @Test
     public void rfcMonthNamesAreCaseInsensitive() {
         assertEquals(MostDateTime.parse("Wed Jan 04 18:52:01 CST 2023").toInstant(),
                 MostDateTime.parse("wed jan 04 18:52:01 cst 2023").toInstant());
@@ -71,6 +134,10 @@ public class MostDateTimeRegressionTest {
                 MostDateTime.parse("wed, 04 jan 2023 09:36:48 GMT").toInstant());
         assertEquals(Instant.parse("2023-01-04T09:36:48Z"),
                 MostDateTime.parse("wed JAN 04 2023 17:36:48 GMT+0800").toInstant());
+        String embedded = "created at Wed Jan 04 2023 18:52:01 GMT+08:30 (record)";
+        assertEquals(Instant.parse("2023-01-04T10:22:01Z"), MostDateTime.of(embedded).toInstant());
+        assertEquals(Instant.parse("2023-01-04T10:22:01Z"),
+                MostDateTime.createRFCLikeDateTime(embedded).toZonedDateTime().toInstant());
         reject(() -> MostDateTime.parse("Sat, 30 Feb 2026 09:36:48 GMT"));
     }
 
@@ -126,7 +193,7 @@ public class MostDateTimeRegressionTest {
     @Test
     public void strictParsingRejectsUnconsumedTextAndLegacyExtractionStillWorks() {
         for (String invalid : new String[]{"bad 2026-10-09 garbage", "2026-10-09T12:34:56Z junk",
-                "2026-10-09 12:34:56.1234567890", "2026-10-09 12:34:56 +08:00",
+                "2026-10-09 12:34:56.1234567890", "2026-10-09 12:34:56  +08:00",
                 "2026-10-09 2026-10-10", "", "nonsense", "2026-02-30", "25:00:00"}) {
             reject(() -> MostDateTime.parse(invalid));
         }

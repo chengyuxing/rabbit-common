@@ -81,13 +81,13 @@ public final class MostDateTime {
     // language=regexp
     public static final Pattern ZH_TIME_PATTERN = Pattern.compile("((?<h>\\d{1,2})[时点])((?<m>\\d{1,2})分)((?<s>\\d{1,2})秒)?");
     // language=regexp
-    public static final Pattern ISO_DATE_TIME_PATTERN = Pattern.compile("(?<date>\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,9})?)(?<zone>Z|GMT|UTC|UT|([+-](\\d{1,6}|\\d{2}:\\d{2}(:\\d{2})?)))?", Pattern.CASE_INSENSITIVE);
+    public static final Pattern ISO_DATE_TIME_PATTERN = Pattern.compile("(?<date>\\d{4}-\\d{2}-\\d{2}[T ]\\d{2}:\\d{2}(:\\d{2}(\\.\\d{1,9})?)?) ?(?<zone>Z|GMT|UTC|UT|([+-](\\d{2}:\\d{2}(:\\d{2})?|\\d{1,6})))?", Pattern.CASE_INSENSITIVE);
     // language=regexp
     public static final Pattern RFC_1123_DATE_TIME_PATTERN = Pattern.compile("(" + WEEK_PATTERN + "),\\s+\\d{1,2}\\s+(" + MONTHS_PATTERN + ")\\s+\\d{4}\\s+\\d{1,2}:\\d{1,2}:\\d{1,2}\\s+GMT", Pattern.CASE_INSENSITIVE);
     // language=regexp
     public static final Pattern RFC_CST_DATE_TIME_PATTERN = Pattern.compile("(" + WEEK_PATTERN + ")\\s+(?<M>" + MONTHS_PATTERN + ")\\s+(?<d>\\d{1,2})\\s+(?<time>\\d{1,2}:\\d{1,2}:\\d{1,2})\\s+CST\\s+(?<y>\\d{4})", Pattern.CASE_INSENSITIVE);
     // language=regexp
-    public static final Pattern RFC_GMT_DATE_TIME_PATTERN = Pattern.compile("(" + WEEK_PATTERN + ")\\s+(?<M>" + MONTHS_PATTERN + ")\\s+(?<d>\\d{1,2})\\s+(?<y>\\d{4})\\s+(?<time>\\d{1,2}:\\d{1,2}:\\d{1,2})\\s+GMT(?<zone>Z|GMT|UTC|UT|([+-](\\d{1,6}|\\d{2}:\\d{2}(:\\d{2})?)))", Pattern.CASE_INSENSITIVE);
+    public static final Pattern RFC_GMT_DATE_TIME_PATTERN = Pattern.compile("(" + WEEK_PATTERN + ")\\s+(?<M>" + MONTHS_PATTERN + ")\\s+(?<d>\\d{1,2})\\s+(?<y>\\d{4})\\s+(?<time>\\d{1,2}:\\d{1,2}:\\d{1,2})\\s+GMT(?<zone>Z|GMT|UTC|UT|([+-](\\d{2}:\\d{2}(:\\d{2})?|\\d{1,6})))", Pattern.CASE_INSENSITIVE);
     public static final Pattern TIME_CHAR_PATTERN = Pattern.compile("[HhmsS]");
 
     public static final DateTimeFormatter DATE_NUM_FORMAT = DateTimeFormatter.ofPattern("uuuuMMdd").withResolverStyle(ResolverStyle.STRICT);
@@ -432,9 +432,12 @@ public final class MostDateTime {
             return ZonedDateTime.parse(datetime, DateTimeFormatter.RFC_1123_DATE_TIME.withResolverStyle(ResolverStyle.STRICT));
         }
 
-        if (datetime.indexOf('T') >= 0 || datetime.indexOf('t') >= 0) {
+        // SQL-style timestamps use a space in place of ISO's date/time separator.
+        String isoDatetime = len > 10 && datetime.charAt(10) == ' '
+                ? datetime.substring(0, 10) + 'T' + datetime.substring(11) : datetime;
+        if (isoDatetime.indexOf('T') >= 0 || isoDatetime.indexOf('t') >= 0) {
             try {
-                Temporal parsed = (Temporal) DateTimeFormatter.ISO_DATE_TIME.parseBest(datetime,
+                Temporal parsed = (Temporal) DateTimeFormatter.ISO_DATE_TIME.parseBest(isoDatetime,
                         ZonedDateTime::from, LocalDateTime::from);
                 return of(parsed).getZonedDateTime();
             } catch (DateTimeParseException ignored) {
@@ -560,7 +563,7 @@ public final class MostDateTime {
             Matcher m = ISO_DATE_TIME_PATTERN.matcher(stringDate.trim());
             if (extract ? m.find() : m.matches()) {
                 find = true;
-                date = m.group("date");
+                date = m.group("date").replace(' ', 'T');
                 String zone = m.group("zone");
                 if (zone == null) {
                     zoneId = ZoneId.systemDefault();
