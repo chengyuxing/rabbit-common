@@ -10,6 +10,15 @@
   </dependency>
   ```
 
+## UUID 字段转换
+
+`ValueUtils.adaptValue(UUID.class, value)` 和 `DataRow.toEntity()` 支持标准 36 位 UUID 字符串、无横线的 32 位十六进制字符串以及已有的 UUID 对象；大小写均可，非法格式会抛出异常，`null` 保持为 `null`。
+
+```java
+UUID id = ValueUtils.adaptValue(UUID.class, "550e8400e29b41d4a716446655440000");
+// 550e8400-e29b-41d4-a716-446655440000
+```
+
 ## MostDateTime
 
 `MostDateTime.of(String)` 保留从文本中提取日期的能力，例如 `决定书二〇〇一年十二月二十一日的`。验证完整输入时使用 `MostDateTime.parse(String)`；非法日期、未识别的前后缀和多余的小数秒位数会报错，不会自动修正日期。`ValueUtils.adaptValue` 的日期及时间字符串转换使用这个完整校验入口。

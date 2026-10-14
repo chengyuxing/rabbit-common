@@ -44,6 +44,20 @@ public final class ValueUtils {
         VALUE_ADAPTORS.put(long.class, ValueUtils::toLong);
         VALUE_ADAPTORS.put(Float.class, ValueUtils::toFloat);
         VALUE_ADAPTORS.put(float.class, ValueUtils::toFloat);
+        VALUE_ADAPTORS.put(UUID.class, o -> {
+            String text = o.toString();
+            if (text.length() == 32) {
+                text = text.substring(0, 8) + "-" + text.substring(8, 12) + "-"
+                        + text.substring(12, 16) + "-" + text.substring(16, 20) + "-"
+                        + text.substring(20);
+            }
+            UUID uuid = UUID.fromString(text);
+            // Some JDKs accept abbreviated groups or truncate oversized ones.
+            if (!uuid.toString().equalsIgnoreCase(text)) {
+                throw new IllegalArgumentException("Invalid UUID string: " + o);
+            }
+            return uuid;
+        });
     }
 
     /**
@@ -419,6 +433,7 @@ public final class ValueUtils {
      * <p>
      * Date subclasses mapped to java.util.Date are copied to a plain Date at millisecond precision.
      * Date and temporal strings must parse completely via MostDateTime.parse; unrecognized text is rejected.
+     * UUID strings accept the standard 36-character form or 32 hexadecimal characters without hyphens.
      *
      * @param targetType The target type to which the value should be adapted. Must not be null.
      * @param value      The value to adapt. Can be null.
