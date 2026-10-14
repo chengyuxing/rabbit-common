@@ -47,3 +47,49 @@ SQL 风格的日期时间也支持用空格分隔日期与时间，并保留尾�
 旧的无参 `toZonedDateTime()` 实际返回 `LocalDateTime`，已更名为 `toLocalDateTime()`，旧调用需要修改。需要带时区的结果时使用 `getZonedDateTime()`；静态的 `MostDateTime.toZonedDateTime(String)` 仍提供文本提取。
 
 `java.util.Date` 字段转换会得到普通 `Date`，精度为毫秒；`Timestamp` 和 Java 时间类型保留支持的纳秒精度。JDBC 日期和时间可以安全转换，SQL 日期转 `LocalDate`、SQL 时间转 `LocalTime` 保留日历值，其余转换按 epoch 时间值和指定时区处理。
+
+## Tree
+
+`com.github.chengyuxing.common.tree.Tree` 是不依赖 UI、数据库或业务模型的树状数据工具。泛型约束为 `Tree<T extends TreeNode<T, ID>, ID>`，保留前端 Tree 的节点自身类型与 ID 类型约束；Java 版对输入校验和结构修改采用更严格的规则。
+
+节点实现 `TreeNode<T, ID>`，提供以下属性的 getter/setter：
+
+| 属性 | Java 类型 | 说明 |
+| --- | --- | --- |
+| `id` | `ID` | 非空、唯一的节点标识，0 和空字符串也可以作为 ID |
+| `pid` | `ID` | 父节点标识，只有 null 表示根节点 |
+| `children` | `List<T>` | 子节点 |
+| `parent` | `T` | 父节点引用 |
+
+例如 `Node implements TreeNode<Node, Long>`，并具有 `String label` 实例字段：
+
+```java
+Tree<Node, Long> tree = new Tree<>(flatNodes);
+List<Node> roots = tree.getRoots();
+Node node = tree.getNode(2L); // 不存在时为 null
+List<Long> matched = tree.search(n -> n.getId().equals(2L));
+List<Long> context = tree.searchWithContext(n -> n.getId().equals(2L));
+tree.addNode(1L, newNode); // pid 为 null 时添加根节点，支持携带子树
+tree.updateNode(2L, Collections.singletonMap("label", "updated"));
+tree.moveNode(2L, null); // 将节点及其子树移动到根节点列表末尾
+List<Node> path = tree.getPath(2L); // 从根或最高已知祖先到自身
+tree.getAncestors(2L);
+tree.getDescendants(1L);
+tree.getSiblings(2L); // 包含自身；孤立节点延续原工具的根节点列表规则
+tree.getSibling(2L, Tree.SiblingPosition.NEXT);
+Tree<Node, Long> filtered = tree.filterTree(n -> n.getId().equals(2L));
+List<Node> flat = tree.toFlat();
+tree.removeNode(2L); // 连同后代一起从树及索引移除
+```
+
+- 构建时浅复制输入节点，包括继承的实例字段；已有 `children`、`parent` 不参与构建，原始节点不被修改。默认节点类需有无参构造器；无无参构造器时可使用 `new Tree<>(flatNodes, Node::new)` 提供复制构造器，或传入自己的复制函数，复制节点字段并返回新对象。
+- 构建拒绝空节点、空 ID、重复 ID、自指及父链成环。缺失父节点的数据仍留在索引中，不会自动成为根节点；`getSize()` 包含这些孤立节点，`isEmpty()` 和 `getRootCount()` 以根节点为准。
+- `addNode` 添加传入节点本身，使用其 `children` 构建子树，并重设 `pid`、`parent`、`children`。先校验整个新增子树：父节点不存在、空 ID、与已有节点或子树内重复的 ID、子树成环时抛出 `IllegalArgumentException`，数据校验失败不修改传入节点和已有树。
+- `updateNode` 只更新业务实例字段，字段须存在且值类型兼容。禁止修改 `id`、`pid`、`children`、`parent`；其他名称的字段若改变结构也会被拒绝并恢复该字段。变更父节点使用 `moveNode`，新增和删除使用对应方法。
+- `moveNode(id, pid)` 移动整个子树到新父节点的子列表末尾；`pid` 为 null 时移到根列表末尾。节点或父节点不存在、移动到自身或后代时抛出异常，保持原结构。移到当前父节点不改变兄弟顺序，节点对象及 ID 索引保持不变。
+- `getPath` 返回从根节点或孤立子树最高已知祖先到当前节点自身的路径；节点不存在时返回空列表。路径列表是新列表，列表中的节点属于原树。
+- `filterTree` 逐个判断所有索引节点，仅保留命中节点及其祖先；命中父节点不会自动保留后代。返回节点副本构成的新树，父子结构独立，业务字段按配置的复制函数复制，默认仍是浅复制。保留移动后的根和兄弟顺序；新树索引按根开始的深度优先顺序、随后孤立子树顺序插入。命中的孤立节点及其祖先仍留在新树索引中，不自动变成根节点。
+- `search` 返回索引插入顺序的命中 ID，也能找到孤立节点；`searchWithContext` 按命中顺序收集自身、从近到远的祖先和深度优先的后代，并按首次出现去重。
+- `toFlat` 按根节点开始的深度优先顺序返回浅复制节点，不包含孤立节点，`parent`、`children` 设为 null。新增子树、后代查询、过滤、展开和删除使用迭代遍历，支持深层结构。
+- `getRoots`、`getNode`、`getSiblings` 返回树内对象或列表。结构修改应通过树的方法完成；直接改返回节点的 ID、父节点或结构列表，不会自动同步索引。此类不是线程安全的。
+- `SiblingPosition` 的 `NEXT`、`PREVIOUS`、`FIRST`、`LAST` 对应前端的四种位置，越界或节点不存在时返回 null。
