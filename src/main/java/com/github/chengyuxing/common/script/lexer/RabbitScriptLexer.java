@@ -2,6 +2,7 @@ package com.github.chengyuxing.common.script.lexer;
 
 import com.github.chengyuxing.common.script.lang.Token;
 import com.github.chengyuxing.common.script.lang.TokenType;
+import com.github.chengyuxing.common.script.exception.LexerException;
 import com.github.chengyuxing.common.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -69,7 +70,11 @@ public class RabbitScriptLexer {
             String line = normalizeDirectiveLine(current);
             if (DIRECTIVES_PATTERN.matcher(line).matches()) {
                 IdentifierLexer lexer = new IdentifierLexer(line, lineNumber);
-                tokens.addAll(lexer.tokenize());
+                try {
+                    tokens.addAll(lexer.tokenize());
+                } catch (LexerException ex) {
+                    throw new LexerException("Script line " + (lineNumber + 1) + ": " + ex.getMessage(), ex);
+                }
             } else {
                 tokens.add(new Token(TokenType.PLAIN_TEXT, current, lineNumber, 0));
             }

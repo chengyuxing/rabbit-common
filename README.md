@@ -6,7 +6,7 @@
   <dependency>
       <groupId>com.github.chengyuxing</groupId>
       <artifactId>rabbit-common</artifactId>
-      <version>3.2.14</version>
+      <version>3.2.15</version>
   </dependency>
   ```
 
@@ -18,6 +18,12 @@
 UUID id = ValueUtils.adaptValue(UUID.class, "550e8400e29b41d4a716446655440000");
 // 550e8400-e29b-41d4-a716-446655440000
 ```
+
+## 实体映射错误定位
+
+`DataRow.toEntity()` 的值转换或 setter 调用失败时，抛出的 `IllegalStateException` 包含实体类、属性名、来源列名、来源值类型、目标类型和 setter 名称，原始异常保留在 `getCause()`。`DataRow.ofEntity()` 的 getter 调用失败也会说明实体、属性、列名及 getter，并保留 getter 抛出的原始原因。
+
+`ValueUtils.adaptValue()` 直接调用时仍保持原有的转换异常；映射实体时可通过 `getCause()` 判断日期解析、UUID 格式、自定义转换或访问方法中的错误。
 
 ## MostDateTime
 

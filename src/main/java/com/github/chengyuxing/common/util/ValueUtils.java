@@ -540,29 +540,33 @@ public final class ValueUtils {
      */
     public static <T extends Map<String, Object>> T entityToMap(Object entity, @NotNull Function<Field, String> fieldMapper, @NotNull Function<Integer, T> mapBuilder) {
         if (entity == null) return mapBuilder.apply(0);
-        try {
-            Class<?> clazz = entity.getClass();
-            Map<String, PropertyMeta> metas = ReflectUtils.getBeanPropertyMetas(clazz);
-            T map = mapBuilder.apply(metas.size());
-            for (Map.Entry<String, PropertyMeta> e : metas.entrySet()) {
-                PropertyMeta meta = e.getValue();
-                Method getter = meta.getGetter();
-                if (getter == null) {
-                    continue;
-                }
-
-                String name = meta.hasField()
-                        ? fieldMapper.apply(meta.getField())
-                        : e.getKey();
-
-                Object value = getter.invoke(entity);
-
-                map.put(name, value);
+        Class<?> clazz = entity.getClass();
+        Map<String, PropertyMeta> metas = ReflectUtils.getBeanPropertyMetas(clazz);
+        T map = mapBuilder.apply(metas.size());
+        for (Map.Entry<String, PropertyMeta> e : metas.entrySet()) {
+            PropertyMeta meta = e.getValue();
+            Method getter = meta.getGetter();
+            if (getter == null) {
+                continue;
             }
-            return map;
-        } catch (IllegalAccessException | InvocationTargetException e) {
-            throw new IllegalStateException("convert to map error", e);
+
+            String name = meta.hasField()
+                    ? fieldMapper.apply(meta.getField())
+                    : e.getKey();
+
+            Object value;
+            try {
+                value = getter.invoke(entity);
+            } catch (RuntimeException | IllegalAccessException | InvocationTargetException ex) {
+                Throwable cause = ex instanceof InvocationTargetException && ex.getCause() != null
+                        ? ex.getCause() : ex;
+                throw new IllegalStateException("Failed to read entity " + clazz.getTypeName()
+                        + ", property '" + e.getKey() + "' (getter: " + getter.getName()
+                        + ") for column '" + name + "': " + cause.getMessage(), cause);
+            }
+            map.put(name, value);
         }
+        return map;
     }
 
     /**
@@ -609,11 +613,21 @@ public final class ValueUtils {
                     continue;
                 }
 
-                Object value = meta.hasField() && valueAdaptor != null
-                        ? valueAdaptor.apply(meta.getField(), source.get(name))
-                        : adaptValue(setter.getParameterTypes()[0], source.get(name));
-
-                setter.invoke(entity, value);
+                Object sourceValue = source.get(name);
+                try {
+                    Object value = meta.hasField() && valueAdaptor != null
+                            ? valueAdaptor.apply(meta.getField(), sourceValue)
+                            : adaptValue(setter.getParameterTypes()[0], sourceValue);
+                    setter.invoke(entity, value);
+                } catch (RuntimeException | IllegalAccessException | InvocationTargetException ex) {
+                    Throwable cause = ex instanceof InvocationTargetException && ex.getCause() != null
+                            ? ex.getCause() : ex;
+                    throw new IllegalStateException("Failed to map column '" + name + "' (source type: "
+                            + (sourceValue == null ? "null" : sourceValue.getClass().getTypeName())
+                            + ") to entity " + targetType.getTypeName() + ", property '" + e.getKey()
+                            + "' (target type: " + setter.getParameterTypes()[0].getTypeName()
+                            + ", setter: " + setter.getName() + "): " + cause.getMessage(), cause);
+                }
             }
             return entity;
         } catch (NoSuchMethodException | InstantiationException | InvocationTargetException |
