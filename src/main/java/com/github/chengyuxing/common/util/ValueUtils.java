@@ -14,6 +14,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
 import java.time.*;
 import java.time.temporal.Temporal;
 import java.util.*;
@@ -434,6 +435,8 @@ public final class ValueUtils {
      * Date subclasses mapped to java.util.Date are copied to a plain Date at millisecond precision.
      * Date and temporal strings must parse completely via MostDateTime.parse; unrecognized text is rejected.
      * UUID strings accept the standard 36-character form or 32 hexadecimal characters without hyphens.
+     * Enum strings must exactly match a constant name. Numeric enum values must be
+     * exact, in-range ordinals; numeric strings are treated as names, not ordinals.
      *
      * @param targetType The target type to which the value should be adapted. Must not be null.
      * @param value      The value to adapt. Can be null.
@@ -452,6 +455,25 @@ public final class ValueUtils {
         }
         if (targetType.isAssignableFrom(valueType)) {
             return (T) value;
+        }
+        if (targetType.isEnum()) {
+            if (value instanceof String) {
+                //noinspection rawtypes
+                return (T) Enum.valueOf((Class) targetType, (String) value);
+            }
+            if (value instanceof Number) {
+                try {
+                    int ordinal = new BigDecimal(value.toString()).intValueExact();
+                    T[] constants = targetType.getEnumConstants();
+                    if (ordinal >= 0 && ordinal < constants.length) {
+                        return constants[ordinal];
+                    }
+                } catch (ArithmeticException | NumberFormatException ex) {
+                    throw new IllegalArgumentException("Invalid ordinal for enum " + targetType.getName() + ": " + value, ex);
+                }
+            }
+            throw new IllegalArgumentException("Cannot convert " + valueType.getName() + " value '" + value
+                    + "' to enum " + targetType.getName());
         }
         Function<Object, Object> f = VALUE_ADAPTORS.get(targetType);
         if (f != null) {
