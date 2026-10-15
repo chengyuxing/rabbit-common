@@ -3,6 +3,7 @@ package com.github.chengyuxing.common.util;
 import com.github.chengyuxing.common.MethodReference;
 import com.github.chengyuxing.common.PropertyMeta;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
@@ -191,6 +192,68 @@ public final class ReflectUtils {
      */
     public static boolean isBasicType(@NotNull Object value) {
         return isBasicType(value.getClass());
+    }
+
+    /**
+     * Check whether a type is a candidate JavaBean for property binding.
+     * Known scalar and container types, enum subclasses, synthetic classes and
+     * JDK dynamic proxies are excluded. Constructor availability is not checked:
+     * reading properties from an existing argument object does not instantiate it.
+     *
+     * @param type type
+     * @return whether the type is a candidate for bean property binding
+     */
+    public static boolean isBindableObject(@NotNull Class<?> type) {
+        String name = type.getName();
+        if (StringUtils.startsWiths(name, "java.", "javax.", "jakarta.")) {
+            return false;
+        }
+        if (type.isInterface() || Enum.class.isAssignableFrom(type) || type.isArray() || type.isPrimitive()
+                || type.isSynthetic() || Proxy.isProxyClass(type)) {
+            return false;
+        }
+        return !Number.class.isAssignableFrom(type)
+                && !CharSequence.class.isAssignableFrom(type)
+                && !Date.class.isAssignableFrom(type)
+                && !Calendar.class.isAssignableFrom(type)
+                && !Map.class.isAssignableFrom(type)
+                && !Iterable.class.isAssignableFrom(type);
+    }
+
+    /**
+     * Get the concrete class of a method return type's generic argument at the given index.
+     * Nested parameterized arguments use their raw class. Existing reflective
+     * types are used directly, without loading classes by name or initializing them.
+     *
+     * @param method method to inspect
+     * @param index zero-based type argument index
+     * @return argument class, or null if the return type is not parameterized
+     * @throws IndexOutOfBoundsException if the index is negative or outside a parameterized type's arguments
+     * @throws IllegalArgumentException if the selected argument is a wildcard, unresolved type variable,
+     *                                  or generic array without a concrete class
+     */
+    public static @Nullable Class<?> getReturnGenericType(@NotNull Method method, int index) {
+        if (index < 0) {
+            throw new IndexOutOfBoundsException("Negative return generic type index: " + index);
+        }
+        Type genericReturnType = method.getGenericReturnType();
+        if (genericReturnType instanceof ParameterizedType) {
+            Type[] actualTypeArguments = ((ParameterizedType) genericReturnType).getActualTypeArguments();
+            if (index >= actualTypeArguments.length) {
+                throw new IndexOutOfBoundsException("Return generic type index " + index + " out of bounds ("
+                        + actualTypeArguments.length + " arguments) for method " + method.toGenericString());
+            }
+            Type actualTypeArgument = actualTypeArguments[index];
+            if (actualTypeArgument instanceof ParameterizedType) {
+                actualTypeArgument = ((ParameterizedType) actualTypeArgument).getRawType();
+            }
+            if (actualTypeArgument instanceof Class<?>) {
+                return (Class<?>) actualTypeArgument;
+            }
+            throw new IllegalArgumentException("Cannot resolve concrete return generic type '"
+                    + actualTypeArgument.getTypeName() + "' at index " + index + " for method " + method.toGenericString());
+        }
+        return null;
     }
 
     /**
